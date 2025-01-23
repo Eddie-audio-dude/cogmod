@@ -1,6 +1,6 @@
 # Introduction
 
-```{r echo = FALSE, out.width="100%", fig.cap="Models can be used for many purposes in science---the focus in this tutorial is on causal models that help us to understand the mechanisms that produce choices and response times."}
+```{r echo = FALSE, out.width="100%", fig.cap="Models can be used for many purposes in science---the focus in this course is on causal models that help us to understand the cognitive processes and representations that guide behavior."}
 knitr::include_graphics("img/modeling_continuum.png")
 ```
 
@@ -46,4 +46,3 @@ Two analogies may help give some intuition about the value of simulation:  If we
 "Fitting" a model to data means finding the combination of parameter values for which the model produces behavior that most closely resembles that produced by a participant in some task.  The value of doing this is that it helps us understand *why* that participant acted the way they did.
 
 For example, we might want to know whether someone was fast because they were able to quickly accumulate the evidence they needed, because they were uncautious, because they were biased, or because they could execute motor actions quickly.  We can address that question by finding the values of the parameters associated with each construct that best fit their observed performance.
-
