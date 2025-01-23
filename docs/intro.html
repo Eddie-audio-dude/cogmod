@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.39">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>1&nbsp; Introduction – Computational Cognitive Models</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./ebrw.html" rel="next">
+<link href="./index.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-7593ef76ee4b520e6bec3acdccc89eb3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./intro.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Computational Cognitive Models</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ebrw.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#some-functions-of-models" id="toc-some-functions-of-models" class="nav-link active" data-scroll-target="#some-functions-of-models"><span class="header-section-number">1.1</span> Some functions of models</a></li>
+  <li><a href="#the-importance-of-simulation" id="toc-the-importance-of-simulation" class="nav-link" data-scroll-target="#the-importance-of-simulation"><span class="header-section-number">1.2</span> The importance of simulation</a></li>
+  <li><a href="#the-importance-of-fitting-data" id="toc-the-importance-of-fitting-data" class="nav-link" data-scroll-target="#the-importance-of-fitting-data"><span class="header-section-number">1.3</span> The importance of fitting data</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/modeling_continuum.png" class="img-fluid figure-img" style="width:100.0%"></p>
+<figcaption>Models can be used for many purposes in science—the focus in this tutorial is on causal models that help us to understand the mechanisms that produce choices and response times.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Understanding the mind is ultimately about understanding a dynamic system comprised of a large set of elements that interact in complex ways. If we had designed the mind, things would be easier: Like a car, a computer, or some other piece of modern machinery, we would have built different parts for different functions and stuck them together in a way that would make it easy for us to repair and reconfigure the system. In reality, things are not so simple. Because the mind is not human-engineered (or really “engineered” at all!), for us mere humans to understand it requires us to <em>reverse-engineer</em> the mind. In other words, we have to see what the mind does in some particular situation, build a particular type of machine—a <em>model</em>—that we <em>hypothesize</em> operates like the mind does, and then put the machine in that same scenario and see whether it acts like a human mind. To the extent that our model acts like a human in that scenario, that gives us reason to believe that the model is operating in some sense “like” a human mind does in that scenario.</p>
+<p>In the early days of scientific psychology, our tools for building models of complex dynamical systems were quite limited. We could build physical models, but these are constrained by the physical properties of the materials we use (nonetheless, it is worth noting that mechanical model of attention by <span class="citation" data-cites="Broadbent1957">Broadbent (<a href="references.html#ref-Broadbent1957" role="doc-biblioref">1957</a>)</span> is designed in such a way that the physical properties of the model capture important psychological constraints). Purely mathematical models may not have been so strongly constrained by physicality, but when considering situations with many interacting elements or when stochastic noise is involved, mathematical models quickly become intractable (consider the insoluble <a href="https://en.wikipedia.org/wiki/Three-body_problem">“three body problem”</a>—even with a complete model of such a system, we cannot derive its future behavior analytically). As a result, early psychology was dominated by <em>behaviorism</em>, which eschewed the development of theories of the mind and contented itself merely with observing and cataloging behavior.</p>
+<p>It was not until the middle of the twentieth century, when modern computers began to become of use, that the possibility of “reverse-engineering the mind” became a reality. This was the time of the “cognitive revolution” <span class="citation" data-cites="Neisser1967">(<a href="references.html#ref-Neisser1967" role="doc-biblioref">Neisser, 1967</a>)</span>. The revolution came about for both technical and conceptual reasons.</p>
+<p>From a conceptual perspective, computers offered a productive metaphor for helping us understand how the mind works. A computer uses the same physical substrate to perform different functions, similar to how the same brain lets us both speak and play piano. A computer’s adaptivity comes from the fact that the computer can run different “programs” on its hardware. A program is a set of procedures that take a set of “inputs” and transform them into “outputs”. This is analogous to how a living organism decides to act in a certain way (its “outputs”) depending on its goals and on the environment it happens to be in (its “inputs”). Meanwhile, the procedures that transform a computer’s inputs into outputs often involve intermediate steps that do not themselves produce observable behavior but which are nonetheless <em>represented</em> by changes in the internal state of the computer. These internal states are analogous to thoughts or beliefs in that they may not be externally observable, but they are critical steps on the path toward taking an action. The computer metaphor thus enables us to understand cognition in terms of how internal states of mind <em>represent</em> aspects of an organism’s environment, goals, and thoughts in such a way that these representations can be <em>processed</em> to yield behavior that is appropriate to the situation the organism is in.</p>
+<p>From a technical perspective, computers offer a way to derive predictions from complex models that would not have been tractable otherwise. As we shall see, this is particularly valuable for two applications: First, we can use the computer to <em>simulate</em> what a model would do and thereby understand the distribution of possible actions it can take. This obviates the need to derive predictions through mathematical analysis or logic, which though powerful, can only be applied to simple models. Second, we can use the computer to <strong>fit</strong> a model to data. Almost all models have <em>parameters</em> which can be thought of as “knobs” or “settings” that adjust the kind of behavior the model produces. To “fit” a model means to find the parameters for that model that get it to generate behavior that is as close as possible to the behavior recorded in a dataset. Except for very simple models, it is impossible (or at least very impractical) to try to fit them to data without a computer. But as we shall see, fitting a model is useful because we can infer from the best-fitting parameters something about the person who produced the data to which the model was fit.</p>
+<p>In summary, computers made it feasible for cognitive psychologists to “reverse-engineer” the mind because they (a) provided a valuable conceptual metaphor that allowed theories of cognition to be posed in the form of computational models comprised of internal representations and processes applied to those representations; (b) enabled predictions to be derived for models that were complex and/or had stochastic elements; and (c) enabled those same kinds of models to be “fit” to data so that model parameters can give insight into how a person performed the task for which data was recorded.</p>
+<p>There is an important difference between “reverse-engineering” a natural system, like the mind, from reverse-engineering a human-designed system like a car. Because a natural system was not “engineered”, the models we devise are not guaranteed to work the same way as a natural system, even if the model accurately mimicks the behavior of the natural system in the cases we study. The purpose in “reverse-engineering” the mind is not to build a duplicate mind, it is instead to “translate” a complex system into a form that enables us to understand it better. The model is a deliberate simplification which we expect to deviate from reality in many ways. What we hope is that we arrive at a model that helps us understand the key features of a natural system well enough for us to understand why it acts the way it does in specific situations <span class="citation" data-cites="CoxShiffrinChapter SingmannEtAl2022">(for further discussion of the purposes of models in psychology, see <a href="references.html#ref-CoxShiffrinChapter" role="doc-biblioref">Cox &amp; Shiffrin, 2024</a>; <a href="references.html#ref-SingmannEtAl2022" role="doc-biblioref">Singmann et al., 2022</a>)</span>.</p>
+<section id="some-functions-of-models" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="some-functions-of-models"><span class="header-section-number">1.1</span> Some functions of models</h2>
+<p>As <span class="citation" data-cites="CoxShiffrinChapter">Cox &amp; Shiffrin (<a href="references.html#ref-CoxShiffrinChapter" role="doc-biblioref">2024</a>)</span> describe, a computational cognitive model falls on the “causal” end of the spectrum in the graph shown at the top. They enumerate a couple of goals that such a model might serve:</p>
+<ol type="1">
+<li>All models are wrong, but causal models are useful when they capture and approximate the causal processes at work and when they generalize to other settings. When modeling complex human behavior, all the models are at best crude approximations to reality, but nonetheless they can prove useful by describing the processes that are most important for explaining behavior.</li>
+<li>Modeling allows precise communication among scientists. When theories and hypotheses are proposed verbally and heuristically, their precise meaning is not generally known even to the proposers, and they are often misinterpreted and misunderstood by others. When theoretical constructs are clearly linked to elements of a model and the internal workings of the model are described with mathematical or computational precision (e.g., by including the code running the model simulation), other scientists can use, generalize, and test the model because its application in at least its original domain is well specified.</li>
+<li>Models make clear the links between assumptions and predictions. Different investigators cannot dispute the predictions of the model that are produced by a given set of parameters (the parameters generally index different quantitative variants of a given class of models).</li>
+<li>The formal specification of the model clarifies the nature of proposed internal cognitive processes. A poor modeler may fail to demonstrate that linkage. A good modeler will explore the parameter space and show how the parameter values change the predictions and how narrow or broad a range of outcomes can be predicted by changes in the parameter values. A good modeler will also explore alterations in the model, perhaps by deleting some processes or by adding others, or by fixing some parameter values at certain values, thus providing diagnostic information about the qualitative features of the outcome space that are primarily due to a process controlled by particular parameters. A bad modeler might claim a fit to data provides support for an underlying causal theory when in fact the fit is primarily due to some parameter or theory not conceptually related to the claim.</li>
+<li>Constructing a model can act as an “intuition pump” <span class="citation" data-cites="Dennett1980">(cf. <a href="references.html#ref-Dennett1980" role="doc-biblioref">Dennett, 1980</a>)</span>. Many modelers try to infer underlying cognitive processes from complex data sets that involve multiple measures (e.g., accuracy and response time) and many conditions which may be difficult or impossible to summarize adequately. Modelers form hypotheses about the processes involved based on the data and their prior knowledge. It is often the case that intuiting predictions for different combinations of processes is not possible due to the limitations of human cognition. Thus, different combinations of processes are instantiated as formal models, enabling a modeler to observe and test the predictions of their hypotheses. In an iterative model building process, the failures in each iteration indicate the way forward to an appropriate account.</li>
+<li>Modeling allows different hypothesis classes to be compared, both because the predictions of each are well specified and because model comparison techniques take into account model complexity. The issue of complexity is itself quite complex.
+<ol type="a">
+<li>One issue is due to statistical noise produced by limited data. A flexible model with many parameters can produce what seems to be a good fit with parameter values that explain the noise in the data rather than the underlying processes. The best model comparison techniques penalize models appropriately for extra complexity. However, models are in most cases developed after observing the data, and they are used to explain the patterns observed. To do so, they often incorporate assumptions that are critical but not explicitly parameterized. It thus becomes a difficult and subtle matter to assess complexity adequately. A secondary problem with using fit to compare models is the fact that the most principled ways to control for complexity, such as Bayesian model selection and minimum description length, are difficult to implement computationally and are often replaced by approximations such as the Akaike or Bayes/Schwartz information criteria that often fail to account for key aspects of model complexity.</li>
+<li>Simpler models are also favored for other reasons. A chief one is limited human reasoning: As a model becomes more complex, it becomes more difficult for a human to understand how it works. Simpler models are also favored when analytic predictions can be derived (thereby greatly reducing computational costs) and for qualitative reasons such as “elegance”.</li>
+<li>Simpler models are particularly favored when their core processes generalize well across many tasks.</li>
+<li>There exists a danger that the modeler will mistake small quantitative differences in “fit” for the important differences among models—differences that generally lie in qualitative patterns of predictions. Knowing one model provides a better fit to a limited set of observations from a narrow experimental setting is not often useful. For example, consider a model that correctly predicts the relative levels of recall accuracy observed across conditions in a given experiment but quantitatively overpredicts the accuracy in a single condition. Meanwhile, another model perfectly predicts the accuracy in that condition but fails to predict the right qualitative pattern of accuracy across conditions. We argue that the qualitatively correct prediction is a reason to favor the first model, even though it might yield a worse quantitative fit. Correct qualitative predictions across conditions are often a sign that a model captures an important and generalizable causal process.</li>
+</ol></li>
+</ol>
+</section>
+<section id="the-importance-of-simulation" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="the-importance-of-simulation"><span class="header-section-number">1.2</span> The importance of simulation</h2>
+<p>The models that we will be covering are models that simulate behavioral (and maybe even neural) outcomes. Because we are building models of a complex system—namely, the mind—our models can also become complex. Therefore, understanding what kind of behavior a model produces may require us to <em>simulate</em> behavior from that model. This will also help us to understand the relationship between the model’s parameters and its behavior. By simulating how behavior changes as one or more parameters change, we can understand the role played by the theoretical construct represented by that parameter.</p>
+<p>For example, we might have a parameter that represents the quality or precision with which an event is stored in memory. In a model where this memory representation is used to yield behavior, we can systematically adjust the value of the quality/precision parameter and observe the effect this has on the model’s simulated behavior. Again, because we are dealing with models that can grow quite complex, we may even be surprised by the behavior the model produces!</p>
+<p>Two analogies may help give some intuition about the value of simulation: If we are cooking, often the only way to know how a particular combination of spices will taste is to actually combine them and taste. Model parameters are like the different amounts of each spice, with the final taste being analogous to the model’s simulated behavior. Alternatively, you can think of model parameters as being like characters in an improv sketch. The characters have different backgrounds and goals which dictate how they will interact and how the story will develop. The background and goals of the characters are like the parameters of a model, with the resulting performance analogous to the model’s predicted behavior.</p>
+</section>
+<section id="the-importance-of-fitting-data" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="the-importance-of-fitting-data"><span class="header-section-number">1.3</span> The importance of fitting data</h2>
+<p>“Fitting” a model to data means finding the combination of parameter values for which the model produces behavior that most closely resembles that produced by a participant in some task. The value of doing this is that it helps us understand <em>why</em> that participant acted the way they did.</p>
+<p>For example, we might want to know whether someone was fast because they were able to quickly accumulate the evidence they needed, because they were uncautious, because they were biased, or because they could execute motor actions quickly. We can address that question by finding the values of the parameters associated with each construct that best fit their observed performance.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-Broadbent1957" class="csl-entry" role="listitem">
+Broadbent, D. E. (1957). A mechanical model for human attention and immediate memory. <em>Psychological Review</em>, <em>64</em>(3), 205–215.
+</div>
+<div id="ref-CoxShiffrinChapter" class="csl-entry" role="listitem">
+Cox, G. E., &amp; Shiffrin, R. M. (2024). Computational models of event memory. In M. J. Kahana &amp; A. Wagner (Eds.), <em>Oxford handbook of human memory</em>. Oxford University Press.
+</div>
+<div id="ref-Dennett1980" class="csl-entry" role="listitem">
+Dennett, D. (1980). The milk of human intentionality. <em>Behavioral and Brain Sciences</em>, <em>3</em>(3), 428–430. <a href="https://doi.org/10.1017/s0140525x0000580x">https://doi.org/10.1017/s0140525x0000580x</a>
+</div>
+<div id="ref-Neisser1967" class="csl-entry" role="listitem">
+Neisser, U. (1967). <em>Cognitive psychology</em>. Appleton-Century-Crofts.
+</div>
+<div id="ref-SingmannEtAl2022" class="csl-entry" role="listitem">
+Singmann, H., Kellen, D., Cox, G. E., Chandramouli, S. H., Davis-Stober, C. P., Dunn, J. C., Gronau, Q. F., Kalish, M. L., McMullin, S. D., Navarro, D. J., &amp; Shiffrin, R. M. (2022). Statistics in the service of science: Don’t let the tail wag the dog. <em>Computational Brain &amp; Behavior</em>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./index.html" class="pagination-link" aria-label="Preface">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Preface</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./ebrw.html" class="pagination-link" aria-label="Exemplar of the Exemplar Based Random Walk">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,442 @@
+# A worked example
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(patchwork)
+library(WienR)
+
+set.seed(12222)
+
+source("wienr_fit_utils.r")
+```
+
+This chapter presents a complete worked example of applying the diffusion model to a two-choice task.  In doing so, we illustrate the kinds of data that can be modeled within this framework, how to fit the diffusion model to a typical cognitive dataset, and some ways we can use the resulting fits to draw inferences about the cognitive processes behind the choices people made.
+
+## The data
+
+The data for this example were reported originally by @TruebloodEtAl2018.  There's a lot about this study that we won't get to here, and I encourage you to check out the original paper.
+
+### Participants and procedures
+
+Participants in this study did several blocks of a categorization task.  The stimuli used in this task were images of cells that were either indicative of cancer---these are called "blast" cells---or normal---these are "non-blast" cells.  The images were further subdivided into "easy" and "hard" versions, based on expert judgments.  The image below illustrates the kinds of images that participants would see in this task.
+
+```{r out.width = "100%", fig.cap="(a) An easy blast image. (b) A hard blast image. (c) An easy non-blast image. (d) A hard non-blast image."}
+knitr::include_graphics("img/blast_example_stimuli.png")
+```
+
+After several blocks of training in which participants became familiar with these kinds of images (if they were not already; see below), participants moved on to the categorization task.  On each trial of this task, an image was shown.  Blast and non-blast images were shown equally often.  Easy and hard versions of each type were also shown at the same rates.  The participant's job was to decide whether or not each image was a "blast" cell.  The categorization task was itself divided into several blocks, each of which was a different type.  We will be looking at data from two types of block: "Accuracy" blocks in which participants were encouraged to take their time and be accurate in their categorization of each image; and "Speed" blocks in which participants were encouraged to make their decisions quickly without regard to accuracy.
+
+The participants in this study came from three different groups.  **Novice** participants were just that---typical undergraduate university students who had no prior experience with these kinds of medical images.  **Inexperienced** participants were pathologists who had just begun their training, so while they would be knowledgeable about these kinds of images, they might not have much practice categorizing them.  **Experienced** participants were pathologists who had completed at least four training rotations who would have had plenty of practice dealing with these kinds of images.
+
+Finally, I note that, in addition to the blast/non-blast categorization task, all participants did a "Novel Object Memory Task" (NOMT) designed to measure their general ability to recognize visual objects, not just medical images of cells.
+
+### Getting the data
+
+You can download the data from this study that we will be examining in this tutorial by running the code below.  The first line downloads the data to a file called `blast_data.rdata` in your current working directory.  The second line loads that data into your R environment.
+
+```{r}
+#| code-fold: show
+
+download.file("https://github.com/gregcox7/choice_rt_models/raw/refs/heads/main/data/blast_data.rdata", "blast_data.rdata")
+load("blast_data.rdata")
+```
+
+The data should now be in your R environment in a data frame called `blast_data`.  Let's take a look at that data now:
+
+```{r}
+#| code-fold: show
+
+glimpse(blast_data)
+```
+
+We can already see the columns that will be most important for us:
+
+* `blockType`: Whether the block instructions emphasized *Accuracy* or *Speed*.
+* `correct_response`: Whether the image on that trial was a *Blast* or *Non-blast* cell.
+* `difficulty`: Whether the image on that trial was *Easy* or *Hard*.
+* `rt`: The response time (RT) in seconds.
+* `response`: Whether the participant classified the image as a *Blast* or *Non-blast* cell.
+* `subject`: An identifier for each individual participant.
+* `group`: Which of the three groups the participant came from (*Experienced*, *Inexperienced*, or *Novice*).
+* `nomt`: The score on the Novel Object Memory Test (NOMT) for the participant on that trial.
+
+## A single participant
+
+In the next section, we will fit a diffusion model to data from every participant.  Before we do that, though, let's see how to do it for a single participant.  We will replicate this procedure for each individual participant in the next section.
+
+### A single participant's data
+
+I arbitrarily picked the participant with ID "M003" for us to examine.  The code below uses the `filter` function to extract the data from just this participant:
+
+```{r}
+#| code-fold: show
+
+subj_data <- blast_data %>%
+    filter(subject == "M003")
+```
+
+### Grouping the trials
+
+For the next bit, make sure that you have `source`d the `wienr_fit_utils.r` script:
+
+```{r}
+#| code-fold: show
+
+source("wienr_fit_utils.r")
+```
+
+If we omit the `par` argument, we can use the `qp_fit` function to get the observed response proportions and RT quantiles and make a quantile-probability plot of the observed data.  However, to do this, we need to decide how to group the individual trials using the "indexing" trick we used in the last chapter.  The way we do this will ultimately inform what diffusion model parameters we will estimate, so it is worth putting in the thought now.
+
+Specifically, we need to think about what factors would influence the drift rate of the evidence being accumulated on each trial, what factors would influence how the participant sets their response boundaries on a given trial, and what factors might influence the residual time on each trial.  Later, we will also consider how trial-by-trial variability in these three aspects of the model might or might not vary between conditions.
+
+#### What factors influence drift rates?
+
+The "evidence" in this task arises from some kind of evaluation of how much the image looks like what the participant thinks of as a "blast" cell versus a "non-blast" cell.  In other words, the "evidence" should depend on whether the image on that trial shows a blast or non-blast cell, just like how "evidence" in recognition memory depends on whether the test item is a target or foil.  In addition, we would expect "hard" images to yield worse evidence than "easy" images, by definition.  These two aspects of the data are reflected in the `difficulty` and `correct_response` columns.  So we can specify a `drift_index` based on the *interaction* between these two factors.
+
+The emphasis of the current block---Accuracy vs. Speed---could also impact drift rates [@RaeEtAl2014], though exploring that possibility is left as an exercise for the reader.
+
+#### What factors influence response boundaries?
+
+The response boundaries cannot be influenced by the type of image shown on a trial---if they were, then the participant would already know what kind of image they were seeing!  On the other hand, it is reasonable to expect that participants would adjust their response boundaries depending on whether the current block emphasized speed or accuracy.  This suggests that we can define a `bound_index` using the `blockType` column in the data.
+
+#### What factors influence residual time?
+
+If residual time reflects *only* the processes involved in executing the motor response associated with a choice, then we might expect it to be unaffected by any experimental factors.  On the other hand, it may be that participants are able to adjust their "response vigor" in light of speed/accuracy emphasis.  In addition, it may be that participants can more quickly orient their attention to a stimulus if speed is emphasized.  So we can specify a `resid_index` that also depends on `blockType`.
+
+#### Defining indices
+
+On the basis of the considerations above, we will define three indices: one that specifies what conditions can have different drift rates (`drift_index`), one that specifies what conditions can have different response boundaries (`bound_index`), and one that specifies what conditions can have different residual time (`resid_index`):
+
+```{r}
+#| code-fold: show
+
+subj_data <- subj_data %>%
+    mutate(
+        drift_index = as.numeric(interaction(difficulty, correct_response)),
+        bound_index = as.numeric(blockType),
+        resid_index = as.numeric(blockType)
+    )
+```
+
+It is important to keep in mind that the grouping defined above is not necessarily the "one true grouping"!  It is merely meant to give a sense of the kind of things to think about when deciding how different model parameters will be assigned to different conditions.
+
+### Plotting the observed data
+
+Having defined our indices, we can pass them to the `qp_fit` function so that we can make a quantile-probability plot of this participant's data.  Note that I had to 
+
+```{r}
+#| code-fold: show
+
+obs_qp <- qp_fit(
+    rt = subj_data$rt,
+    response = subj_data$response,
+    drift_index = subj_data$drift_index,
+    bound_index = subj_data$bound_index,
+    resid_index = subj_data$resid_index
+)
+```
+
+When making the plot, I found it helpful to "undo" the transformation of the different factors into numerical indices.  That "undoing" is the purpose of the two `mutate` lines.
+
+```{r}
+#| code-fold: show
+
+obs_qp %>%
+    mutate(item_type = factor(drift_index, levels = 1:4, labels = levels(interaction(blast_data$difficulty, blast_data$correct_response)))) %>%
+    mutate(blockType = factor(bound_index, levels = 1:2, labels = levels(blast_data$blockType))) %>%
+    ggplot(aes(x = p_resp, y = rt_q, color = item_type, shape = response)) +
+    geom_point() +
+    expand_limits(x = c(0, 1)) +
+    labs(x = "Response probability", y = "RT quantile") +
+    facet_wrap("blockType")
+```
+
+It is worth noting a few features of these data that are apparent from the quantile-probability plot.  First, this participant was indeed faster in the Speed block than the Accuracy block.  Even the faster RT's (the 0.1 quantiles) are faster in the Speed block, supporting the idea that residual time could differ between blocks if residual time represents the minimal time needed to respond.  It also looks like this participant was less accurate in the Speed block---at least for Blast images, they had nearly perfect accuracy in the Accuracy block but not in the speed block.  This participant was not very good in either block at categorizing Non-blast images.  It doesn't look like difficulty (Easy vs. Hard) made a big difference for this participant in terms of their choice/RT behavior.  Finally, it looks like this participant's errors tended to be a bit slower than their correct responses, suggesting that the diffusion model will need to allow for trial-by-trial variability in drift rates to accommodate these data.  This same consideration suggests that we don't need to assume variability in boundaries (since that would produce fast errors instead).
+
+### Fitting a diffusion model
+
+With all the preliminaries out of the way, let's try fitting a diffusion model to this participant's data.  This will look just like it did in the last chapter, only with real data instead of simulated data!
+
+We have already decided how to assign parameters to trials using the indices we defined in the previous section.  We also have good reason to believe that drift rates can vary from trial to trial.  We can estimate $s_v$, the standard deviation of the trial-by-trial distribution of drift rates, by including the argument `fit_sv = TRUE` to the `fit_wienr` function.  We don't have reason to assume variability in boundaries, which would be reflected in the $s_w$ parameter, but we could do so if we passed `fit_sw = TRUE` to `fit_wienr`.  Finally, we will allow for variability in residual time by including `fit_st0 = TRUE` in the function call to `fit_wienr`.
+
+For present purposes, we will only estimate one value of $s_v$ and one value of $s_{t_0}$ parameter, and these values will apply to all trials.  If we wanted to allow them to vary, we could pass a `sv_index`, `sw_index`, or `st0_index` vector to the `fit_wienr` function---these index vectors work just like the `drift_index`, `bound_index`, and `resid_index` vectors we defined above.
+
+Putting it all together, the code below fits our desired diffusion model to this participant's choice and RT data.
+
+```{r}
+#| code-fold: show
+
+subj_fit <- fit_wienr(
+    rt = subj_data$rt,
+    response = subj_data$response,
+    fit_sv = TRUE,
+    fit_sw = FALSE,
+    fit_st0 = TRUE,
+    drift_index = subj_data$drift_index,
+    bound_index = subj_data$bound_index,
+    resid_index = subj_data$resid_index
+)
+```
+
+Let's have a look at the estimated parameter values:
+
+```{r}
+#| code-fold: show
+
+subj_fit$par
+```
+
+The first two parameters are the response caution parameters, with `a[1]` corresponding to the Accuracy blocks and `a[2]` to the Speed blocks.  As we might expect, the fact thata `a[2]` $<$ `a[1]` tells us that this participant was less cautious in the Speed blocks, being more willing to sacrifice accuracy for speed.  Skipping ahead to `w[1]` and `w[2]`, these parameters tell us that this participant was biased toward calling images "Blast" images in both Accuracy and Speed blocks (the response caution and response bias parameters have the same indices).  Although we allowed for residual time to vary between Accuracy and Speed blocks, the estimates `t0[1]` and `t0[2]` look pretty similar to one another.
+
+The drift rate parameters also make some sense: `v[1]`, for easy non-blast images, is negative and has a greater magnitude than `v[2]`, for hard non-blast images.  The magnitudes of the drift rates for Blast images, `v[3]` and `v[4]`, are greater than for the non-blast images and are not too different from one another, in accord with our observation that this participant was better at identifying blast images than non-blasts and that the difficulty of the blast image didn't seem to matter much.
+
+Finally, we can see that the drift-rate variability parameter `sv[1]` and the residual time variability parameter `st0[1]` are both greater than zero.  That said, we did not have strong theoretical reasons to expect these parameters to take any particular value---we just suspected they would be important to account for the data.  We can verify that intuition by fitting a model without any trial-by-trial variability and seeing whether AIC and/or BIC still prefers the more complex model with both forms of variability.
+
+```{r}
+#| code-fold: show
+
+subj_fit_novar <- fit_wienr(
+    rt = subj_data$rt,
+    response = subj_data$response,
+    fit_sv = FALSE,
+    fit_sw = FALSE,
+    fit_st0 = FALSE,
+    drift_index = subj_data$drift_index,
+    bound_index = subj_data$bound_index,
+    resid_index = subj_data$resid_index
+)
+
+aic_wvar <- 2 * subj_fit$value + 2 * length(subj_fit$par)
+aic_novar <- 2 * subj_fit_novar$value + 2 * length(subj_fit_novar$par)
+
+bic_wvar <- 2 * subj_fit$value + log(nrow(subj_data)) * length(subj_fit$par)
+bic_novar <- 2 * subj_fit_novar$value + log(nrow(subj_data)) * length(subj_fit_novar$par)
+
+c(aic_wvar, aic_novar)
+c(bic_wvar, bic_novar)
+```
+
+Both AIC and BIC are lower for the model with trial-by-trial variability, suggesting that this additional complexity is warranted in light of the data.
+
+## All the participants
+
+Having fit a diffusion model to *one* participant, we will now replicate that procedure for every participant.  First, it will be convenient to define our three index vectors using the whole dataset:
+
+```{r}
+#| code-fold: show
+
+blast_data <- blast_data %>%
+    mutate(
+        drift_index = as.numeric(interaction(difficulty, correct_response, drop = TRUE)),
+        bound_index = as.numeric(blockType),
+        resid_index = as.numeric(blockType)
+    )
+```
+
+Now comes the big stuff.  We will write a `for` loop that does the following for each participant:
+
+1. Extracts that participant's data from the complete dataset.
+2. Fits a diffusion model to that participant's data.
+3. Extracts the estimated parameters for that participant and saves them in a data frame called `model_pars`.  This is so we can examine the estimated parameters later.
+4. Computes both observed and model-produced RT quantiles and response probabilities and saves them in a data frame called `model_qp`.  This is so we can verify that the model is fitting the data.
+
+All of that is accomplished with the following chunk of R code, which begins by using the `unique` function to extract all the unique participant ID's in the dataset.  Note that this is used to define what the `for` loop iterates over.  This will take a while to run, but patience is a virtue!
+
+```{r eval = FALSE}
+#| code-fold: show
+
+subj_to_fit <- unique(blast_data$subject)
+
+model_pars <- c()
+model_qp <- c()
+
+for (id in subj_to_fit) {
+    this_subj_data <- blast_data %>%
+        filter(subject == id)
+    
+    this_fit <- fit_wienr(
+        rt = this_subj_data$rt,
+        response = (this_subj_data$response == "Blast") + 1,
+        fit_sv = TRUE,
+        fit_sw = FALSE,
+        fit_st0 = TRUE,
+        drift_index = this_subj_data$drift_index,
+        bound_index = this_subj_data$bound_index,
+        resid_index = this_subj_data$resid_index
+    )
+    
+    model_pars <- rbind(
+        model_pars,
+        tibble(subject = id, group = this_subj_data$group[1], par_name = names(this_fit$par), val = this_fit$par) %>% extract(par_name, into = c("par", "index"), regex = "(.+)\\[(.+)\\]")
+    )
+    
+    this_qp <- qp_fit(
+        rt = this_subj_data$rt,
+        response = (this_subj_data$response == "Blast") + 1,
+        par = this_fit$par,
+        drift_index = this_subj_data$drift_index,
+        bound_index = this_subj_data$bound_index,
+        resid_index = this_subj_data$resid_index
+    ) %>%
+        mutate(subject = id, group = this_subj_data$group[1])
+    
+    model_qp <- rbind(
+        model_qp,
+        this_qp
+    )
+}
+```
+
+```{r eval = TRUE, echo = FALSE}
+load("blast_fits.rdata")
+```
+
+### Comparing parameters between groups
+
+Once we have our parameter estimates safely stored in `model_pars`, we can visualize the resulting estimates  using color to distinguish between the three groups.  The plot below was made by using tiny, slightly faded points for each individual participant (note the `alpha = 0.5, size = 0.5` settings in the `geom_point` line).  Overlaid on those is a big point with error bars that shows the mean and 95% confidence interval for the mean, computed separately for each group.
+
+```{r}
+model_pars %>%
+    ggplot(aes(x = index, y = val, color = group, shape = group)) +
+    geom_point(position = position_jitterdodge(jitter.width = 0.1, dodge.width = 0.4), alpha = 0.5, size = 0.5) +
+    stat_summary(geom = "pointrange", fun.data = mean_cl_boot, position = position_dodge(width = 0.4)) +
+    labs(x = "Index", y = "Estimated value", color = "Group") +
+    facet_wrap("par", scales = "free")
+```
+
+#### Response caution
+
+Let's focus first on `a`, the response caution parameter.  As we know, `a[1]` corresponds to the Accuracy blocks while `a[2]` corresponds to the Speed blocks.  It certainly looks like participants, on average, had lower response caution in the Speed blocks than in the Accuracy blocks.  It also looks like the more experienced participants tended to have greater response caution in both block types.
+
+To get some statistical evidence for differences between groups and between conditions, we can use our old friend, the *Analysis of Variance (ANOVA)*.  While you might normally think of applying ANOVA to observed values, like mean response time or accuracy, it can be applied just as well to estimated parameter values.  In both cases, we have a single value for each participant in each condition and we are testing the null hypothesis that the parameter estimate does not differ, on average, between conditions/groups.
+
+To do ANOVA, I'll use the `afex` R package and make sure to run its `set_sum_contrasts()` function (by default, R uses "treatment" contrasts, which are not always appropriate).
+
+```{r}
+#| code-fold: show
+
+library(afex)
+set_sum_contrasts()
+```
+
+Now, we can use the `aov_ez` function to do the ANOVA on the `a` parameter estimates.
+
+```{r}
+#| code-fold: show
+
+aov_ez(
+    id = "subject",      # Specify the name of the column that identifies unique participants
+    dv = "val",          # Specify the name of the column that contains the values to be analyzed
+    data = model_pars %>% filter(par == "a"), # The data for this ANOVA is stored in "model_pars", but we are only interested in the estimates of the "a" parameter
+    between = "group",   # Specify the name of the column that identifies between-subject comparisons
+    within = "index"     # Specify the name of the column that identifies within-subject comparisons
+)
+```
+
+As we can see, there is a main effect of "group", consistent with our observation that more experienced participants had higher response caution.  There is also a main effect of "index", consistent with our observation that participants tended to set lower response caution in Speed blocks.  Finally, there is a significant interaction between "group" and "index", although it looks from the graph above that this is likely to be a "fan" interaction, with a bigger increase from Speed to Accuracy for the more experienced participants.
+
+#### Drift rates
+
+Now, let's consider the drift rate parameters.  Again, we will use ANOVA to look for statistical evidence of differences in drift rates between groups and between conditions.  Things are a little more complicated, though, because drift rate was allowed to vary by both difficulty and image type (blast vs. non-blast).  To properly specify the ANOVA, then, we should "undo" the drift rate indices back into those original two factors.  That's what the `mutate` lines in the `data` specification do in the code below.
+
+```{r}
+#| code-fold: show
+
+aov_ez(
+    id = "subject",
+    dv = "val",
+    data = model_pars %>%
+        filter(par == "v") %>%
+        mutate(
+            difficulty = factor(index, levels = 1:4, labels = c("Easy", "Hard", "Easy", "Hard")),
+            correct_response = factor(index, levels = 1:4, labels = c("Non-blast", "Non-blast", "Blast", "Blast"))),
+    between = "group",
+    within = c("difficulty", "correct_response")
+)
+```
+
+The ANOVA finds evidence for significant differences for all but "group" on its own.  However, this analysis is a bit misleading in that, as you'll recall, drift rates for non-blast images tend to be negative while drift rates for blast images tend to be positive.  We may be more interested in analyzing how drift rates *toward the correct response boundary* may or may not differ between groups/conditions.
+
+To do this, we can add another `mutate` line that reverses the sign of the estimated drift rates for non-blast images:
+
+```{r}
+#| code-fold: show
+
+aov_ez(
+    id = "subject",
+    dv = "val",
+    data = model_pars %>%
+        filter(par == "v") %>%
+        mutate(
+            difficulty = factor(index, levels = 1:4, labels = c("Easy", "Hard", "Easy", "Hard")),
+            correct_response = factor(index, levels = 1:4, labels = c("Non-blast", "Non-blast", "Blast", "Blast")),
+            val = if_else(correct_response == "Blast", val, -val)),
+    between = "group",
+    within = c("difficulty", "correct_response")
+)
+```
+
+Now the ANOVA correctly detects a main effect of group that was obscured in the previous analysis, among other things.
+
+#### Individual differences
+
+Finally, recall that each participant also completed the "NOMT", a test of general visual object processing ability.  It would be reasonable to ask whether participants who have high NOMT scores *also* tend to have higher drift rates toward the correct response boundary.  To analyze this, we need to first extract the NOMT scores for each participant, append them to the model parameter estimates, and include NOMT as a `covariate` in the ANOVA.  For interpretability, I also "center" the NOMT scores by subtracting the group mean.
+
+```{r}
+#| code-fold: show
+
+# Extract NOMT scores and center them.
+nomt_scores <- blast_data %>%
+    group_by(group, subject) %>%
+    summarize(nomt = first(nomt)) %>%
+    mutate(nomt_centered = nomt - mean(nomt))
+
+# Append the NOMT scores to the parameter estimates
+model_pars_nomt <- left_join(model_pars, nomt_scores)
+
+# Run the same ANOVA as above, now including `nomt_centered` as a `covariate`
+aov_ez(
+    id = "subject",
+    dv = "val",
+    data = model_pars_nomt %>%
+        filter(par == "v") %>%
+        mutate(
+            difficulty = factor(index, levels = 1:4, labels = c("Easy", "Hard", "Easy", "Hard")),
+            correct_response = factor(index, levels = 1:4, labels = c("Non-blast", "Non-blast", "Blast", "Blast")),
+            val = if_else(correct_response == "Blast", val, -val)),
+    between = "group",
+    within = c("difficulty", "correct_response"),
+    covariate = "nomt_centered",
+    factorize = FALSE  # This last setting is necessary to ensure that "nomt_centered" isn't accidentally treated like a factor
+)
+```
+
+In fact, it looks like NOMT not only has a main effect on drift rates, it also interacts with difficulty, suggesting that group differences alone do not account for individual differences in performance on this task---categorizing images of cells also seems to depend on general object processing ability.
+
+### Visualizing model fit
+
+Finally, we come to the most challenging section: How to visualize the quality of the model fit.  We could, of course, produce quantile-probability plots for each participant separately, but this would only be feasible with very few participants.
+
+Instead, the code below plots the observed and fitted RT quantiles and response probabilities *averaged over the participants in each group*.  This is not meant to be the final word, but just a way to verify that the model is close to the data and that it is accurately reproducing the important aspects of the data.
+
+```{r}
+model_qp %>%
+    mutate(
+        blockType = factor(bound_index, labels = levels(blast_data$blockType)),
+        item_type = factor(drift_index, labels = levels(interaction(blast_data$difficulty, blast_data$correct_response, sep = " ", drop = T)))
+    ) %>%
+    group_by(group, blockType, item_type, response, source, rt_p) %>%
+    summarize(rt_q = mean(rt_q, na.rm = TRUE), p_resp = mean(p_resp, na.rm = TRUE)) %>%
+    ggplot(aes(x = p_resp, y = rt_q, color = item_type)) +
+    geom_point(aes(shape = source), fill = "white") +
+    scale_linetype_manual(values = c("Observed" = "solid", "Fitted" = "dashed")) +
+    scale_shape_manual(values = c("Observed" = 16, "Fitted" = 21)) +
+    facet_grid(blockType ~ group, scales = "free_y")
+```
+
+The upshot is that it looke like the model is, at least on average, doing a very good job of capturing the response proportion and a pretty good one capturing the RT quantiles.  That said, some of the misfits for the highest and lowest quantiles (see, e.g., the green points in the "Speed" conditions) may be due to sampling error, as discussed earlier.
+
+## Exercises
+
+1. Run an ANOVA analysis on other estimated model parameters, like bias (`w`), residual time (`t0`), and the two variability parameters (`sv` and `st0`).  Do you find evidence for differences, on average, between groups or between conditions (for `sv` and `st0`, you can only compare between groups)?
+2. Using the `sv_index` and `st0_index` parameters, modify the diffusion model we used above so that drift rate variability and residual time variability can also vary by block type.  Does this more complex model provide a better account of the data, as scored by either AIC or BIC?

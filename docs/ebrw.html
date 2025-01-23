@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.39">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>2&nbsp; Exemplar of the Exemplar Based Random Walk – Computational Cognitive Models</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./intro.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-7593ef76ee4b520e6bec3acdccc89eb3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+<script src="site_libs/plotly-binding-4.9.3/plotly.js"></script>
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+<script src="site_libs/jquery-3.5.1/jquery.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet">
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="site_libs/plotly-htmlwidgets-css-1.57.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="site_libs/plotly-main-1.57.1/plotly-latest.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./ebrw.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Computational Cognitive Models</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ebrw.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#summed-similarity" id="toc-summed-similarity" class="nav-link active" data-scroll-target="#summed-similarity"><span class="header-section-number">2.1</span> Summed similarity</a>
+  <ul class="collapse">
+  <li><a href="#perceived-distance-and-similarity" id="toc-perceived-distance-and-similarity" class="nav-link" data-scroll-target="#perceived-distance-and-similarity"><span class="header-section-number">2.1.1</span> Perceived distance and similarity</a></li>
+  <li><a href="#summed-similarity-1" id="toc-summed-similarity-1" class="nav-link" data-scroll-target="#summed-similarity-1"><span class="header-section-number">2.1.2</span> Summed similarity</a></li>
+  </ul></li>
+  <li><a href="#making-a-recognition-decision-from-random-walk-to-diffusion" id="toc-making-a-recognition-decision-from-random-walk-to-diffusion" class="nav-link" data-scroll-target="#making-a-recognition-decision-from-random-walk-to-diffusion"><span class="header-section-number">2.2</span> Making a recognition decision: From random walk to diffusion</a>
+  <ul class="collapse">
+  <li><a href="#accumulating-memory-evidence" id="toc-accumulating-memory-evidence" class="nav-link" data-scroll-target="#accumulating-memory-evidence"><span class="header-section-number">2.2.1</span> Accumulating memory evidence</a></li>
+  <li><a href="#step-probabilities" id="toc-step-probabilities" class="nav-link" data-scroll-target="#step-probabilities"><span class="header-section-number">2.2.2</span> Step probabilities</a></li>
+  <li><a href="#from-discrete-random-walk-to-continuous-diffusion" id="toc-from-discrete-random-walk-to-continuous-diffusion" class="nav-link" data-scroll-target="#from-discrete-random-walk-to-continuous-diffusion"><span class="header-section-number">2.2.3</span> From discrete random walk to continuous diffusion</a></li>
+  </ul></li>
+  <li><a href="#implementation-in-r" id="toc-implementation-in-r" class="nav-link" data-scroll-target="#implementation-in-r"><span class="header-section-number">2.3</span> Implementation in R</a>
+  <ul class="collapse">
+  <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters"><span class="header-section-number">2.3.1</span> Parameters</a></li>
+  <li><a href="#computing-the-mean-and-sd-of-the-drift-for-each-trial" id="toc-computing-the-mean-and-sd-of-the-drift-for-each-trial" class="nav-link" data-scroll-target="#computing-the-mean-and-sd-of-the-drift-for-each-trial"><span class="header-section-number">2.3.2</span> Computing the mean and SD of the drift for each trial</a></li>
+  <li><a href="#calculating-the-log-likelihood" id="toc-calculating-the-log-likelihood" class="nav-link" data-scroll-target="#calculating-the-log-likelihood"><span class="header-section-number">2.3.3</span> Calculating the log-likelihood</a></li>
+  <li><a href="#error-checking" id="toc-error-checking" class="nav-link" data-scroll-target="#error-checking"><span class="header-section-number">2.3.4</span> Error-checking</a></li>
+  </ul></li>
+  <li><a href="#a-worked-example" id="toc-a-worked-example" class="nav-link" data-scroll-target="#a-worked-example"><span class="header-section-number">2.4</span> A worked example</a>
+  <ul class="collapse">
+  <li><a href="#check-out-the-data" id="toc-check-out-the-data" class="nav-link" data-scroll-target="#check-out-the-data"><span class="header-section-number">2.4.1</span> Check out the data</a></li>
+  <li><a href="#finding-optimal-parameters" id="toc-finding-optimal-parameters" class="nav-link" data-scroll-target="#finding-optimal-parameters"><span class="header-section-number">2.4.2</span> Finding optimal parameters</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The <strong>Exemplar-Based Random Walk (EBRW)</strong> <span class="citation" data-cites="NosofskyPalmeri1997 NosofskyEtAl2011">(<a href="references.html#ref-NosofskyEtAl2011" role="doc-biblioref">Nosofsky et al., 2011</a>; <a href="references.html#ref-NosofskyPalmeri1997" role="doc-biblioref">Nosofsky &amp; Palmeri, 1997</a>)</span> is a dynamic extension of the <strong>Generalized Context Model (GCM)</strong> <span class="citation" data-cites="Nosofsky1986">(<a href="references.html#ref-Nosofsky1986" role="doc-biblioref">Nosofsky, 1986</a>)</span>. According to these models, each time you experience an item in a particular context, it leaves a “trace” in memory. This trace is called an “exemplar” or an “instance” and it consists of a record of the <strong>values</strong> the item had for particular <strong>features</strong>. When you are presented with a <strong>probe</strong> item, it <em>activates</em> each of these exemplars in memory in proportion to how similar the features of the probe are to the features of the exemplars in memory.</p>
+<p>The EBRW was originally developed to account for choice and RT in <em>categorization</em> tasks. In what follows, we apply EBRW to a <em>recognition</em> task. Recognition decisions are based on the summed activation across all exemplars in memory, which is termed the “familiarity” of the probe. The extent to which familiarity is higher than a <strong>criterion</strong> determines the extent to which the probe will be recognized as having been seen before. Specifically, familiarity determines the <strong>rate at which evidence accumulates</strong> toward either a “yes” or “no” decision regarding whether the probe item was seen before. If the accumulated evidence reaches an upper threshold, a “yes” decision is made; otherwise, if the accumulated evidence reaches a lower threshold, a “no” decision is made.</p>
+<p>The text below first describes how familiarity is determined by the summed similarity between a probe and the exemplars in memory, using the concrete example of items consisting of patches of color. Then, the dynamics of evidence accumulation are described. These dynamics are first described as a random walk between the thresholds for “yes” and “no” decisions. Then, we illustrate how the same dynamics can be described in continuous time as a diffusion process instead of a random walk <span class="citation" data-cites="NosofskyEtAl2014">(<a href="references.html#ref-NosofskyEtAl2014" role="doc-biblioref">Nosofsky et al., 2014</a>)</span>. Finally, we see how the continuous diffusion process makes it easier to fit the parameters of the EBRW model to recognition data.</p>
+<section id="summed-similarity" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="summed-similarity"><span class="header-section-number">2.1</span> Summed similarity</h2>
+<p>For concreteness, we imagine an experiment in which several color patches were studied. Colors can be described in terms of three features: <em>hue</em>, <em>chroma</em> (or “saturation”), and <em>luminance</em> (or “brightness”). Imagine that you saw many reddish-hued colors that varied in chroma and luminance. According to the EBRW, each of the colors you saw would leave a trace in memory. Each trace would consist of the values of the color you saw along those three dimensions. In this example, all the colors have the same value for “hue”, which is 0. The value of “0” for “hue” corresponds to a reddish color. The colors differ in their values for chroma and luminance, as illustrated in the graph below:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>colDF <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">h =</span> hue, <span class="at">c =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="at">length.out =</span> <span class="dv">5</span>), <span class="at">l =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="at">length.out =</span> <span class="dv">5</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">col =</span> <span class="fu">hcl</span>(h, c, l))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>colDF <span class="sc">%&gt;%</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> c, <span class="at">y =</span> l, <span class="at">fill =</span> col)) <span class="sc">+</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_tile</span>(<span class="at">width =</span> <span class="fl">2.5</span>, <span class="at">height =</span> <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_identity</span>() <span class="sc">+</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Chroma (saturation)"</span>, <span class="at">y =</span> <span class="st">"Luminance (brightness)"</span>, <span class="at">caption =</span> <span class="fu">bquote</span>(<span class="fu">plain</span>(hue) <span class="sc">==</span> .(<span class="fu">round</span>(hue))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ebrw_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Your memory traces can also be written as a matrix, where each row corresponds to an item (color) and each column corresponds to a feature (<strong>h</strong> for “hue”, <strong>c</strong> for “chroma”, and <strong>l</strong> for “luminance”):</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(<span class="fu">head</span>(colDF <span class="sc">%&gt;%</span> <span class="fu">select</span>(h, c, l), <span class="dv">10</span>), <span class="at">row.names =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">h</th>
+<th style="text-align: right;">c</th>
+<th style="text-align: right;">l</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">30</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">40</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">50</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">60</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">70</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">30</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">40</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">50</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">9</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">60</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">70</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>These coordinates will often be derived using <strong>Multidimensional Scaling (MDS)</strong> <span class="citation" data-cites="Shepard1962a Shepard1962b Nosofsky1992">(<a href="references.html#ref-Nosofsky1992" role="doc-biblioref">Nosofsky, 1992</a>; <a href="references.html#ref-Shepard1962a" role="doc-biblioref">Shepard, 1962a</a>, <a href="references.html#ref-Shepard1962b" role="doc-biblioref">1962b</a>)</span>. This type of analysis derives a spatial representation of a set of stimuli on the basis of similarity judgments provided by raters.</p>
+<section id="perceived-distance-and-similarity" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="perceived-distance-and-similarity"><span class="header-section-number">2.1.1</span> Perceived distance and similarity</h3>
+<p>The perceived <strong>distance</strong> between any two of these colors is the Euclidean distance between their feature values, weighted by the degree of attention given to each feature: <span class="math display">\[
+d_{ij} = \sqrt{\sum_{k = 1}^{N_F} w_k \left(x_{ik} - x_{jk} \right)^2}
+\]</span> where <span class="math inline">\(w_k\)</span> is the weight given to feature <span class="math inline">\(k\)</span>, <span class="math inline">\(x_{ik}\)</span> is the value of item <span class="math inline">\(i\)</span> on feature <span class="math inline">\(k\)</span>, <span class="math inline">\(x_{jk}\)</span> is the value of item <span class="math inline">\(j\)</span> on feature <span class="math inline">\(k\)</span>, <span class="math inline">\(d_{ij}\)</span> is the perceived distance between items <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span>, and <span class="math inline">\(N_F\)</span> is the number of features which in this example is 3 (hue, chroma, and luminance). Note also that while Euclidean distance is appropriate for colors, other types of distance metrics may be more appropriate for other kinds of stimuli.</p>
+<p>Perceived <strong>similarity</strong> between two items, <span class="math inline">\(s_{ij}\)</span>, is an exponential function of the psychological distance between those items: <span class="math display">\[
+s_{ij} = \exp(-c d_{ij})
+\]</span> where <span class="math inline">\(c\)</span> is a <em>sensitivity</em> parameter that controls how quickly perceived similarity decreases with distance, as illustrated in the graph below:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">expand_grid</span>(<span class="at">d =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">10</span>, <span class="at">length.out =</span> <span class="dv">151</span>), <span class="at">c =</span> <span class="fu">seq</span>(<span class="fl">0.25</span>, <span class="dv">3</span>, <span class="at">by =</span> <span class="fl">0.25</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">s =</span> <span class="fu">exp</span>(<span class="sc">-</span>c <span class="sc">*</span> d)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> d, <span class="at">y =</span> s, <span class="at">color =</span> c, <span class="at">group =</span> c)) <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_continuous_sequential</span>() <span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(d[ij]), <span class="at">y =</span> <span class="fu">expression</span>(s[ij])) <span class="sc">+</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">legend.justification =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: A numeric `legend.position` argument in `theme()` was deprecated in ggplot2
+3.5.0.
+ℹ Please use the `legend.position.inside` argument of `theme()` instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ebrw_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="summed-similarity-1" class="level3" data-number="2.1.2">
+<h3 data-number="2.1.2" class="anchored" data-anchor-id="summed-similarity-1"><span class="header-section-number">2.1.2</span> Summed similarity</h3>
+<p>Imagine that you have just been shown two colors from among the set shown earlier. We then present you with a third color—a <strong>probe item</strong>—and ask whether it was one of the two you just saw. You answer this question on the basis of the <em>summed similarity</em> between the probe item and the two items in memory. The probe item has its own vector of feature values, <span class="math inline">\(\mathbf{x_q}\)</span>. The perceived distance between the probe item and <em>each</em> of the memory items is, as above, the Euclidean distance between the probe’s feature values and those of the memory item: <span class="math display">\[
+\begin{align}
+d_{qj} &amp; = \sqrt{\sum_{k = 1}^{N_F} w_k \left(x_{qk} - x_{jk} \right)^2} \\
+s_{qj} &amp; = \exp \left( -c d_{qj} \right) \\
+S &amp; = \sum_{j = 1}^{N_M} s_{qj}
+\end{align}
+\]</span> and, again, the perceived similarity <span class="math inline">\(s_{qj}\)</span> between the probe <span class="math inline">\(q\)</span> and memory item <span class="math inline">\(j\)</span> is an exponential function of perceived distance <span class="math inline">\(d_{qj}\)</span>. Finally, summed similarity <span class="math inline">\(S\)</span> is the sum of the perceived similarities across all <span class="math inline">\(N_M\)</span> items in memory.</p>
+<p>The graphs below illustrate how this works. The left graph shows contours of equal similarity from each of two study items. The right graph shows summed similarity as a function of the chroma and luminance of a probe item (assuming the same hue).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="dv">40</span>, <span class="dv">60</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>      <span class="dv">60</span>, <span class="dv">50</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> <span class="dv">2</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> <span class="dv">2</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">byrow =</span> <span class="cn">TRUE</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>sens <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>colDF <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">h =</span> hue, <span class="at">c =</span> X[,<span class="dv">1</span>], <span class="at">l =</span> X[,<span class="dv">2</span>]) <span class="sc">%&gt;%</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">col =</span> <span class="fu">hcl</span>(h, c, l))</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>item_cols <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(colDF<span class="sc">$</span>col)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(item_cols) <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(item_cols))</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>simDF <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">c =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="at">length.out=</span><span class="dv">101</span>), <span class="at">l =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="at">length.out=</span><span class="dv">101</span>), <span class="at">item =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">d =</span> <span class="fu">sqrt</span>((c <span class="sc">-</span> X[item, <span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (l <span class="sc">-</span> X[item, <span class="dv">2</span>])<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">s =</span> <span class="fu">exp</span>(<span class="sc">-</span>sens <span class="sc">*</span> d))</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>conPlot <span class="ot">&lt;-</span> colDF <span class="sc">%&gt;%</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> c, <span class="at">y =</span> l)) <span class="sc">+</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_contour</span>(<span class="fu">aes</span>(<span class="at">z =</span> s, <span class="at">color =</span> <span class="fu">factor</span>(item)), <span class="at">data =</span> simDF, <span class="at">alpha =</span> <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">by =</span> <span class="fl">0.2</span>)) <span class="sc">+</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_tile</span>(<span class="fu">aes</span>(<span class="at">fill =</span> col), <span class="at">width =</span> <span class="fl">2.5</span>, <span class="at">height =</span> <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_identity</span>(<span class="at">aesthetics =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> item_cols, <span class="at">aesthetics =</span> <span class="st">"color"</span>, <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>)) <span class="sc">+</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Chroma (saturation)"</span>, <span class="at">y =</span> <span class="st">"Luminance (brightness)"</span>, <span class="at">subtitle =</span> <span class="st">"Contours of equal similarity"</span>, <span class="at">caption =</span> <span class="fu">bquote</span>(<span class="fu">list</span>(<span class="fu">plain</span>(hue) <span class="sc">==</span> .(<span class="fu">round</span>(hue)), c <span class="sc">==</span> .(<span class="fu">signif</span>(sens, <span class="dv">3</span>)))))</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>sumSimPlot <span class="ot">&lt;-</span> simDF <span class="sc">%&gt;%</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(c, l) <span class="sc">%&gt;%</span></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">summed_sim =</span> <span class="fu">sum</span>(s), <span class="at">.groups =</span> <span class="st">"keep"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> c, <span class="at">y =</span> l, <span class="at">fill =</span> summed_sim)) <span class="sc">+</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>() <span class="sc">+</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">"magma"</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>)) <span class="sc">+</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Chroma (saturation)"</span>, <span class="at">y =</span> <span class="st">"Luminance (brightness)"</span>, <span class="at">subtitle =</span> <span class="st">"Summed similarity"</span>, <span class="at">caption =</span> <span class="fu">bquote</span>(<span class="fu">list</span>(<span class="fu">plain</span>(hue) <span class="sc">==</span> .(<span class="fu">round</span>(hue)), c <span class="sc">==</span> .(<span class="fu">signif</span>(sens, <span class="dv">3</span>)))))</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>conPlot <span class="sc">+</span> sumSimPlot <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">nrow =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ebrw_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="trace-strength" class="level4" data-number="2.1.2.1">
+<h4 data-number="2.1.2.1" class="anchored" data-anchor-id="trace-strength"><span class="header-section-number">2.1.2.1</span> Trace strength</h4>
+<p>It is reasonable to believe that some memory traces are <em>stronger</em> than others, likely due to things like primacy and recency. In GCM/EBRW, “strength” is operationalized as a scaling factor <span class="math inline">\(m_j\)</span> applied to perceived similarity: <span class="math display">\[
+s_{qj} = m_j \exp \left( -c d_{qj} \right)
+\]</span></p>
+<p>Stronger traces have their similarity multiplied by a large value (<span class="math inline">\(m_j\)</span> is large if trace <span class="math inline">\(j\)</span> is strong) while weaker traces have their similarity multiplied by a small value (<span class="math inline">\(m_j\)</span> is small if trace <span class="math inline">\(j\)</span> is weak). This is illustrated in the pair of graphs below. A probe item does not need to be as similar to a strong item in order to evoke the same level of perceived similarity.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="dv">40</span>, <span class="dv">60</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>      <span class="dv">60</span>, <span class="dv">50</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> <span class="dv">2</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> <span class="dv">2</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">byrow =</span> <span class="cn">TRUE</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>sens <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>strength <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>colDF <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">h =</span> hue, <span class="at">c =</span> X[,<span class="dv">1</span>], <span class="at">l =</span> X[,<span class="dv">2</span>]) <span class="sc">%&gt;%</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">col =</span> <span class="fu">hcl</span>(h, c, l)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">label =</span> <span class="fu">c</span>(<span class="st">"1"</span>, <span class="st">"2"</span>))</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>item_cols <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(colDF<span class="sc">$</span>col)</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(item_cols) <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(item_cols))</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>simDF <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">c =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="at">length.out=</span><span class="dv">101</span>), <span class="at">l =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="at">length.out=</span><span class="dv">101</span>), <span class="at">item =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">d =</span> <span class="fu">sqrt</span>((c <span class="sc">-</span> X[item, <span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (l <span class="sc">-</span> X[item, <span class="dv">2</span>])<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">s =</span> <span class="fu">exp</span>(<span class="sc">-</span>sens <span class="sc">*</span> d) <span class="sc">*</span> strength[item])</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>conPlot <span class="ot">&lt;-</span> colDF <span class="sc">%&gt;%</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> c, <span class="at">y =</span> l)) <span class="sc">+</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_contour</span>(<span class="fu">aes</span>(<span class="at">z =</span> s, <span class="at">color =</span> <span class="fu">factor</span>(item)), <span class="at">data =</span> simDF, <span class="at">alpha =</span> <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="at">by =</span> <span class="fl">0.2</span>)) <span class="sc">+</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_tile</span>(<span class="fu">aes</span>(<span class="at">fill =</span> col), <span class="at">width =</span> <span class="fl">2.5</span>, <span class="at">height =</span> <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> label), <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_identity</span>(<span class="at">aesthetics =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> item_cols, <span class="at">aesthetics =</span> <span class="st">"color"</span>, <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>)) <span class="sc">+</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Chroma (saturation)"</span>, <span class="at">y =</span> <span class="st">"Luminance (brightness)"</span>, <span class="at">subtitle =</span> <span class="st">"Contours of equal similarity"</span>, <span class="at">caption =</span> <span class="fu">bquote</span>(<span class="fu">list</span>(<span class="fu">plain</span>(hue) <span class="sc">==</span> .(<span class="fu">round</span>(hue)), c <span class="sc">==</span> .(<span class="fu">signif</span>(sens, <span class="dv">3</span>)), m[<span class="dv">1</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(strength[<span class="dv">1</span>], <span class="dv">3</span>)), m[<span class="dv">2</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(strength[<span class="dv">2</span>], <span class="dv">3</span>)))))</span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>sumSimPlot <span class="ot">&lt;-</span> simDF <span class="sc">%&gt;%</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(c, l) <span class="sc">%&gt;%</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">summed_sim =</span> <span class="fu">sum</span>(s), <span class="at">.groups =</span> <span class="st">"keep"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> c, <span class="at">y =</span> l, <span class="at">fill =</span> summed_sim)) <span class="sc">+</span></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>() <span class="sc">+</span></span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">"magma"</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>)) <span class="sc">+</span></span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Chroma (saturation)"</span>, <span class="at">y =</span> <span class="st">"Luminance (brightness)"</span>, <span class="at">subtitle =</span> <span class="st">"Summed similarity"</span>, <span class="at">caption =</span> <span class="fu">bquote</span>(<span class="fu">list</span>(<span class="fu">plain</span>(hue) <span class="sc">==</span> .(<span class="fu">round</span>(hue)), c <span class="sc">==</span> .(<span class="fu">signif</span>(sens, <span class="dv">3</span>)), m[<span class="dv">1</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(strength[<span class="dv">1</span>], <span class="dv">3</span>)), m[<span class="dv">2</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(strength[<span class="dv">2</span>], <span class="dv">3</span>)))))</span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>conPlot <span class="sc">+</span> sumSimPlot <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">nrow =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ebrw_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="trace-specificity" class="level4" data-number="2.1.2.2">
+<h4 data-number="2.1.2.2" class="anchored" data-anchor-id="trace-specificity"><span class="header-section-number">2.1.2.2</span> Trace specificity</h4>
+<p>The specificity parameter <span class="math inline">\(c\)</span> represents the fact that items are assumed to be encoded with some degree of error/uncertainty. Just as items may be encoded with more or less strength, it is reasonable to assume that items can be encoded in memory with more or less specificity. Thus, we add a subscript to the <span class="math inline">\(c\)</span> parameter corresponding to each study item: <span class="math display">\[
+s_{qj} = m_j \exp \left( -c_j d_{qj} \right)
+\]</span></p>
+<p>If an item is encoded with high specificity, then it will only be perceived as similar to the probe if the probe is very close in psychological space. This is illustrated in the pair of graphs below, where item 2 is not only stronger (<span class="math inline">\(m_2 = 2\)</span> vs.&nbsp;<span class="math inline">\(m_1 = 1\)</span>) but also more precise (<span class="math inline">\(c_2 = 0.1\)</span> vs.&nbsp;<span class="math inline">\(c_1 = 0.05\)</span>).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="dv">40</span>, <span class="dv">60</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>      <span class="dv">60</span>, <span class="dv">50</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">nrow =</span> <span class="dv">2</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ncol =</span> <span class="dv">2</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">byrow =</span> <span class="cn">TRUE</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>specificity <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.1</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>strength <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>colDF <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">h =</span> hue, <span class="at">c =</span> X[,<span class="dv">1</span>], <span class="at">l =</span> X[,<span class="dv">2</span>]) <span class="sc">%&gt;%</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">col =</span> <span class="fu">hcl</span>(h, c, l)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">label =</span> <span class="fu">c</span>(<span class="st">"1"</span>, <span class="st">"2"</span>))</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>item_cols <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(colDF<span class="sc">$</span>col)</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(item_cols) <span class="ot">&lt;-</span> <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(item_cols))</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>simDF <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">c =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="at">length.out=</span><span class="dv">101</span>), <span class="at">l =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">70</span>, <span class="at">length.out=</span><span class="dv">101</span>), <span class="at">item =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">d =</span> <span class="fu">sqrt</span>((c <span class="sc">-</span> X[item, <span class="dv">1</span>])<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> (l <span class="sc">-</span> X[item, <span class="dv">2</span>])<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">s =</span> <span class="fu">exp</span>(<span class="sc">-</span>specificity[item] <span class="sc">*</span> d) <span class="sc">*</span> strength[item])</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>conPlot <span class="ot">&lt;-</span> colDF <span class="sc">%&gt;%</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> c, <span class="at">y =</span> l)) <span class="sc">+</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_contour</span>(<span class="fu">aes</span>(<span class="at">z =</span> s, <span class="at">color =</span> <span class="fu">factor</span>(item)), <span class="at">data =</span> simDF, <span class="at">alpha =</span> <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>, <span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="at">by =</span> <span class="fl">0.2</span>)) <span class="sc">+</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_tile</span>(<span class="fu">aes</span>(<span class="at">fill =</span> col), <span class="at">width =</span> <span class="fl">2.5</span>, <span class="at">height =</span> <span class="fl">2.5</span>) <span class="sc">+</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> label), <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_identity</span>(<span class="at">aesthetics =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> item_cols, <span class="at">aesthetics =</span> <span class="st">"color"</span>, <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>)) <span class="sc">+</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Chroma (saturation)"</span>, <span class="at">y =</span> <span class="st">"Luminance (brightness)"</span>, <span class="at">subtitle =</span> <span class="st">"Contours of equal similarity"</span>, <span class="at">caption =</span> <span class="fu">bquote</span>(<span class="fu">list</span>(<span class="fu">plain</span>(hue) <span class="sc">==</span> .(<span class="fu">round</span>(hue)), m[<span class="dv">1</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(strength[<span class="dv">1</span>], <span class="dv">3</span>)), m[<span class="dv">2</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(strength[<span class="dv">2</span>], <span class="dv">3</span>)), c[<span class="dv">1</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(specificity[<span class="dv">1</span>], <span class="dv">3</span>)), c[<span class="dv">2</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(specificity[<span class="dv">2</span>], <span class="dv">3</span>)))))</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>sumSimPlot <span class="ot">&lt;-</span> simDF <span class="sc">%&gt;%</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(c, l) <span class="sc">%&gt;%</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">summed_sim =</span> <span class="fu">sum</span>(s), <span class="at">.groups =</span> <span class="st">"keep"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> c, <span class="at">y =</span> l, <span class="at">fill =</span> summed_sim)) <span class="sc">+</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>() <span class="sc">+</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">"magma"</span>, <span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">3</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">70</span>)) <span class="sc">+</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Chroma (saturation)"</span>, <span class="at">y =</span> <span class="st">"Luminance (brightness)"</span>, <span class="at">subtitle =</span> <span class="st">"Summed similarity"</span>, <span class="at">caption =</span> <span class="fu">bquote</span>(<span class="fu">list</span>(<span class="fu">plain</span>(hue) <span class="sc">==</span> .(<span class="fu">round</span>(hue)), m[<span class="dv">1</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(strength[<span class="dv">1</span>], <span class="dv">3</span>)), m[<span class="dv">2</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(strength[<span class="dv">2</span>], <span class="dv">3</span>)), c[<span class="dv">1</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(specificity[<span class="dv">1</span>], <span class="dv">3</span>)), c[<span class="dv">2</span>] <span class="sc">==</span> .(<span class="fu">signif</span>(specificity[<span class="dv">2</span>], <span class="dv">3</span>)))))</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>conPlot <span class="sc">+</span> sumSimPlot <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">nrow =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ebrw_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="making-a-recognition-decision-from-random-walk-to-diffusion" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="making-a-recognition-decision-from-random-walk-to-diffusion"><span class="header-section-number">2.2</span> Making a recognition decision: From random walk to diffusion</h2>
+<p>According to the EBRW, each trace <span class="math inline">\(j\)</span> in memory <em>races</em> to be retrieved at a rate proportional to its perceived similarity to the probe item, <span class="math inline">\(s_{qj}\)</span>. Traces race not just against one another, but against a <strong>criterion</strong>. If a memory trace wins the race, this is taken as evidence that the probe item matches something in memory, thus favoring a “yes” recognition response. If the criterion wins the race instead, this is taken as evidence that the probe item does <em>not</em> match anything in memory, thus favoring a “no” recognition response.</p>
+<p>The idea is that, if the probe item matches something in memory, then the corresponding memory trace (or one sufficiently similar to probably match) should be able to win against the criterion. If nothing wins against the criterion, then this suggests there are no traces in memory that are a good match to the probe.</p>
+<section id="accumulating-memory-evidence" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="accumulating-memory-evidence"><span class="header-section-number">2.2.1</span> Accumulating memory evidence</h3>
+<p>The outcome of each race is added to a running tally which starts at zero. The value of the tally at any given time <span class="math inline">\(t\)</span>, which we can denote <span class="math inline">\(x(t)\)</span>, constitutes the current state of evidence from memory for making a recognition decision. Assume that each race takes <span class="math inline">\(\Delta t\)</span> seconds to complete. Each time a memory trace wins the race, the tally gets incremented by one; each time the criterion wins the race, the tally gets decremented by one. Put formally, we can write this process as <span class="math display">\[
+x\left( t + \Delta t \right) =
+\begin{cases}
+x\left( t \right) + 1 &amp; \text{if trace wins} \\
+x\left( t \right) - 1 &amp; \text{if criterion wins}
+\end{cases}
+\]</span> where <span class="math inline">\(x(0) = 0\)</span>.</p>
+</section>
+<section id="step-probabilities" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="step-probabilities"><span class="header-section-number">2.2.2</span> Step probabilities</h3>
+<p>Although we have specified that whether memory evidence goes up or down depends on whether a trace or the criterion wins the race, we have not yet specified how the outcome of that race is determined. The winner of each race is random but depends on the similarity <span class="math inline">\(s_{qj}\)</span> between each trace <span class="math inline">\(j\)</span> and the probe <span class="math inline">\(q\)</span>. Specifically, trace <span class="math inline">\(j\)</span> wins the race with probability: <span class="math display">\[
+\frac{s_{qj}}{\sum_{k = 1}^N s_{qk} + \kappa}
+\]</span> where <span class="math inline">\(\kappa\)</span> is a nonnegative number that represents how stringent the criterion is. In other words, the equation above says that the probability that trace <span class="math inline">\(j\)</span> wins the race is the similarity between trace <span class="math inline">\(j\)</span> and the probe <span class="math inline">\(q\)</span> divided by the summed similarity across all traces <em>plus</em> the criterion <span class="math inline">\(\kappa\)</span>. In a sense, we can think of the criterion is like a “virtual memory trace” that races alongside the <span class="math inline">\(N\)</span> actual memory traces.</p>
+<p>Remember that we increment memory strength whenever <em>any</em> trace wins the race, regardless of which one it is. Because only one trace can win each race, the probability that <em>any</em> trace wins is just the sum of the probabilities of winning across all <span class="math inline">\(N\)</span> traces, i.e.: <span class="math display">\[
+p = \sum_{j = 1}^N \frac{s_{qj}}{\sum_{k = 1}^N s_{qk} + \kappa} = \frac{1}{\sum_{k = 1}^N s_{qk} + \kappa} \left( \sum_{j = 1}^Ns_{qj} \right) = \frac{S}{S + \kappa}
+\]</span> where <span class="math inline">\(S = \sum_{j = 1}^N s_{qj}\)</span> is the summed similarity across all <span class="math inline">\(N\)</span> traces. The quantity <span class="math inline">\(p\)</span> is the probability that the random walk takes a step up.</p>
+<p>The EBRW models the speed of decision making in terms of how many races must be run until the accumulated win advantage in favor of either a “yes” or “no” response reaches a decision boundary. To convert this to “real time”, we must say how long each race takes and allow for a <strong>residual time</strong>. Above, we used <span class="math inline">\(\Delta t\)</span> to stand for the amount of time (in seconds) each race takes to run. It will be convenient later to think instead of <span class="math inline">\(\nu = \frac{1}{\Delta t}\)</span>, where <span class="math inline">\(\nu\)</span> is the number of races per second.</p>
+<p>The figure below shows an example of how memory evidence evolves during a single trial in which <span class="math inline">\(p = 0.55\)</span>, <span class="math inline">\(\nu = 40\)</span>, <span class="math inline">\(B_{Upper} = 7\)</span>, <span class="math inline">\(B_{Lower} = -8\)</span>, and <span class="math inline">\(t_0 = 0.2\)</span>. In addition, the graphs above and below the evidence trajectory illustrate the relative frequency with which, across many identical trials, each type of response would be made at each unit of time. Note that these distributions are discrete because the random walk operates in discrete time intervals, each of duration <span class="math inline">\(\Delta t\)</span> (which in this example is <span class="math inline">\(\Delta t = \frac{1}{\nu} = 0.025\)</span> seconds).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>nu <span class="ot">&lt;-</span> <span class="dv">40</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="fl">0.55</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">8</span>, <span class="dv">7</span>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>resid <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="do">### RT distributions</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>Y_rw <span class="ot">&lt;-</span> <span class="fu">seq</span>(B[<span class="dv">1</span>], B[<span class="dv">2</span>])</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>P_rw <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="fu">length</span>(Y_rw), <span class="at">ncol =</span> <span class="fu">length</span>(Y_rw))</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>P_rw[<span class="fu">cbind</span>(<span class="dv">2</span><span class="sc">:</span>(<span class="fu">nrow</span>(P_rw) <span class="sc">-</span> <span class="dv">1</span>), <span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(P_rw) <span class="sc">-</span> <span class="dv">2</span>))] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> p</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>P_rw[<span class="fu">cbind</span>(<span class="dv">2</span><span class="sc">:</span>(<span class="fu">nrow</span>(P_rw) <span class="sc">-</span> <span class="dv">1</span>), <span class="dv">3</span><span class="sc">:</span><span class="fu">ncol</span>(P_rw))] <span class="ot">&lt;-</span> p</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>P_rw[<span class="dv">1</span>, <span class="dv">1</span>] <span class="ot">&lt;-</span> P_rw[<span class="fu">nrow</span>(P_rw), <span class="fu">ncol</span>(P_rw)] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="do">### Simulation</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (<span class="cn">TRUE</span>) {</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    winner <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    x_rw <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> (<span class="cn">TRUE</span>) {</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>        s <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> (<span class="fu">runif</span>(<span class="at">n =</span> <span class="dv">1</span>) <span class="sc">&lt;</span> p) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        x_rw <span class="ot">&lt;-</span> <span class="fu">c</span>(x_rw, x_rw[<span class="fu">length</span>(x_rw)] <span class="sc">+</span> s)</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (x_rw[<span class="fu">length</span>(x_rw)] <span class="sc">&lt;=</span> B[<span class="dv">1</span>]) {</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>            winner <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> <span class="cf">if</span> (x_rw[<span class="fu">length</span>(x_rw)] <span class="sc">&gt;=</span> B[<span class="dv">2</span>]) {</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>            winner <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (winner <span class="sc">==</span> <span class="dv">2</span> <span class="sc">&amp;</span> (<span class="fu">length</span>(x_rw) <span class="sc">/</span> nu) <span class="sc">&gt;</span> <span class="fl">1.5</span>) {</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>RT_rw <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="fu">length</span>(x_rw))</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>Z_rw <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">*</span> <span class="fu">c</span>(Y_rw <span class="sc">==</span> <span class="dv">0</span>)</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(x_rw)) {</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    Z_rw <span class="ot">&lt;-</span> Z_rw <span class="sc">%*%</span> P_rw</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    RT_rw[<span class="dv">1</span>, i] <span class="ot">&lt;-</span> Z_rw[<span class="dv">1</span>]</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    RT_rw[<span class="dv">2</span>, i] <span class="ot">&lt;-</span> Z_rw[<span class="fu">length</span>(Z_rw)]</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>dRT_rw <span class="ot">&lt;-</span> <span class="fu">apply</span>(RT_rw, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> diff) <span class="sc">*</span> nu <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>rtPlot1 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">t =</span> resid <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(x_rw) <span class="sc">/</span> nu, <span class="at">p =</span> <span class="fu">c</span>(<span class="dv">0</span>, dRT_rw[,<span class="dv">2</span>])) <span class="sc">%&gt;%</span></span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p)) <span class="sc">+</span></span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"#eeb211"</span>, <span class="at">color =</span> <span class="cn">NA</span>, <span class="at">width =</span> <span class="dv">1</span> <span class="sc">/</span> nu) <span class="sc">+</span></span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(<span class="fu">c</span>(dRT_rw)))) <span class="sc">+</span></span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Pr(Respond at time t)"</span>) <span class="sc">+</span></span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(), <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>rtPlot0 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">t =</span> resid <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(x_rw) <span class="sc">/</span> nu, <span class="at">p =</span> <span class="fu">c</span>(<span class="dv">0</span>, dRT_rw[,<span class="dv">1</span>])) <span class="sc">%&gt;%</span></span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p)) <span class="sc">+</span></span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"#46166b"</span>, <span class="at">color =</span> <span class="cn">NA</span>, <span class="at">width =</span> <span class="dv">1</span> <span class="sc">/</span> nu) <span class="sc">+</span></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Pr(Respond at time t)"</span>) <span class="sc">+</span></span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>)) <span class="sc">+</span></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">max</span>(<span class="fu">c</span>(dRT_rw)), <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(), <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>rwPlot <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">t =</span> resid <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(x_rw) <span class="sc">/</span> nu, <span class="at">x =</span> x_rw) <span class="sc">%&gt;%</span></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>(<span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> B[<span class="dv">2</span>], <span class="at">linetype =</span> <span class="st">"solid"</span>, <span class="at">color =</span> <span class="st">"#eeb211"</span>, <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> B[<span class="dv">1</span>], <span class="at">linetype =</span> <span class="st">"solid"</span>, <span class="at">color =</span> <span class="st">"#46166b"</span>, <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> resid, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"#666666"</span>, <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="at">data =</span> <span class="fu">tibble</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> B[<span class="dv">2</span>], <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"B[Upper] == "</span>, B[<span class="dv">2</span>])), <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">label =</span> label), <span class="at">color =</span> <span class="st">"#eeb211"</span>, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">parse =</span> <span class="cn">TRUE</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="at">data =</span> <span class="fu">tibble</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> B[<span class="dv">1</span>], <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"B[Lower] == "</span>, B[<span class="dv">1</span>])), <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">label =</span> label), <span class="at">color =</span> <span class="st">"#46166b"</span>, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">parse =</span> <span class="cn">TRUE</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="at">data =</span> <span class="fu">tibble</span>(<span class="at">x =</span> resid, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"t[0] == "</span>, resid)), <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">label =</span> label), <span class="at">color =</span> <span class="st">"#666666"</span>, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">parse =</span> <span class="cn">TRUE</span>, <span class="at">hjust =</span> <span class="fl">1.1</span>, <span class="at">vjust =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>)) <span class="sc">+</span></span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Retrieval time (s)"</span>, <span class="at">y =</span> <span class="st">"Memory evidence"</span>, <span class="at">caption =</span> <span class="fu">bquote</span>(<span class="fu">list</span>(p <span class="sc">==</span> .(p), nu <span class="sc">==</span> .(nu))))</span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>rtPlot1 <span class="sc">+</span> rwPlot <span class="sc">+</span> rtPlot0 <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.75</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ebrw_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="from-discrete-random-walk-to-continuous-diffusion" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="from-discrete-random-walk-to-continuous-diffusion"><span class="header-section-number">2.2.3</span> From discrete random walk to continuous diffusion</h3>
+<p>A random walk takes discrete-valued steps either up or down in discrete units of time. A Wiener diffusion process takes continuous-valued steps sampled from a normal distribution in infinitely small units of time, thus effectively operating in continuous time. We are going to approximate the discrete EBRW with a continuous diffusion process (so technically we should call this model the EBD for Exemplar-Based Diffusion, but we will keep calling it the EBRW for posterity).</p>
+<p>In going from a random walk to a diffusion model, we are making an important psychological claim: We are saying that, instead of memory evidence arriving in discrete units at regular intervals, memory evidence is a continuous value that continually evolves as new information arrives. We can think of this as saying that, instead of only knowing the outcome of each race, you can see who is ahead and who is behind at any given time; this is the move from discrete time to continuous time. Moreover, instead of only scoring each race as a win or loss for the memory traces, the races are assigned a continuous value depending on how clear the winner is; this is the move from discrete evidence to continuous evidence.</p>
+<section id="mean-and-standard-deviation-of-diffusion" class="level4" data-number="2.2.3.1">
+<h4 data-number="2.2.3.1" class="anchored" data-anchor-id="mean-and-standard-deviation-of-diffusion"><span class="header-section-number">2.2.3.1</span> Mean and standard deviation of diffusion</h4>
+<p>We can write the update equation for the random walk like we did above: <span class="math display">\[
+\begin{align}
+x \left( t + \Delta t \right) &amp; = \begin{cases} x(t) + 1 &amp; \text{with probability } p \\ x(t) - 1 &amp; \text{with probability } 1 - p \end{cases} \\
+x \left( t + \Delta t \right) - x(t) &amp; = \begin{cases} 1 &amp; \text{with probability } p \\ -1 &amp; \text{with probability } 1 - p \end{cases} \\
+x \left( t + \Delta t \right) - x(t) &amp; \sim 2 \times \text{Bernoulli} \left( p \right) - 1
+\end{align}
+\]</span> where we have rearranged terms and used the shorthand in the final line to emphasize the idea that each step of the random walk can be thought of as a sample from a Bernoulli distribution with parameter <span class="math inline">\(p\)</span> that is then transformed from <span class="math inline">\(\lbrace 0, 1 \rbrace\)</span> to <span class="math inline">\(\lbrace -1, 1 \rbrace\)</span>.</p>
+<p>To turn this into a continuous diffusion process, we need to swap out the transformed Bernoulli distribution with a normal distribution that has the same mean and variance. The mean is <span class="math inline">\(2 p - 1\)</span> and the variance is <span class="math inline">\(4 p \left(1 - p \right)\)</span>. One more thing: remember that we run <span class="math inline">\(\nu\)</span> races per second, so we need to multiply the mean and variance by <span class="math inline">\(\nu\)</span>. Therefore, the mean drift rate is <span class="math inline">\(v = \nu \left(2 p - 1 \right)\)</span> and the variance is <span class="math inline">\(\sigma^2 = 4 \nu p (1 - p)\)</span>.</p>
+<p>Note that this is different from the typical diffusion model where the variance of the evidence samples is arbitrarily fixed to 1. Notice an important property of this variance: It is largest when <span class="math inline">\(p = 0.5\)</span> and approaches zero as <span class="math inline">\(p\)</span> approaches either 0 or 1. In other words, the more uncertain the outcome of each race, the more noise there is in the diffusion. This is illustrated below:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">expand_grid</span>(<span class="at">p =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">101</span>), <span class="at">nu =</span> <span class="fu">seq</span>(<span class="dv">10</span>, <span class="dv">40</span>, <span class="at">by =</span> <span class="dv">10</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">sigma2 =</span> <span class="dv">4</span> <span class="sc">*</span> nu <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> p, <span class="at">y =</span> sigma2, <span class="at">color =</span> nu, <span class="at">group =</span> nu)) <span class="sc">+</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> p, <span class="at">y =</span> <span class="fu">expression</span>(sigma<span class="sc">^</span><span class="dv">2</span>), <span class="at">color =</span> <span class="fu">expression</span>(nu)) <span class="sc">+</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">legend.justification =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ebrw_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>To summarize, the difference between the random walk and the diffusion is that we have swapped out a discrete binomial distribution of evidence increments per unit time with a continuous normal distribution of evidence increments per unit time. Everything else is the same: You still respond “yes” if and when the accumulated evidence <span class="math inline">\(x(t)\)</span> reaches either the upper boundary or the lower boundary.</p>
+</section>
+<section id="closeness-of-predictions" class="level4" data-number="2.2.3.2">
+<h4 data-number="2.2.3.2" class="anchored" data-anchor-id="closeness-of-predictions"><span class="header-section-number">2.2.3.2</span> Closeness of predictions</h4>
+<p>To illustrate how well the diffusion process approximates the random walk, the graphs below show the diffusion approximation to the same random walk example used above. The smooth lines in the upper and lower graphs are the probability of responding per unit time (i.e., the probability density function) according to the Wiener diffusion model. The open bars are the same probabilities from the random walk. The diffusion model’s predictions hew very closely to those of the random walk!</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> nu <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>sigma2 <span class="ot">&lt;-</span> <span class="dv">4</span> <span class="sc">*</span> nu <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>boundsep <span class="ot">&lt;-</span> B[<span class="dv">2</span>] <span class="sc">-</span> B[<span class="dv">1</span>]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>bias <span class="ot">&lt;-</span> (<span class="dv">0</span> <span class="sc">-</span> B[<span class="dv">1</span>]) <span class="sc">/</span> (B[<span class="dv">2</span>] <span class="sc">-</span> B[<span class="dv">1</span>])</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>delta_t <span class="ot">&lt;-</span> <span class="fl">0.001</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (<span class="cn">TRUE</span>) {</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    winner_diff <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    x_diff <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> (<span class="cn">TRUE</span>) {</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>        x_diff <span class="ot">&lt;-</span> <span class="fu">c</span>(x_diff, x_diff[<span class="fu">length</span>(x_diff)] <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">mean =</span> mu <span class="sc">*</span> delta_t, <span class="at">sd =</span> <span class="fu">sqrt</span>(sigma2 <span class="sc">*</span> delta_t)))</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (x_diff[<span class="fu">length</span>(x_diff)] <span class="sc">&lt;=</span> B[<span class="dv">1</span>]) {</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>            winner_diff <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> <span class="cf">if</span> (x_diff[<span class="fu">length</span>(x_diff)] <span class="sc">&gt;=</span> B[<span class="dv">2</span>]) {</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>            winner_diff <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (winner <span class="sc">==</span> winner_diff <span class="sc">&amp;</span> <span class="fu">abs</span>((<span class="fu">length</span>(x_diff) <span class="sc">*</span> delta_t) <span class="sc">-</span> (<span class="fu">length</span>(x_rw) <span class="sc">/</span> nu)) <span class="sc">&lt;</span> (<span class="dv">1</span> <span class="sc">/</span> nu)) {</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>x_diff <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="fu">pmin</span>(x_diff, B[<span class="dv">2</span>]), B[<span class="dv">1</span>])</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="fu">length</span>(x_diff)) <span class="sc">*</span> delta_t</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>dRT_diff <span class="ot">&lt;-</span> <span class="fu">cbind</span>(</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">WienerPDF</span>(<span class="at">t =</span> t, <span class="at">response =</span> <span class="st">"lower"</span>, <span class="at">a =</span> boundsep <span class="sc">/</span> <span class="fu">sqrt</span>(sigma2), <span class="at">v =</span> mu <span class="sc">/</span> <span class="fu">sqrt</span>(sigma2), <span class="at">w =</span> bias)<span class="sc">$</span>value,</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">WienerPDF</span>(<span class="at">t =</span> t, <span class="at">response =</span> <span class="st">"upper"</span>, <span class="at">a =</span> boundsep <span class="sc">/</span> <span class="fu">sqrt</span>(sigma2), <span class="at">v =</span> mu <span class="sc">/</span> <span class="fu">sqrt</span>(sigma2), <span class="at">w =</span> bias)<span class="sc">$</span>value</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>rtPlot1 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">t =</span> resid <span class="sc">+</span> t, <span class="at">p =</span> dRT_diff[,<span class="dv">2</span>]) <span class="sc">%&gt;%</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p)) <span class="sc">+</span></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>(<span class="at">data =</span> <span class="fu">tibble</span>(<span class="at">t =</span> resid <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(x_rw) <span class="sc">/</span> nu, <span class="at">p =</span> <span class="fu">c</span>(<span class="dv">0</span>, dRT_rw[,<span class="dv">2</span>])), <span class="at">color =</span> <span class="st">"#eeb211aa"</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">width =</span> <span class="dv">1</span> <span class="sc">/</span> nu) <span class="sc">+</span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_area</span>(<span class="at">fill =</span> <span class="st">"#eeb21177"</span>, <span class="at">color =</span> <span class="st">"#eeb211"</span>) <span class="sc">+</span></span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">max</span>(<span class="fu">c</span>(dRT_diff)))) <span class="sc">+</span></span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Pr(Respond at time t)"</span>) <span class="sc">+</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(), <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>rtPlot0 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">t =</span> resid <span class="sc">+</span> t, <span class="at">p =</span> dRT_diff[,<span class="dv">1</span>]) <span class="sc">%&gt;%</span></span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p)) <span class="sc">+</span></span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_col</span>(<span class="at">data =</span> <span class="fu">tibble</span>(<span class="at">t =</span> resid <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(x_rw) <span class="sc">/</span> nu, <span class="at">p =</span> <span class="fu">c</span>(<span class="dv">0</span>, dRT_rw[,<span class="dv">1</span>])), <span class="at">color =</span> <span class="st">"#46166baa"</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">width =</span> <span class="dv">1</span> <span class="sc">/</span> nu) <span class="sc">+</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_area</span>(<span class="at">fill =</span> <span class="st">"#46166b77"</span>, <span class="at">color =</span> <span class="st">"#46166b"</span>) <span class="sc">+</span></span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Pr(Respond at time t)"</span>) <span class="sc">+</span></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>)) <span class="sc">+</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_y_reverse</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">max</span>(<span class="fu">c</span>(dRT_diff)), <span class="dv">0</span>)) <span class="sc">+</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text =</span> <span class="fu">element_blank</span>(), <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>rwPlot <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">t =</span> resid <span class="sc">+</span> t, <span class="at">x =</span> x_diff) <span class="sc">%&gt;%</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> B[<span class="dv">2</span>], <span class="at">linetype =</span> <span class="st">"solid"</span>, <span class="at">color =</span> <span class="st">"#eeb211"</span>, <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> B[<span class="dv">1</span>], <span class="at">linetype =</span> <span class="st">"solid"</span>, <span class="at">color =</span> <span class="st">"#46166b"</span>, <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> resid, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"#666666"</span>, <span class="at">linewidth =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="at">data =</span> <span class="fu">tibble</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> B[<span class="dv">2</span>], <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"B[Upper] == "</span>, B[<span class="dv">2</span>])), <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">label =</span> label), <span class="at">color =</span> <span class="st">"#eeb211"</span>, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">parse =</span> <span class="cn">TRUE</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="at">data =</span> <span class="fu">tibble</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> B[<span class="dv">1</span>], <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"B[Lower] == "</span>, B[<span class="dv">1</span>])), <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">label =</span> label), <span class="at">color =</span> <span class="st">"#46166b"</span>, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">parse =</span> <span class="cn">TRUE</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="at">data =</span> <span class="fu">tibble</span>(<span class="at">x =</span> resid, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">label =</span> <span class="fu">paste0</span>(<span class="st">"t[0] == "</span>, resid)), <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">label =</span> label), <span class="at">color =</span> <span class="st">"#666666"</span>, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">parse =</span> <span class="cn">TRUE</span>, <span class="at">hjust =</span> <span class="fl">1.1</span>, <span class="at">vjust =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="cn">NA</span>)) <span class="sc">+</span></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Retrieval time (s)"</span>, <span class="at">y =</span> <span class="st">"Memory evidence"</span>, <span class="at">caption =</span> <span class="fu">bquote</span>(<span class="fu">list</span>(p <span class="sc">==</span> .(p), nu <span class="sc">==</span> .(nu), v <span class="sc">==</span> .(<span class="fu">signif</span>(mu, <span class="dv">3</span>)), sigma <span class="sc">==</span> .(<span class="fu">signif</span>(<span class="fu">sqrt</span>(sigma2), <span class="dv">3</span>)))))</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>rtPlot1 <span class="sc">+</span> rwPlot <span class="sc">+</span> rtPlot0 <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.75</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ebrw_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="implementation-in-r" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="implementation-in-r"><span class="header-section-number">2.3</span> Implementation in R</h2>
+<p>To find the EBRW parameters that best fit the recognition data from a participant, let’s implement the diffusion version of the EBRW in R using the <code>WienR</code> package. We must define a function to compute the negative log-likelihood (NLL) for a set of observed responses/RT’s, given a set of parameters. The function itself, in outline form, looks like the one below. I have written comments for the things that the function needs to accomplish to get from what is given to the function (in the parentheses following <code>function</code>) to what the function needs to <code>return</code> at the end.</p>
+<p>For example purposes, this implementation doesn’t include all of the bells and whistles that the full model includes. It will not allow for varying trace strength nor will it include attention weights on each dimension. This is meant to illustrate the basic idea that we can define a diffusion model in which the drift rates are derived from a theory, rather than just estimated.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function arguments:</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># par: this is a named vector of parameter values</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># stim_coords: this is a matrix of the coordinates of the stimuli, where each row is a stimulus and each column is a dimension</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># study_items: this is a matrix where each row is a trial and each column indicates the items that were studied on that trial</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># probe_item: this is a vector giving the index of the probe item on each trial</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># response: this is a vector where each value is 2 or 1, depending on whether the participant responsed "yes" (2) or "no" (1) on that trial</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co"># rt: this is a vector of the response times from each trial</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>ebrw_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, stim_coords, study_items, probe_item, response, rt) {</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Compute the mean and SD of the drift for each trial</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Calculate the log-likelihood of each observed response/RT on each trial</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Return final result</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(nll)</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Let’s now fill in each of those sections in turn.</p>
+<section id="parameters" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="parameters"><span class="header-section-number">2.3.1</span> Parameters</h3>
+<p>The vector <code>par</code> that is the first argument to the <code>ebrw_nll</code> function should be a <em>named</em> vector that has the following entries:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"retrieval_rate"</span> <span class="ot">=</span> <span class="dv">3</span>,     <span class="co"># This is the "nu" parameter</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span> <span class="ot">=</span> <span class="dv">2</span>,                  <span class="co"># Response caution</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"w"</span> <span class="ot">=</span> <span class="fl">0.5</span>,                <span class="co"># Response bias</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t0"</span> <span class="ot">=</span> <span class="dv">0</span>,                 <span class="co"># Residual time</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"specificity"</span> <span class="ot">=</span> <span class="dv">1</span>,        <span class="co"># Specificity of memory representations (the "c" parameter)</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"criterion"</span> <span class="ot">=</span> <span class="dv">1</span>           <span class="co"># Criterion (the "kappa" parameter)</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="computing-the-mean-and-sd-of-the-drift-for-each-trial" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="computing-the-mean-and-sd-of-the-drift-for-each-trial"><span class="header-section-number">2.3.2</span> Computing the mean and SD of the drift for each trial</h3>
+<p>Recall that the drift rates depend on the distances between each of the stimulus items. Since the function is provided with <code>stim_coords</code>, we can make our job a little easier by using the <code>dist</code> function to compute the matrix of distances between all pairs of items. This saves us from “recomputing” the distances between pairs of items that occur on multiple trials:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>stim_dists <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">dist</span>(stim_coords))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Then, to compute the summed similarity for each trial <code>i</code>, we can use a <code>for</code> loop:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>evidence_mean <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>evidence_sd <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    summed_sim <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">exp</span>(<span class="sc">-</span>par[<span class="st">"specificity"</span>] <span class="sc">*</span> stim_dists[probe_item[i], study_items[i,]]))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    p <span class="ot">&lt;-</span> summed_sim <span class="sc">/</span> (summed_sim <span class="sc">+</span> par[<span class="st">"criterion"</span>])</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    evidence_mean[i] <span class="ot">&lt;-</span> par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    evidence_sd[i] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We have now completed the second step of writing the <code>ebrw_nll</code> function, as summarized below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function arguments:</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># par: this is a named vector of parameter values</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># stim_coords: this is a matrix of the coordinates of the stimuli, where each row is a stimulus and each column is a dimension</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># study_items: this is a matrix where each row is a trial and each column indicates the items that were studied on that trial</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># probe_item: this is a vector giving the index of the probe item on each trial</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># response: this is a vector where each value is 2 or 1, depending on whether the participant responsed "yes" (2) or "no" (1) on that trial</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># rt: this is a vector of the response times from each trial</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>ebrw_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, stim_coords, study_items, probe_item, response, rt) {</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Compute the mean and SD of the drift for each trial</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    stim_dists <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">dist</span>(stim_coords))</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    evidence_mean <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    evidence_sd <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        summed_sim <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">exp</span>(<span class="sc">-</span>par[<span class="st">"specificity"</span>] <span class="sc">*</span> stim_dists[probe_item[i], study_items[i,]]))</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        p <span class="ot">&lt;-</span> summed_sim <span class="sc">/</span> (summed_sim <span class="sc">+</span> par[<span class="st">"criterion"</span>])</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>        evidence_mean[i] <span class="ot">&lt;-</span> par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>        evidence_sd[i] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Calculate the log-likelihood of each observed response/RT on each trial</span></span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Return final result</span></span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(nll)</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="calculating-the-log-likelihood" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="calculating-the-log-likelihood"><span class="header-section-number">2.3.3</span> Calculating the log-likelihood</h3>
+<p>This step is almost too easy. We are using the <code>WienR</code> package, which means we can use the <code>WienerPDF</code> function like we’ve seen already. There is only one thing we need to do: The <code>WienerPDF</code> function assumes that the standard deviation of the diffusion is always equal to one. As such, we need to <em>standardize</em> the drift rate and boundary separation before we send them to the <code>WienerPDF</code> function by dividing each by <code>evidence_sd</code>:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function arguments:</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># par: this is a named vector of parameter values</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># stim_coords: this is a matrix of the coordinates of the stimuli, where each row is a stimulus and each column is a dimension</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co"># study_items: this is a matrix where each row is a trial and each column indicates the items that were studied on that trial</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co"># probe_item: this is a vector giving the index of the probe item on each trial</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># response: this is a vector where each value is 2 or 1, depending on whether the participant responsed "yes" (2) or "no" (1) on that trial</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co"># rt: this is a vector of the response times from each trial</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>ebrw_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, stim_coords, study_items, probe_item, response, rt) {</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Compute the mean and SD of the drift for each trial</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    stim_dists <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">dist</span>(stim_coords))</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    evidence_mean <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    evidence_sd <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>        summed_sim <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">exp</span>(<span class="sc">-</span>par[<span class="st">"specificity"</span>] <span class="sc">*</span> stim_dists[probe_item[i], study_items[i,]]))</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>        p <span class="ot">&lt;-</span> summed_sim <span class="sc">/</span> (summed_sim <span class="sc">+</span> par[<span class="st">"criterion"</span>])</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>        evidence_mean[i] <span class="ot">&lt;-</span> par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>        evidence_sd[i] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Calculate the log-likelihood of each observed response/RT on each trial</span></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    result <span class="ot">&lt;-</span> <span class="fu">WienerPDF</span>(</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>        <span class="at">t =</span> rt,</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>        <span class="at">response =</span> response,</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>        <span class="at">a =</span> par[<span class="st">"a"</span>] <span class="sc">/</span> evidence_sd,</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>        <span class="at">w =</span> par[<span class="st">"w"</span>],</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>        <span class="at">v =</span> evidence_mean <span class="sc">/</span> evidence_sd,</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>        <span class="at">t0 =</span> par[<span class="st">"t0"</span>]</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Return final result</span></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="sc">-</span><span class="fu">sum</span>(result<span class="sc">$</span>logvalue))</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="error-checking" class="level3" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="error-checking"><span class="header-section-number">2.3.4</span> Error-checking</h3>
+<p>It is important for us to do some error checking. Sometimes, a particular combination of parameters will make it impossible for the <code>WienerPDF</code> function to calculate the log-likelihood. When that happens, it gives an error. In essence, such a result tells us that the model cannot work with that combination of parameters. Thus, rather than an “error”, that is really telling us that we should assign zero likelihood to that set of parameters, which is equivalent to a log-likelihood of <span class="math inline">\(-\infty\)</span>.</p>
+<p>We can do that kind of check in R by putting the <code>WienerPDF</code> function call within <code>try()</code>. If the <code>WienerPDF</code> function gives an error, then the result that gets stored in <code>trial_wiener</code> is also an error. Otherwise, it just gives us the log-likelihoods that we want.</p>
+<p>Let’s set up an “if…else” structure to do this check:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Function arguments:</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># par: this is a named vector of parameter values</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co"># stim_coords: this is a matrix of the coordinates of the stimuli, where each row is a stimulus and each column is a dimension</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># study_items: this is a matrix where each row is a trial and each column indicates the items that were studied on that trial</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co"># probe_item: this is a vector giving the index of the probe item on each trial</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co"># response: this is a vector where each value is 2 or 1, depending on whether the participant responsed "yes" (2) or "no" (1) on that trial</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co"># rt: this is a vector of the response times from each trial</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>ebrw_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, stim_coords, study_items, probe_item, response, rt) {</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Compute the mean and SD of the drift for each trial</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    stim_dists <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">dist</span>(stim_coords))</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    evidence_mean <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    evidence_sd <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>        summed_sim <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">exp</span>(<span class="sc">-</span>par[<span class="st">"specificity"</span>] <span class="sc">*</span> stim_dists[probe_item[i], study_items[i,]]))</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>        p <span class="ot">&lt;-</span> summed_sim <span class="sc">/</span> (summed_sim <span class="sc">+</span> par[<span class="st">"criterion"</span>])</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>        evidence_mean[i] <span class="ot">&lt;-</span> par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>        evidence_sd[i] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Calculate the log-likelihood of each observed response/RT on each trial</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>    result <span class="ot">&lt;-</span> <span class="fu">try</span>(<span class="fu">WienerPDF</span>(</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>        <span class="at">t =</span> rt,</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>        <span class="at">response =</span> response,</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>        <span class="at">a =</span> par[<span class="st">"a"</span>] <span class="sc">/</span> evidence_sd,</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>        <span class="at">w =</span> par[<span class="st">"w"</span>],</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>        <span class="at">v =</span> evidence_mean <span class="sc">/</span> evidence_sd,</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>        <span class="at">t0 =</span> par[<span class="st">"t0"</span>]</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Return final result</span></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">class</span>(result) <span class="sc">==</span> <span class="st">"try-error"</span>) {</span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(<span class="cn">Inf</span>)</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(<span class="sc">-</span><span class="fu">sum</span>(result<span class="sc">$</span>logvalue))</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+<section id="a-worked-example" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="a-worked-example"><span class="header-section-number">2.4</span> A worked example</h2>
+<p>This example uses a single participant’s data from Experiment 2 of <span class="citation" data-cites="GillespieCox2024">Gillespie &amp; Cox (<a href="references.html#ref-GillespieCox2024" role="doc-biblioref">2024</a>)</span>. In this experiment, each participant made similarity ratings between all pairs of eight items. Each item was an “auditory texture” constructed via Fourier synthesis. We applied Multidimensional Scaling to the similarity ratings from each participant to assign, for each participant, a set of coordinates to each item. The coordinates are such that items that are farther from one another were associated with lower similarity ratings and those that were closer to one another were assigned higher similarity ratings. Be sure to check out the paper itself for additional detail on how this was done, and how we decided that the multidimensional space in which the stimuli are represented had 3 dimensions. These coordinates will be used for the <code>stim_coords</code> argument of the <code>ebrw_nll</code> function.</p>
+<p>In addition to providing similarity ratings, each participant engaged in a recognition memory task. On each trial of this task, the participant heard two auditory textures, presented sequentially. They then heard a “probe” sound and had to decide whether or not it was one of the two sounds that had just been presented. It is these recognition data that we will model with the EBRW.</p>
+<p>You can grab the data yourself by running the following chunk of code to download it and load it into your R workspace:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">download.file</span>(<span class="st">"https://github.com/gregcox7/choice_rt_models/raw/refs/heads/main/data/ebrw_example_data.rdata"</span>, <span class="st">"blast_data.rdata"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"ebrw_example_data.rdata"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="check-out-the-data" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="check-out-the-data"><span class="header-section-number">2.4.1</span> Check out the data</h3>
+<p>The stimulus coordinates are saved in a matrix called <code>stim_coords</code>:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(stim_coords)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>           [,1]         [,2]        [,3]
+[1,] -0.4679162 -0.463219039 -0.08056499
+[2,] -0.5549266  0.499390636  0.07099460
+[3,] -0.4742833 -0.132020672  0.43312165
+[4,] -0.5062581  0.005578674 -0.40175331
+[5,]  0.5110397 -0.222844222 -0.30381582
+[6,]  0.4578305  0.336495895 -0.27302187
+[7,]  0.5669455 -0.288366241  0.24624698
+[8,]  0.4675684  0.264984969  0.30879277</code></pre>
+</div>
+</div>
+<p>We can visualize them using <code>plot_ly</code>:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>to_plot <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(stim_coords)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(to_plot) <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Dimension"</span>, <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(stim_coords))</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(to_plot) <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Item"</span>, <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(stim_coords))</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_ly</span>(<span class="at">data =</span> to_plot, <span class="at">x =</span> <span class="sc">~</span> <span class="st">`</span><span class="at">Dimension 1</span><span class="st">`</span>, <span class="at">y =</span> <span class="sc">~</span> <span class="st">`</span><span class="at">Dimension 2</span><span class="st">`</span>, <span class="at">z =</span> <span class="sc">~</span> <span class="st">`</span><span class="at">Dimension 3</span><span class="st">`</span>, <span class="at">type =</span> <span class="st">"scatter3d"</span>, <span class="at">text =</span> <span class="fu">rownames</span>(to_plot))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>No scatter3d mode specifed:
+  Setting the mode to markers
+  Read more about this attribute -&gt; https://plotly.com/r/reference/#scatter-mode</code></pre>
+</div>
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-254ba0c536aba6f5d5c3" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-254ba0c536aba6f5d5c3">{"x":{"visdat":{"19d62d7e7c2d60":["function () ","plotlyVisDat"]},"cur_data":"19d62d7e7c2d60","attrs":{"19d62d7e7c2d60":{"x":{},"y":{},"z":{},"text":["Item 1","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"`Dimension 1`"},"yaxis":{"title":"`Dimension 2`"},"zaxis":{"title":"`Dimension 3`"}},"hovermode":"closest","showlegend":false},"source":"A","config":{"showSendToCloud":false},"data":[{"x":[-0.4679161611520406,-0.55492658286274077,-0.47428333513396143,-0.50625809279990275,0.51103974867404744,0.45783054068415885,0.56694547092957315,0.46756841166086582],"y":[-0.46321903909441836,0.49939063638984044,-0.13202067242339119,0.0055786743535065283,-0.22284422229517822,0.33649589490445841,-0.28836624054434484,0.26498496870952648],"z":[-0.080564994532971015,0.070994597405408214,0.43312164966214295,-0.40175330903355666,-0.3038158169562874,-0.27302187298276354,0.24624697977727203,0.30879276666075506],"text":["Item 1","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8"],"type":"scatter3d","mode":"markers","marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"line":{"color":"rgba(31,119,180,1)"},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p>In addition for each trial of the recognition task, the <code>study_items</code> matrix tells us which of the two items had been presented as part of the set to be remembered and the <code>probe_item</code> vector tells us what the probe item was. These numbers refer to row in the <code>stim_coords</code> matrix.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(study_items)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>      [,1] [,2]
+ [1,]    3    5
+ [2,]    3    6
+ [3,]    8    1
+ [4,]    1    7
+ [5,]    2    4
+ [6,]    7    2
+ [7,]    6    7
+ [8,]    8    3
+ [9,]    3    4
+[10,]    5    6
+[11,]    6    8
+[12,]    1    4
+[13,]    4    8
+[14,]    7    4
+[15,]    6    1
+[16,]    1    3
+[17,]    1    2
+[18,]    3    2
+[19,]    6    4
+[20,]    8    2
+[21,]    3    7
+[22,]    4    5
+[23,]    5    2
+[24,]    1    5
+[25,]    7    8
+[26,]    2    6
+[27,]    7    5
+[28,]    5    8</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(probe_item)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 4 2 1 7 2 7 7 2 6 6 6 1 3 4 4 3 8 3 8 4 7 8 4 2 6 2 3 5</code></pre>
+</div>
+</div>
+<p>Finally, the <code>rt</code> and <code>response</code> vectors record the response time (in seconds) and the response (where <code>2</code> is “yes” and <code>1</code> is “no”) produced by this participant on each trial.</p>
+</section>
+<section id="finding-optimal-parameters" class="level3" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="finding-optimal-parameters"><span class="header-section-number">2.4.2</span> Finding optimal parameters</h3>
+<p>The version of the EBRW that we applied in our paper is a bit more complex than the one we will use here, which only has six free parameters. We will use R’s built-in <code>nlminb</code> function to find the best-fitting values of these parameters. To do this, we need to specify initial values for each parameter in a named vector, as shown below. These initial values don’t necessarily need to be anything in particular as long as they don’t cause the <code>ebrw_nll</code> function to return an error or a value of <code>Inf</code>.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>init_par <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"retrieval_rate"</span> <span class="ot">=</span> <span class="dv">3</span>,     <span class="co"># This is the "nu" parameter</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span> <span class="ot">=</span> <span class="dv">2</span>,                  <span class="co"># Response caution</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"w"</span> <span class="ot">=</span> <span class="fl">0.5</span>,                <span class="co"># Response bias</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t0"</span> <span class="ot">=</span> <span class="dv">0</span>,                 <span class="co"># Residual time</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"specificity"</span> <span class="ot">=</span> <span class="dv">1</span>,        <span class="co"># Specificity of memory representations (the "c" parameter)</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"criterion"</span> <span class="ot">=</span> <span class="dv">1</span>           <span class="co"># Criterion (the "kappa" parameter)</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We also need to specify the upper and lower values that each of these parameters could possibly take, as shown below:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>lower <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"retrieval_rate"</span> <span class="ot">=</span> <span class="dv">0</span>,     <span class="co"># This is the "nu" parameter</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span> <span class="ot">=</span> <span class="dv">0</span>,                  <span class="co"># Response caution</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"w"</span> <span class="ot">=</span> <span class="dv">0</span>,                  <span class="co"># Response bias</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t0"</span> <span class="ot">=</span> <span class="dv">0</span>,                 <span class="co"># Residual time</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"specificity"</span> <span class="ot">=</span> <span class="dv">0</span>,        <span class="co"># Specificity of memory representations (the "c" parameter)</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"criterion"</span> <span class="ot">=</span> <span class="dv">0</span>           <span class="co"># Criterion (the "kappa" parameter)</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>upper <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"retrieval_rate"</span> <span class="ot">=</span> <span class="cn">Inf</span>,     <span class="co"># This is the "nu" parameter</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span> <span class="ot">=</span> <span class="cn">Inf</span>,                  <span class="co"># Response caution</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"w"</span> <span class="ot">=</span> <span class="dv">1</span>,                    <span class="co"># Response bias</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t0"</span> <span class="ot">=</span> <span class="fu">min</span>(rt),             <span class="co"># Residual time</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"specificity"</span> <span class="ot">=</span> <span class="cn">Inf</span>,        <span class="co"># Specificity of memory representations (the "c" parameter)</span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"criterion"</span> <span class="ot">=</span> <span class="cn">Inf</span>           <span class="co"># Criterion (the "kappa" parameter)</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Note that these upper and lower values can be <code>Inf</code>inite if necessary!</p>
+<p>Finally, let’s use the <code>nlminb</code> function, which we need to provide with each of the ingredients we prepared above. We will save the result as <code>fit</code>:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">nlminb</span>(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">start =</span> init_par,          <span class="co"># Need to provide initial guess of parameter values</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">objective =</span> ebrw_nll,      <span class="co"># Tell R the name of the function to optimize</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower =</span> lower,             <span class="co"># The lower bounds on each parameter</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">upper =</span> upper,             <span class="co"># The upper bounds on each parameter</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">stim_coords =</span> stim_coords, <span class="co"># The coordinates of each stimulus</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">rt =</span> rt,                   <span class="co"># The vector of RT's on each trial</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">response =</span> response,       <span class="co"># The vector of responses on each trial</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">study_items =</span> study_items, <span class="co"># The study items on each trial</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">probe_item =</span> probe_item    <span class="co"># The probe item on each trial</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in nlminb(start = init_par, objective = ebrw_nll, lower = lower, :
+NA/NaN function evaluation</code></pre>
+</div>
+</div>
+<p>And the final result!</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$par
+retrieval_rate              a              w             t0    specificity 
+     1.2474191      2.1459586      0.4488126      0.6884095      5.6470633 
+     criterion 
+     0.1035233 
+
+$objective
+[1] 21.59716
+
+$convergence
+[1] 0
+
+$iterations
+[1] 35
+
+$evaluations
+function gradient 
+      56      243 
+
+$message
+[1] "relative convergence (4)"</code></pre>
+</div>
+</div>
+<p>The beauty of this result is that we have explained why this participant did what they did in terms of</p>
+<ol type="a">
+<li>Their internal representations of the stimuli, modeled as coordinates in a latent psychological space.</li>
+<li>A decision process that involves continuously sampling exemplars from memory until a criterion is reached.</li>
+</ol>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-GillespieCox2024" class="csl-entry" role="listitem">
+Gillespie, N. F., &amp; Cox, G. E. (2024). <em>Perception and memory for novel auditory stimuli: Similarity, serial position, and list homogeneity</em>. PsyArXiv. <a href="https://doi.org/10.31234/osf.io/n294a">https://doi.org/10.31234/osf.io/n294a</a>
+</div>
+<div id="ref-Nosofsky1986" class="csl-entry" role="listitem">
+Nosofsky, R. M. (1986). Attention, similarity, and the identification-categorization relationship. <em>Journal of Experimental Psychology: General</em>, <em>115</em>(1), 39–57.
+</div>
+<div id="ref-Nosofsky1992" class="csl-entry" role="listitem">
+Nosofsky, R. M. (1992). Similarity scaling and cognitive process models. <em>Annual Review of Psychology</em>, <em>43</em>, 25–53.
+</div>
+<div id="ref-NosofskyEtAl2014" class="csl-entry" role="listitem">
+Nosofsky, R. M., Cox, G. E., Cao, R., &amp; Shiffrin, R. M. (2014). An exemplar-familiarity model predicts short-term and long-term probe recognition across diverse forms of memory search. <em>Journal of Experimental Psychology: Learning, Memory, and Cognition</em>, <em>40</em>(6), 1524–1539.
+</div>
+<div id="ref-NosofskyEtAl2011" class="csl-entry" role="listitem">
+Nosofsky, R. M., Little, D. R., Donkin, C., &amp; Fific, M. (2011). Short-term memory scanning viewed as exemplar-based categorization. <em>Psychological Review</em>, <em>118</em>(2), 280–315.
+</div>
+<div id="ref-NosofskyPalmeri1997" class="csl-entry" role="listitem">
+Nosofsky, R. M., &amp; Palmeri, T. J. (1997). An exemplar-based random walk model of speeded classification. <em>Psychological Review</em>, <em>104</em>(2), 266–300.
+</div>
+<div id="ref-Shepard1962a" class="csl-entry" role="listitem">
+Shepard, R. N. (1962a). The analysis of proximities: <span>M</span>ultidimensional scaling with an unknown distance function. <span>I</span>. <em>Psychometrika</em>, <em>27</em>(2), 125–140. https://doi.org/<a href="https://doi.org/10.1007/BF02289630">https://doi.org/10.1007/BF02289630</a>
+</div>
+<div id="ref-Shepard1962b" class="csl-entry" role="listitem">
+Shepard, R. N. (1962b). The analysis of proximities: <span>M</span>ultidimensional scaling with an unknown distance function. <span>II</span>. <em>Psychometrika</em>, <em>27</em>(3), 219–246. https://doi.org/<a href="https://doi.org/10.1007/BF02289621">https://doi.org/10.1007/BF02289621</a>
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./intro.html" class="pagination-link" aria-label="Introduction">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

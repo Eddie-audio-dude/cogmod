@@ -1,0 +1,3 @@
+# Preface {.unnumbered}
+
+This is a collection of notes and materials for an introductory course in computational cognitive modeling.  It will be updated and, arguably, improved over the course of the semester.
