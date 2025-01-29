@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>References – Computational Cognitive Models</title>
+<title>3&nbsp; Programming with R – Computational Cognitive Models</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,26 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
 }
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -49,7 +64,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./r_coding.html" rel="prev">
+<link href="./references.html" rel="next">
+<link href="./ebrw.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -87,6 +103,35 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -99,7 +144,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./references.html">References</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./r_coding.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Programming with R</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -144,13 +189,13 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./r_coding.html" class="sidebar-item-text sidebar-link">
+  <a href="./r_coding.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Programming with R</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./references.html" class="sidebar-item-text sidebar-link active">
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">References</span></a>
   </div>
 </li>
@@ -159,15 +204,29 @@ div.csl-indent {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#tips-and-strategies" id="toc-tips-and-strategies" class="nav-link active" data-scroll-target="#tips-and-strategies"><span class="header-section-number">3.1</span> Tips and strategies</a></li>
+  <li><a href="#exercise-fibonnacci" id="toc-exercise-fibonnacci" class="nav-link" data-scroll-target="#exercise-fibonnacci"><span class="header-section-number">3.2</span> Exercise: Fibonnacci</a>
+  <ul class="collapse">
+  <li><a href="#exercise-1" id="toc-exercise-1" class="nav-link" data-scroll-target="#exercise-1"><span class="header-section-number">3.2.1</span> Exercise 1</a></li>
+  <li><a href="#exericse-2" id="toc-exericse-2" class="nav-link" data-scroll-target="#exericse-2"><span class="header-section-number">3.2.2</span> Exericse 2</a></li>
+  <li><a href="#exercise-3" id="toc-exercise-3" class="nav-link" data-scroll-target="#exercise-3"><span class="header-section-number">3.2.3</span> Exercise 3</a></li>
+  <li><a href="#exercise-4" id="toc-exercise-4" class="nav-link" data-scroll-target="#exercise-4"><span class="header-section-number">3.2.4</span> Exercise 4</a></li>
+  <li><a href="#extension-exercise" id="toc-extension-exercise" class="nav-link" data-scroll-target="#extension-exercise"><span class="header-section-number">3.2.5</span> Extension exercise</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">References</h1>
+<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Programming with R</span></h1>
 </div>
 
 
@@ -184,78 +243,82 @@ div.csl-indent {
 </header>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
-<div id="ref-Broadbent1957" class="csl-entry" role="listitem">
-Broadbent, D. E. (1957). A mechanical model for human attention and
-immediate memory. <em>Psychological Review</em>, <em>64</em>(3),
-205–215.
+<section id="tips-and-strategies" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="tips-and-strategies"><span class="header-section-number">3.1</span> Tips and strategies</h2>
+<ul>
+<li>When trying to write code to accomplish a particular task—or when trying to understand code written by someone else—try to break the task into individual steps that are accomplished in sequence in order to yield the final result.</li>
+<li>If you are unsure what a particular bit of code will do—for example, if you want to figure out how to code one of the steps you’ve identified above—try to construct a <em>minimal working example</em>. This example should be simple enough that you can figure out what the result <em>should</em> be without doing any code. Then you can try out the code and verify whether the result matches what you expected.</li>
+<li>R supports <em>vectorization</em> of many operations. While vectorization allows for code to run more efficiently, the resulting code can sometimes be harder to understand and debug. As a result, you may want to write a less efficient but easier to read version of your code first, so that you can verify that it works the way you expect. You can then see where you might want to try to make your code more efficient, using your original easy-to-read code to verify that any changes you make don’t alter the expected result.</li>
+<li>Using <em>named vectors/matrices/arrays</em> can often be quite handy when you want to index values by using a string that describes their <em>meaning</em> or <em>interpretation</em>, rather than a numerical index. Not only can this make your code more interpretable, it avoids issues when you may not know ahead of time which numerical index contains a particular desired value.</li>
+<li>R has a tendency to <em>recycle</em> things in ways you may not expect! For example, when doing any operation involving multiple vectors, if one vector is shorter than the other, R will <em>sometimes</em> “recycle” the elements of the shorter vector to create a new vector that is the same length as the longer one. The rules that govern how R “recycles” are not consistently applied and can be hard to predict, therefore it is important to ensure that your code will not produce this kind of ambiguous situation. You may want to include error checks to ensure that vectors are the same length. Alternatively, if you want to recycle, you can do so explicitly so there is no ambiguity (e.g., <code>x_recycled &lt;- rep(x, length(y))[1:length(y)]</code>).</li>
+<li>Always remember the <code>drop</code> option when subsetting an array, matrix, or data frame! If the subsetting procedure selects only a single element, unless you use <code>drop = FALSE</code>, the result will be a length-one vector that “throws out” the other dimensions of your data structure. This can result in bugs if your code assumes that the result of the subset will have a consistent number of dimensions.</li>
+</ul>
+</section>
+<section id="exercise-fibonnacci" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="exercise-fibonnacci"><span class="header-section-number">3.2</span> Exercise: Fibonnacci</h2>
+<p>The following set of R coding exercises are meant to prepare you for the kind of coding that will be involved in writing our first cognitive model simulations. It is not exhaustive of all the things that you can do with R, but it addresses many of the essentials.</p>
+<p>These exercises are based on everyone’s favorite sequence, the <a href="https://en.wikipedia.org/wiki/Fibonacci_sequence">Fibonnacci sequence</a>. The sequence is defined by a simple rule: the <em>next</em> value in the sequence is the <em>sum</em> of the <em>previous two values</em>. Written in Math, that’s: <span class="math display">\[
+f[i] = f[i - 2] + f[i - 1]
+\]</span> where <span class="math inline">\(f[\cdot]\)</span> is a value in the Fibonnacci sequence and <span class="math inline">\(i\)</span> is the <em>index</em> of the next value. To get this sequence going, we need to know the first two values, <span class="math inline">\(f[1]\)</span> and <span class="math inline">\(f[2]\)</span>. Typically, these are both set to 1. As a result, the beginning of the Fibonnacci sequence goes like this: <span class="math display">\[
+1, 1, 2, 3, 5, 8, 13, \ldots
+\]</span></p>
+<p>Anyway, let’s begin!</p>
+<section id="exercise-1" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="exercise-1"><span class="header-section-number">3.2.1</span> Exercise 1</h3>
+<p>Write two versions of a chunk of code that will create a vector called <code>fib</code> that contains the first <strong>20</strong> values in the Fibonnacci sequence. Assume that the first two values in the sequence are 1 and 1. Write one version of the code that creates the vector by appending each new value to the end of <code>fib</code>. Write another version that assigns values to the corresponding entries in <code>fib</code> directly using the appropriate index (for this second version, you may want to use the <code>rep</code> function to create the <code>fib</code> vector).</p>
+</section>
+<section id="exericse-2" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="exericse-2"><span class="header-section-number">3.2.2</span> Exericse 2</h3>
+<p>Based on the code you wrote for the previous exercise, write a <strong>function</strong> that returns a vector containing the first <strong>N</strong> terms of the Fibonnacci sequence. Your function should take two arguments, the value <code>N</code> and a vector called <code>init</code> that contains the first two values in the sequence. Give those arguments sensible default values. The chunk below gives a sense of the overall structure your function should have:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fib_func <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">N =</span> ___, <span class="at">init =</span> ___) {</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(fib)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
-<div id="ref-CoxShiffrinChapter" class="csl-entry" role="listitem">
-Cox, G. E., &amp; Shiffrin, R. M. (2024). Computational models of event
-memory. In M. J. Kahana &amp; A. Wagner (Eds.), <em>Oxford handbook of
-human memory</em>. Oxford University Press.
-</div>
-<div id="ref-Dennett1980" class="csl-entry" role="listitem">
-Dennett, D. (1980). The milk of human intentionality. <em>Behavioral and
-Brain Sciences</em>, <em>3</em>(3), 428–430. <a href="https://doi.org/10.1017/s0140525x0000580x">https://doi.org/10.1017/s0140525x0000580x</a>
-</div>
-<div id="ref-GillespieCox2024" class="csl-entry" role="listitem">
-Gillespie, N. F., &amp; Cox, G. E. (2024). <em>Perception and memory for
-novel auditory stimuli: Similarity, serial position, and list
-homogeneity</em>. PsyArXiv. <a href="https://doi.org/10.31234/osf.io/n294a">https://doi.org/10.31234/osf.io/n294a</a>
-</div>
-<div id="ref-Neisser1967" class="csl-entry" role="listitem">
-Neisser, U. (1967). <em>Cognitive psychology</em>.
-Appleton-Century-Crofts.
-</div>
-<div id="ref-Nosofsky1986" class="csl-entry" role="listitem">
-Nosofsky, R. M. (1986). Attention, similarity, and the
-identification-categorization relationship. <em>Journal of Experimental
-Psychology: General</em>, <em>115</em>(1), 39–57.
-</div>
-<div id="ref-Nosofsky1992" class="csl-entry" role="listitem">
-Nosofsky, R. M. (1992). Similarity scaling and cognitive process models.
-<em>Annual Review of Psychology</em>, <em>43</em>, 25–53.
-</div>
-<div id="ref-NosofskyEtAl2014" class="csl-entry" role="listitem">
-Nosofsky, R. M., Cox, G. E., Cao, R., &amp; Shiffrin, R. M. (2014). An
-exemplar-familiarity model predicts short-term and long-term probe
-recognition across diverse forms of memory search. <em>Journal of
-Experimental Psychology: Learning, Memory, and Cognition</em>,
-<em>40</em>(6), 1524–1539.
-</div>
-<div id="ref-NosofskyEtAl2011" class="csl-entry" role="listitem">
-Nosofsky, R. M., Little, D. R., Donkin, C., &amp; Fific, M. (2011).
-Short-term memory scanning viewed as exemplar-based categorization.
-<em>Psychological Review</em>, <em>118</em>(2), 280–315.
-</div>
-<div id="ref-NosofskyPalmeri1997" class="csl-entry" role="listitem">
-Nosofsky, R. M., &amp; Palmeri, T. J. (1997). An exemplar-based random
-walk model of speeded classification. <em>Psychological Review</em>,
-<em>104</em>(2), 266–300.
-</div>
-<div id="ref-Shepard1962a" class="csl-entry" role="listitem">
-Shepard, R. N. (1962a). The analysis of proximities:
-<span>M</span>ultidimensional scaling with an unknown distance function.
-<span>I</span>. <em>Psychometrika</em>, <em>27</em>(2), 125–140.
-https://doi.org/<a href="https://doi.org/10.1007/BF02289630">https://doi.org/10.1007/BF02289630</a>
-</div>
-<div id="ref-Shepard1962b" class="csl-entry" role="listitem">
-Shepard, R. N. (1962b). The analysis of proximities:
-<span>M</span>ultidimensional scaling with an unknown distance function.
-<span>II</span>. <em>Psychometrika</em>, <em>27</em>(3), 219–246.
-https://doi.org/<a href="https://doi.org/10.1007/BF02289621">https://doi.org/10.1007/BF02289621</a>
-</div>
-<div id="ref-SingmannEtAl2022" class="csl-entry" role="listitem">
-Singmann, H., Kellen, D., Cox, G. E., Chandramouli, S. H., Davis-Stober,
-C. P., Dunn, J. C., Gronau, Q. F., Kalish, M. L., McMullin, S. D.,
-Navarro, D. J., &amp; Shiffrin, R. M. (2022). Statistics in the service
-of science: Don’t let the tail wag the dog. <em>Computational Brain
-&amp; Behavior</em>.
+</section>
+<section id="exercise-3" class="level3" data-number="3.2.3">
+<h3 data-number="3.2.3" class="anchored" data-anchor-id="exercise-3"><span class="header-section-number">3.2.3</span> Exercise 3</h3>
+<p>Write code that calls the function you wrote in the previous exercise several times, each time using a different value for the second value in the <code>init</code> argument (but the same value for <code>N</code> and for <code>init[1]</code>). Collect the results from each function call in a single data frame or tibble. The data frame or tibble should have a column that stores the second initial value, a column for the vector returned from the function, and a third column that is the value’s index within the sequence. An example of the kind of result you’re looking for is given below:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8 × 3
+  init2   fib     i
+  &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+1     1     1     1
+2     1     1     2
+3     1     2     3
+4     1     3     4
+5     4     1     1
+6     4     4     2
+7     4     5     3
+8     4     9     4</code></pre>
 </div>
 </div>
+</section>
+<section id="exercise-4" class="level3" data-number="3.2.4">
+<h3 data-number="3.2.4" class="anchored" data-anchor-id="exercise-4"><span class="header-section-number">3.2.4</span> Exercise 4</h3>
+<p>Write code that uses the <code>ggplot2</code> library to plot the values of the Fibonnacci sequence on the y-axis against their position in the sequence on the x-axis. Distinguish between different <code>init2</code> values by using different colored lines. The result should look something like the plot below.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="r_coding_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="extension-exercise" class="level3" data-number="3.2.5">
+<h3 data-number="3.2.5" class="anchored" data-anchor-id="extension-exercise"><span class="header-section-number">3.2.5</span> Extension exercise</h3>
+<p>Write a new function that takes a third argument, <code>n_back</code>, which specifies <em>how many</em> of the previous values to add up to create the next value in the sequence. For the Fibonnacci sequence, <code>n_back = 2</code>, but in principle we could define other kinds of sequences too. Adapt the code you wrote for your previous exercises to explore what happens with different values of <code>n_back</code>. You may also want to include some code at the beginning of your function that checks to ensure that the number of initial values provided in the <code>init</code> argument is sufficient!</p>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -677,11 +740,14 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./r_coding.html" class="pagination-link" aria-label="Programming with R">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Programming with R</span></span>
+      <a href="./ebrw.html" class="pagination-link" aria-label="Exemplar of the Exemplar Based Random Walk">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->

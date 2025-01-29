@@ -5,7 +5,7 @@ project:
 book:
   title: "Computational Cognitive Models"
   author: "Gregory E. Cox"
-  date: "1/23/2025"
+  date: "1/28/2025"
   chapters:
     - index.qmd
     - intro.qmd
@@ -15,6 +15,7 @@ book:
     # - diffusion_fit.qmd
     # - blast_example.qmd
     - ebrw.qmd
+    - r_coding.qmd
     - references.qmd
 
 bibliography: references.bib
@@ -22,7 +23,7 @@ csl: apa.csl
 
 format:
   html:
-    theme: cosmo
+    theme: pulse
     code-fold: true
 
 editor: source
