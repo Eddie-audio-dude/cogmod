@@ -256,7 +256,14 @@ window.Quarto = {
 </section>
 <section id="exercise-fibonnacci" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="exercise-fibonnacci"><span class="header-section-number">3.2</span> Exercise: Fibonnacci</h2>
-<p>The following set of R coding exercises are meant to prepare you for the kind of coding that will be involved in writing our first cognitive model simulations. It is not exhaustive of all the things that you can do with R, but it addresses many of the essentials. It also exemplifies the workflow involved in building a model: 1. Implement the basic processes involved in a simple case where you know what the correct result should be, so you can ensure you have implemented these basics appropriately. 2. Build a function that generalizes the code you wrote in step 1 so that you can apply it to different parameter settings. 3. Use your function to simulate different results using different parameter settings. 4. Explore the range of results your function produces across parameter settings. 5. Optionally, consider ways that you can generalize your model even further by incorporating additional parameters.</p>
+<p>The following set of R coding exercises are meant to prepare you for the kind of coding that will be involved in writing our first cognitive model simulations. It is not exhaustive of all the things that you can do with R, but it addresses many of the essentials. It also exemplifies the workflow involved in building a model:</p>
+<ol type="1">
+<li>Implement the basic processes involved in a simple case where you know what the correct result should be, so you can ensure you have implemented these basics appropriately.</li>
+<li>Build a function that generalizes the code you wrote in step 1 so that you can apply it to different parameter settings.</li>
+<li>Use your function to simulate different results using different parameter settings.</li>
+<li>Explore the range of results your function produces across parameter settings.</li>
+<li>Optionally, consider ways that you can generalize your model even further by incorporating additional parameters.</li>
+</ol>
 <p>These exercises are based on everyone’s favorite sequence, the <a href="https://en.wikipedia.org/wiki/Fibonacci_sequence">Fibonnacci sequence</a>. The sequence is defined by a simple rule: the <em>next</em> value in the sequence is the <em>sum</em> of the <em>previous two values</em>. Written in Math, that’s: <span class="math display">\[
 f[i] = f[i - 2] + f[i - 1]
 \]</span> where <span class="math inline">\(f[\cdot]\)</span> is a value in the Fibonnacci sequence and <span class="math inline">\(i\)</span> is the <em>index</em> of the next value. To get this sequence going, we need to know the first two values, <span class="math inline">\(f[1]\)</span> and <span class="math inline">\(f[2]\)</span>. Typically, these are both set to 1. As a result, the beginning of the Fibonnacci sequence goes like this: <span class="math display">\[

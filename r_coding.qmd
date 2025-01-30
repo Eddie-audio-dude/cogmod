@@ -16,6 +16,7 @@ library(tidyverse)
 ## Exercise: Fibonnacci
 
 The following set of R coding exercises are meant to prepare you for the kind of coding that will be involved in writing our first cognitive model simulations.  It is not exhaustive of all the things that you can do with R, but it addresses many of the essentials.  It also exemplifies the workflow involved in building a model:
+
 1. Implement the basic processes involved in a simple case where you know what the correct result should be, so you can ensure you have implemented these basics appropriately.
 2. Build a function that generalizes the code you wrote in step 1 so that you can apply it to different parameter settings.
 3. Use your function to simulate different results using different parameter settings.
