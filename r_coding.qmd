@@ -15,7 +15,12 @@ library(tidyverse)
 
 ## Exercise: Fibonnacci
 
-The following set of R coding exercises are meant to prepare you for the kind of coding that will be involved in writing our first cognitive model simulations.  It is not exhaustive of all the things that you can do with R, but it addresses many of the essentials.
+The following set of R coding exercises are meant to prepare you for the kind of coding that will be involved in writing our first cognitive model simulations.  It is not exhaustive of all the things that you can do with R, but it addresses many of the essentials.  It also exemplifies the workflow involved in building a model:
+1. Implement the basic processes involved in a simple case where you know what the correct result should be, so you can ensure you have implemented these basics appropriately.
+2. Build a function that generalizes the code you wrote in step 1 so that you can apply it to different parameter settings.
+3. Use your function to simulate different results using different parameter settings.
+4. Explore the range of results your function produces across parameter settings.
+5. Optionally, consider ways that you can generalize your model even further by incorporating additional parameters.
 
 These exercises are based on everyone's favorite sequence, the [Fibonnacci sequence](https://en.wikipedia.org/wiki/Fibonacci_sequence).  The sequence is defined by a simple rule: the *next* value in the sequence is the *sum* of the *previous two values*.  Written in Math, that's:
 $$
