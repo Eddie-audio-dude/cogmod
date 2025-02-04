@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.39">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -64,17 +64,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./references.html" rel="next">
+<link href="./random_walk.html" rel="next">
 <link href="./ebrw.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-03787a5611acd63027d79b3f02190e6e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -195,6 +195,12 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./random_walk.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./references.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">References</span></a>
   </div>
@@ -248,6 +254,7 @@ window.Quarto = {
 <ul>
 <li>When trying to write code to accomplish a particular task—or when trying to understand code written by someone else—try to break the task into individual steps that are accomplished in sequence in order to yield the final result.</li>
 <li>If you are unsure what a particular bit of code will do—for example, if you want to figure out how to code one of the steps you’ve identified above—try to construct a <em>minimal working example</em>. This example should be simple enough that you can figure out what the result <em>should</em> be without doing any code. Then you can try out the code and verify whether the result matches what you expected.</li>
+<li>The same principles that underlie producing good code also underlie debugging code. This is covered well in the corresponding chapter of Wickham’s <em>Advanced R</em> book, but essentially debugging involves (a) isolating where the problem arises; (b) understanding the conditions that resulted in the problem; (c) revising the code in an attempt to correct the problem or to prevent problematic circumstances from arising; and (d) testing to ensure the solution in fact addresses the problem. Working on small bits of code at a time makes all of the essential steps of debugging easier.</li>
 <li>R supports <em>vectorization</em> of many operations. While vectorization allows for code to run more efficiently, the resulting code can sometimes be harder to understand and debug. As a result, you may want to write a less efficient but easier to read version of your code first, so that you can verify that it works the way you expect. You can then see where you might want to try to make your code more efficient, using your original easy-to-read code to verify that any changes you make don’t alter the expected result.</li>
 <li>Using <em>named vectors/matrices/arrays</em> can often be quite handy when you want to index values by using a string that describes their <em>meaning</em> or <em>interpretation</em>, rather than a numerical index. Not only can this make your code more interpretable, it avoids issues when you may not know ahead of time which numerical index contains a particular desired value.</li>
 <li>R has a tendency to <em>recycle</em> things in ways you may not expect! For example, when doing any operation involving multiple vectors, if one vector is shorter than the other, R will <em>sometimes</em> “recycle” the elements of the shorter vector to create a new vector that is the same length as the longer one. The rules that govern how R “recycles” are not consistently applied and can be hard to predict, therefore it is important to ensure that your code will not produce this kind of ambiguous situation. You may want to include error checks to ensure that vectors are the same length. Alternatively, if you want to recycle, you can do so explicitly so there is no ambiguity (e.g., <code>x_recycled &lt;- rep(x, length(y))[1:length(y)]</code>).</li>
@@ -410,6 +417,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -520,6 +529,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
+      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {
@@ -752,8 +762,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./references.html" class="pagination-link" aria-label="References">
-        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./random_walk.html" class="pagination-link" aria-label="Building a random walk model to simulate choice and RT">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.39">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -49,16 +49,16 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./r_coding.html" rel="prev">
+<link href="./random_walk.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-03787a5611acd63027d79b3f02190e6e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -150,6 +150,12 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./random_walk.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./references.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">References</span></a>
   </div>
@@ -190,6 +196,11 @@ Broadbent, D. E. (1957). A mechanical model for human attention and
 immediate memory. <em>Psychological Review</em>, <em>64</em>(3),
 205–215.
 </div>
+<div id="ref-BusemeyerTownsend1993" class="csl-entry" role="listitem">
+Busemeyer, J. R., &amp; Townsend, J. T. (1993). Decision field theory: A
+dynamic–cognitive approach to decision making in an uncertain
+environment. <em>Psychological Review</em>, <em>100</em>(3), 432–459.
+</div>
 <div id="ref-CoxShiffrinChapter" class="csl-entry" role="listitem">
 Cox, G. E., &amp; Shiffrin, R. M. (2024). Computational models of event
 memory. In M. J. Kahana &amp; A. Wagner (Eds.), <em>Oxford handbook of
@@ -198,6 +209,11 @@ human memory</em>. Oxford University Press.
 <div id="ref-Dennett1980" class="csl-entry" role="listitem">
 Dennett, D. (1980). The milk of human intentionality. <em>Behavioral and
 Brain Sciences</em>, <em>3</em>(3), 428–430. <a href="https://doi.org/10.1017/s0140525x0000580x">https://doi.org/10.1017/s0140525x0000580x</a>
+</div>
+<div id="ref-Diederich1997" class="csl-entry" role="listitem">
+Diederich, A. (1997). Dynamic stochastic models for decision making
+under time constraints. <em>Journal of Mathematical Psychology</em>,
+<em>41</em>(3), 260–274. <a href="https://doi.org/10.1006/jmps.1997.1167">https://doi.org/10.1006/jmps.1997.1167</a>
 </div>
 <div id="ref-GillespieCox2024" class="csl-entry" role="listitem">
 Gillespie, N. F., &amp; Cox, G. E. (2024). <em>Perception and memory for
@@ -340,6 +356,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -450,6 +468,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
+      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {
@@ -677,8 +696,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./r_coding.html" class="pagination-link" aria-label="Programming with R">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Programming with R</span></span>
+      <a href="./random_walk.html" class="pagination-link" aria-label="Building a random walk model to simulate choice and RT">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

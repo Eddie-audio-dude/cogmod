@@ -5,7 +5,7 @@ project:
 book:
   title: "Computational Cognitive Models"
   author: "Gregory E. Cox"
-  date: "1/28/2025"
+  date: "2/4/2025"
   chapters:
     - index.qmd
     - intro.qmd
@@ -16,6 +16,7 @@ book:
     # - blast_example.qmd
     - ebrw.qmd
     - r_coding.qmd
+    - random_walk.qmd
     - references.qmd
 
 bibliography: references.bib

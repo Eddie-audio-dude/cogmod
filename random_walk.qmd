@@ -6,7 +6,7 @@ library(tidyverse)
 set.seed(12222)
 ```
 
-```{r out.width = "50%", fig.cap= "Simon the Donkey accumulating evidence.", echo = FALSE}
+```{r out.width = "50%", fig.cap= "Simon the Donkey busily accumulating evidence.", echo = FALSE}
 knitr::include_graphics("img/simon_the_donkey.jpeg")
 ```
 
@@ -14,9 +14,26 @@ You are in a bind. There are two piles of hay in front of you. They look pretty 
 
 The situation described above is a version of the parable of [Buridan's ass](https://en.wikipedia.org/wiki/Buridan%27s_ass). In the parable, the unfortunate ass is unable to come to a decision because the two piles of hay are equally large, meaning he has no basis for choosing between them. As a result, the donkey starves to death.
 
-In this chapter, we will build a model of two-choice behavior that rescues Buridan's donkey from this dire fate. This model is called a **random walk**. As we will see, this model can be applied to any situation involving a choice between two options. The random walk model instantiates all four of the key constructs described in the Introduction. It is also a great example of the general structure of a computational cognitive model, in that it describes how an observable action (a choice) arises by applying a process of accumulation to a representation of the balance of evidence between the two options.
+In this chapter, we will build a model of two-choice behavior that rescues Buridan's donkey from this dire fate. This model is called a **random walk**. As we will see, this model can be applied to any situation involving a choice between two options. The random walk model instantiates four core constructs that together comprise a theory of how people and other animals decide between two options. It is also a great example of the general structure of a computational cognitive model, in that it describes how an observable action (a choice) arises by applying a process of accumulation to a representation of the balance of evidence between the two options.  As we shall see, it will be fairly straightforward to extend the random walk model into a more general form.
 
 ## Out for a random walk
+
+The random walk model is designed to account for two aspects of behavior: *choice* and *response time (RT)*.  These and similar models are applied in situations where a person (or other organism!) has to decide between a small number of possible alternatives, often just two.  Such situations abound in experimental psychology, including lexical decision, recognition memory, detection tasks, search tasks, categorization tasks, etc.  The models are designed to help us understand two things:
+
+1. Why did a participant make the choices they made?
+2. Why did it take the participant a certain amount of time to make the choices they made?
+
+### Key theoretical constructs
+
+The vast majority of models of choice and RT, including random walk and diffusion models, address the two questions above by invoking four basic theoretical constructs:
+
+**Evidence accumulation**:  Choosing from among a set of options is assumed to require accumulating "evidence" that weighs either in favor of or against each option.  This evidence may come from perception (e.g., deciding which of two stimuli is brighter), from memory (e.g., deciding whether an item was or was not on a previously-studied list), or from deliberation (e.g., deciding which of two products to buy).  As such, the idea that decisions are made by accumulating evidence helps explain not only which choice was made (it was the option that was most favored by the accumulated evidence) and how long it took to made the choice (the time needed to accumulate sufficient evidence to commit to a decision).
+
+**Response caution**:  If decisions are made by accumulating evidence, there must be a policy that terminates the accumulation process, otherwise someone would keep accumulating evidence forever---and this is exactly what Buridan's ass needs to avoid!  The construct of "response caution" refers to the idea that, depending on the situation, a decision maker may adopt a policy of deciding quickly on the basis of very little evidence (low response caution) or deciding slowly by waiting for more evidence to accumulate (high response caution).  Thus, this construct is directly related to the idea of **speed-accuracy trade-off**.
+
+**Response bias**:  It may be that a decision maker is willing to commit to some options more readily than others; in that case, we say they are "biased" in favor of those responses.  Typically, this bias is modeled by assuming lower response caution for some options than others.  In other words, a participant may be willing to commit to some decisions on the basis of less accumulated evidence than others.
+
+**Residual time**:  The time needed to accumulate sufficient evidence to make a decision is not the only thing that contributes to observed response times.  After all, it takes time to realize that a trial of a task has actually begun.  It may also take time to retrieve relevant information from memory, to focus attention on relevant features in the environment, or to evaluate a potential outcome.  Finally, it takes some time to execute the motor actions associated with the chosen option (e.g., to press a button, move a lever, etc.).  The time for all of these additional processes is often called *non-decision time* (NDT) or *encoding and response execution* time ($T_{ER}$).  However, I prefer to call it simply "residual time" because that is what it is---it is the time "left over" besides the time needed for evidence accumulation.
 
 ### Representing the current state of evidence
 
@@ -30,13 +47,17 @@ In a cognitive task, the two choices might be "word" and "non-word" in a lexical
 
 The value of $x(t)$ represents the evidence that has been accumulated by time $t$. But what does it mean to "accumulate" evidence? And what is the "evidence" that is accumulated?
 
-In a random walk model, we assume that at regular time intervals (each interval has duration $Delta t$), the decision maker receives a "sample" of evidence, which we will label $\Delta x(t)$. This sample can take one of two values, $+1$ or $-1$. If it is $+1$, the sample favors the option associated with positive evidence values (e.g., the pile of hay on the right) and if it is $-1$, the sample favors the option associated with negative evidence values (e.g., the pile of hay on the left). To accumulate evidence means to add the new sample $\Delta x(t)$ to the current value of the accumulated evidence, i.e.: $$
+In a random walk model, we assume that at regular time intervals (each interval has duration $\Delta t$), the decision maker receives a "sample" of evidence, which we will label $\Delta x(t)$. This sample can take one of two values, $+1$ or $-1$. If it is $+1$, the sample favors the option associated with positive evidence values (e.g., the pile of hay on the right) and if it is $-1$, the sample favors the option associated with negative evidence values (e.g., the pile of hay on the left). To accumulate evidence means to add the new sample $\Delta x(t)$ to the current value of the accumulated evidence, i.e.:
+$$
 \overbrace{x(t + \Delta t)}^{\text{Updated evidence}} = \overbrace{x(t)}^{\text{Current accumulated evidence}} + \overbrace{\Delta x(t)}^{\text{Current sample of evidence}}
-$$ Thus, the accumulated evidence $x(t)$ is the sum of all the samples of evidence that were obtained by time $t$.
+$$
+Thus, the accumulated evidence $x(t)$ is the sum of all the samples of evidence that were obtained by time $t$.
 
 ### What is evidence?
 
-At this point, it would be reasonable to ask where these samples of evidence come from. There is no single answer to this question because the random walk model, like most of the models of choice and RT we will consider, treats evidence in a very abstract sense. To return to Buridan's ass, the evidence might be perceptual in nature: For an interval of time, the donkey looks at both piles of hay. Even though both piles are, by assumption, equally big, that may not always be visually apparent. During any finite interval of time, one pile might happen to look ever so slightly larger than the other, perhaps due to a quirk of the light, a sheaf fluttering in the breeze, the donkey's visual acuity, etc. If the pile on the right happened to look a bit bigger than the one on the left during one of those intervals, then the sample of evidence for that interval would be $+1$. Otherwise, it would be $-1$. Because these minute differences are due to essentially chance factors, and they are equally likely to favor either pile, we can say that the probability of getting a sample that is either $+1$ or $-1$ is $0.5$. While the evidence might not favor one pile over the other *in the long run*, it *will* favor one option over a finite interval of time, which is all any real decision maker has at their disposal. As we shall see shortly, this is the key to saving Buridan's ass.
+At this point, it would be reasonable to ask where these samples of evidence come from. There is no single answer to this question because the random walk model, like most of the models of choice and RT we will consider, treats evidence in a very abstract sense.  Later in the course, we will encounter models that instantiate specific theories of the "evidence" a decision maker may use in a specific context.
+
+To return to Buridan's ass, the evidence might be perceptual in nature: For an interval of time, the donkey looks at both piles of hay. Even though both piles are, by assumption, equally big, that may not always be visually apparent. During any finite interval of time, one pile might happen to look ever so slightly larger than the other, perhaps due to a quirk of the light, a sheaf fluttering in the breeze, the donkey's visual acuity, etc. If the pile on the right happened to look a bit bigger than the one on the left during one of those intervals, then the sample of evidence for that interval would be $+1$. Otherwise, it would be $-1$. Because these minute differences are due to essentially chance factors, and they are equally likely to favor either pile, we can say that the probability of getting a sample that is either $+1$ or $-1$ is $0.5$. While the evidence might not favor one pile over the other *in the long run*, it *will* favor one option over a finite interval of time, which is all any real decision maker has at their disposal. As we shall see shortly, this is the key to saving Buridan's ass.
 
 Treating evidence as due, at least in part, to chance factors is why this model is called a "random" walk. It also highlights the fact that the evidence samples need not occur with equal frequency. Perhaps samples come up $+1$ with probability $p$ and otherwise come up $-1$, like the proverbial biased coin flip. If the evidence consistently favors one option, that means that $p$ is close to either 1 or 0. To the extent that chance factors influence the evidence, $p$ will be closer to $0.5$. We have now been introduced to the first **parameter** of the random walk model: $p$, the probability of getting a sample of evidence that favors the option associated with positive evidence.
 
@@ -53,7 +74,7 @@ expand_grid(p = c(0.2, 0.5, 0.8), sim_index = 1:5, t = 1:20) %>%
     labs(x = "Time interval", y = "Accumulated evidence", color = "p")
 ```
 
-What about evidence in cognitive tasks? Buridan's ass relies on the same kind of sensory evidence as one needs to do, for example, psychophysical tasks like picking which stimulus is brighter, more leftward-oriented, etc. Evidence derived from memory can also be noisy---perhaps when retrieving an event, you sometimes recall the color of an object as blue and sometimes as green. When deciding between different gambles or products, we may also shift attention to different features of those options, leading us to judge them as better or worse depending on which features we attend to [@BusemeyerTownsend1993].
+What about evidence in cognitive tasks? Buridan's ass relies on the same kind of sensory evidence as one needs to do, for example, psychophysical tasks like picking which stimulus is brighter, more leftward-oriented, etc. Evidence derived from memory can also be noisy---perhaps when retrieving an event, you sometimes recall the color of an object as blue and sometimes as green. When deciding between different gambles or products, we may also shift attention to different features of those options, leading us to judge them as better or worse depending on which features we attend to [@BusemeyerTownsend1993; @Diederich1997].
 
 ### Doing some code
 
@@ -73,7 +94,7 @@ With the code above as the core of the model, we now need to do three things: fi
 
 #### Sampling evidence
 
-To get a value for `x_sample`, we will use R's `rbinom` function, which generates a random sample from a binomial distribution. Specifically, the line `rbinom(n = 1, size = 1, prob = 0.5)` will generate a sample that equals 1 with probability 0.5, otherwise it equals zero. It is perhaps easiest to think of it in terms of a coin flip: The `n` parameter of the `rbinom` function says how many samples to draw, `size` says how many coins we flip at once, and `prob` is the probability that any single flip comes up heads. The number that `rbinom` gives is the number of heads per sample.
+To get a value for `x_sample`, we will use R's `rbinom` function, which generates a random sample from a binomial distribution. Specifically, the line `rbinom(n = 1, size = 1, prob = 0.5)` will generate a sample that equals 1 with probability 0.5, otherwise it equals zero. It is perhaps easiest to think of it in terms of a coin flip: The `n` parameter of the `rbinom` function says how many sets of coins to flip, `size` says how many coins we flip in each set, and `prob` is the probability that any single flip comes up heads. The number that `rbinom` gives is the number of heads in a particular set of flips.
 
 For Buridan's ass, the sample of evidence favors each pile equally often, so `prob = 0.5` makes sense. Note that because `rbinom` returns either a 0 or a 1, we need to do some math to turn the result into $+1$ or $-1$. This is shown below.
 
@@ -88,7 +109,7 @@ x <- x + x_sample
 
 There are a few ways we can write code that will obtain many samples. To anticipate what we will be doing later, we will use the `while` control structure. We can use it to specify a condition such that, so long as the condition is met, a block of code will continue to be executed in a loop.
 
-Our condition will depend on the current time. Remember that, in the random walk, each sample of evidence arrives at fixed intervals of time. We will therefore need to keep track of the current time as well as the accumulated evidence. Similar to how we updated the evidence, we will need to keep track of `t`, the current time. We will also need to specify `dt`, the duration of each interval, and `t_max`, the amount of time to keep accumulating evidence.
+Our condition will depend on the current time. Remember that, in the random walk, each sample of evidence arrives at fixed intervals of time. We will therefore need to keep track of the current time as well as the accumulated evidence. Similar to how we updated the evidence, we will need to keep track of `t`, the current time. We will also need to specify `dt`, the duration of each interval (otherwise known as $\Delta t$), and `t_max`, the amount of time to keep accumulating evidence.
 
 ```{r eval = FALSE, echo = TRUE}
 #| code-fold: show
@@ -123,7 +144,7 @@ while (t < t_max) {
 
 #### Keeping a record
 
-The chunk of code above will work just fine! But unfortunately it does not leave a record of accumulated evidence over time that we can then examine, like we did with the graph above. In the chunk below, we use a fun trick to keep a record of each value of `x` and `t`: We create two vectors `x_record` and `t_record` and use the `c` function to append the current values of `x` and `t` to these vectors:
+The chunk of code above will work just fine! But unfortunately it does not leave a record of accumulated evidence over time that we can then examine, like we did with the graph above. In the chunk below, we use a fun trick to keep a record of each value of `x` and `t`: We create two vectors `x_record` and `t_record` and use the `c` function to *concatenate* the current values of `x` and `t` to these vectors:
 
 ```{r eval = FALSE, echo = TRUE}
 #| code-fold: show
@@ -197,11 +218,11 @@ rw_sim <- function(p = 0.5, dt = 0.05, t_max = 5) {
         t_record <- c(t_record, t)
     }
     
-    return(data.frame(t = t_record, x = x_record))
+    return(tibble(t = t_record, x = x_record))
 }
 ```
 
-Now we can call the function `rw_sim` with different settings to simulate different random walks. Note that, because the function returns `t_record` and `x_record` as different columns of a `data.frame`, we can easily use `ggplot2` to plot the results, as in the examples below.
+Now we can call the function `rw_sim` with different settings to simulate different random walks. Note that, because the function returns `t_record` and `x_record` as different columns of a `tibble`, we can easily use `ggplot2` to plot the results, as in the examples below.
 
 ```{r echo = TRUE, eval = TRUE}
 #| code-fold: show
@@ -318,7 +339,7 @@ rw_sim <- function(p = 0.5, b_upper = 5, b_lower = -5, dt = 0.05, t_max = Inf) {
         t_record <- c(t_record, t)
     }
     
-    return(data.frame(t = t_record, x = x_record))
+    return(tibble(t = t_record, x = x_record))
 }
 ```
 
@@ -384,7 +405,7 @@ rw_sim <- function(p = 0.5, b_upper = 5, b_lower = -5, t0 = 0.2, dt = 0.05, t_ma
         t_record <- c(t_record, t)
     }
     
-    return(data.frame(t = t_record, x = x_record))
+    return(tibble(t = t_record, x = x_record))
 }
 ```
 
@@ -501,7 +522,7 @@ choice_rt %>%
 
 In the choice-RT modeling world, it is common to make "quantile-probability plots", sometimes abbreviated to QP plots. These plots can be a bit confusing at first, but are useful because they convey information about choice proportions and RT distributions in a single graph.
 
-The horizontal axis of a QP plot corresponds to the probability of having made a particular choice. In this case, that is the proportion of simulations that resulted in each choice. We can get that information in numerical form from our `choice_rt` data frame:
+The horizontal axis of a QP plot corresponds to the probability of having made a particular choice. In this case, that is the proportion of simulations that resulted in each choice. We can get that information in numerical form from our `choice_rt` tibble:
 
 ```{r}
 #| code-fold: show
@@ -523,7 +544,7 @@ choice_rt %>%
     reframe(rt_q = quantile(rt, probs = c(0.1, 0.3, 0.5, 0.7, 0.9)))
 ```
 
-To make a QP plot, we need to "join" together the response proportions and RT quantiles into the same data frame:
+To make a QP plot, we need to "join" together the response proportions and RT quantiles into the same tibble:
 
 ```{r}
 #| code-fold: show
@@ -541,7 +562,7 @@ sim_rt_q <- choice_rt %>%
 full_join(sim_choice_p, sim_rt_q)
 ```
 
-That joined data frame can then be used as the basis for our QP plot:
+That joined tibble can then be used as the basis for our QP plot:
 
 ```{r}
 #| code-fold: show

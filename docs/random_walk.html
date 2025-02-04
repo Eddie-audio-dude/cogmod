@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>4&nbsp; Building a random walk model to simulate choice and RT – Computational Cognitive Models</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./r_coding.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./random_walk.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Computational Cognitive Models</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ebrw.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./r_coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Programming with R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./random_walk.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#out-for-a-random-walk" id="toc-out-for-a-random-walk" class="nav-link active" data-scroll-target="#out-for-a-random-walk"><span class="header-section-number">4.1</span> Out for a random walk</a>
+  <ul class="collapse">
+  <li><a href="#key-theoretical-constructs" id="toc-key-theoretical-constructs" class="nav-link" data-scroll-target="#key-theoretical-constructs"><span class="header-section-number">4.1.1</span> Key theoretical constructs</a></li>
+  <li><a href="#representing-the-current-state-of-evidence" id="toc-representing-the-current-state-of-evidence" class="nav-link" data-scroll-target="#representing-the-current-state-of-evidence"><span class="header-section-number">4.1.2</span> Representing the current state of evidence</a></li>
+  <li><a href="#accumulating-evidence" id="toc-accumulating-evidence" class="nav-link" data-scroll-target="#accumulating-evidence"><span class="header-section-number">4.1.3</span> Accumulating evidence</a></li>
+  <li><a href="#what-is-evidence" id="toc-what-is-evidence" class="nav-link" data-scroll-target="#what-is-evidence"><span class="header-section-number">4.1.4</span> What is evidence?</a></li>
+  <li><a href="#doing-some-code" id="toc-doing-some-code" class="nav-link" data-scroll-target="#doing-some-code"><span class="header-section-number">4.1.5</span> Doing some code</a></li>
+  </ul></li>
+  <li><a href="#making-a-decision" id="toc-making-a-decision" class="nav-link" data-scroll-target="#making-a-decision"><span class="header-section-number">4.2</span> Making a decision</a>
+  <ul class="collapse">
+  <li><a href="#response-boundaries" id="toc-response-boundaries" class="nav-link" data-scroll-target="#response-boundaries"><span class="header-section-number">4.2.1</span> Response boundaries</a></li>
+  <li><a href="#response-bias" id="toc-response-bias" class="nav-link" data-scroll-target="#response-bias"><span class="header-section-number">4.2.2</span> Response bias</a></li>
+  <li><a href="#revising-our-function" id="toc-revising-our-function" class="nav-link" data-scroll-target="#revising-our-function"><span class="header-section-number">4.2.3</span> Revising our function</a></li>
+  </ul></li>
+  <li><a href="#residual-time" id="toc-residual-time" class="nav-link" data-scroll-target="#residual-time"><span class="header-section-number">4.3</span> Residual time</a></li>
+  <li><a href="#simulating-many-trials" id="toc-simulating-many-trials" class="nav-link" data-scroll-target="#simulating-many-trials"><span class="header-section-number">4.4</span> Simulating many trials</a>
+  <ul class="collapse">
+  <li><a href="#running-and-saving-many-simulation-results" id="toc-running-and-saving-many-simulation-results" class="nav-link" data-scroll-target="#running-and-saving-many-simulation-results"><span class="header-section-number">4.4.1</span> Running and saving many simulation results</a></li>
+  <li><a href="#visualizing-the-random-walks" id="toc-visualizing-the-random-walks" class="nav-link" data-scroll-target="#visualizing-the-random-walks"><span class="header-section-number">4.4.2</span> Visualizing the random walks</a></li>
+  <li><a href="#joint-distributions-of-choice-and-rt" id="toc-joint-distributions-of-choice-and-rt" class="nav-link" data-scroll-target="#joint-distributions-of-choice-and-rt"><span class="header-section-number">4.4.3</span> Joint distributions of choice and RT</a></li>
+  </ul></li>
+  <li><a href="#putting-it-all-together" id="toc-putting-it-all-together" class="nav-link" data-scroll-target="#putting-it-all-together"><span class="header-section-number">4.5</span> Putting it all together</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">4.6</span> Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/simon_the_donkey.jpeg" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>Simon the Donkey busily accumulating evidence.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>You are in a bind. There are two piles of hay in front of you. They look pretty similar in size. You are hungry. Which of the two piles do you walk toward? I should also mention that you are a donkey, so this is pretty important to you! (The deliberating donkey shown above, Simon, is the resident donkey at <a href="https://www.indianladderfarms.com/">Indian Ladder Farms</a> near Albany, NY.)</p>
+<p>The situation described above is a version of the parable of <a href="https://en.wikipedia.org/wiki/Buridan%27s_ass">Buridan’s ass</a>. In the parable, the unfortunate ass is unable to come to a decision because the two piles of hay are equally large, meaning he has no basis for choosing between them. As a result, the donkey starves to death.</p>
+<p>In this chapter, we will build a model of two-choice behavior that rescues Buridan’s donkey from this dire fate. This model is called a <strong>random walk</strong>. As we will see, this model can be applied to any situation involving a choice between two options. The random walk model instantiates four core constructs that together comprise a theory of how people and other animals decide between two options. It is also a great example of the general structure of a computational cognitive model, in that it describes how an observable action (a choice) arises by applying a process of accumulation to a representation of the balance of evidence between the two options. As we shall see, it will be fairly straightforward to extend the random walk model into a more general form.</p>
+<section id="out-for-a-random-walk" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="out-for-a-random-walk"><span class="header-section-number">4.1</span> Out for a random walk</h2>
+<p>The random walk model is designed to account for two aspects of behavior: <em>choice</em> and <em>response time (RT)</em>. These and similar models are applied in situations where a person (or other organism!) has to decide between a small number of possible alternatives, often just two. Such situations abound in experimental psychology, including lexical decision, recognition memory, detection tasks, search tasks, categorization tasks, etc. The models are designed to help us understand two things:</p>
+<ol type="1">
+<li>Why did a participant make the choices they made?</li>
+<li>Why did it take the participant a certain amount of time to make the choices they made?</li>
+</ol>
+<section id="key-theoretical-constructs" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="key-theoretical-constructs"><span class="header-section-number">4.1.1</span> Key theoretical constructs</h3>
+<p>The vast majority of models of choice and RT, including random walk and diffusion models, address the two questions above by invoking four basic theoretical constructs:</p>
+<p><strong>Evidence accumulation</strong>: Choosing from among a set of options is assumed to require accumulating “evidence” that weighs either in favor of or against each option. This evidence may come from perception (e.g., deciding which of two stimuli is brighter), from memory (e.g., deciding whether an item was or was not on a previously-studied list), or from deliberation (e.g., deciding which of two products to buy). As such, the idea that decisions are made by accumulating evidence helps explain not only which choice was made (it was the option that was most favored by the accumulated evidence) and how long it took to made the choice (the time needed to accumulate sufficient evidence to commit to a decision).</p>
+<p><strong>Response caution</strong>: If decisions are made by accumulating evidence, there must be a policy that terminates the accumulation process, otherwise someone would keep accumulating evidence forever—and this is exactly what Buridan’s ass needs to avoid! The construct of “response caution” refers to the idea that, depending on the situation, a decision maker may adopt a policy of deciding quickly on the basis of very little evidence (low response caution) or deciding slowly by waiting for more evidence to accumulate (high response caution). Thus, this construct is directly related to the idea of <strong>speed-accuracy trade-off</strong>.</p>
+<p><strong>Response bias</strong>: It may be that a decision maker is willing to commit to some options more readily than others; in that case, we say they are “biased” in favor of those responses. Typically, this bias is modeled by assuming lower response caution for some options than others. In other words, a participant may be willing to commit to some decisions on the basis of less accumulated evidence than others.</p>
+<p><strong>Residual time</strong>: The time needed to accumulate sufficient evidence to make a decision is not the only thing that contributes to observed response times. After all, it takes time to realize that a trial of a task has actually begun. It may also take time to retrieve relevant information from memory, to focus attention on relevant features in the environment, or to evaluate a potential outcome. Finally, it takes some time to execute the motor actions associated with the chosen option (e.g., to press a button, move a lever, etc.). The time for all of these additional processes is often called <em>non-decision time</em> (NDT) or <em>encoding and response execution</em> time (<span class="math inline">\(T_{ER}\)</span>). However, I prefer to call it simply “residual time” because that is what it is—it is the time “left over” besides the time needed for evidence accumulation.</p>
+</section>
+<section id="representing-the-current-state-of-evidence" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="representing-the-current-state-of-evidence"><span class="header-section-number">4.1.2</span> Representing the current state of evidence</h3>
+<p>The random walk model assumes that, at any given time, a decision maker represents the current balance of evidence between two options as a number. We will creatively refer to this representation as <span class="math inline">\(x(t)\)</span>, where <span class="math inline">\(x\)</span> stands for evidence and <span class="math inline">\((t)\)</span> stands for the fact that it is the evidence at a specific time <span class="math inline">\(t\)</span>. The sign and magnitude of <span class="math inline">\(x(t)\)</span> represents the extent to which the current value of evidence favors one option over the other.</p>
+<p>If <span class="math inline">\(x(t)\)</span> equals zero, then the evidence at time <span class="math inline">\(t\)</span> does not favor either option. This is akin to the situation when Buridan’s ass first encounters the two piles of hay. If <span class="math inline">\(x(t) &gt; 0\)</span>, then the evidence favors one of the two options. For Buridan’s ass, perhaps positive values of evidence represent evidence in favor of going toward the pile of hay on the right. If <span class="math inline">\(x(t) &lt; 0\)</span>, then the evidence favors the other option. For Buridan’s ass, maybe negative values of evidence represent evidence in favor of going toward the pile of hay on the left. Notice that we could just as easily do it the other way around: positive evidence favors going left while negative evidence favors going right. The important thing is just that the two options are associated with opposite signs of evidence.</p>
+<p>In a cognitive task, the two choices might be “word” and “non-word” in a lexical decision task, “old” and “new” in a recognition memory task, “present” and “absent” in a visual search task, “same” and “different” in a change detection task, “category A” and “category B” in a categorization task, etc. Again, the point is that, at any given time, the degree to which the decision maker’s accumulated evidence at time <span class="math inline">\(t\)</span> favors one option or the other is represented by the value of a number <span class="math inline">\(x(t)\)</span>, with each option associated with opposite signs.</p>
+</section>
+<section id="accumulating-evidence" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="accumulating-evidence"><span class="header-section-number">4.1.3</span> Accumulating evidence</h3>
+<p>The value of <span class="math inline">\(x(t)\)</span> represents the evidence that has been accumulated by time <span class="math inline">\(t\)</span>. But what does it mean to “accumulate” evidence? And what is the “evidence” that is accumulated?</p>
+<p>In a random walk model, we assume that at regular time intervals (each interval has duration <span class="math inline">\(\Delta t\)</span>), the decision maker receives a “sample” of evidence, which we will label <span class="math inline">\(\Delta x(t)\)</span>. This sample can take one of two values, <span class="math inline">\(+1\)</span> or <span class="math inline">\(-1\)</span>. If it is <span class="math inline">\(+1\)</span>, the sample favors the option associated with positive evidence values (e.g., the pile of hay on the right) and if it is <span class="math inline">\(-1\)</span>, the sample favors the option associated with negative evidence values (e.g., the pile of hay on the left). To accumulate evidence means to add the new sample <span class="math inline">\(\Delta x(t)\)</span> to the current value of the accumulated evidence, i.e.: <span class="math display">\[
+\overbrace{x(t + \Delta t)}^{\text{Updated evidence}} = \overbrace{x(t)}^{\text{Current accumulated evidence}} + \overbrace{\Delta x(t)}^{\text{Current sample of evidence}}
+\]</span> Thus, the accumulated evidence <span class="math inline">\(x(t)\)</span> is the sum of all the samples of evidence that were obtained by time <span class="math inline">\(t\)</span>.</p>
+</section>
+<section id="what-is-evidence" class="level3" data-number="4.1.4">
+<h3 data-number="4.1.4" class="anchored" data-anchor-id="what-is-evidence"><span class="header-section-number">4.1.4</span> What is evidence?</h3>
+<p>At this point, it would be reasonable to ask where these samples of evidence come from. There is no single answer to this question because the random walk model, like most of the models of choice and RT we will consider, treats evidence in a very abstract sense. Later in the course, we will encounter models that instantiate specific theories of the “evidence” a decision maker may use in a specific context.</p>
+<p>To return to Buridan’s ass, the evidence might be perceptual in nature: For an interval of time, the donkey looks at both piles of hay. Even though both piles are, by assumption, equally big, that may not always be visually apparent. During any finite interval of time, one pile might happen to look ever so slightly larger than the other, perhaps due to a quirk of the light, a sheaf fluttering in the breeze, the donkey’s visual acuity, etc. If the pile on the right happened to look a bit bigger than the one on the left during one of those intervals, then the sample of evidence for that interval would be <span class="math inline">\(+1\)</span>. Otherwise, it would be <span class="math inline">\(-1\)</span>. Because these minute differences are due to essentially chance factors, and they are equally likely to favor either pile, we can say that the probability of getting a sample that is either <span class="math inline">\(+1\)</span> or <span class="math inline">\(-1\)</span> is <span class="math inline">\(0.5\)</span>. While the evidence might not favor one pile over the other <em>in the long run</em>, it <em>will</em> favor one option over a finite interval of time, which is all any real decision maker has at their disposal. As we shall see shortly, this is the key to saving Buridan’s ass.</p>
+<p>Treating evidence as due, at least in part, to chance factors is why this model is called a “random” walk. It also highlights the fact that the evidence samples need not occur with equal frequency. Perhaps samples come up <span class="math inline">\(+1\)</span> with probability <span class="math inline">\(p\)</span> and otherwise come up <span class="math inline">\(-1\)</span>, like the proverbial biased coin flip. If the evidence consistently favors one option, that means that <span class="math inline">\(p\)</span> is close to either 1 or 0. To the extent that chance factors influence the evidence, <span class="math inline">\(p\)</span> will be closer to <span class="math inline">\(0.5\)</span>. We have now been introduced to the first <strong>parameter</strong> of the random walk model: <span class="math inline">\(p\)</span>, the probability of getting a sample of evidence that favors the option associated with positive evidence.</p>
+<p>The figure below illustrates different ways that evidence might accumulate over time. Each step up or down is driven by the sample of evidence that was obtained at that time, which is assumed to be random with probability <span class="math inline">\(p\)</span>. The figure also illustrates why this model is called a random “walk”, because each trajectory kind of looks like a path that someone might have walked.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">expand_grid</span>(<span class="at">p =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.5</span>, <span class="fl">0.8</span>), <span class="at">sim_index =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">t =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">x_sample =</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">n</span>(), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> p) <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(p, sim_index) <span class="sc">%&gt;%</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">x_accum =</span> <span class="fu">cumsum</span>(x_sample)) <span class="sc">%&gt;%</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x_accum, <span class="at">color =</span> <span class="fu">factor</span>(p), <span class="at">group =</span> <span class="fu">interaction</span>(p, sim_index))) <span class="sc">+</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>(<span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time interval"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>, <span class="at">color =</span> <span class="st">"p"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>What about evidence in cognitive tasks? Buridan’s ass relies on the same kind of sensory evidence as one needs to do, for example, psychophysical tasks like picking which stimulus is brighter, more leftward-oriented, etc. Evidence derived from memory can also be noisy—perhaps when retrieving an event, you sometimes recall the color of an object as blue and sometimes as green. When deciding between different gambles or products, we may also shift attention to different features of those options, leading us to judge them as better or worse depending on which features we attend to <span class="citation" data-cites="BusemeyerTownsend1993 Diederich1997">(<a href="references.html#ref-BusemeyerTownsend1993" role="doc-biblioref">Busemeyer &amp; Townsend, 1993</a>; <a href="references.html#ref-Diederich1997" role="doc-biblioref">Diederich, 1997</a>)</span>.</p>
+</section>
+<section id="doing-some-code" class="level3" data-number="4.1.5">
+<h3 data-number="4.1.5" class="anchored" data-anchor-id="doing-some-code"><span class="header-section-number">4.1.5</span> Doing some code</h3>
+<p>Having now familiarized ourselves with how the random walk model represents a decision maker’s evidence and how it processes that evidence via accumulation, let’s see how we would write that model in code. Specifically, we will be writing code that <em>simulates</em> different possible random walks. The way we will do this is more of an intellectual exercise, since we will not be striving for efficiency (later on, we will use special-purposes R packages for that). Rather, the point here is to see how the conceptual aspects of a model can be implemented in code. We will add on to this code as we go.</p>
+<p>For now, we know that we will have a line that looks something like the accumulation equation above:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> x <span class="sc">+</span> x_sample</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Here, <code>x</code> stands for the value of the accumulated evidence and <code>x_sample</code> stands for the current sample of evidence (which is either <code>1</code> or <code>-1</code>). The <code>&lt;-</code> evaluates the expression on the right and assigns it to the thing on the left, so the code above says “take the current value of <code>x</code>, add the new sample <code>x_sample</code>, and put it back as the new value of <code>x</code>”.</p>
+<p>With the code above as the core of the model, we now need to do three things: first, specify how to get <code>x_sample</code>; second, obtain many such samples; third, keep a record of how the accumulated evidence changes over time.</p>
+<section id="sampling-evidence" class="level4" data-number="4.1.5.1">
+<h4 data-number="4.1.5.1" class="anchored" data-anchor-id="sampling-evidence"><span class="header-section-number">4.1.5.1</span> Sampling evidence</h4>
+<p>To get a value for <code>x_sample</code>, we will use R’s <code>rbinom</code> function, which generates a random sample from a binomial distribution. Specifically, the line <code>rbinom(n = 1, size = 1, prob = 0.5)</code> will generate a sample that equals 1 with probability 0.5, otherwise it equals zero. It is perhaps easiest to think of it in terms of a coin flip: The <code>n</code> parameter of the <code>rbinom</code> function says how many sets of coins to flip, <code>size</code> says how many coins we flip in each set, and <code>prob</code> is the probability that any single flip comes up heads. The number that <code>rbinom</code> gives is the number of heads in a particular set of flips.</p>
+<p>For Buridan’s ass, the sample of evidence favors each pile equally often, so <code>prob = 0.5</code> makes sense. Note that because <code>rbinom</code> returns either a 0 or a 1, we need to do some math to turn the result into <span class="math inline">\(+1\)</span> or <span class="math inline">\(-1\)</span>. This is shown below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>x_sample <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.5</span>) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> x <span class="sc">+</span> x_sample</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="obtaining-many-samples" class="level4" data-number="4.1.5.2">
+<h4 data-number="4.1.5.2" class="anchored" data-anchor-id="obtaining-many-samples"><span class="header-section-number">4.1.5.2</span> Obtaining many samples</h4>
+<p>There are a few ways we can write code that will obtain many samples. To anticipate what we will be doing later, we will use the <code>while</code> control structure. We can use it to specify a condition such that, so long as the condition is met, a block of code will continue to be executed in a loop.</p>
+<p>Our condition will depend on the current time. Remember that, in the random walk, each sample of evidence arrives at fixed intervals of time. We will therefore need to keep track of the current time as well as the accumulated evidence. Similar to how we updated the evidence, we will need to keep track of <code>t</code>, the current time. We will also need to specify <code>dt</code>, the duration of each interval (otherwise known as <span class="math inline">\(\Delta t\)</span>), and <code>t_max</code>, the amount of time to keep accumulating evidence.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>t_max <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>dt <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (t <span class="sc">&lt;</span> t_max) {</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    x_sample <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.5</span>) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> x <span class="sc">+</span> x_sample</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">&lt;-</span> t <span class="sc">+</span> dt</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Notice that we specified values for <code>t_max</code> and <code>dt</code> <em>outside</em> the <code>while</code> loop. We can specify initial values for <code>x</code> and <code>t</code> the same way:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>t_max <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>dt <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (t <span class="sc">&lt;</span> t_max) {</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    x_sample <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.5</span>) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> x <span class="sc">+</span> x_sample</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">&lt;-</span> t <span class="sc">+</span> dt</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="keeping-a-record" class="level4" data-number="4.1.5.3">
+<h4 data-number="4.1.5.3" class="anchored" data-anchor-id="keeping-a-record"><span class="header-section-number">4.1.5.3</span> Keeping a record</h4>
+<p>The chunk of code above will work just fine! But unfortunately it does not leave a record of accumulated evidence over time that we can then examine, like we did with the graph above. In the chunk below, we use a fun trick to keep a record of each value of <code>x</code> and <code>t</code>: We create two vectors <code>x_record</code> and <code>t_record</code> and use the <code>c</code> function to <em>concatenate</em> the current values of <code>x</code> and <code>t</code> to these vectors:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>t_max <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>dt <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>x_record <span class="ot">&lt;-</span> x</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>t_record <span class="ot">&lt;-</span> t</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (t <span class="sc">&lt;</span> t_max) {</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    x_sample <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.5</span>) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> x <span class="sc">+</span> x_sample</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">&lt;-</span> t <span class="sc">+</span> dt</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    x_record <span class="ot">&lt;-</span> <span class="fu">c</span>(x_record, x)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    t_record <span class="ot">&lt;-</span> <span class="fu">c</span>(t_record, t)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="visualizing-the-record" class="level4" data-number="4.1.5.4">
+<h4 data-number="4.1.5.4" class="anchored" data-anchor-id="visualizing-the-record"><span class="header-section-number">4.1.5.4</span> Visualizing the record</h4>
+<p>Now that we are keeping a record of evidence over time, let’s visualize it! The code below uses base R for that purpose, although the graph above uses <code>ggplot2</code> which we will use again later. The <code>type = "s"</code> setting in the <code>plot</code> function at the end give the “step-like” plot.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>t_max <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>dt <span class="ot">&lt;-</span> <span class="fl">0.05</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>x_record <span class="ot">&lt;-</span> x</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>t_record <span class="ot">&lt;-</span> t</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (t <span class="sc">&lt;</span> t_max) {</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    x_sample <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fl">0.5</span>) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> x <span class="sc">+</span> x_sample</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">&lt;-</span> t <span class="sc">+</span> dt</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    x_record <span class="ot">&lt;-</span> <span class="fu">c</span>(x_record, x)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    t_record <span class="ot">&lt;-</span> <span class="fu">c</span>(t_record, t)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(t_record, x_record, <span class="at">type =</span> <span class="st">"s"</span>, <span class="at">xlab =</span> <span class="st">"Time"</span>, <span class="at">ylab =</span> <span class="st">"Accumulated evidence"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Try copy-pasting the code above and running it yourself a few times to see what it looks like!</p>
+</section>
+<section id="making-a-function" class="level4" data-number="4.1.5.5">
+<h4 data-number="4.1.5.5" class="anchored" data-anchor-id="making-a-function"><span class="header-section-number">4.1.5.5</span> Making a function</h4>
+<p>If we have a chunk of code that we want to re-run many times, we would do better to write a <strong>function</strong> that we can call instead of having to re-run the whole chunk. Writing a function also makes it easier to deal with <em>parameters</em> that can have different settings, like <code>dt</code> and <code>t_max</code>. We will also make the probability <span class="math inline">\(p\)</span> a parameter too. Finally, the values for these three parameters in the <code>function</code> line are <em>defaults</em>.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>rw_sim <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">p =</span> <span class="fl">0.5</span>, <span class="at">dt =</span> <span class="fl">0.05</span>, <span class="at">t_max =</span> <span class="dv">5</span>) {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    x_record <span class="ot">&lt;-</span> x</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    t_record <span class="ot">&lt;-</span> t</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> (t <span class="sc">&lt;</span> t_max) {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        x_sample <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> p) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        x <span class="ot">&lt;-</span> x <span class="sc">+</span> x_sample</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        t <span class="ot">&lt;-</span> t <span class="sc">+</span> dt</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        x_record <span class="ot">&lt;-</span> <span class="fu">c</span>(x_record, x)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        t_record <span class="ot">&lt;-</span> <span class="fu">c</span>(t_record, t)</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">tibble</span>(<span class="at">t =</span> t_record, <span class="at">x =</span> x_record))</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now we can call the function <code>rw_sim</code> with different settings to simulate different random walks. Note that, because the function returns <code>t_record</code> and <code>x_record</code> as different columns of a <code>tibble</code>, we can easily use <code>ggplot2</code> to plot the results, as in the examples below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sim_result1 <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.5</span>, <span class="at">dt =</span> <span class="fl">0.05</span>, <span class="at">t_max =</span> <span class="dv">5</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>sim_result1 <span class="sc">%&gt;%</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>() <span class="sc">+</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>, <span class="at">title =</span> <span class="st">"p = 0.5"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>sim_result2 <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.2</span>, <span class="at">dt =</span> <span class="fl">0.05</span>, <span class="at">t_max =</span> <span class="dv">5</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>sim_result2 <span class="sc">%&gt;%</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>() <span class="sc">+</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>, <span class="at">title =</span> <span class="st">"p = 0.2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-10-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>sim_result3 <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.8</span>, <span class="at">dt =</span> <span class="fl">0.05</span>, <span class="at">t_max =</span> <span class="dv">5</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>sim_result3 <span class="sc">%&gt;%</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>() <span class="sc">+</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>, <span class="at">title =</span> <span class="st">"p = 0.8"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-10-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Go ahead, try it out yourself with different values of <code>p</code>, <code>dt</code>, and/or <code>t_max</code>. It’s fun! And if you don’t think the step graphs are too interesting, just imagine that each of those steps is Simon the donkey trying to decide between his two piles of hay.</p>
+</section>
+</section>
+</section>
+<section id="making-a-decision" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="making-a-decision"><span class="header-section-number">4.2</span> Making a decision</h2>
+<p>So far, we have built a simple model of <em>evidence accumulation</em>. In this model, samples of “evidence” arrive at regular intervals, with the sample supporting either one option (<span class="math inline">\(+1\)</span>) or the other (<span class="math inline">\(-1\)</span>) with probability <span class="math inline">\(p\)</span>, and the decision maker accumulates these samples by summation. The resulting accumulated evidence thus starts at zero and takes a “random walk” that can drift upward (if <span class="math inline">\(p &gt; 0.5\)</span>), downward (if <span class="math inline">\(p &lt; 0.5\)</span>), or in no particular direction (if <span class="math inline">\(p = 0.5\)</span>).</p>
+<section id="response-boundaries" class="level3" data-number="4.2.1">
+<h3 data-number="4.2.1" class="anchored" data-anchor-id="response-boundaries"><span class="header-section-number">4.2.1</span> Response boundaries</h3>
+<p>What we have not done is say how the decision maker uses this accumulated evidence to decide between their two options. According to the random walk model, the decision maker sets two values prior to accumulating evidence. These values are called <em>thresholds</em>, <em>criteria</em>, or <em>boundaries</em> (these terms are often used interchangeably). There is one positive boundary and one negative boundary. If and when the accumulated evidence crosses one of these boundaries, the decision maker selects the corresponding option.</p>
+<p>For example, say that Buridan’s ass will pick the pile on the right if his accumulated evidence ever gets greater than <span class="math inline">\(+5\)</span> and he will pick the pile on the left if his accumulated evidence ever gets less than <span class="math inline">\(-5\)</span>. We can visualize this situation by overlaying lines at those two boundaries on the “random walk” of accumulating evidence:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>buridan_sim1 <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.5</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>buridan_sim1 <span class="sc">%&gt;%</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>() <span class="sc">+</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here’s another one:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>buridan_sim2 <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.5</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>buridan_sim2 <span class="sc">%&gt;%</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>() <span class="sc">+</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Go ahead and try it out yourself!</p>
+<p>The point is that we can read from these graphs <em>which</em> option the donkey ends up picking by seeing which boundary gets crossed first. We can also see <em>when</em> the donkey makes his decision based on how long it took for that first boundary-crossing to occur. This is how the random walk model ultimately produces both a choice (which boundary was crossed first) and an RT (how long it took). It is also why the random walk saves Buridan’s ass: Even if the evidence in the long run does not favor either option, <em>by chance</em> the accumulated evidence will at some point cross one of the boundaries, enabling the donkey to make a decision.</p>
+</section>
+<section id="response-bias" class="level3" data-number="4.2.2">
+<h3 data-number="4.2.2" class="anchored" data-anchor-id="response-bias"><span class="header-section-number">4.2.2</span> Response bias</h3>
+<p>In the examples above, Buridan’s ass set his response boundaries to be of equal distance from the initial evidence value of zero. Burdian’s ass might be more willing to go to the leftward pile than the rightward one—maybe it is more aesthetically appealing or the donkey has a limp that makes it easier for him to walk left than right. This would amount to a <em>bias</em> in favor of one option (going left) over the other (going right).</p>
+<p>We can instantiate this bias in the random walk model via the donkey’s response boundaries. For example, the donkey may go to the left if the accumulated evidence ever gets less than <span class="math inline">\(-4\)</span> but would only be willing to go to the right if the accumulated evidence ever gets greater than <span class="math inline">\(+6\)</span>. The following two graphs illustrate these biased response boundaries.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>buridan_bias_sim1 <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.5</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>buridan_bias_sim1 <span class="sc">%&gt;%</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>() <span class="sc">+</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">4</span>, <span class="dv">6</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>, <span class="at">title =</span> <span class="st">"Response bias, simulation 1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>buridan_bias_sim2 <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.5</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>buridan_bias_sim2 <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>() <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">4</span>, <span class="dv">6</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>, <span class="at">title =</span> <span class="st">"Response bias, simulation 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Intuitively, it seems reasonable to expect that, if one boundary is closer to the start than the other, that two things will happen: First, the option associated with the closer boundary will be picked more often (at least if the evidence against that option is not too strong). Second, the decision maker will tend to be faster to pick the option associated with the closer boundary. We will verify these intuitions later, but for now you can rest assured that these intuitions are correct.</p>
+</section>
+<section id="revising-our-function" class="level3" data-number="4.2.3">
+<h3 data-number="4.2.3" class="anchored" data-anchor-id="revising-our-function"><span class="header-section-number">4.2.3</span> Revising our function</h3>
+<p>Now that we have gotten acquainted with the notion of response boundaries and how they can be biased, let’s incorporate them into our random walk simulation function from earlier. This will involve two things: First, we will need to add two parameters to the function, one for each boundary. Second, we will need to change the condition in the <code>while</code> loop so that the random walk <em>stops</em> when it reaches a boundary. As a corrollary to this second step, we will keep the <code>t_max</code> condition but adjust the default value of <code>t_max</code>.</p>
+<p>The revised function is shown below, with some additional explanation following:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>rw_sim <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">p =</span> <span class="fl">0.5</span>, <span class="at">b_upper =</span> <span class="dv">5</span>, <span class="at">b_lower =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">dt =</span> <span class="fl">0.05</span>, <span class="at">t_max =</span> <span class="cn">Inf</span>) {</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    x_record <span class="ot">&lt;-</span> x</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    t_record <span class="ot">&lt;-</span> t</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> (x <span class="sc">&lt;</span> b_upper <span class="sc">&amp;</span> x <span class="sc">&gt;</span> b_lower <span class="sc">&amp;</span> t <span class="sc">&lt;</span> t_max) {</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        x_sample <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> p) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        x <span class="ot">&lt;-</span> x <span class="sc">+</span> x_sample</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        t <span class="ot">&lt;-</span> t <span class="sc">+</span> dt</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        x_record <span class="ot">&lt;-</span> <span class="fu">c</span>(x_record, x)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        t_record <span class="ot">&lt;-</span> <span class="fu">c</span>(t_record, t)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">tibble</span>(<span class="at">t =</span> t_record, <span class="at">x =</span> x_record))</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The key changes we made to the <code>rw_sim</code> function are:</p>
+<ul>
+<li>Adding parameters <code>b_upper</code> and <code>b_lower</code> for the upper and lower response boundaries, respectively.</li>
+<li>Changing the default value of <code>t_max</code> to <code>Inf</code> for “infinity”. This means that, by default, reaching a boundary is the <em>only</em> way the random walk will stop. However, by leaving <code>t_max</code> as a parameter, it means that we can set it to some real number like <code>5</code> or <code>10</code> to force the random walk to stop eventually.</li>
+<li>Changing the condition in the <code>while</code> loop. Now the walk will continue so long as the evidence <code>x</code> is below the upper boundary (<code>x &lt; b_upper</code>) <em>and</em> above the lower boundary (<code>x &gt; b_lower</code>) <em>and</em> so long as the maximum time hasn’t been reached (<code>t &lt; t_max</code>). Note that the <code>&amp;</code> is a “logical <em>and</em>” operator.</li>
+</ul>
+<p>Here are a few simulation runs—try it out yourself!</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>boundary_sim_result1 <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.5</span>, <span class="at">b_upper =</span> <span class="dv">5</span>, <span class="at">b_lower =</span> <span class="sc">-</span><span class="dv">5</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>boundary_sim_result1 <span class="sc">%&gt;%</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>() <span class="sc">+</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>, <span class="at">title =</span> <span class="st">"p = 0.5, b_upper = 5, b_lower = -5"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>boundary_sim_result2 <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.5</span>, <span class="at">b_upper =</span> <span class="dv">6</span>, <span class="at">b_lower =</span> <span class="sc">-</span><span class="dv">4</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>boundary_sim_result2 <span class="sc">%&gt;%</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>() <span class="sc">+</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">4</span>, <span class="dv">6</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>, <span class="at">title =</span> <span class="st">"p = 0.5, b_upper = 6, b_lower = -4"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-16-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>boundary_sim_result3 <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.7</span>, <span class="at">b_upper =</span> <span class="dv">6</span>, <span class="at">b_lower =</span> <span class="sc">-</span><span class="dv">4</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>boundary_sim_result3 <span class="sc">%&gt;%</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>() <span class="sc">+</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">4</span>, <span class="dv">6</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>, <span class="at">title =</span> <span class="st">"p = 0.7, b_upper = 6, b_lower = -4"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-16-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="residual-time" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="residual-time"><span class="header-section-number">4.3</span> Residual time</h2>
+<p>We are nearly done with our simulation model! We can model <em>accumulating evidence</em> and <em>making a decision</em>. The final ingredient arises from the fact that, while a decision maker might select one option at a particular time, we can only observe the behavioral consequences of that decision. Those behavioral consequences might be hitting a key, clicking a button, pressing a lever, or walking toward a pile of hay. Executing that behavior takes time in addition to the time needed to accumulate evidence and reach a response boundary. That additional time goes by many names, often “non-decision time” (NDT) or “encoding and responding” time (<span class="math inline">\(T_{ER}\)</span>), but I prefer to simply call it <strong>residual time</strong>.</p>
+<p>For now, we will adopt a simple assumption that this residual time is constant. Therefore, the observed response time will be the sum of the time needed for the random walk to reach a boundary <em>plus</em> the residual time associated with all the other processes that are involved in taking an action but which our model doesn’t explicitly enumerate.</p>
+<p>To make this concrete, let’s introduce a parameter called <code>t0</code> that will stand for residual time. While I cannot speak to what a plausible value of <code>t0</code> would be for Buridan’s ass, in many cognitive tasks, it tends to be around 0.2 or 0.3 seconds, to account for the time needed to execute a simple motor action like hitting a button.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>rw_sim <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">p =</span> <span class="fl">0.5</span>, <span class="at">b_upper =</span> <span class="dv">5</span>, <span class="at">b_lower =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>, <span class="at">dt =</span> <span class="fl">0.05</span>, <span class="at">t_max =</span> <span class="cn">Inf</span>) {</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    x <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">&lt;-</span> t0</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    x_record <span class="ot">&lt;-</span> x</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    t_record <span class="ot">&lt;-</span> t</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> (x <span class="sc">&lt;</span> b_upper <span class="sc">&amp;</span> x <span class="sc">&gt;</span> b_lower <span class="sc">&amp;</span> t <span class="sc">&lt;</span> t_max) {</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        x_sample <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> p) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        x <span class="ot">&lt;-</span> x <span class="sc">+</span> x_sample</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        t <span class="ot">&lt;-</span> t <span class="sc">+</span> dt</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>        x_record <span class="ot">&lt;-</span> <span class="fu">c</span>(x_record, x)</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>        t_record <span class="ot">&lt;-</span> <span class="fu">c</span>(t_record, t)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">tibble</span>(<span class="at">t =</span> t_record, <span class="at">x =</span> x_record))</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Note that the main change to our <code>rw_sim</code> function is that the initial value for the time <code>t</code> is no longer <code>0</code> but <code>t0</code>, i.e., the value of the residual time parameter.</p>
+</section>
+<section id="simulating-many-trials" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="simulating-many-trials"><span class="header-section-number">4.4</span> Simulating many trials</h2>
+<p>Our <code>rw_sim</code> function can now simulate single realizations of a random walk decision process. As we have seen, though, each realization of this process is different because the samples of evidence are random. If we want to get a sense of the kind of behavior the model tends to produce, we need to simulate many realizations of the decision and examine the <em>distribution</em> of choices and RT’s produced by the model. This is the same reason why, in a typical cognitive task, we collect multiple trials from each participant in each condition. With a real participant, we are limited by the time and energy that a participant is willing to commit. With a model, we are still limited by time and energy, but they are <em>our</em> time and the <em>computer’s</em> energy. Nonetheless, it is worth keeping in mind that all the techniques below for visualizing choices and RT’s apply to observed data as well as they apply to simulated data.</p>
+<section id="running-and-saving-many-simulation-results" class="level3" data-number="4.4.1">
+<h3 data-number="4.4.1" class="anchored" data-anchor-id="running-and-saving-many-simulation-results"><span class="header-section-number">4.4.1</span> Running and saving many simulation results</h3>
+<p>We will need to write some code that repeatedly calls our <code>rw_sim</code> function a large number of times and saves the results so we can examine them later. What follows is not necessarily the most efficient way of accomplishing those goals, but it is conceptually transparent and introduces the <code>for</code> loop. The comments (following the <code>#</code> marks) explain what is going on with the line below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify the number of simulations to run</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="co"># This is initially empty, but will eventually save all our random walk simulations</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>sim_results <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="co"># The for loop increments a counter (called "i" here) over a specified range (from 1 up to n_sims)</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims) {</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Simulate a single realization of the random walk with the given parameters</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    current_result <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.5</span>, <span class="at">b_upper =</span> <span class="dv">5</span>, <span class="at">b_lower =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>, <span class="at">dt =</span> <span class="fl">0.05</span>)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># "Bind" the current simulation to the ongoing record of simulation results</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    sim_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>        sim_results,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add a new column that identifies which simulation this was</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>        current_result <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">sim_index =</span> i)</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Get a quick sense of what the results look like</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(sim_results)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 25,884
+Columns: 3
+$ t         &lt;dbl&gt; 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, …
+$ x         &lt;dbl&gt; 0, -1, -2, -3, -2, -3, -4, -3, -2, -3, -4, -3, -4, -3, -2, -…
+$ sim_index &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, …</code></pre>
+</div>
+</div>
+</section>
+<section id="visualizing-the-random-walks" class="level3" data-number="4.4.2">
+<h3 data-number="4.4.2" class="anchored" data-anchor-id="visualizing-the-random-walks"><span class="header-section-number">4.4.2</span> Visualizing the random walks</h3>
+<p>What we are about to do may be a bit silly but helps build some intuitions about what is going on in the model. We are going to make a plot that overlays all 1000 simulated random walks on top of each other. The point is to get a sense of how much variability there is from one realization to the next.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>sim_results <span class="sc">%&gt;%</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x, <span class="at">group =</span> sim_index)) <span class="sc">+</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_step</span>(<span class="at">alpha =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Okay, maybe it is a bit silly after all. But it is possible to see that things “thin out” at longer times as more and more random walks end by hitting a boundary. If you check out the code that generates the plot, note how <code>group = sim_index</code> was used to make sure each individual simulation, indexed by <code>sim_index</code>, got its own step-line on the graph. Also note the use of <code>alpha = 0.1</code> to make each line semi-transparent so they could be overlayed on one another.</p>
+<p>Let’s try a different approach to visualize the same thing, using a heatmap that indicates the relative frequency with which the accumulated evidence takes different values at different times:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>sim_results <span class="sc">%&gt;%</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_density2d_filled</span>() <span class="sc">+</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>, <span class="at">fill =</span> <span class="st">"Relative frequency"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Again, what is important to see above is that all the random walks start at the same time and evidence value (the yellow region) and then “fan out” over time.</p>
+</section>
+<section id="joint-distributions-of-choice-and-rt" class="level3" data-number="4.4.3">
+<h3 data-number="4.4.3" class="anchored" data-anchor-id="joint-distributions-of-choice-and-rt"><span class="header-section-number">4.4.3</span> Joint distributions of choice and RT</h3>
+<p>What we visualized in the previous section are the <em>internal states</em> of the model, that is, how the model represents the decision maker’s current balance of evidence between their two options. Remember, though, that the model is ultimately judged on its <em>externally-observable behavior</em>, since that is all we have to compare it against. We are finally going to visualize the choices and response times produced by the model. As we shall see, however, there are a few ways to do this!</p>
+<section id="extracting-choices-and-rts" class="level4" data-number="4.4.3.1">
+<h4 data-number="4.4.3.1" class="anchored" data-anchor-id="extracting-choices-and-rts"><span class="header-section-number">4.4.3.1</span> Extracting choices and RT’s</h4>
+<p>For each simulation, the RT is the final value of <code>t</code>, since that is the time (plus residual time) at which the first boundary was crossed. Meanwhile, the choice is whether the evidence <code>x</code> is positive or negative. The chunk of code below takes our simulation results and extracts the final choices and RT from each simulation.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>choice_rt <span class="ot">&lt;-</span> sim_results <span class="sc">%&gt;%</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sim_index) <span class="sc">%&gt;%</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">choice =</span> <span class="fu">factor</span>(<span class="fu">last</span>(x) <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="at">levels =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"upper"</span>, <span class="st">"lower"</span>)),</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">rt =</span> <span class="fu">last</span>(t)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(choice_rt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 1,000
+Columns: 3
+$ sim_index &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 1…
+$ choice    &lt;fct&gt; lower, lower, lower, upper, upper, lower, upper, lower, uppe…
+$ rt        &lt;dbl&gt; 1.05, 2.35, 0.95, 0.75, 0.55, 2.45, 1.15, 0.45, 1.35, 3.25, …</code></pre>
+</div>
+</div>
+</section>
+<section id="joint-frequency-plot" class="level4" data-number="4.4.3.2">
+<h4 data-number="4.4.3.2" class="anchored" data-anchor-id="joint-frequency-plot"><span class="header-section-number">4.4.3.2</span> Joint frequency plot</h4>
+<p>The code below plots the frequency with which each choice (upper or lower) is made at different times. This kind of plot is not terribly common, but is a quick way to get a sense of both how often each choice is made as well as the shape of the distributions of RT’s.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>choice_rt <span class="sc">%&gt;%</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> rt, <span class="at">color =</span> choice)) <span class="sc">+</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_freqpoly</span>(<span class="at">binwidth =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Response time"</span>, <span class="at">y =</span> <span class="st">"Frequency"</span>, <span class="at">color =</span> <span class="st">"Choice"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="conditional-rt-density" class="level4" data-number="4.4.3.3">
+<h4 data-number="4.4.3.3" class="anchored" data-anchor-id="conditional-rt-density"><span class="header-section-number">4.4.3.3</span> Conditional RT density</h4>
+<p>The code below plots the <em>conditional</em> density of the RT’s for each choice. This kind of plot is much more common, but doesn’t convey any information about the relative frequency with which different choices are made. Nonetheless, it illustrates how the random walk produces distributions of RT’s with a pronounced right skew, similar to RT distributions that are actually observed in choice tasks. Note that the conditional RT distributions for each choice are pretty similar to one another too.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>choice_rt <span class="sc">%&gt;%</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> rt, <span class="at">color =</span> choice)) <span class="sc">+</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_density</span>() <span class="sc">+</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Response time"</span>, <span class="at">y =</span> <span class="st">"Frequency"</span>, <span class="at">color =</span> <span class="st">"Choice"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="quantile-probability-plots" class="level4" data-number="4.4.3.4">
+<h4 data-number="4.4.3.4" class="anchored" data-anchor-id="quantile-probability-plots"><span class="header-section-number">4.4.3.4</span> Quantile-probability plots</h4>
+<p>In the choice-RT modeling world, it is common to make “quantile-probability plots”, sometimes abbreviated to QP plots. These plots can be a bit confusing at first, but are useful because they convey information about choice proportions and RT distributions in a single graph.</p>
+<p>The horizontal axis of a QP plot corresponds to the probability of having made a particular choice. In this case, that is the proportion of simulations that resulted in each choice. We can get that information in numerical form from our <code>choice_rt</code> tibble:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>choice_rt <span class="sc">%&gt;%</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(choice) <span class="sc">%&gt;%</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">count</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">p_resp =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 3
+  choice     n p_resp
+  &lt;fct&gt;  &lt;int&gt;  &lt;dbl&gt;
+1 upper    507  0.507
+2 lower    493  0.493</code></pre>
+</div>
+</div>
+<p>The vertical axis of a QP plot corresponds to different quantiles of the conditional RT distributions for each choice. Typically, those quantiles are the RT’s at the 10th, 30th, 50th, 70th, and 90th percentiles of the distribution. The reason for all of these quantiles is that they convey information about different aspects of the distribution: The 50th percentile, otherwise known as the <em>median</em>, conveys the central tendency. The 30th and 70th percentiles indicate where the “bulk” of the RT’s tend to fall. Finally, the 10th and 90th percentiles convey information about the lower and upper tails of the distribution, respectively. We can obtain those quantiles numerically like so:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>choice_rt <span class="sc">%&gt;%</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(choice) <span class="sc">%&gt;%</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">reframe</span>(<span class="at">rt_q =</span> <span class="fu">quantile</span>(rt, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 2
+   choice  rt_q
+   &lt;fct&gt;  &lt;dbl&gt;
+ 1 upper   0.55
+ 2 upper   0.75
+ 3 upper   1.05
+ 4 upper   1.55
+ 5 upper   2.65
+ 6 lower   0.55
+ 7 lower   0.85
+ 8 lower   1.25
+ 9 lower   1.75
+10 lower   2.75</code></pre>
+</div>
+</div>
+<p>To make a QP plot, we need to “join” together the response proportions and RT quantiles into the same tibble:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>sim_choice_p <span class="ot">&lt;-</span> choice_rt <span class="sc">%&gt;%</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(choice) <span class="sc">%&gt;%</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">count</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">p_resp =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n))</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>sim_rt_q <span class="ot">&lt;-</span> choice_rt <span class="sc">%&gt;%</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(choice) <span class="sc">%&gt;%</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">reframe</span>(<span class="at">rt_q =</span> <span class="fu">quantile</span>(rt, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span>)))</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="fu">full_join</span>(sim_choice_p, sim_rt_q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(choice)`</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 4
+   choice     n p_resp  rt_q
+   &lt;fct&gt;  &lt;int&gt;  &lt;dbl&gt; &lt;dbl&gt;
+ 1 upper    507  0.507  0.55
+ 2 upper    507  0.507  0.75
+ 3 upper    507  0.507  1.05
+ 4 upper    507  0.507  1.55
+ 5 upper    507  0.507  2.65
+ 6 lower    493  0.493  0.55
+ 7 lower    493  0.493  0.85
+ 8 lower    493  0.493  1.25
+ 9 lower    493  0.493  1.75
+10 lower    493  0.493  2.75</code></pre>
+</div>
+</div>
+<p>That joined tibble can then be used as the basis for our QP plot:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">full_join</span>(sim_choice_p, sim_rt_q) <span class="sc">%&gt;%</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> p_resp, <span class="at">y =</span> rt_q, <span class="at">color =</span> choice)) <span class="sc">+</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Response proportion"</span>, <span class="at">y =</span> <span class="st">"RT Quantile"</span>, <span class="at">title =</span> <span class="st">"Quantile-Probability Plot"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(choice)`</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="random_walk_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="putting-it-all-together" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="putting-it-all-together"><span class="header-section-number">4.5</span> Putting it all together</h2>
+<p>We have used R to build a random walk model of decision making, implemented via a function called <code>rw_sim</code>, that accumulates samples of evidence until the accumulated evidence reaches either an upper or lower boundary. This model depends on several parameters, of which the most theoretically important are:</p>
+<ul>
+<li><code>p</code>: The probability that any given sample of evidence favors the option associated with the upper response boundary.</li>
+<li><code>b_upper</code>: The upper response boundary.</li>
+<li><code>b_lower</code>: The lower response boundary.</li>
+<li><code>t0</code>: Residual time.</li>
+</ul>
+<p>We also saw different ways that we can visualize both the internal states and external behavior of the model. It may be useful at this point to put together everything we have done so far into a single chunk of code. This will make your own explorations of this model easier.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify the number of simulations to run</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="co"># This is initially empty, but will eventually save all our random walk simulations</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>sim_results <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a><span class="co"># The for loop increments a counter (called "i" here) over a specified range (from 1 up to n_sims)</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims) {</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Simulate a single realization of the random walk with the given parameters</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>    current_result <span class="ot">&lt;-</span> <span class="fu">rw_sim</span>(<span class="at">p =</span> <span class="fl">0.5</span>, <span class="at">b_upper =</span> <span class="dv">5</span>, <span class="at">b_lower =</span> <span class="sc">-</span><span class="dv">5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>, <span class="at">dt =</span> <span class="fl">0.05</span>)</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># "Bind" the current simulation to the ongoing record of simulation results</span></span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>    sim_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a>        sim_results,</span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add a new column that identifies which simulation this was</span></span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>        current_result <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">sim_index =</span> i)</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the internal states of the model</span></span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>sim_results <span class="sc">%&gt;%</span></span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> x)) <span class="sc">+</span></span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_density2d_filled</span>() <span class="sc">+</span></span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Accumulated evidence"</span>, <span class="at">fill =</span> <span class="st">"Relative frequency"</span>, <span class="at">title =</span> <span class="st">"Internal evidence states over time"</span>)</span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract simulated choices and RT's</span></span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a>choice_rt <span class="ot">&lt;-</span> sim_results <span class="sc">%&gt;%</span></span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sim_index) <span class="sc">%&gt;%</span></span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(</span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a>        <span class="at">choice =</span> <span class="fu">factor</span>(<span class="fu">last</span>(x) <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="at">levels =</span> <span class="fu">c</span>(<span class="cn">TRUE</span>, <span class="cn">FALSE</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"upper"</span>, <span class="st">"lower"</span>)),</span>
+<span id="cb38-31"><a href="#cb38-31" aria-hidden="true" tabindex="-1"></a>        <span class="at">rt =</span> <span class="fu">last</span>(t)</span>
+<span id="cb38-32"><a href="#cb38-32" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb38-33"><a href="#cb38-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-34"><a href="#cb38-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot conditional RT distributions</span></span>
+<span id="cb38-35"><a href="#cb38-35" aria-hidden="true" tabindex="-1"></a>choice_rt <span class="sc">%&gt;%</span></span>
+<span id="cb38-36"><a href="#cb38-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> rt, <span class="at">color =</span> choice)) <span class="sc">+</span></span>
+<span id="cb38-37"><a href="#cb38-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_density</span>() <span class="sc">+</span></span>
+<span id="cb38-38"><a href="#cb38-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Response time"</span>, <span class="at">y =</span> <span class="st">"Frequency"</span>, <span class="at">color =</span> <span class="st">"Choice"</span>, <span class="at">title =</span> <span class="st">"Conditional RT distributions"</span>)</span>
+<span id="cb38-39"><a href="#cb38-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-40"><a href="#cb38-40" aria-hidden="true" tabindex="-1"></a><span class="co"># Quantile-probability plot</span></span>
+<span id="cb38-41"><a href="#cb38-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-42"><a href="#cb38-42" aria-hidden="true" tabindex="-1"></a>sim_choice_p <span class="ot">&lt;-</span> choice_rt <span class="sc">%&gt;%</span></span>
+<span id="cb38-43"><a href="#cb38-43" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(choice) <span class="sc">%&gt;%</span></span>
+<span id="cb38-44"><a href="#cb38-44" aria-hidden="true" tabindex="-1"></a>    <span class="fu">count</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb38-45"><a href="#cb38-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ungroup</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb38-46"><a href="#cb38-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">p_resp =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n))</span>
+<span id="cb38-47"><a href="#cb38-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-48"><a href="#cb38-48" aria-hidden="true" tabindex="-1"></a>sim_rt_q <span class="ot">&lt;-</span> choice_rt <span class="sc">%&gt;%</span></span>
+<span id="cb38-49"><a href="#cb38-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(choice) <span class="sc">%&gt;%</span></span>
+<span id="cb38-50"><a href="#cb38-50" aria-hidden="true" tabindex="-1"></a>    <span class="fu">reframe</span>(<span class="at">rt_q =</span> <span class="fu">quantile</span>(rt, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.3</span>, <span class="fl">0.5</span>, <span class="fl">0.7</span>, <span class="fl">0.9</span>)))</span>
+<span id="cb38-51"><a href="#cb38-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-52"><a href="#cb38-52" aria-hidden="true" tabindex="-1"></a><span class="fu">full_join</span>(sim_choice_p, sim_rt_q) <span class="sc">%&gt;%</span></span>
+<span id="cb38-53"><a href="#cb38-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> p_resp, <span class="at">y =</span> rt_q, <span class="at">color =</span> choice)) <span class="sc">+</span></span>
+<span id="cb38-54"><a href="#cb38-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb38-55"><a href="#cb38-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb38-56"><a href="#cb38-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Response proportion"</span>, <span class="at">y =</span> <span class="st">"RT Quantile"</span>, <span class="at">title =</span> <span class="st">"Quantile-Probability Plot"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="exercises" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="exercises"><span class="header-section-number">4.6</span> Exercises</h2>
+<ol type="1">
+<li>Set the <code>p</code> parameter to something other than 0.5, so that the evidence tends to favor one option over the other. Do one set of simulations in which the response boundaries are equidistant from the starting value of 0 (you may need to play around to find values that you like). Do another set of simulations in which you keep the boundaries equidistant but make them closer to the starting point. What is the effect on the model’s choices and RT’s of having boundaries that are closer to the starting point?</li>
+<li>Run one set of simulations with the <code>p</code> parameter to 0.6 and the response boundaries equidistant from the starting point. Run another set of simulations keeping the response boundaries the same but increasing the <code>p</code> parameter to 0.8. What is the effect of increasing the <code>p</code> parameter on the RT distributions for making the “upper” choice? What is the effect of increasing the <code>p</code> parameter on the RT distributions for making the “lower” choice?</li>
+<li>Imagine that, instead of each sample of evidence equalling either <span class="math inline">\(+1\)</span> or <span class="math inline">\(-1\)</span>, the evidence could also equal <span class="math inline">\(0\)</span>. Write code to simulate this model and use your simulations to see how this model might differ from the random walk model we developed in this chapter.
+<ol type="a">
+<li>You will need to introduce a new parameter to the model that represents the probability of getting a sample that equals zero. What ways can you think of to implement this aspect of the model? Which method did you pick and why?</li>
+<li>How does the shape of the predicted RT distributions differ, if at all, from that predicted by the original random walk model? (Hint: you may want to explore settings in which there is zero probability of taking a step either up or down. It may also help to visualize the random walks themselves too.)</li>
+<li>What cognitive tasks might be better modeled by allowing for evidence to have a value of zero?</li>
+</ol></li>
+<li>Try implementing a model in which the residual time can vary randomly according to some distribution. Since residual time must be non-negative, you might consider distributions like the Gamma distribution or a uniform distribution between two positive values.
+<ol type="a">
+<li>How did you implement random residual times?</li>
+<li>How does random residual time affect the shape of the predicted RT distributions?</li>
+<li>What psychological factors might contribute to variability in residual time?</li>
+</ol></li>
+</ol>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-BusemeyerTownsend1993" class="csl-entry" role="listitem">
+Busemeyer, J. R., &amp; Townsend, J. T. (1993). Decision field theory: A dynamic–cognitive approach to decision making in an uncertain environment. <em>Psychological Review</em>, <em>100</em>(3), 432–459.
+</div>
+<div id="ref-Diederich1997" class="csl-entry" role="listitem">
+Diederich, A. (1997). Dynamic stochastic models for decision making under time constraints. <em>Journal of Mathematical Psychology</em>, <em>41</em>(3), 260–274. <a href="https://doi.org/10.1006/jmps.1997.1167">https://doi.org/10.1006/jmps.1997.1167</a>
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./r_coding.html" class="pagination-link" aria-label="Programming with R">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Programming with R</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
