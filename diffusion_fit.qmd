@@ -386,6 +386,10 @@ Continuing with the recognition memory example, imagine that we wanted to addres
 
 To address that question, we can fit one version of a diffusion model that uses the `drift_index` vector to estimate separate drift rates for targets and foils, like we just did.  We can then fit another version that does *not* include `drift_index`, so that it estimates a single drift rate for all trials.  The second model would correspond to the hypothesis that the participant cannot distinguish between targets and foils, because they get the same quality of evidence from their memory either way.  By comparing how well those two models account for the data, taking into account the fact that the one-drift-rate model is less complex, then we can get evidence to help us address our question.
 
+Later in the course, we will delve more deeply into the issue of model comparison.  For now, we will just introduce the basic idea of "scoring" a model based on (a) how well it fits data; and (b) how complex the model is.  As noted below, a more complex model will, in general, be able to fit a wider variety of data.  Thus, we should only favor a more complex model to the extent that it fits data better than would be expected based on its complexity.  As we will discuss later in the course, there are other reasons why we should be reticent to favor more complex models, but these reasons can sometimes be hard to quantify.  Thus, for now, we introduce some simple quantitative methods by which models can be compared while still accounting for their complexity.
+
+### Information criteria
+
 In the previous section, we already fit the two-drift-rate model.  Now let's fit the one-drift-rate version:
 
 ```{r}
@@ -393,8 +397,6 @@ In the previous section, we already fit the two-drift-rate model.  Now let's fit
 
 (recog_fit_onedrift <- fit_wienr(rt = all_trials$rt, response = all_trials$response))
 ```
-
-### Information criteria
 
 To compare the fit of the two models, we have a number of techniques at our disposal, but one of the most common is to use an **information criterion**.  These values essentially "score" a model, with higher scores being worse (like golf).  The score takes into account how well the model fits the data as well as how complex the model is.  Taking into account complexity is critical because, generally speaking, a more complex model will be able to fit data better, so it needs to be "handicapped" to account for this advantage (again, sort of like golf).  The information criteria we will use here measure a model's complexity in terms of the number of free parameters it has.
 
@@ -442,174 +444,174 @@ Once again, the two-drift model gets the lower---and therefore better---score.
 
 The "Manual parameter fitting" tab of the [Shiny app from the previous chapter](https://raw.githubusercontent.com/gregcox7/choice_rt_models/refs/heads/main/diffusion_shiny_app.r) allows you to try searching for optimal parameters yourself.  You will find how difficult it is to do by hand!  There is also a "Parameter recovery" tab that replicates what we did in this chapter, namely, using the diffusion model to simulate data and then fitting the diffusion model to the simulated data.  Finally, note that the App allows you to play around with other parameters, like the trial-by-trial variability parameters, that we did not use in this chapter.
 
-```{r}
-#| code-fold: show
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
 
-download.file("https://github.com/gregcox7/choice_rt_models/raw/refs/heads/main/data/blast_data.rdata", "blast_data.rdata")
-load("blast_data.rdata")
-```
+<!-- download.file("https://github.com/gregcox7/choice_rt_models/raw/refs/heads/main/data/blast_data.rdata", "blast_data.rdata") -->
+<!-- load("blast_data.rdata") -->
+<!-- ``` -->
 
-```{r}
-#| code-fold: show
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
 
-glimpse(blast_data)
-```
+<!-- glimpse(blast_data) -->
+<!-- ``` -->
 
-```{r}
-#| code-fold: show
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
 
-blast_data_cond <- blast_data %>%
-    filter(group == "Inexperienced", subject == "M003", blockType == "Accuracy")
-```
+<!-- blast_data_cond <- blast_data %>% -->
+<!--     filter(group == "Inexperienced", subject == "M003", blockType == "Accuracy") -->
+<!-- ``` -->
 
-```{r eval = FALSE}
-#| code-fold: show
+<!-- ```{r eval = FALSE} -->
+<!-- #| code-fold: show -->
 
-fit_model_nosv <- fit_wienr(rt = blast_data_cond$rt, response = (blast_data_cond$response == "Blast") + 1, fit_sv = F, fit_sw = F, fit_st0 = F, optim_control = list(trace = 1))
+<!-- fit_model_nosv <- fit_wienr(rt = blast_data_cond$rt, response = (blast_data_cond$response == "Blast") + 1, fit_sv = F, fit_sw = F, fit_st0 = F, optim_control = list(trace = 1)) -->
 
-fit_model_wsv <- fit_wienr(rt = blast_data_cond$rt, response = (blast_data_cond$response == "Blast") + 1, fit_sv = T, fit_sw = F, fit_st0 = F, optim_control = list(trace = 1))
-```
+<!-- fit_model_wsv <- fit_wienr(rt = blast_data_cond$rt, response = (blast_data_cond$response == "Blast") + 1, fit_sv = T, fit_sw = F, fit_st0 = F, optim_control = list(trace = 1)) -->
+<!-- ``` -->
 
-```{r eval = FALSE}
-#| code-fold: show
+<!-- ```{r eval = FALSE} -->
+<!-- #| code-fold: show -->
 
-to_fit <- expand_grid(fit_sv = c(TRUE, FALSE), fit_sw = c(TRUE, FALSE), fit_st0 = c(TRUE, FALSE)) %>%
-    mutate(nll = NA, np = NA)
+<!-- to_fit <- expand_grid(fit_sv = c(TRUE, FALSE), fit_sw = c(TRUE, FALSE), fit_st0 = c(TRUE, FALSE)) %>% -->
+<!--     mutate(nll = NA, np = NA) -->
 
-fits <- list()
+<!-- fits <- list() -->
 
-for (i in 1:nrow(to_fit)) {
-    fits[[i]] <- fit_wienr(rt = blast_data_cond$rt, response = (blast_data_cond$response == "Blast") + 1, fit_sv = to_fit$fit_sv[i], fit_sw = to_fit$fit_sw[i], fit_st0 = to_fit$fit_st0[i], optim_control = list(trace = 1))
-    
-    to_fit$nll[i] <- fits[[i]]$value
-    to_fit$np[i] <- length(fits[[i]]$par)
-    to_fit$nobs[i] <- nrow(blast_data_cond)
-}
+<!-- for (i in 1:nrow(to_fit)) { -->
+<!--     fits[[i]] <- fit_wienr(rt = blast_data_cond$rt, response = (blast_data_cond$response == "Blast") + 1, fit_sv = to_fit$fit_sv[i], fit_sw = to_fit$fit_sw[i], fit_st0 = to_fit$fit_st0[i], optim_control = list(trace = 1)) -->
 
-to_fit %>%
-    mutate(nobs = nrow(blast_data_cond)) %>%
-    mutate(aic = 2 * nll + 2 * np, bic = 2 * nll + log(nobs) * np) %>%
-    mutate(daic = exp(-0.5 * (aic - min(aic))), dbic = exp(-0.5 * (bic - min(bic)))) %>%
-    mutate(waic = daic / sum(daic), wbic = dbic / sum(dbic))
-```
+<!--     to_fit$nll[i] <- fits[[i]]$value -->
+<!--     to_fit$np[i] <- length(fits[[i]]$par) -->
+<!--     to_fit$nobs[i] <- nrow(blast_data_cond) -->
+<!-- } -->
 
-```{r eval = FALSE}
-library(modelr)
+<!-- to_fit %>% -->
+<!--     mutate(nobs = nrow(blast_data_cond)) %>% -->
+<!--     mutate(aic = 2 * nll + 2 * np, bic = 2 * nll + log(nobs) * np) %>% -->
+<!--     mutate(daic = exp(-0.5 * (aic - min(aic))), dbic = exp(-0.5 * (bic - min(bic)))) %>% -->
+<!--     mutate(waic = daic / sum(daic), wbic = dbic / sum(dbic)) -->
+<!-- ``` -->
 
-to_fit <- blast_data %>%
-    data_grid(nesting(group, subject), blockType)
+<!-- ```{r eval = FALSE} -->
+<!-- library(modelr) -->
 
-model_pars <- c()
-model_pred <- c()
+<!-- to_fit <- blast_data %>% -->
+<!--     data_grid(nesting(group, subject), blockType) -->
 
-pb <- txtProgressBar(min = 0, max = nrow(to_fit), initial = 0, style = 3)
+<!-- model_pars <- c() -->
+<!-- model_pred <- c() -->
 
-for (fit_index in 1:nrow(to_fit)) {
-    this_subj_data <- semi_join(blast_data, to_fit[fit_index,]) %>%
-        mutate(
-            drift_index = as.numeric(interaction(difficulty, correct_response))
-        )
-    
-    this_fit_init <- fit_wienr(
-        rt = this_subj_data$rt,
-        response = (this_subj_data$response == "Blast") + 1,
-        fit_sv = F,
-        fit_sw = F,
-        fit_st0 = F,
-        optim_control = list(trace = 1),
-        drift_index = this_subj_data$drift_index
-    )
-    
-    this_fit <- fit_wienr(
-        rt = this_subj_data$rt,
-        response = (this_subj_data$response == "Blast") + 1,
-        fit_sv = TRUE,
-        fit_sw = F,
-        fit_st0 = TRUE,
-        init_par = this_fit_init$par,
-        optim_control = list(trace = 1),
-        drift_index = this_subj_data$drift_index
-    )
-    
-    this_ddm_pars <- coef(this_ddm_fit, dpar = "full")
-    
-    ddm_pars <- rbind(
-        ddm_pars,
-        cbind(to_fit[fit_index,], tibble(par_name = names(this_ddm_pars), val = this_ddm_pars) %>% extract(par_name, into = c("coef", "dpar"), regex = "(.+) \\((.+)\\)"))
-    )
-    
-    this_pred_pars <- this_subj_data %>%
-        mutate(rownum = 1:nrow(this_subj_data)) %>%
-        group_by(blockType, difficulty, correct_response) %>%
-        summarize(n = n(), i = first(rownum), .groups = "keep") %>%
-        mutate(a = c(this_ddm_fit$mmatrix$boundary[i,] %*% as.matrix(this_ddm_fit$coefficients$boundary))) %>%
-        mutate(v = c(this_ddm_fit$mmatrix$drift[i,] %*% as.matrix(this_ddm_fit$coefficients$drift))) %>%
-        mutate(t0 = c(this_ddm_fit$mmatrix$ndt[i,] %*% as.matrix(this_ddm_fit$coefficients$ndt))) %>%
-        mutate(bias = c(this_ddm_fit$mmatrix$bias[i,] %*% as.matrix(this_ddm_fit$coefficients$bias))) %>%
-        mutate(sv = c(this_ddm_fit$mmatrix$sv[i,] %*% as.matrix(this_ddm_fit$coefficients$sv))) %>%
-        # mutate(sv = 0) %>%
-        mutate(z = bias * a)
-    
-    this_pred_data <- c()
-    
-    for (i in 1:nrow(this_pred_pars)) {
-        p_resp_upper <- pdiffusion(rt = 5, response = "upper", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], maxt = 5)
-        p_resp_lower <- pdiffusion(rt = 5, response = "lower", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], maxt = 5)
-        
-        upper_q <- qdiffusion(p = rt_quantiles, response = "upper", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], scale_p = TRUE, maxt = 5, interval = c(0, 5))
-        lower_q <- qdiffusion(p = rt_quantiles, response = "lower", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], scale_p = TRUE, maxt = 5, interval = c(0, 5))
-        
-        this_pred_data <- rbind(
-            this_pred_data,
-            cbind(this_pred_pars[i,], tibble(response = "Blast", p_resp = p_resp_upper / (p_resp_upper + p_resp_lower), rt_p = rt_quantiles, rt_q = upper_q)),
-            cbind(this_pred_pars[i,], tibble(response = "Non-blast", p_resp = p_resp_lower / (p_resp_upper + p_resp_lower), rt_p = rt_quantiles, rt_q = lower_q))
-        )
-    }
-    
-    ddm_pred <- rbind(
-        ddm_pred,
-        cbind(to_fit[fit_index,], this_pred_data)
-    )
-    
-    setTxtProgressBar(pb, fit_index)
-}
+<!-- pb <- txtProgressBar(min = 0, max = nrow(to_fit), initial = 0, style = 3) -->
 
-close(pb)
+<!-- for (fit_index in 1:nrow(to_fit)) { -->
+<!--     this_subj_data <- semi_join(blast_data, to_fit[fit_index,]) %>% -->
+<!--         mutate( -->
+<!--             drift_index = as.numeric(interaction(difficulty, correct_response)) -->
+<!--         ) -->
 
-ddm_pars %>%
-    ggplot(aes(x = coef, y = val, color = group, shape = group)) +
-    geom_point(position = position_jitterdodge(jitter.width = 0.1, dodge.width = 0.4), alpha = 0.5, size = 0.5) +
-    stat_summary(geom = "pointrange", fun.data = mean_cl_boot, position = position_dodge(width = 0.4)) +
-    facet_wrap("dpar", scales = "free")
+<!--     this_fit_init <- fit_wienr( -->
+<!--         rt = this_subj_data$rt, -->
+<!--         response = (this_subj_data$response == "Blast") + 1, -->
+<!--         fit_sv = F, -->
+<!--         fit_sw = F, -->
+<!--         fit_st0 = F, -->
+<!--         optim_control = list(trace = 1), -->
+<!--         drift_index = this_subj_data$drift_index -->
+<!--     ) -->
 
-obs_rt_quantiles <- blast_data %>%
-    group_by(group, subject, blockType, difficulty, correct_response, response) %>%
-    reframe(rt_q = quantile(rt, probs = rt_quantiles)) %>%
-    mutate(rt_p = rep(rt_quantiles, n() / length(rt_quantiles))) %>%
-    complete(nesting(group, subject), blockType, difficulty, correct_response, response, rt_p, fill = list(rt_q = NA))
+<!--     this_fit <- fit_wienr( -->
+<!--         rt = this_subj_data$rt, -->
+<!--         response = (this_subj_data$response == "Blast") + 1, -->
+<!--         fit_sv = TRUE, -->
+<!--         fit_sw = F, -->
+<!--         fit_st0 = TRUE, -->
+<!--         init_par = this_fit_init$par, -->
+<!--         optim_control = list(trace = 1), -->
+<!--         drift_index = this_subj_data$drift_index -->
+<!--     ) -->
 
-obs_p_resp <- blast_data %>%
-    group_by(group, subject, blockType, difficulty, correct_response, response) %>%
-    summarize(n_resp = n(), .groups = "keep") %>%
-    ungroup() %>%
-    complete(nesting(group, subject), blockType, difficulty, correct_response, response, fill = list(n_resp = 0)) %>%
-    group_by(group, subject, blockType, difficulty, correct_response) %>%
-    mutate(p_resp = n_resp / sum(n_resp))
+<!--     this_ddm_pars <- coef(this_ddm_fit, dpar = "full") -->
 
-obs_pred_data <- full_join(
-    full_join(obs_p_resp, obs_rt_quantiles) %>% mutate(source = "Observed"),
-    ddm_pred %>% mutate(source = "Predicted")
-) %>%
-    mutate(correct = factor(correct_response == response, levels = c(TRUE, FALSE), labels = c("Correct", "Incorrect")))
+<!--     ddm_pars <- rbind( -->
+<!--         ddm_pars, -->
+<!--         cbind(to_fit[fit_index,], tibble(par_name = names(this_ddm_pars), val = this_ddm_pars) %>% extract(par_name, into = c("coef", "dpar"), regex = "(.+) \\((.+)\\)")) -->
+<!--     ) -->
 
-obs_pred_data %>%
-    group_by(blockType, difficulty, correct_response, response, correct, source, rt_p) %>%
-    summarize(rt_q = mean(rt_q, na.rm = TRUE), p_resp = mean(p_resp, na.rm = TRUE)) %>%
-    ggplot(aes(x = p_resp, y = rt_q, color = interaction(correct, correct_response))) +
-    geom_point(aes(alpha = difficulty, shape = source)) +
-    geom_line(aes(linetype = source, group = interaction(correct, correct_response, rt_p, source))) +
-    facet_wrap("blockType")
-```
+<!--     this_pred_pars <- this_subj_data %>% -->
+<!--         mutate(rownum = 1:nrow(this_subj_data)) %>% -->
+<!--         group_by(blockType, difficulty, correct_response) %>% -->
+<!--         summarize(n = n(), i = first(rownum), .groups = "keep") %>% -->
+<!--         mutate(a = c(this_ddm_fit$mmatrix$boundary[i,] %*% as.matrix(this_ddm_fit$coefficients$boundary))) %>% -->
+<!--         mutate(v = c(this_ddm_fit$mmatrix$drift[i,] %*% as.matrix(this_ddm_fit$coefficients$drift))) %>% -->
+<!--         mutate(t0 = c(this_ddm_fit$mmatrix$ndt[i,] %*% as.matrix(this_ddm_fit$coefficients$ndt))) %>% -->
+<!--         mutate(bias = c(this_ddm_fit$mmatrix$bias[i,] %*% as.matrix(this_ddm_fit$coefficients$bias))) %>% -->
+<!--         mutate(sv = c(this_ddm_fit$mmatrix$sv[i,] %*% as.matrix(this_ddm_fit$coefficients$sv))) %>% -->
+<!--         # mutate(sv = 0) %>% -->
+<!--         mutate(z = bias * a) -->
+
+<!--     this_pred_data <- c() -->
+
+<!--     for (i in 1:nrow(this_pred_pars)) { -->
+<!--         p_resp_upper <- pdiffusion(rt = 5, response = "upper", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], maxt = 5) -->
+<!--         p_resp_lower <- pdiffusion(rt = 5, response = "lower", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], maxt = 5) -->
+
+<!--         upper_q <- qdiffusion(p = rt_quantiles, response = "upper", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], scale_p = TRUE, maxt = 5, interval = c(0, 5)) -->
+<!--         lower_q <- qdiffusion(p = rt_quantiles, response = "lower", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], scale_p = TRUE, maxt = 5, interval = c(0, 5)) -->
+
+<!--         this_pred_data <- rbind( -->
+<!--             this_pred_data, -->
+<!--             cbind(this_pred_pars[i,], tibble(response = "Blast", p_resp = p_resp_upper / (p_resp_upper + p_resp_lower), rt_p = rt_quantiles, rt_q = upper_q)), -->
+<!--             cbind(this_pred_pars[i,], tibble(response = "Non-blast", p_resp = p_resp_lower / (p_resp_upper + p_resp_lower), rt_p = rt_quantiles, rt_q = lower_q)) -->
+<!--         ) -->
+<!--     } -->
+
+<!--     ddm_pred <- rbind( -->
+<!--         ddm_pred, -->
+<!--         cbind(to_fit[fit_index,], this_pred_data) -->
+<!--     ) -->
+
+<!--     setTxtProgressBar(pb, fit_index) -->
+<!-- } -->
+
+<!-- close(pb) -->
+
+<!-- ddm_pars %>% -->
+<!--     ggplot(aes(x = coef, y = val, color = group, shape = group)) + -->
+<!--     geom_point(position = position_jitterdodge(jitter.width = 0.1, dodge.width = 0.4), alpha = 0.5, size = 0.5) + -->
+<!--     stat_summary(geom = "pointrange", fun.data = mean_cl_boot, position = position_dodge(width = 0.4)) + -->
+<!--     facet_wrap("dpar", scales = "free") -->
+
+<!-- obs_rt_quantiles <- blast_data %>% -->
+<!--     group_by(group, subject, blockType, difficulty, correct_response, response) %>% -->
+<!--     reframe(rt_q = quantile(rt, probs = rt_quantiles)) %>% -->
+<!--     mutate(rt_p = rep(rt_quantiles, n() / length(rt_quantiles))) %>% -->
+<!--     complete(nesting(group, subject), blockType, difficulty, correct_response, response, rt_p, fill = list(rt_q = NA)) -->
+
+<!-- obs_p_resp <- blast_data %>% -->
+<!--     group_by(group, subject, blockType, difficulty, correct_response, response) %>% -->
+<!--     summarize(n_resp = n(), .groups = "keep") %>% -->
+<!--     ungroup() %>% -->
+<!--     complete(nesting(group, subject), blockType, difficulty, correct_response, response, fill = list(n_resp = 0)) %>% -->
+<!--     group_by(group, subject, blockType, difficulty, correct_response) %>% -->
+<!--     mutate(p_resp = n_resp / sum(n_resp)) -->
+
+<!-- obs_pred_data <- full_join( -->
+<!--     full_join(obs_p_resp, obs_rt_quantiles) %>% mutate(source = "Observed"), -->
+<!--     ddm_pred %>% mutate(source = "Predicted") -->
+<!-- ) %>% -->
+<!--     mutate(correct = factor(correct_response == response, levels = c(TRUE, FALSE), labels = c("Correct", "Incorrect"))) -->
+
+<!-- obs_pred_data %>% -->
+<!--     group_by(blockType, difficulty, correct_response, response, correct, source, rt_p) %>% -->
+<!--     summarize(rt_q = mean(rt_q, na.rm = TRUE), p_resp = mean(p_resp, na.rm = TRUE)) %>% -->
+<!--     ggplot(aes(x = p_resp, y = rt_q, color = interaction(correct, correct_response))) + -->
+<!--     geom_point(aes(alpha = difficulty, shape = source)) + -->
+<!--     geom_line(aes(linetype = source, group = interaction(correct, correct_response, rt_p, source))) + -->
+<!--     facet_wrap("blockType") -->
+<!-- ``` -->
 
 ## Exercises
 

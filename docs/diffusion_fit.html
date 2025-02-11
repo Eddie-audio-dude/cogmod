@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>6&nbsp; Fitting a diffusion model to data – Computational Cognitive Models</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./diffusion_sim.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./diffusion_fit.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Fitting a diffusion model to data</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Computational Cognitive Models</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ebrw.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./r_coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Programming with R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./random_walk.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion_sim.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">From random walk to diffusion</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion_fit.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Fitting a diffusion model to data</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#fitting-a-model" id="toc-fitting-a-model" class="nav-link active" data-scroll-target="#fitting-a-model"><span class="header-section-number">6.1</span> Fitting a model</a>
+  <ul class="collapse">
+  <li><a href="#parameters-likelihoods-and-log-likelihoods" id="toc-parameters-likelihoods-and-log-likelihoods" class="nav-link" data-scroll-target="#parameters-likelihoods-and-log-likelihoods"><span class="header-section-number">6.1.1</span> Parameters, likelihoods, and log-likelihoods</a></li>
+  <li><a href="#log-likelihood" id="toc-log-likelihood" class="nav-link" data-scroll-target="#log-likelihood"><span class="header-section-number">6.1.2</span> Log-likelihood</a></li>
+  <li><a href="#maximizing-log-likelihood" id="toc-maximizing-log-likelihood" class="nav-link" data-scroll-target="#maximizing-log-likelihood"><span class="header-section-number">6.1.3</span> Maximizing log-likelihood</a></li>
+  <li><a href="#minimizing-negative-log-likelihood" id="toc-minimizing-negative-log-likelihood" class="nav-link" data-scroll-target="#minimizing-negative-log-likelihood"><span class="header-section-number">6.1.4</span> Minimizing negative log-likelihood</a></li>
+  </ul></li>
+  <li><a href="#fitting-a-diffusion-model" id="toc-fitting-a-diffusion-model" class="nav-link" data-scroll-target="#fitting-a-diffusion-model"><span class="header-section-number">6.2</span> Fitting a diffusion model</a>
+  <ul class="collapse">
+  <li><a href="#diffusion-model-likelihood" id="toc-diffusion-model-likelihood" class="nav-link" data-scroll-target="#diffusion-model-likelihood"><span class="header-section-number">6.2.1</span> Diffusion model likelihood</a></li>
+  <li><a href="#finding-the-best-fitting-parameters" id="toc-finding-the-best-fitting-parameters" class="nav-link" data-scroll-target="#finding-the-best-fitting-parameters"><span class="header-section-number">6.2.2</span> Finding the best-fitting parameters</a></li>
+  <li><a href="#visualizing-model-fit" id="toc-visualizing-model-fit" class="nav-link" data-scroll-target="#visualizing-model-fit"><span class="header-section-number">6.2.3</span> Visualizing model fit</a></li>
+  </ul></li>
+  <li><a href="#fitting-multiple-conditions" id="toc-fitting-multiple-conditions" class="nav-link" data-scroll-target="#fitting-multiple-conditions"><span class="header-section-number">6.3</span> Fitting multiple conditions</a></li>
+  <li><a href="#comparing-model-fits" id="toc-comparing-model-fits" class="nav-link" data-scroll-target="#comparing-model-fits"><span class="header-section-number">6.4</span> Comparing model fits</a>
+  <ul class="collapse">
+  <li><a href="#information-criteria" id="toc-information-criteria" class="nav-link" data-scroll-target="#information-criteria"><span class="header-section-number">6.4.1</span> Information criteria</a></li>
+  </ul></li>
+  <li><a href="#shiny-app" id="toc-shiny-app" class="nav-link" data-scroll-target="#shiny-app"><span class="header-section-number">6.5</span> Shiny App</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">6.6</span> Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Fitting a diffusion model to data</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/mountain.jpg" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>Searching for the parameters that assign the highest log-likelihood to the data (Photo credit: Renan Ozturk and Freddie Wilkinson, FA Alaska’s Tooth Traverse).</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>In the previous chapter, we adapted our random walk model into a diffusion model. We saw how the different parameters of the diffusion model produce different patterns of choice and RT behavior. This is what makes the diffusion model a useful cognitive model in so many cases: It has parameters that correspond to meaningful, if unobservable, psychological constructs (evidence accumulation, response caution, response bias) and we can see how differences in those constructs manifest in observable behavior.</p>
+<p>In this chapter, we turn the model around: Instead of taking parameters and using them to produce behavior, we are taking behavior and <em>inferring</em> what values of the model parameters most likely produced that behavior. In doing so, we are performing a kind of “mind reading”—we are learning about unobservable psychological constructs via how those constructs manifest in behavior.</p>
+<p>The foundational material puts us in a position to do three things in the next chapter:</p>
+<ol type="1">
+<li>Compare estimated model parameters between conditions to identify what cognitive constructs are affected by different research conditions.</li>
+<li>Compare estimated model parameters between individuals to characterize how different people perfom the same task.</li>
+<li>Compare versions of the model that place constraints on parameter values to see which components of the model are and are not important for explaining the data.</li>
+</ol>
+<section id="fitting-a-model" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="fitting-a-model"><span class="header-section-number">6.1</span> Fitting a model</h2>
+<p>Fitting a model to data means finding the values of that model’s parameters that assign the highest <em>likelihood</em> to the observed data. Given a set of parameter values, we can use the model to compute how likely it would be to have seen each observation in our dataset.</p>
+<section id="parameters-likelihoods-and-log-likelihoods" class="level3" data-number="6.1.1">
+<h3 data-number="6.1.1" class="anchored" data-anchor-id="parameters-likelihoods-and-log-likelihoods"><span class="header-section-number">6.1.1</span> Parameters, likelihoods, and log-likelihoods</h3>
+<p>Using <span class="math inline">\(\theta\)</span> to stand for a set of parameter values and <span class="math inline">\(x_i\)</span> to stand for a particular observation, we can use <span class="math inline">\(f \left( x \mid \theta \right)\)</span> to stand for the <strong>likelihood</strong> of the datum <span class="math inline">\(x_i\)</span> given the parameter values <span class="math inline">\(\theta\)</span> and a model with a <em>likelihood function</em> <span class="math inline">\(f\)</span>.</p>
+<p>Consider the familiar normal distribution. This distribution has two parameters, a mean <span class="math inline">\(\mu\)</span> and a standard deviation <span class="math inline">\(\sigma\)</span>. So for the normal distribution, <span class="math inline">\(\theta\)</span> is actually a vector with two elements: <span class="math inline">\(\theta = \left[ \mu, \sigma \right]\)</span>. The normal distribution is a simple <em>model</em> in that it says that observed values fall in a particular shape around the mean <span class="math inline">\(\mu\)</span> with a spread described by <span class="math inline">\(\sigma\)</span>. The likelihood function for the normal distribution, written below, indicates how likely it would be to observe datum <span class="math inline">\(x_i\)</span> <em>given</em> specific values of <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span>: <span class="math display">\[
+f_{\text{Normal}} \left( x_i \mid \mu, \sigma \right) = \frac{1}{ \sigma \sqrt{2 \pi}} \exp \left[ - \frac{\left(x_i - \mu \right)^2}{2 \sigma^2} \right]
+\]</span></p>
+<p>The graph below assumes that we have just a single observation, <span class="math inline">\(x_i = 0\)</span>. The plots show how the likelihood assigned to that datum depends on <em>both</em> parameters of the normal distribution, <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>norm_like_df <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">mu =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="at">by =</span> <span class="fl">0.1</span>), <span class="at">sigma =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">by =</span> <span class="fl">0.1</span>), <span class="at">x =</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">d =</span> <span class="fu">dnorm</span>(x, <span class="at">mean =</span> mu, <span class="at">sd =</span> sigma))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>mu_plot <span class="ot">&lt;-</span> norm_like_df <span class="sc">%&gt;%</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(sigma <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mu, <span class="at">y =</span> d)) <span class="sc">+</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(mu), <span class="at">y =</span> <span class="fu">expression</span>(f[Normal] <span class="sc">*</span> <span class="fu">bgroup</span>(<span class="st">"("</span>, x[i] <span class="sc">*</span> <span class="st">"|"</span> <span class="sc">*</span> <span class="fu">list</span>(mu, <span class="dv">1</span>), <span class="st">")"</span>)), <span class="at">title =</span> <span class="fu">expression</span>(<span class="st">"Assuming "</span> <span class="sc">*</span> sigma <span class="sc">==</span> <span class="dv">1</span>))</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>sigma_plot <span class="ot">&lt;-</span> norm_like_df <span class="sc">%&gt;%</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(mu <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sigma, <span class="at">y =</span> d)) <span class="sc">+</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(sigma), <span class="at">y =</span> <span class="fu">expression</span>(f[Normal] <span class="sc">*</span> <span class="fu">bgroup</span>(<span class="st">"("</span>, x[i] <span class="sc">*</span> <span class="st">"|"</span> <span class="sc">*</span> <span class="fu">list</span>(<span class="dv">1</span>, sigma), <span class="st">")"</span>)), <span class="at">title =</span> <span class="fu">expression</span>(<span class="st">"Assuming "</span> <span class="sc">*</span> mu <span class="sc">==</span> <span class="dv">1</span>))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>joint_plot <span class="ot">&lt;-</span> norm_like_df <span class="sc">%&gt;%</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mu, <span class="at">y =</span> sigma, <span class="at">fill =</span> d)) <span class="sc">+</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>(<span class="at">interpolate =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"lightgrey"</span>) <span class="sc">+</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"lightgrey"</span>) <span class="sc">+</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(mu), <span class="at">y =</span> <span class="fu">expression</span>(sigma), <span class="at">fill =</span> <span class="fu">expression</span>(f[Normal] <span class="sc">*</span> <span class="fu">bgroup</span>(<span class="st">"("</span>, x[i] <span class="sc">*</span> <span class="st">"|"</span> <span class="sc">*</span> <span class="fu">list</span>(mu, sigma), <span class="st">")"</span>)), <span class="at">title =</span> <span class="st">"Joint likelihood"</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>mu_plot <span class="sc">+</span> sigma_plot <span class="sc">+</span> joint_plot <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">design =</span> <span class="st">"12</span><span class="sc">\n</span><span class="st">33"</span>, <span class="at">guides =</span> <span class="st">"keep"</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="diffusion_fit_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="576"></p>
+<figcaption>Data: (0)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>When we have more than one observation, the likelihood of <em>all</em> observations is the <em>product</em> of the likelihoods of each individual observation: <span class="math display">\[
+f \left( \mathbf{x} \mid \theta \right) = \prod_{i = 1}^N f \left( x_i \mid \theta \right)
+\]</span> This situation is illustrated in the graphs below. These graphs again assume a normal distribution as the model, but now we have observed the values <span class="math inline">\(\mathbf{x} = \left[ 0, 1 \right]\)</span>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>norm_like_df <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">mu =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="at">by =</span> <span class="fl">0.1</span>), <span class="at">sigma =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">by =</span> <span class="fl">0.1</span>), <span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">d =</span> <span class="fu">dnorm</span>(x, <span class="at">mean =</span> mu, <span class="at">sd =</span> sigma)) <span class="sc">%&gt;%</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(mu, sigma) <span class="sc">%&gt;%</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">d =</span> <span class="fu">prod</span>(d), <span class="at">.groups =</span> <span class="st">"keep"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>mu_plot <span class="ot">&lt;-</span> norm_like_df <span class="sc">%&gt;%</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(sigma <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mu, <span class="at">y =</span> d)) <span class="sc">+</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(mu), <span class="at">y =</span> <span class="fu">expression</span>(f[Normal] <span class="sc">*</span> <span class="fu">bgroup</span>(<span class="st">"("</span>, x[i] <span class="sc">*</span> <span class="st">"|"</span> <span class="sc">*</span> <span class="fu">list</span>(mu, <span class="dv">1</span>), <span class="st">")"</span>)), <span class="at">title =</span> <span class="fu">expression</span>(<span class="st">"Assuming "</span> <span class="sc">*</span> sigma <span class="sc">==</span> <span class="dv">1</span>))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>sigma_plot <span class="ot">&lt;-</span> norm_like_df <span class="sc">%&gt;%</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(mu <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sigma, <span class="at">y =</span> d)) <span class="sc">+</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(sigma), <span class="at">y =</span> <span class="fu">expression</span>(f[Normal] <span class="sc">*</span> <span class="fu">bgroup</span>(<span class="st">"("</span>, x[i] <span class="sc">*</span> <span class="st">"|"</span> <span class="sc">*</span> <span class="fu">list</span>(<span class="dv">1</span>, sigma), <span class="st">")"</span>)), <span class="at">title =</span> <span class="fu">expression</span>(<span class="st">"Assuming "</span> <span class="sc">*</span> mu <span class="sc">==</span> <span class="dv">1</span>))</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>joint_plot <span class="ot">&lt;-</span> norm_like_df <span class="sc">%&gt;%</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mu, <span class="at">y =</span> sigma, <span class="at">fill =</span> d)) <span class="sc">+</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>(<span class="at">interpolate =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"lightgrey"</span>) <span class="sc">+</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"lightgrey"</span>) <span class="sc">+</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(mu), <span class="at">y =</span> <span class="fu">expression</span>(sigma), <span class="at">fill =</span> <span class="fu">expression</span>(f[Normal] <span class="sc">*</span> <span class="fu">bgroup</span>(<span class="st">"("</span>, x[i] <span class="sc">*</span> <span class="st">"|"</span> <span class="sc">*</span> <span class="fu">list</span>(mu, sigma), <span class="st">")"</span>)), <span class="at">title =</span> <span class="st">"Joint likelihood"</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>mu_plot <span class="sc">+</span> sigma_plot <span class="sc">+</span> joint_plot <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">design =</span> <span class="st">"12</span><span class="sc">\n</span><span class="st">33"</span>, <span class="at">guides =</span> <span class="st">"keep"</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 row containing missing values or values outside the scale range
+(`geom_line()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="diffusion_fit_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid figure-img" width="576"></p>
+<figcaption>Data: (0, 1)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="log-likelihood" class="level3" data-number="6.1.2">
+<h3 data-number="6.1.2" class="anchored" data-anchor-id="log-likelihood"><span class="header-section-number">6.1.2</span> Log-likelihood</h3>
+<p>You may have noticed that the scale on the bottom graph in the second set of plots (where the data were <span class="math inline">\(0, 1\)</span>) has a smaller maximum than it did in the bottom graph in the first set of plots (where the data were just <span class="math inline">\(0\)</span>). This is because the likelihood of the whole dataset is a <em>product</em> of many small numbers, so the result also tends to be small. Unfortunately, this can lead to technical issues when we have many observations because the resulting likelihood may be too small for the computer to accurately calculate.</p>
+<p>As a result, we often work with the <em>natural logarithm</em> of the likelihood function. Because multiplication turns into addition on the log-scale, this saves the computer from needing to work with very tiny numbers. We often write <span class="math inline">\(LL\)</span> to stand for this “log-likelihood”: <span class="math display">\[
+LL \left( \mathbf{x} \mid \theta \right) = \log \left[ \prod_{i = 1}^N f \left( x_i \mid \theta \right) \right] = \sum_{i = 1}^N \log f \left( x_i \mid \theta \right)
+\]</span></p>
+<p>Fortunately, since the logarithm is a <em>monotonic</em> transformation, the parameters that maximize the likelihood are the very same parameters that maximize the log-likelihood. To get a sense of this, the graphs below replicate the graph above with observed values <span class="math inline">\(\mathbf{x} = \left[ 0, 1 \right]\)</span>, but showing the log-likelihood instead of the likelihood.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>norm_like_df <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">mu =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="at">by =</span> <span class="fl">0.1</span>), <span class="at">sigma =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">by =</span> <span class="fl">0.1</span>), <span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">ll =</span> <span class="fu">dnorm</span>(x, <span class="at">mean =</span> mu, <span class="at">sd =</span> sigma, <span class="at">log =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(mu, sigma) <span class="sc">%&gt;%</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">ll =</span> <span class="fu">sum</span>(ll), <span class="at">.groups =</span> <span class="st">"keep"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>mu_plot <span class="ot">&lt;-</span> norm_like_df <span class="sc">%&gt;%</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(sigma <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mu, <span class="at">y =</span> ll)) <span class="sc">+</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(mu), <span class="at">y =</span> <span class="fu">expression</span>(LL[Normal] <span class="sc">*</span> <span class="fu">bgroup</span>(<span class="st">"("</span>, x[i] <span class="sc">*</span> <span class="st">"|"</span> <span class="sc">*</span> <span class="fu">list</span>(mu, <span class="dv">1</span>), <span class="st">")"</span>)), <span class="at">title =</span> <span class="fu">expression</span>(<span class="st">"Assuming "</span> <span class="sc">*</span> sigma <span class="sc">==</span> <span class="dv">1</span>))</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>sigma_plot <span class="ot">&lt;-</span> norm_like_df <span class="sc">%&gt;%</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(mu <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sigma, <span class="at">y =</span> ll)) <span class="sc">+</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(sigma), <span class="at">y =</span> <span class="fu">expression</span>(LL[Normal] <span class="sc">*</span> <span class="fu">bgroup</span>(<span class="st">"("</span>, x[i] <span class="sc">*</span> <span class="st">"|"</span> <span class="sc">*</span> <span class="fu">list</span>(<span class="dv">1</span>, sigma), <span class="st">")"</span>)), <span class="at">title =</span> <span class="fu">expression</span>(<span class="st">"Assuming "</span> <span class="sc">*</span> mu <span class="sc">==</span> <span class="dv">1</span>))</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>joint_plot <span class="ot">&lt;-</span> norm_like_df <span class="sc">%&gt;%</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mu, <span class="at">y =</span> sigma, <span class="at">fill =</span> ll)) <span class="sc">+</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_raster</span>(<span class="at">interpolate =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"lightgrey"</span>) <span class="sc">+</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"lightgrey"</span>) <span class="sc">+</span></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_fill_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(mu), <span class="at">y =</span> <span class="fu">expression</span>(sigma), <span class="at">fill =</span> <span class="fu">expression</span>(LL[Normal] <span class="sc">*</span> <span class="fu">bgroup</span>(<span class="st">"("</span>, x[i] <span class="sc">*</span> <span class="st">"|"</span> <span class="sc">*</span> <span class="fu">list</span>(mu, sigma), <span class="st">")"</span>)), <span class="at">title =</span> <span class="st">"Total log-likelihood"</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>mu_plot <span class="sc">+</span> sigma_plot <span class="sc">+</span> joint_plot <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">design =</span> <span class="st">"12</span><span class="sc">\n</span><span class="st">33"</span>, <span class="at">guides =</span> <span class="st">"keep"</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 row containing missing values or values outside the scale range
+(`geom_line()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="diffusion_fit_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="576"></p>
+<figcaption>Data: (0, 1)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="maximizing-log-likelihood" class="level3" data-number="6.1.3">
+<h3 data-number="6.1.3" class="anchored" data-anchor-id="maximizing-log-likelihood"><span class="header-section-number">6.1.3</span> Maximizing log-likelihood</h3>
+<p>The combination of parameter values that assigns the highest total log-likelihood to <em>all</em> the data is where the bright spot is in the bottom graph of each set of plots above. For a normal model, the values of <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span> that assign the highest total log-likelihood to the data can be computed directly: they are the <em>sample mean</em> and the <em>population standard deviation computed on the same</em> (i.e., where you divide by <span class="math inline">\(N\)</span> instead of <span class="math inline">\(N - 1\)</span>).</p>
+<p>For a more complex model, like our diffusion model, we will not be able to calculate these “optimal” parameter values directly. Instead, we will need to use the computer to <em>search</em> for these values. The topic of parameter optimization is a large one that we cannot fully address here. However, the functions supplied with this tutorial make use of two search methods: the <a href="https://en.wikipedia.org/wiki/Nelder%E2%80%93Mead_method">Nelder-Mead simplex algorithm</a> and the <code>ucminf</code> function from the <code>ucminf</code> R package.</p>
+<p>The essence of these parameter optimization algorithms is this: They begin with an initial “guess” of the parameter values and compute the log-likelihood of the data given that initial guess. They then “explore” by calculating the log-likelihood of the data using slightly adjusted parameter values. If this exploration finds a set of adjusted parameter values that assign a higher log-likelihood to the data than the original guess, then these adjusted values are considered a “better guess”. The search process then begins again starting from that better guess. As a result, the “guess” gets gradually better on each step of the algorithm until it can no longer find any way to adjust the parameters to find a higher log-likelihood.</p>
+<p>One can think of this parameter search as like trying to find a mountain peak in a snowstorm: The snowstorm obscures your visibility so you can only search areas in your immediate vicinity (similar to how the parameter optimizer tries to adjust values of the parameters starting from an initial guess). However, you can still figure out which direction is “uphill” from your current position (similar to how the algorithm finds adjusted parameters that yield a higher log-likelihood than the current best guess). Eventually, you will reach a point where you can’t go uphill any more.</p>
+<p>The metaphor in the previous paragraph serves to highlight the fact that parameter optimizers are not necessarily guaranteed to find the “global optimum”—the best possible set of parameter values. It is possible that they instead find a “local optimum”—a set of values for which no small adjustment yields an improvement, but which is not the best you could possibly do. To return to the metaphor, the tallest peak may be a mile away from the one you found, but you’ll never know that because you can’t see it.</p>
+<p>The utility functions we will use in this tutorial are generally pretty good at finding global optima, but it is not guaranteed! This is why it is important to develop some intuitions about how model parameters manifest in behavior, so you can detect when you might have reached a local optimum instead of a global one.</p>
+</section>
+<section id="minimizing-negative-log-likelihood" class="level3" data-number="6.1.4">
+<h3 data-number="6.1.4" class="anchored" data-anchor-id="minimizing-negative-log-likelihood"><span class="header-section-number">6.1.4</span> Minimizing negative log-likelihood</h3>
+<p>Due to the vagaries of history, algorithms that search for optimal parameter values are often written not to <em>maximize</em> something, but to <em>minimize</em> it instead. As a result, what a parameter optimization algorithm <em>actually</em> does is <strong>minimize the negative log-likelihood</strong>. Basically, it flips the “maximization” problem over, although it does not change anything conceptually. However, it does mean that a more appropriate metaphor is finding the lowest point in a valley rather than the highest peak of a mountain range.</p>
+</section>
+</section>
+<section id="fitting-a-diffusion-model" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="fitting-a-diffusion-model"><span class="header-section-number">6.2</span> Fitting a diffusion model</h2>
+<p>To find the set of parameters for a diffusion model that assign the highest likelihood to the data, we need to be able to compute the likelihood of making a specific choice at a specific time, given a set of diffusion model parameters. This computation is not something we can do by hand—we have to rely on the computer. Fortunately, many folks have contributed to the development of efficient means of doing this computation <span class="citation" data-cites="BlurtonEtAl2012 GondanEtAl2014 HartmannKlauer2021 NavarroFuss2009 Tuerlincx2004">(e.g., <a href="references.html#ref-BlurtonEtAl2012" role="doc-biblioref">Blurton et al., 2012</a>; <a href="references.html#ref-GondanEtAl2014" role="doc-biblioref">Gondan et al., 2014</a>; <a href="references.html#ref-HartmannKlauer2021" role="doc-biblioref">Hartmann &amp; Klauer, 2021</a>; <a href="references.html#ref-NavarroFuss2009" role="doc-biblioref">Navarro &amp; Fuss, 2009</a>; <a href="references.html#ref-Tuerlincx2004" role="doc-biblioref">Tuerlincx, 2004</a>)</span>.</p>
+<p>We will make use specifically of an R package that implements these methods called <code>WienR</code> <span class="citation" data-cites="WienR">(<a href="references.html#ref-WienR" role="doc-biblioref">Hartmann &amp; Klauer, 2023</a>)</span>. The name comes from the fact that <a href="https://en.wikipedia.org/wiki/Norbert_Wiener">Norbert Wiener</a> was associated with the development of the “bare-bones” diffusion model without any of the trial-by-trial variability introduced by <span class="citation" data-cites="Ratcliff1978">Ratcliff (<a href="references.html#ref-Ratcliff1978" role="doc-biblioref">1978</a>)</span>. That said, the <code>WienR</code> package allows for all of those additional forms of variability as described in the previous chapter.</p>
+<p>Be sure you have the <code>WienR</code> package installed and loaded!</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(WienR)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="diffusion-model-likelihood" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="diffusion-model-likelihood"><span class="header-section-number">6.2.1</span> Diffusion model likelihood</h3>
+<p>The <code>WienR</code> package provides a function called <code>WienerPDF</code> which returns both the likelihood <em>and</em> the log-likelihood of a set of responses, given a set of diffusion model parameters.</p>
+<p>Unlike with the normal distribution model, where an observation was characterized by a single number, an observation for a diffusion model is characterized by a choice <em>and</em> a response time. Thus, if we want to compute the likelihood of responding at the upper boundary in 1 second given a drift rate of <span class="math inline">\(v = 0.5\)</span>, response caution of <span class="math inline">\(a = 2\)</span>, response bias of <span class="math inline">\(w = 0.5\)</span>, and residual time <span class="math inline">\(t_0 = 0.2\)</span>, we use</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">WienerPDF</span>(<span class="at">t =</span> <span class="dv">1</span>, <span class="at">response =</span> <span class="st">"upper"</span>, <span class="at">a =</span> <span class="dv">2</span>, <span class="at">v =</span> <span class="fl">0.5</span>, <span class="at">w =</span> <span class="fl">0.5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+First-passage time PDF
+
+[1] 0.4362052
+
+---------------------------
+
+Log of first-passage time PDF
+
+[1] -0.8296426
+
+---------------------------</code></pre>
+</div>
+</div>
+<p>The “First-passage time PDF” is the <em>likelihood</em> of having made that response at that time.</p>
+<p>Let’s imagine that we observed a few more trials, one in which a decision-maker responded at the upper boundary in 1.5 seconds and one in which the decision-maker responded at the lower boundary in 2 seconds. We can compute the likelihood and log-likelihood of all of those trials:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">WienerPDF</span>(<span class="at">t =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>), <span class="at">response =</span> <span class="fu">c</span>(<span class="st">"upper"</span>, <span class="st">"upper"</span>, <span class="st">"lower"</span>), <span class="at">a =</span> <span class="dv">2</span>, <span class="at">v =</span> <span class="fl">0.5</span>, <span class="at">w =</span> <span class="fl">0.5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+First-passage time PDF
+
+[1] 0.43620517 0.22137809 0.04128626
+
+---------------------------
+
+Log of first-passage time PDF
+
+[1] -0.8296426 -1.5078832 -3.1872255
+
+---------------------------</code></pre>
+</div>
+</div>
+<p>Note two things: First, <code>t</code> and <code>response</code> are allowed to be <em>vectors</em>, where the <span class="math inline">\(i\)</span>th entry in the <code>t</code> vector corresponds to the <span class="math inline">\(i\)</span>th entry in the <code>response</code> vector. Second, we get the likelihood and log-likelihood for each trial individually. So if we want the <em>total log-likelihood</em>, we have to do that ourselves:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">WienerPDF</span>(<span class="at">t =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>), <span class="at">response =</span> <span class="fu">c</span>(<span class="st">"upper"</span>, <span class="st">"upper"</span>, <span class="st">"lower"</span>), <span class="at">a =</span> <span class="dv">2</span>, <span class="at">v =</span> <span class="fl">0.5</span>, <span class="at">w =</span> <span class="fl">0.5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>(total_log_likelihood <span class="ot">&lt;-</span> <span class="fu">sum</span>(result<span class="sc">$</span>logvalue))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -5.524751</code></pre>
+</div>
+</div>
+<p>The upshot of this is that <code>WienerPDF</code> gives us a way to evaluate the log-likelihood of a set of choices and response times <em>given</em> a set of values for the diffusion model’s parameters. <code>WienerPDF</code> also allows us to include variability in drift rates via the <code>sv</code> parameter, variability in boundaries via the <code>sw</code> parameter, and variability in residual time via the <code>st0</code> parameter, like so:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">WienerPDF</span>(<span class="at">t =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>), <span class="at">response =</span> <span class="fu">c</span>(<span class="st">"upper"</span>, <span class="st">"upper"</span>, <span class="st">"lower"</span>), <span class="at">a =</span> <span class="dv">2</span>, <span class="at">v =</span> <span class="fl">0.5</span>, <span class="at">w =</span> <span class="fl">0.5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>, <span class="at">sv =</span> <span class="fl">0.5</span>, <span class="at">sw =</span> <span class="fl">0.1</span>, <span class="at">st0 =</span> <span class="fl">0.4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+First-passage time PDF
+
+[1] 0.56113640 0.26562047 0.06165999
+
+---------------------------
+
+Log of first-passage time PDF
+
+[1] -0.5777913 -1.3256868 -2.7861200
+
+---------------------------</code></pre>
+</div>
+</div>
+<p>Notice that the likelihoods and log-likelihoods changed when we included those three new parameters (which, by default, are set to zero).</p>
+</section>
+<section id="finding-the-best-fitting-parameters" class="level3" data-number="6.2.2">
+<h3 data-number="6.2.2" class="anchored" data-anchor-id="finding-the-best-fitting-parameters"><span class="header-section-number">6.2.2</span> Finding the best-fitting parameters</h3>
+<p>To find the diffusion model parameters that assign the highest log-likelihood to a given set of choices and RT’s, I have provided a helpful function called <code>fit_wienr</code>. To use this function, download the <a href="https://raw.githubusercontent.com/gregcox7/choice_rt_models/refs/heads/main/wienr_fit_utils.r"><code>wienr_fit_utils.r</code> R script</a> to your working directory and run</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"wienr_fit_utils.r"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We shall see later that the <code>fit_wienr</code> function has some useful bells-and-whistles, but for now let’s just see how it works in its basic form. To do this, let’s use another function from the <code>WienR</code> package called <code>sampWiener</code> which simulates a sample of data from a diffusion model, just like we did in the last chapter (actually, you could even use the <code>diffusion_sim</code> function you built for that purpose!):</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>(sim_data <span class="ot">&lt;-</span> <span class="fu">sampWiener</span>(<span class="at">N =</span> <span class="dv">50</span>, <span class="at">a =</span> <span class="dv">2</span>, <span class="at">v =</span> <span class="fl">0.5</span>, <span class="at">w =</span> <span class="fl">0.5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$q
+ [1] 1.0145267 0.7785001 0.4830922 0.7476763 0.6889558 0.3996333 0.7652827
+ [8] 1.0678441 1.0589824 1.1778599 1.1916915 2.0070563 0.4737943 0.5687575
+[15] 0.9735880 0.7182124 0.7907633 1.5717658 0.6528604 0.8988441 0.6722051
+[22] 0.3394198 0.8275921 2.0176933 0.6527308 1.3267482 1.0114098 0.7283250
+[29] 1.6299191 1.8353343 1.2566600 1.2643379 2.0130723 1.5419533 1.0620593
+[36] 0.5713716 2.5825087 0.7561459 1.1029754 0.6381128 0.5454809 0.6359990
+[43] 3.0614166 1.6769220 0.8270179 2.9357647 1.0710890 0.3431315 0.4737332
+[50] 3.6870701
+
+$response
+ [1] "upper" "upper" "upper" "upper" "upper" "upper" "upper" "upper" "upper"
+[10] "upper" "upper" "upper" "upper" "upper" "upper" "upper" "upper" "upper"
+[19] "upper" "upper" "upper" "upper" "upper" "upper" "upper" "upper" "upper"
+[28] "upper" "upper" "upper" "upper" "upper" "upper" "upper" "upper" "upper"
+[37] "upper" "upper" "upper" "lower" "lower" "lower" "lower" "lower" "lower"
+[46] "lower" "lower" "lower" "lower" "lower"
+
+$call
+sampWiener(N = 50, a = 2, v = 0.5, w = 0.5, t0 = 0.2)
+
+attr(,"class")
+[1] "Diffusion_samp"</code></pre>
+</div>
+</div>
+<p>The simulated choices are in <code>sim_data$response</code> and the simulated RT’s are in <code>sim_data$q</code>.</p>
+<p>Because we are using the diffusion model to simulate data, it’s worth asking how likely the data are given the parameter values we actually used for the simulation:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>original_likelihood <span class="ot">&lt;-</span> <span class="fu">WienerPDF</span>(<span class="at">t =</span> sim_data<span class="sc">$</span>q, <span class="at">response =</span> sim_data<span class="sc">$</span>response, <span class="at">a =</span> <span class="dv">2</span>, <span class="at">v =</span> <span class="fl">0.5</span>, <span class="at">w =</span> <span class="fl">0.5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(original_likelihood<span class="sc">$</span>logvalue)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] -66.06148</code></pre>
+</div>
+</div>
+<p>Remember, though, that the optimization algorithm will actually be minimizing the <em>negative</em> log-likelihood. The negative log-likelihood given the original values of the parameters is</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="sc">-</span><span class="fu">sum</span>(original_likelihood<span class="sc">$</span>logvalue)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 66.06148</code></pre>
+</div>
+</div>
+<p>It may be that the “best-fitting” parameters differ from those used to simulate the data, just due to sampling variability. Thus, what we are about to do is a form of <strong>parameter recovery</strong>, in that we are seeing how well we can “recover” the original model parameters, despite this sampling variability.</p>
+<p>The following code uses the <code>fit_wienr</code> function to find the best-fitting diffusion model parameter values for the simulated data above:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>(fit <span class="ot">&lt;-</span> <span class="fu">fit_wienr</span>(<span class="at">rt =</span> sim_data<span class="sc">$</span>q, <span class="at">response =</span> sim_data<span class="sc">$</span>response))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$par
+     a[1]      v[1]      w[1]     t0[1] 
+2.0672467 0.7208941 0.4525921 0.2034778 
+
+$value
+[1] 65.09442
+
+$convergence
+[1] 1
+
+$message
+[1] "Stopped by small gradient (grtol)."
+
+$invhessian.lt
+ [1]  0.0233247552  0.0059470005 -0.0003678730 -0.0039030749  0.0343417878
+ [6] -0.0053634481 -0.0010979615  0.0025483504  0.0004887555  0.0017438879
+
+$info
+ maxgradient     laststep      stepmax        neval 
+3.672341e-08 2.012289e-07 1.500625e-02 1.700000e+01 
+
+attr(,"class")
+[1] "ucminf"</code></pre>
+</div>
+</div>
+<p>The best <em>negative log-likelihood</em> that the algorithm was able to find is <code>fit$value</code>—as we can see it is slightly <em>lower</em> than the negative log-likelihood associated with the original simulating parameters, suggesting that the best-fitting parameters really do a slightly better job of “fitting” the data. Those parameter estimates reside in <code>fit$par</code>, where we can compare them against the values used to actually simulate the data.</p>
+</section>
+<section id="visualizing-model-fit" class="level3" data-number="6.2.3">
+<h3 data-number="6.2.3" class="anchored" data-anchor-id="visualizing-model-fit"><span class="header-section-number">6.2.3</span> Visualizing model fit</h3>
+<p>Minimizing the negative log-likelihood is well and good, but it doesn’t tell us much about how well the model actually “fits” the data. Does it predict similar choice and RT patterns?</p>
+<p>To address this, it is helpful to visually inspect the fit of the model. There are many ways to do this, but here we will make use of the quantile-probability plots we introduced in previous chapters. We will overlay the quantile-probability plots of the original data with those that would be predicted by the best-fitting diffusion model parameters. To the extent that the model and data are close to one another, we can feel confident that the model is accurately reproducing the major features of the data.</p>
+<p>The <code>qp_fit</code> function in the <code>wienr_fit_utils.r</code> script calculates the response probabilities and RT quantiles for both the observed data and the fitted model, like so:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>(obs_fit_data <span class="ot">&lt;-</span> <span class="fu">qp_fit</span>(<span class="at">rt =</span> sim_data<span class="sc">$</span>q, <span class="at">response =</span> sim_data<span class="sc">$</span>response, <span class="at">par =</span> fit<span class="sc">$</span>par))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(drift_index, bound_index, resid_index, sv_index,
+sw_index, st0_index, response)`
+Joining with `by = join_by(drift_index, bound_index, resid_index, sv_index,
+sw_index, st0_index, response, p_resp, rt_p, rt_q, source)`</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 20 × 12
+# Groups:   drift_index, bound_index, resid_index, sv_index, sw_index,
+#   st0_index [1]
+   drift_index bound_index resid_index sv_index sw_index st0_index response
+         &lt;dbl&gt;       &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;   
+ 1           1           1           1        1        1         1 lower   
+ 2           1           1           1        1        1         1 lower   
+ 3           1           1           1        1        1         1 lower   
+ 4           1           1           1        1        1         1 lower   
+ 5           1           1           1        1        1         1 lower   
+ 6           1           1           1        1        1         1 upper   
+ 7           1           1           1        1        1         1 upper   
+ 8           1           1           1        1        1         1 upper   
+ 9           1           1           1        1        1         1 upper   
+10           1           1           1        1        1         1 upper   
+11           1           1           1        1        1         1 upper   
+12           1           1           1        1        1         1 upper   
+13           1           1           1        1        1         1 upper   
+14           1           1           1        1        1         1 upper   
+15           1           1           1        1        1         1 upper   
+16           1           1           1        1        1         1 lower   
+17           1           1           1        1        1         1 lower   
+18           1           1           1        1        1         1 lower   
+19           1           1           1        1        1         1 lower   
+20           1           1           1        1        1         1 lower   
+# ℹ 5 more variables: n_resp &lt;int&gt;, p_resp &lt;dbl&gt;, rt_p &lt;dbl&gt;, rt_q &lt;dbl&gt;,
+#   source &lt;chr&gt;</code></pre>
+</div>
+</div>
+<p>We can then use the result to overlay the quantile-probabilities from the fitted model over those computed from the observed data:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>obs_fit_data <span class="sc">%&gt;%</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> p_resp, <span class="at">y =</span> rt_q, <span class="at">color =</span> source, <span class="at">shape =</span> response)) <span class="sc">+</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> <span class="fu">interaction</span>(rt_p, source), <span class="at">linetype =</span> source), <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Response probability"</span>, <span class="at">y =</span> <span class="st">"RT Quantile (s)"</span>, <span class="at">color =</span> <span class="cn">NULL</span>, <span class="at">linetype =</span> <span class="cn">NULL</span>, <span class="at">shape =</span> <span class="st">"Response"</span>, <span class="at">title =</span> <span class="st">"50 simulated trials"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="diffusion_fit_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>This visualization highlights a few things: While the diffusion model fits the response probabilities and central tendency of the RT’s quite well, it doesn’t do as good a job with the error RT’s nor with the tails of the RT distributions. This is not because of a qualitative difference between the model and data—after all, we used the diffusion model to simulate these data! Rather, this apparent misfit is due to sampling error: With a small sample, it is harder to estimate RT’s for rare responses (like errors) and it is harder to estimate the tails of the RT distributions (since, by definition, we have fewer observations in the tails).</p>
+<p>So let’s see what happens if we simulate 1000 trials instead of just 50.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>sim_data_large <span class="ot">&lt;-</span> <span class="fu">sampWiener</span>(<span class="at">N =</span> <span class="dv">1000</span>, <span class="at">a =</span> <span class="dv">2</span>, <span class="at">v =</span> <span class="fl">0.5</span>, <span class="at">w =</span> <span class="fl">0.5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>(fit_large <span class="ot">&lt;-</span> <span class="fu">fit_wienr</span>(<span class="at">rt =</span> sim_data_large<span class="sc">$</span>q, <span class="at">response =</span> sim_data_large<span class="sc">$</span>response))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$par
+     a[1]      v[1]      w[1]     t0[1] 
+2.0145409 0.4891320 0.4895752 0.1936399 
+
+$value
+[1] 1394.557
+
+$convergence
+[1] 4
+
+$message
+[1] "Stopped by zero step from line search"
+
+$invhessian.lt
+ [1] 1 0 0 0 1 0 0 1 0 1
+
+$info
+maxgradient    laststep     stepmax       neval 
+  0.3267429   0.0000000   1.0000000   1.0000000 
+
+attr(,"class")
+[1] "ucminf"</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>obs_fit_data_large <span class="ot">&lt;-</span> <span class="fu">qp_fit</span>(<span class="at">rt =</span> sim_data_large<span class="sc">$</span>q, <span class="at">response =</span> sim_data_large<span class="sc">$</span>response, <span class="at">par =</span> fit_large<span class="sc">$</span>par)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(drift_index, bound_index, resid_index, sv_index,
+sw_index, st0_index, response)`
+Joining with `by = join_by(drift_index, bound_index, resid_index, sv_index,
+sw_index, st0_index, response, p_resp, rt_p, rt_q, source)`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>obs_fit_data_large <span class="sc">%&gt;%</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> p_resp, <span class="at">y =</span> rt_q, <span class="at">color =</span> source, <span class="at">shape =</span> response)) <span class="sc">+</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> <span class="fu">interaction</span>(rt_p, source), <span class="at">linetype =</span> source), <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Response probability"</span>, <span class="at">y =</span> <span class="st">"RT Quantile (s)"</span>, <span class="at">color =</span> <span class="cn">NULL</span>, <span class="at">linetype =</span> <span class="cn">NULL</span>, <span class="at">shape =</span> <span class="st">"Response"</span>, <span class="at">title =</span> <span class="st">"1000 simulated trials"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="diffusion_fit_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Much better! And notice that the best-fitting parameter values (<code>fit_large$par</code>, above) are quite close to those used to simulate the data.</p>
+</section>
+</section>
+<section id="fitting-multiple-conditions" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="fitting-multiple-conditions"><span class="header-section-number">6.3</span> Fitting multiple conditions</h2>
+<p>Imagine that we are modeling someone doing a recognition memory task. In this task, participants study a set of items like words or images. Later, during a test phase participants are shown many items and, for each one, they have to decide whether it had been on the study list or not. Therefore, on any given test trial, the item shown could have been studied—called a <em>target</em>—or not studied—called a <em>foil</em>. The participant needs to accumulate evidence from their memory in order to decide whether the item had or had not been studied. It seems reasonable to assume that, if the item is a target, the drift rate for that evidence would tend to be positive, i.e., supporting the choice that the item had been studied. If the item is a foil, the drift rate would tend to be negative, since the samples of evidence from memory would support the choice that the item wasn’t studied. Modeling this task would therefore require estimating two drift rate parameters, one for trials in which a target is shown and one for trials in which a foil is shown. However, because the participant cannot know which type of item they were shown, their response boundaries and residual time should be the same regardless of whether the trial shows a target or a foil.</p>
+<p>The example above is just one case in which we need to model a decision task by assuming that some parameters differ between conditions (like between targets and foils) while others stay the same (like the response boundaries and residual time). For example, we could simulate the situation above by assuming that <span class="math inline">\(v_1 = 0.5\)</span> is the drift rate for targets while <span class="math inline">\(v_2 = -0.5\)</span> is the drift rate for foils, while keeping <span class="math inline">\(a = 2\)</span>, <span class="math inline">\(w = 0.5\)</span>, and <span class="math inline">\(t_0 = 0.2\)</span> constant:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>target_trials <span class="ot">&lt;-</span> <span class="fu">sampWiener</span>(<span class="at">N =</span> <span class="dv">80</span>, <span class="at">a =</span> <span class="dv">2</span>, <span class="at">v =</span> <span class="fl">0.5</span>, <span class="at">w =</span> <span class="fl">0.5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>foil_trials <span class="ot">&lt;-</span> <span class="fu">sampWiener</span>(<span class="at">N =</span> <span class="dv">80</span>, <span class="at">a =</span> <span class="dv">2</span>, <span class="at">v =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">w =</span> <span class="fl">0.5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>(all_trials <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">rt =</span> <span class="fu">c</span>(target_trials<span class="sc">$</span>q, foil_trials<span class="sc">$</span>q),</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">response =</span> <span class="fu">c</span>(target_trials<span class="sc">$</span>response, foil_trials<span class="sc">$</span>response),</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">item =</span> <span class="fu">factor</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"Target"</span>, <span class="st">"Foil"</span>), <span class="at">each =</span> <span class="dv">80</span>), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Target"</span>, <span class="st">"Foil"</span>))</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 160 × 3
+      rt response item  
+   &lt;dbl&gt; &lt;chr&gt;    &lt;fct&gt; 
+ 1 1.77  upper    Target
+ 2 1.95  upper    Target
+ 3 0.486 upper    Target
+ 4 0.396 upper    Target
+ 5 0.543 upper    Target
+ 6 1.40  upper    Target
+ 7 0.748 upper    Target
+ 8 0.721 upper    Target
+ 9 0.938 upper    Target
+10 1.99  upper    Target
+# ℹ 150 more rows</code></pre>
+</div>
+</div>
+<p>We can use the <code>fit_wienr</code> function to fit these data by supplying it with a <code>drift_index</code> vector. This is a vector of positive integers (1, 2, 3, …) that indicate <em>which</em> drift rate to use when computing the log-likelihood of a particular trial. In this case, since we want drift rate to depend on the type of item shown, we can use the <code>item</code> column of our simulated data to define the <code>drift index</code>:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">as.numeric</span>(all_trials<span class="sc">$</span>item)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+ [38] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+ [75] 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+[112] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+[149] 2 2 2 2 2 2 2 2 2 2 2 2</code></pre>
+</div>
+</div>
+<p>Here is how we supply that to <code>fit_wienr</code>:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>(recog_fit <span class="ot">&lt;-</span> <span class="fu">fit_wienr</span>(<span class="at">rt =</span> all_trials<span class="sc">$</span>rt, <span class="at">response =</span> all_trials<span class="sc">$</span>response, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(all_trials<span class="sc">$</span>item)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$par
+      a[1]       v[1]       v[2]       w[1]      t0[1] 
+ 2.0345129  0.3167632 -0.7274032  0.5145780  0.2058107 
+
+$value
+[1] 219.4175
+
+$convergence
+[1] 4
+
+$message
+[1] "Stopped by zero step from line search"
+
+$invhessian.lt
+ [1] 1 0 0 0 0 1 0 0 0 1 0 0 1 0 1
+
+$info
+maxgradient    laststep     stepmax       neval 
+ 0.04339481  0.00000000  1.00000000  1.00000000 
+
+attr(,"class")
+[1] "ucminf"</code></pre>
+</div>
+</div>
+<p>As we can see, the estimated drift rates <code>v[1]</code> and <code>v[2]</code> go in the direction we would expect, given that <code>drift_index = 1</code> indicates a target (positive drift) and <code>drift_index = 2</code> indicates a foil (negative drift).</p>
+<p>And how well does the best-fitting model do? Again, we can supply <code>drift_index</code> to the <code>qp_fit</code> function and make a set of quantile-probability plots.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>recog_obs_fit_data <span class="ot">&lt;-</span> <span class="fu">qp_fit</span>(<span class="at">rt =</span> all_trials<span class="sc">$</span>rt, <span class="at">response =</span> all_trials<span class="sc">$</span>response, <span class="at">par =</span> recog_fit<span class="sc">$</span>par, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(all_trials<span class="sc">$</span>item))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(drift_index, bound_index, resid_index, sv_index,
+sw_index, st0_index, response)`
+Joining with `by = join_by(drift_index, bound_index, resid_index, sv_index,
+sw_index, st0_index, response, p_resp, rt_p, rt_q, source)`</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>recog_obs_fit_data <span class="sc">%&gt;%</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">drift_index_label =</span> <span class="fu">factor</span>(drift_index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Target"</span>, <span class="st">"Foil"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> p_resp, <span class="at">y =</span> rt_q, <span class="at">color =</span> source, <span class="at">shape =</span> response)) <span class="sc">+</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> <span class="fu">interaction</span>(rt_p, source), <span class="at">linetype =</span> source), <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">x =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"drift_index_label"</span>) <span class="sc">+</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Response probability"</span>, <span class="at">y =</span> <span class="st">"RT Quantile (s)"</span>, <span class="at">color =</span> <span class="cn">NULL</span>, <span class="at">linetype =</span> <span class="cn">NULL</span>, <span class="at">shape =</span> <span class="st">"Response"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="diffusion_fit_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Not too bad, though as we saw earlier, the fit isn’t as good for errors or for the tails of the RT distributions.</p>
+</section>
+<section id="comparing-model-fits" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="comparing-model-fits"><span class="header-section-number">6.4</span> Comparing model fits</h2>
+<p>Continuing with the recognition memory example, imagine that we wanted to address the question: <em>Can this participant distinguish between studied and unstudied items?</em> That question can be reframed in terms of diffusion model parameters: <em>is the drift rate the same or different between target and foil trials?</em></p>
+<p>To address that question, we can fit one version of a diffusion model that uses the <code>drift_index</code> vector to estimate separate drift rates for targets and foils, like we just did. We can then fit another version that does <em>not</em> include <code>drift_index</code>, so that it estimates a single drift rate for all trials. The second model would correspond to the hypothesis that the participant cannot distinguish between targets and foils, because they get the same quality of evidence from their memory either way. By comparing how well those two models account for the data, taking into account the fact that the one-drift-rate model is less complex, then we can get evidence to help us address our question.</p>
+<p>Later in the course, we will delve more deeply into the issue of model comparison. For now, we will just introduce the basic idea of “scoring” a model based on (a) how well it fits data; and (b) how complex the model is. As noted below, a more complex model will, in general, be able to fit a wider variety of data. Thus, we should only favor a more complex model to the extent that it fits data better than would be expected based on its complexity. As we will discuss later in the course, there are other reasons why we should be reticent to favor more complex models, but these reasons can sometimes be hard to quantify. Thus, for now, we introduce some simple quantitative methods by which models can be compared while still accounting for their complexity.</p>
+<section id="information-criteria" class="level3" data-number="6.4.1">
+<h3 data-number="6.4.1" class="anchored" data-anchor-id="information-criteria"><span class="header-section-number">6.4.1</span> Information criteria</h3>
+<p>In the previous section, we already fit the two-drift-rate model. Now let’s fit the one-drift-rate version:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>(recog_fit_onedrift <span class="ot">&lt;-</span> <span class="fu">fit_wienr</span>(<span class="at">rt =</span> all_trials<span class="sc">$</span>rt, <span class="at">response =</span> all_trials<span class="sc">$</span>response))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$par
+      a[1]       v[1]       w[1]      t0[1] 
+ 1.9376960 -0.1943884  0.5129813  0.2166252 
+
+$value
+[1] 239.2321
+
+$convergence
+[1] 4
+
+$message
+[1] "Stopped by zero step from line search"
+
+$invhessian.lt
+ [1] 1 0 0 0 1 0 0 1 0 1
+
+$info
+maxgradient    laststep     stepmax       neval 
+ 0.06124639  0.00000000  1.00000000  1.00000000 
+
+attr(,"class")
+[1] "ucminf"</code></pre>
+</div>
+</div>
+<p>To compare the fit of the two models, we have a number of techniques at our disposal, but one of the most common is to use an <strong>information criterion</strong>. These values essentially “score” a model, with higher scores being worse (like golf). The score takes into account how well the model fits the data as well as how complex the model is. Taking into account complexity is critical because, generally speaking, a more complex model will be able to fit data better, so it needs to be “handicapped” to account for this advantage (again, sort of like golf). The information criteria we will use here measure a model’s complexity in terms of the number of free parameters it has.</p>
+<section id="akaike-information-criterion-aic" class="level4" data-number="6.4.1.1">
+<h4 data-number="6.4.1.1" class="anchored" data-anchor-id="akaike-information-criterion-aic"><span class="header-section-number">6.4.1.1</span> Akaike Information Criterion (AIC)</h4>
+<p>The Akaike Information Criterion <span class="citation" data-cites="Akaike1974">(AIC, <a href="references.html#ref-Akaike1974" role="doc-biblioref">Akaike, 1974</a>)</span> is defined: <span class="math display">\[
+AIC = 2 \times NLL + 2 \times k
+\]</span> where <span class="math inline">\(NLL\)</span> is the negative log-likelihood of the fitted model (i.e., the quantity that is minimized during model fitting) and <span class="math inline">\(k\)</span> is the number of free parameters in the model.</p>
+<p>When we use <code>fit_wienr</code>, the negative log-likelihood is the <code>$value</code> entry in the result. Meanwhile, we can get the number of free parameters as the length of the vector of best-fitting parameter estimates, as illustrated below:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>aic_twodrift <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> recog_fit<span class="sc">$</span>value <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">length</span>(recog_fit<span class="sc">$</span>par)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>aic_onedrift <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> recog_fit_onedrift<span class="sc">$</span>value <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">length</span>(recog_fit_onedrift<span class="sc">$</span>par)</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="st">"Two drift"</span> <span class="ot">=</span> aic_twodrift, <span class="st">"One drift"</span> <span class="ot">=</span> aic_onedrift)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Two drift One drift 
+ 448.8351  486.4642 </code></pre>
+</div>
+</div>
+<p>Recall that <em>lower</em> scores are better. Since the two-drift model has the lower AIC, we have evidence that this (simulated) participant is able to distinguish between targets and foils.</p>
+</section>
+<section id="bayesian-information-criterion-bic" class="level4" data-number="6.4.1.2">
+<h4 data-number="6.4.1.2" class="anchored" data-anchor-id="bayesian-information-criterion-bic"><span class="header-section-number">6.4.1.2</span> Bayesian Information Criterion (BIC)</h4>
+<p>The Bayesian Information Criterion (BIC, <span class="citation" data-cites="Schwarz1978">Schwarz (<a href="references.html#ref-Schwarz1978" role="doc-biblioref">1978</a>)</span>) is similar to the AIC but places a stronger penalty on the number of free parameters. Specifically, the penalty scales up with the logarithm of the number of observations. Letting <span class="math inline">\(N\)</span> stand for the number of observed trials, the BIC is defined <span class="math display">\[
+BIC = 2 \times NLL + k \log N
+\]</span> where, again, <span class="math inline">\(NLL\)</span> is the negative log-likelihood and <span class="math inline">\(k\)</span> is the number of free parameters. We can now calculate BIC for each model:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>bic_twodrift <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> recog_fit<span class="sc">$</span>value <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">nrow</span>(all_trials)) <span class="sc">*</span> <span class="fu">length</span>(recog_fit<span class="sc">$</span>par)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>bic_onedrift <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> recog_fit_onedrift<span class="sc">$</span>value <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">nrow</span>(all_trials)) <span class="sc">*</span> <span class="fu">length</span>(recog_fit_onedrift<span class="sc">$</span>par)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="st">"Two drift"</span> <span class="ot">=</span> bic_twodrift, <span class="st">"One drift"</span> <span class="ot">=</span> bic_onedrift)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Two drift One drift 
+ 464.2109  498.7649 </code></pre>
+</div>
+</div>
+<p>Once again, the two-drift model gets the lower—and therefore better—score.</p>
+</section>
+</section>
+</section>
+<section id="shiny-app" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="shiny-app"><span class="header-section-number">6.5</span> Shiny App</h2>
+<p>The “Manual parameter fitting” tab of the <a href="https://raw.githubusercontent.com/gregcox7/choice_rt_models/refs/heads/main/diffusion_shiny_app.r">Shiny app from the previous chapter</a> allows you to try searching for optimal parameters yourself. You will find how difficult it is to do by hand! There is also a “Parameter recovery” tab that replicates what we did in this chapter, namely, using the diffusion model to simulate data and then fitting the diffusion model to the simulated data. Finally, note that the App allows you to play around with other parameters, like the trial-by-trial variability parameters, that we did not use in this chapter.</p>
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
+<!-- download.file("https://github.com/gregcox7/choice_rt_models/raw/refs/heads/main/data/blast_data.rdata", "blast_data.rdata") -->
+<!-- load("blast_data.rdata") -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
+<!-- glimpse(blast_data) -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
+<!-- blast_data_cond <- blast_data %>% -->
+<!--     filter(group == "Inexperienced", subject == "M003", blockType == "Accuracy") -->
+<!-- ``` -->
+<!-- ```{r eval = FALSE} -->
+<!-- #| code-fold: show -->
+<!-- fit_model_nosv <- fit_wienr(rt = blast_data_cond$rt, response = (blast_data_cond$response == "Blast") + 1, fit_sv = F, fit_sw = F, fit_st0 = F, optim_control = list(trace = 1)) -->
+<!-- fit_model_wsv <- fit_wienr(rt = blast_data_cond$rt, response = (blast_data_cond$response == "Blast") + 1, fit_sv = T, fit_sw = F, fit_st0 = F, optim_control = list(trace = 1)) -->
+<!-- ``` -->
+<!-- ```{r eval = FALSE} -->
+<!-- #| code-fold: show -->
+<!-- to_fit <- expand_grid(fit_sv = c(TRUE, FALSE), fit_sw = c(TRUE, FALSE), fit_st0 = c(TRUE, FALSE)) %>% -->
+<!--     mutate(nll = NA, np = NA) -->
+<!-- fits <- list() -->
+<!-- for (i in 1:nrow(to_fit)) { -->
+<!--     fits[[i]] <- fit_wienr(rt = blast_data_cond$rt, response = (blast_data_cond$response == "Blast") + 1, fit_sv = to_fit$fit_sv[i], fit_sw = to_fit$fit_sw[i], fit_st0 = to_fit$fit_st0[i], optim_control = list(trace = 1)) -->
+<!--     to_fit$nll[i] <- fits[[i]]$value -->
+<!--     to_fit$np[i] <- length(fits[[i]]$par) -->
+<!--     to_fit$nobs[i] <- nrow(blast_data_cond) -->
+<!-- } -->
+<!-- to_fit %>% -->
+<!--     mutate(nobs = nrow(blast_data_cond)) %>% -->
+<!--     mutate(aic = 2 * nll + 2 * np, bic = 2 * nll + log(nobs) * np) %>% -->
+<!--     mutate(daic = exp(-0.5 * (aic - min(aic))), dbic = exp(-0.5 * (bic - min(bic)))) %>% -->
+<!--     mutate(waic = daic / sum(daic), wbic = dbic / sum(dbic)) -->
+<!-- ``` -->
+<!-- ```{r eval = FALSE} -->
+<!-- library(modelr) -->
+<!-- to_fit <- blast_data %>% -->
+<!--     data_grid(nesting(group, subject), blockType) -->
+<!-- model_pars <- c() -->
+<!-- model_pred <- c() -->
+<!-- pb <- txtProgressBar(min = 0, max = nrow(to_fit), initial = 0, style = 3) -->
+<!-- for (fit_index in 1:nrow(to_fit)) { -->
+<!--     this_subj_data <- semi_join(blast_data, to_fit[fit_index,]) %>% -->
+<!--         mutate( -->
+<!--             drift_index = as.numeric(interaction(difficulty, correct_response)) -->
+<!--         ) -->
+<!--     this_fit_init <- fit_wienr( -->
+<!--         rt = this_subj_data$rt, -->
+<!--         response = (this_subj_data$response == "Blast") + 1, -->
+<!--         fit_sv = F, -->
+<!--         fit_sw = F, -->
+<!--         fit_st0 = F, -->
+<!--         optim_control = list(trace = 1), -->
+<!--         drift_index = this_subj_data$drift_index -->
+<!--     ) -->
+<!--     this_fit <- fit_wienr( -->
+<!--         rt = this_subj_data$rt, -->
+<!--         response = (this_subj_data$response == "Blast") + 1, -->
+<!--         fit_sv = TRUE, -->
+<!--         fit_sw = F, -->
+<!--         fit_st0 = TRUE, -->
+<!--         init_par = this_fit_init$par, -->
+<!--         optim_control = list(trace = 1), -->
+<!--         drift_index = this_subj_data$drift_index -->
+<!--     ) -->
+<!--     this_ddm_pars <- coef(this_ddm_fit, dpar = "full") -->
+<!--     ddm_pars <- rbind( -->
+<!--         ddm_pars, -->
+<!--         cbind(to_fit[fit_index,], tibble(par_name = names(this_ddm_pars), val = this_ddm_pars) %>% extract(par_name, into = c("coef", "dpar"), regex = "(.+) \\((.+)\\)")) -->
+<!--     ) -->
+<!--     this_pred_pars <- this_subj_data %>% -->
+<!--         mutate(rownum = 1:nrow(this_subj_data)) %>% -->
+<!--         group_by(blockType, difficulty, correct_response) %>% -->
+<!--         summarize(n = n(), i = first(rownum), .groups = "keep") %>% -->
+<!--         mutate(a = c(this_ddm_fit$mmatrix$boundary[i,] %*% as.matrix(this_ddm_fit$coefficients$boundary))) %>% -->
+<!--         mutate(v = c(this_ddm_fit$mmatrix$drift[i,] %*% as.matrix(this_ddm_fit$coefficients$drift))) %>% -->
+<!--         mutate(t0 = c(this_ddm_fit$mmatrix$ndt[i,] %*% as.matrix(this_ddm_fit$coefficients$ndt))) %>% -->
+<!--         mutate(bias = c(this_ddm_fit$mmatrix$bias[i,] %*% as.matrix(this_ddm_fit$coefficients$bias))) %>% -->
+<!--         mutate(sv = c(this_ddm_fit$mmatrix$sv[i,] %*% as.matrix(this_ddm_fit$coefficients$sv))) %>% -->
+<!--         # mutate(sv = 0) %>% -->
+<!--         mutate(z = bias * a) -->
+<!--     this_pred_data <- c() -->
+<!--     for (i in 1:nrow(this_pred_pars)) { -->
+<!--         p_resp_upper <- pdiffusion(rt = 5, response = "upper", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], maxt = 5) -->
+<!--         p_resp_lower <- pdiffusion(rt = 5, response = "lower", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], maxt = 5) -->
+<!--         upper_q <- qdiffusion(p = rt_quantiles, response = "upper", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], scale_p = TRUE, maxt = 5, interval = c(0, 5)) -->
+<!--         lower_q <- qdiffusion(p = rt_quantiles, response = "lower", a = this_pred_pars$a[i], v = this_pred_pars$v[i], t0 = this_pred_pars$t0[i], z = this_pred_pars$z[i], sv = this_pred_pars$sv[i], scale_p = TRUE, maxt = 5, interval = c(0, 5)) -->
+<!--         this_pred_data <- rbind( -->
+<!--             this_pred_data, -->
+<!--             cbind(this_pred_pars[i,], tibble(response = "Blast", p_resp = p_resp_upper / (p_resp_upper + p_resp_lower), rt_p = rt_quantiles, rt_q = upper_q)), -->
+<!--             cbind(this_pred_pars[i,], tibble(response = "Non-blast", p_resp = p_resp_lower / (p_resp_upper + p_resp_lower), rt_p = rt_quantiles, rt_q = lower_q)) -->
+<!--         ) -->
+<!--     } -->
+<!--     ddm_pred <- rbind( -->
+<!--         ddm_pred, -->
+<!--         cbind(to_fit[fit_index,], this_pred_data) -->
+<!--     ) -->
+<!--     setTxtProgressBar(pb, fit_index) -->
+<!-- } -->
+<!-- close(pb) -->
+<!-- ddm_pars %>% -->
+<!--     ggplot(aes(x = coef, y = val, color = group, shape = group)) + -->
+<!--     geom_point(position = position_jitterdodge(jitter.width = 0.1, dodge.width = 0.4), alpha = 0.5, size = 0.5) + -->
+<!--     stat_summary(geom = "pointrange", fun.data = mean_cl_boot, position = position_dodge(width = 0.4)) + -->
+<!--     facet_wrap("dpar", scales = "free") -->
+<!-- obs_rt_quantiles <- blast_data %>% -->
+<!--     group_by(group, subject, blockType, difficulty, correct_response, response) %>% -->
+<!--     reframe(rt_q = quantile(rt, probs = rt_quantiles)) %>% -->
+<!--     mutate(rt_p = rep(rt_quantiles, n() / length(rt_quantiles))) %>% -->
+<!--     complete(nesting(group, subject), blockType, difficulty, correct_response, response, rt_p, fill = list(rt_q = NA)) -->
+<!-- obs_p_resp <- blast_data %>% -->
+<!--     group_by(group, subject, blockType, difficulty, correct_response, response) %>% -->
+<!--     summarize(n_resp = n(), .groups = "keep") %>% -->
+<!--     ungroup() %>% -->
+<!--     complete(nesting(group, subject), blockType, difficulty, correct_response, response, fill = list(n_resp = 0)) %>% -->
+<!--     group_by(group, subject, blockType, difficulty, correct_response) %>% -->
+<!--     mutate(p_resp = n_resp / sum(n_resp)) -->
+<!-- obs_pred_data <- full_join( -->
+<!--     full_join(obs_p_resp, obs_rt_quantiles) %>% mutate(source = "Observed"), -->
+<!--     ddm_pred %>% mutate(source = "Predicted") -->
+<!-- ) %>% -->
+<!--     mutate(correct = factor(correct_response == response, levels = c(TRUE, FALSE), labels = c("Correct", "Incorrect"))) -->
+<!-- obs_pred_data %>% -->
+<!--     group_by(blockType, difficulty, correct_response, response, correct, source, rt_p) %>% -->
+<!--     summarize(rt_q = mean(rt_q, na.rm = TRUE), p_resp = mean(p_resp, na.rm = TRUE)) %>% -->
+<!--     ggplot(aes(x = p_resp, y = rt_q, color = interaction(correct, correct_response))) + -->
+<!--     geom_point(aes(alpha = difficulty, shape = source)) + -->
+<!--     geom_line(aes(linetype = source, group = interaction(correct, correct_response, rt_p, source))) + -->
+<!--     facet_wrap("blockType") -->
+<!-- ``` -->
+</section>
+<section id="exercises" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="exercises"><span class="header-section-number">6.6</span> Exercises</h2>
+<ol type="1">
+<li>Consider a dataset with one particularly short RT. Would you want to allow for variability in residual time when fitting these data? Why or why not?</li>
+<li>Using the Shiny App, see if you can “fool” the model! Specifically, try simulating data until there is a notable discrepancy between the best-fitting parameter values and the values you used to simulate the data. What features of the simulated data may have resulted in this discrepancy?</li>
+<li>We saw an example in the chapter of how drift rates might vary between conditions of an experiment even while the other parameters of the model would stay the same.
+<ol type="a">
+<li>What other examples can you think of where the properties of the <em>evidence</em> change but other model parameters do not?</li>
+<li>Give an example of a situation in which you would expect response boundaries to differ between conditions, but not drift rates.</li>
+<li>Give an example of a situation in which you would expect residual time to differ between conditions, but not drift rates or boundaries.</li>
+</ol></li>
+<li>Repeat our recognition memory simulations and model comparisons, but instead of simulating data where the drift rate actually differs between targets and foils, simulate data in which targets and foils have the same drift rate. Use both AIC and BIC to compare the fits of the two-drift and one-drift models. Do these information criteria favor the “correct” model?</li>
+</ol>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-Akaike1974" class="csl-entry" role="listitem">
+Akaike, H. (1974). <a href="https://www.ncbi.nlm.nih.gov/pubmed/1100705">A new look at the statistical model identification</a>. <em>IEEE Transactions on Automatic Control</em>, <em>19</em>(6), 716–723.
+</div>
+<div id="ref-BlurtonEtAl2012" class="csl-entry" role="listitem">
+Blurton, S. P., Kesselmeier, M., &amp; Gondan, M. (2012). Fast and accurate calculations for cumulative first-passage time distributions in wiener diffusion models. <em>Journal of Mathematical Psychology</em>, <em>56</em>(6), 470–475. https://doi.org/<a href="https://doi.org/10.1016/j.jmp.2012.09.002">https://doi.org/10.1016/j.jmp.2012.09.002</a>
+</div>
+<div id="ref-GondanEtAl2014" class="csl-entry" role="listitem">
+Gondan, M., Blurton, S. P., &amp; Kesselmeier, M. (2014). Even faster and even more accurate first-passage time densities and distributions for the wiener diffusion model. <em>Journal of Mathematical Psychology</em>, <em>60</em>, 20–22. https://doi.org/<a href="https://doi.org/10.1016/j.jmp.2014.05.002">https://doi.org/10.1016/j.jmp.2014.05.002</a>
+</div>
+<div id="ref-HartmannKlauer2021" class="csl-entry" role="listitem">
+Hartmann, R., &amp; Klauer, K. C. (2021). Partial derivatives for the first-passage time distribution in wiener diffusion models. <em>Journal of Mathematical Psychology</em>, <em>103</em>, 102550. https://doi.org/<a href="https://doi.org/10.1016/j.jmp.2021.102550">https://doi.org/10.1016/j.jmp.2021.102550</a>
+</div>
+<div id="ref-WienR" class="csl-entry" role="listitem">
+Hartmann, R., &amp; Klauer, K. C. (2023). <em>WienR: Derivatives of the first-passage time density and cumulative distribution function, and random sampling from the (truncated) first-passage time distribution</em>. <a href="https://CRAN.R-project.org/package=WienR">https://CRAN.R-project.org/package=WienR</a>
+</div>
+<div id="ref-NavarroFuss2009" class="csl-entry" role="listitem">
+Navarro, D. J., &amp; Fuss, I. G. (2009). Fast and accurate calculations for first-passage times in wiener diffusion models. <em>Journal of Mathematical Psychology</em>, <em>53</em>(4), 222–230. https://doi.org/<a href="https://doi.org/10.1016/j.jmp.2009.02.003">https://doi.org/10.1016/j.jmp.2009.02.003</a>
+</div>
+<div id="ref-Ratcliff1978" class="csl-entry" role="listitem">
+Ratcliff, R. (1978). A theory of memory retrieval. <em>Psychological Review</em>, <em>85</em>(2), 59–108.
+</div>
+<div id="ref-Schwarz1978" class="csl-entry" role="listitem">
+Schwarz, G. (1978). Estimating the dimension of a model. <em>The Annals of Statistics</em>, <em>6</em>(2), 461–464.
+</div>
+<div id="ref-Tuerlincx2004" class="csl-entry" role="listitem">
+Tuerlincx, F. (2004). The efficient computation of the cumulative distribution and probability density functions in the diffusion model. <em>Behavior Research Methods, Instruments, &amp; Computers</em>, <em>36</em>(4), 702–716.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./diffusion_sim.html" class="pagination-link" aria-label="From random walk to diffusion">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">From random walk to diffusion</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
