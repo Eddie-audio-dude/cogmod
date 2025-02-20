@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.57">
+<meta name="generator" content="quarto-1.6.39">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,10 +91,10 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-03787a5611acd63027d79b3f02190e6e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -124,13 +124,13 @@ div.csl-indent {
 }</script>
 <link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
 <script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
-<script src="site_libs/plotly-binding-4.10.4/plotly.js"></script>
+<script src="site_libs/plotly-binding-4.9.3/plotly.js"></script>
 <script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
 <script src="site_libs/jquery-3.5.1/jquery.min.js"></script>
-<link href="site_libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
-<script src="site_libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
-<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
-<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+<link href="site_libs/crosstalk-1.2.0/css/crosstalk.min.css" rel="stylesheet">
+<script src="site_libs/crosstalk-1.2.0/js/crosstalk.min.js"></script>
+<link href="site_libs/plotly-htmlwidgets-css-1.57.1/plotly-htmlwidgets.css" rel="stylesheet">
+<script src="site_libs/plotly-main-1.57.1/plotly-latest.min.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -238,6 +238,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="./diffusion_fit.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Fitting a diffusion model to data</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model_comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -1112,7 +1118,7 @@ x \left( t + \Delta t \right) - x(t) &amp; \sim 2 \times \text{Bernoulli} \left(
 </div>
 <div class="cell-output-display">
 <div class="plotly html-widget html-fill-item" id="htmlwidget-254ba0c536aba6f5d5c3" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-254ba0c536aba6f5d5c3">{"x":{"visdat":{"56be2ad11a1c":["function () ","plotlyVisDat"]},"cur_data":"56be2ad11a1c","attrs":{"56be2ad11a1c":{"x":{},"y":{},"z":{},"text":["Item 1","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"`Dimension 1`"},"yaxis":{"title":"`Dimension 2`"},"zaxis":{"title":"`Dimension 3`"}},"hovermode":"closest","showlegend":false},"source":"A","config":{"modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"data":[{"x":[-0.4679161611520406,-0.55492658286274077,-0.47428333513396143,-0.50625809279990275,0.51103974867404744,0.45783054068415885,0.56694547092957315,0.46756841166086582],"y":[-0.46321903909441836,0.49939063638984044,-0.13202067242339119,0.0055786743535065283,-0.22284422229517822,0.33649589490445841,-0.28836624054434484,0.26498496870952648],"z":[-0.080564994532971015,0.070994597405408214,0.43312164966214295,-0.40175330903355666,-0.3038158169562874,-0.27302187298276354,0.24624697977727203,0.30879276666075506],"text":["Item 1","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8"],"type":"scatter3d","mode":"markers","marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"line":{"color":"rgba(31,119,180,1)"},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-254ba0c536aba6f5d5c3">{"x":{"visdat":{"4c2ba7a95e763":["function () ","plotlyVisDat"]},"cur_data":"4c2ba7a95e763","attrs":{"4c2ba7a95e763":{"x":{},"y":{},"z":{},"text":["Item 1","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8"],"alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"`Dimension 1`"},"yaxis":{"title":"`Dimension 2`"},"zaxis":{"title":"`Dimension 3`"}},"hovermode":"closest","showlegend":false},"source":"A","config":{"showSendToCloud":false},"data":[{"x":[-0.4679161611520406,-0.55492658286274077,-0.47428333513396143,-0.50625809279990275,0.51103974867404744,0.45783054068415885,0.56694547092957315,0.46756841166086582],"y":[-0.46321903909441836,0.49939063638984044,-0.13202067242339119,0.0055786743535065283,-0.22284422229517822,0.33649589490445841,-0.28836624054434484,0.26498496870952648],"z":[-0.080564994532971015,0.070994597405408214,0.43312164966214295,-0.40175330903355666,-0.3038158169562874,-0.27302187298276354,0.24624697977727203,0.30879276666075506],"text":["Item 1","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8"],"type":"scatter3d","mode":"markers","marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"line":{"color":"rgba(31,119,180,1)"},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <p>In addition for each trial of the recognition task, the <code>study_items</code> matrix tells us which of the two items had been presented as part of the set to be remembered and the <code>probe_item</code> vector tells us what the probe item was. These numbers refer to row in the <code>stim_coords</code> matrix.</p>
@@ -1372,8 +1378,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -1484,7 +1488,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
-      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {

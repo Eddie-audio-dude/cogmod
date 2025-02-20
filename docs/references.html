@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.57">
+<meta name="generator" content="quarto-1.6.39">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -49,16 +49,16 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./diffusion_fit.html" rel="prev">
+<link href="./model_comparison.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-03787a5611acd63027d79b3f02190e6e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -168,6 +168,12 @@ div.csl-indent {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./model_comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./references.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">References</span></a>
   </div>
@@ -208,6 +214,11 @@ Akaike, H. (1974). <a href="https://www.ncbi.nlm.nih.gov/pubmed/1100705">A new l
 statistical model identification</a>. <em>IEEE Transactions on Automatic
 Control</em>, <em>19</em>(6), 716–723.
 </div>
+<div id="ref-ArlotCelisse2010" class="csl-entry" role="listitem">
+Arlot, S., &amp; Celisse, A. (2010). A survey of cross-validation
+procedures for model selection. <em>Statistics Surveys</em>, <em>4</em>,
+40–79. <a href="https://doi.org/10.1214/09-SS054">https://doi.org/10.1214/09-SS054</a>
+</div>
 <div id="ref-BlurtonEtAl2012" class="csl-entry" role="listitem">
 Blurton, S. P., Kesselmeier, M., &amp; Gondan, M. (2012). Fast and
 accurate calculations for cumulative first-passage time distributions in
@@ -219,10 +230,19 @@ Broadbent, D. E. (1957). A mechanical model for human attention and
 immediate memory. <em>Psychological Review</em>, <em>64</em>(3),
 205–215.
 </div>
+<div id="ref-Browne2000" class="csl-entry" role="listitem">
+Browne, M. W. (2000). Cross-validation methods. <em>Journal of
+Mathematical Psychology</em>, <em>44</em>(1), 108–132. <a href="https://doi.org/10.1006/jmps.1999.1279">https://doi.org/10.1006/jmps.1999.1279</a>
+</div>
 <div id="ref-BusemeyerTownsend1993" class="csl-entry" role="listitem">
 Busemeyer, J. R., &amp; Townsend, J. T. (1993). Decision field theory: A
 dynamic–cognitive approach to decision making in an uncertain
 environment. <em>Psychological Review</em>, <em>100</em>(3), 432–459.
+</div>
+<div id="ref-BusemeyerWang2000" class="csl-entry" role="listitem">
+Busemeyer, J. R., &amp; Wang, Y.-M. (2000). Model comparisons and model
+selections based on generalization criterion methodology. <em>Journal of
+Mathematical Psychology</em>, <em>44</em>(1), 171–189. <a href="https://doi.org/10.1006/jmps.1999.1282">https://doi.org/10.1006/jmps.1999.1282</a>
 </div>
 <div id="ref-CoxShiffrinChapter" class="csl-entry" role="listitem">
 Cox, G. E., &amp; Shiffrin, R. M. (2024). Computational models of event
@@ -237,6 +257,11 @@ Brain Sciences</em>, <em>3</em>(3), 428–430. <a href="https://doi.org/10.1017/
 Diederich, A. (1997). Dynamic stochastic models for decision making
 under time constraints. <em>Journal of Mathematical Psychology</em>,
 <em>41</em>(3), 260–274. <a href="https://doi.org/10.1006/jmps.1997.1167">https://doi.org/10.1006/jmps.1997.1167</a>
+</div>
+<div id="ref-GelmanHwangVehtari2014" class="csl-entry" role="listitem">
+Gelman, A., Hwang, J., &amp; Vehtari, A. (2014). Understanding
+predictive information criteria for bayesian models. <em>Statistics and
+Computing</em>, <em>24</em>(6), 997–1016. <a href="https://doi.org/10.1007/s11222-013-9416-2">https://doi.org/10.1007/s11222-013-9416-2</a>
 </div>
 <div id="ref-GillespieCox2024" class="csl-entry" role="listitem">
 Gillespie, N. F., &amp; Cox, G. E. (2024). <em>Perception and memory for
@@ -260,6 +285,11 @@ Hartmann, R., &amp; Klauer, K. C. (2023). <em>WienR: Derivatives of the
 first-passage time density and cumulative distribution function, and
 random sampling from the (truncated) first-passage time
 distribution</em>. <a href="https://CRAN.R-project.org/package=WienR">https://CRAN.R-project.org/package=WienR</a>
+</div>
+<div id="ref-Navarro2018" class="csl-entry" role="listitem">
+Navarro, D. J. (2018). Between the devil and the deep blue sea: Tensions
+between scientific judgement and statistical model selection.
+<em>Computational Brain &amp; Behavior</em>. <a href="https://doi.org/10.1007/s42113-018-0019-z">https://doi.org/10.1007/s42113-018-0019-z</a>
 </div>
 <div id="ref-NavarroFuss2009" class="csl-entry" role="listitem">
 Navarro, D. J., &amp; Fuss, I. G. (2009). Fast and accurate calculations
@@ -296,6 +326,15 @@ Short-term memory scanning viewed as exemplar-based categorization.
 Nosofsky, R. M., &amp; Palmeri, T. J. (1997). An exemplar-based random
 walk model of speeded classification. <em>Psychological Review</em>,
 <em>104</em>(2), 266–300.
+</div>
+<div id="ref-PiironenVehtari2017" class="csl-entry" role="listitem">
+Piironen, J., &amp; Vehtari, A. (2017). Comparison of bayesian
+predictive methods for model selection. <em>Statistics and
+Computing</em>, <em>27</em>(3), 711–735. <a href="https://doi.org/10.1007/s11222-016-9649-y">https://doi.org/10.1007/s11222-016-9649-y</a>
+</div>
+<div id="ref-Raftery1995" class="csl-entry" role="listitem">
+Raftery, A. E. (1995). Bayesian model selection in social research.
+<em>Sociological Methodology</em>, <em>25</em>, 111–163. <a href="https://doi.org/10.2307/271063">https://doi.org/10.2307/271063</a>
 </div>
 <div id="ref-Ratcliff1978" class="csl-entry" role="listitem">
 Ratcliff, R. (1978). A theory of memory retrieval. <em>Psychological
@@ -334,6 +373,15 @@ Tuerlincx, F. (2004). The efficient computation of the cumulative
 distribution and probability density functions in the diffusion model.
 <em>Behavior Research Methods, Instruments, &amp; Computers</em>,
 <em>36</em>(4), 702–716.
+</div>
+<div id="ref-VehtariLampinen2002" class="csl-entry" role="listitem">
+Vehtari, A., &amp; Lampinen, J. (2002). Bayesian model assessment and
+comparison using cross-validation predictive densities. <em>Neural
+Computation</em>, <em>14</em>(10), 2439–2468. <a href="https://doi.org/10.1162/08997660260293292">https://doi.org/10.1162/08997660260293292</a>
+</div>
+<div id="ref-Zucchini2000" class="csl-entry" role="listitem">
+Zucchini, W. (2000). An introduction to model selection. <em>Journal of
+Mathematical Psychology</em>, <em>44</em>(1), 41–61. <a href="https://doi.org/10.1006/jmps.1999.1276">https://doi.org/10.1006/jmps.1999.1276</a>
 </div>
 </div>
 
@@ -422,8 +470,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -534,7 +580,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
-      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {
@@ -762,8 +807,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./diffusion_fit.html" class="pagination-link" aria-label="Fitting a diffusion model to data">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Fitting a diffusion model to data</span></span>
+      <a href="./model_comparison.html" class="pagination-link" aria-label="Model complexity and model comparison">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">

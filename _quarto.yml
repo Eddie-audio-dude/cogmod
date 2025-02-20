@@ -14,6 +14,7 @@ book:
     - random_walk.qmd
     - diffusion_sim.qmd
     - diffusion_fit.qmd
+    - model_comparison.qmd
     # - blast_example.qmd
     - references.qmd
 

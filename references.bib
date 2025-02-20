@@ -9,6 +9,55 @@
 	year = {1980}
 }
 
+@article{Browne2000,
+	title = {Cross-Validation Methods},
+	volume = {44},
+	issn = {00222496},
+	url = {https://linkinghub.elsevier.com/retrieve/pii/S0022249699912798},
+	doi = {10.1006/jmps.1999.1279},
+	pages = {108--132},
+	number = {1},
+	journaltitle = {Journal of Mathematical Psychology},
+	shortjournal = {Journal of Mathematical Psychology},
+	author = {Browne, Michael W},
+	urldate = {2020-09-27},
+	date = {2000-03},
+	langid = {english},
+}
+
+@article{Zucchini2000,
+	title = {An Introduction to Model Selection},
+	volume = {44},
+	issn = {0022-2496},
+	url = {http://www.sciencedirect.com/science/article/pii/S0022249699912762},
+	doi = {10.1006/jmps.1999.1276},
+	abstract = {This paper is an introduction to model selection intended for nonspecialists who have knowledge of the statistical concepts covered in a typical first (occasionally second) statistics course. The intention is to explain the ideas that generate frequentist methodology for model selection, for example the Akaike information criterion, bootstrap criteria, and cross-validation criteria. Bayesian methods, including the Bayesian information criterion, are also mentioned in the context of the framework outlined in the paper. The ideas are illustrated using an example in which observations are available for the entire population of interest. This enables us to examine and to measure effects that are usually invisible, because in practical applications only a sample from the population is observed. The problem of selection bias, a hazard of which one needs to be aware in the context of model selection, is also discussed.},
+	pages = {41--61},
+	number = {1},
+	journaltitle = {Journal of Mathematical Psychology},
+	author = {Zucchini, Walter},
+	urldate = {2012-02-07},
+	date = {2000},
+}
+
+@article{ArlotCelisse2010,
+	title = {A survey of cross-validation procedures for model selection},
+	volume = {4},
+	issn = {1935-7516},
+	url = {https://projecteuclid.org/euclid.ssu/1268143839},
+	doi = {10.1214/09-SS054},
+	abstract = {Used to estimate the risk of an estimator or to perform model selection, cross-validation is a widespread strategy because of its simplicity and its (apparent) universality. Many results exist on model selection performances of cross-validation procedures. This survey intends to relate these results to the most recent advances of model selection theory, with a particular emphasis on distinguishing empirical statements from rigorous theoretical results. As a conclusion, guidelines are provided for choosing the best cross-validation procedure according to the particular features of the problem in hand.},
+	pages = {40--79},
+	journaltitle = {Statistics Surveys},
+	shortjournal = {Statist. Surv.},
+	author = {Arlot, Sylvain and Celisse, Alain},
+	urldate = {2017-09-21},
+	date = {2010},
+	mrnumber = {MR2602303},
+	zmnumber = {1190.62080},
+	keywords = {Model selection, cross-validation, leave-one-out},
+}
+
 @article{knuth84,
   author = {Knuth, Donald E.},
   title = {Literate Programming},
@@ -281,6 +330,70 @@ abstract = {We propose a new method for quickly calculating the probability dens
   pages = 	{7:1--7:30}
 }
 
+@article{VehtariLampinen2002,
+	title = {Bayesian Model Assessment and Comparison Using Cross-Validation Predictive Densities},
+	volume = {14},
+	issn = {0899-7667},
+	url = {http://dx.doi.org/10.1162/08997660260293292},
+	doi = {10.1162/08997660260293292},
+	abstract = {In this work, we discuss practical methods for the assessment, comparison, and selection of complex hierarchical Bayesian models. A natural way to assess the goodness of the model is to estimate its future predictive capability by estimating expected utilities. Instead of just making a point estimate, it is important to obtain the distribution of the expected utility estimate because it describes the uncertainty in the estimate. The distributions of the expected utility estimates can also be used to compare models, for example, by computing the probability of one model having a better expected utility than some other model. We propose an approach using cross-validation predictive densities to obtain expected utility estimates and Bayesian bootstrap to obtain samples from their distributions. We also discuss the probabilistic assumptions made and properties of two practical cross-validation methods, importance sampling and k-fold cross-validation. As illustrative examples, we use multilayer perceptron neural networks and gaussian processes with Markov chain Monte Carlo sampling in one toy problem and two challenging real-world problems.},
+	pages = {2439--2468},
+	number = {10},
+	journaltitle = {Neural Computation},
+	shortjournal = {Neural Computation},
+	author = {Vehtari, Aki and Lampinen, Jouko},
+	urldate = {2016-02-28},
+	date = {2002},
+}
+
+@article{PiironenVehtari2017,
+	title = {Comparison of Bayesian predictive methods for model selection},
+	volume = {27},
+	issn = {0960-3174, 1573-1375},
+	url = {https://link.springer.com/article/10.1007/s11222-016-9649-y},
+	doi = {10.1007/s11222-016-9649-y},
+	abstract = {The goal of this paper is to compare several widely used Bayesian model selection methods in practical model selection problems, highlight their differences and give recommendations about the preferred approaches. We focus on the variable subset selection for regression and classification and perform several numerical experiments using both simulated and real world data. The results show that the optimization of a utility estimate such as the cross-validation ({CV}) score is liable to finding overfitted models due to relatively high variance in the utility estimates when the data is scarce. This can also lead to substantial selection induced bias and optimism in the performance evaluation for the selected model. From a predictive viewpoint, best results are obtained by accounting for model uncertainty by forming the full encompassing model, such as the Bayesian model averaging solution over the candidate models. If the encompassing model is too complex, it can be robustly simplified by the projection method, in which the information of the full model is projected onto the submodels. This approach is substantially less prone to overfitting than selection based on {CV}-score. Overall, the projection method appears to outperform also the maximum a posteriori model and the selection of the most probable variables. The study also demonstrates that the model selection can greatly benefit from using cross-validation outside the searching process both for guiding the model size selection and assessing the predictive performance of the finally selected model.},
+	pages = {711--735},
+	number = {3},
+	journaltitle = {Statistics and Computing},
+	shortjournal = {Stat Comput},
+	author = {Piironen, Juho and Vehtari, Aki},
+	urldate = {2018-03-01},
+	date = {2017-05-01},
+	langid = {english},
+}
+
+@article{GelmanHwangVehtari2014,
+	title = {Understanding predictive information criteria for Bayesian models},
+	volume = {24},
+	issn = {0960-3174, 1573-1375},
+	url = {https://link.springer.com/article/10.1007/s11222-013-9416-2},
+	doi = {10.1007/s11222-013-9416-2},
+	abstract = {We review the Akaike, deviance, and Watanabe-Akaike information criteria from a Bayesian perspective, where the goal is to estimate expected out-of-sample-prediction error using a bias-corrected adjustment of within-sample error. We focus on the choices involved in setting up these measures, and we compare them in three simple examples, one theoretical and two applied. The contribution of this paper is to put all these information criteria into a Bayesian predictive context and to better understand, through small examples, how these methods can apply in practice.},
+	pages = {997--1016},
+	number = {6},
+	journaltitle = {Statistics and Computing},
+	shortjournal = {Stat Comput},
+	author = {Gelman, Andrew and Hwang, Jessica and Vehtari, Aki},
+	urldate = {2017-08-03},
+	date = {2014-11-01},
+	langid = {english},
+}
+
+@article{Raftery1995,
+	title = {Bayesian Model Selection in Social Research},
+	volume = {25},
+	issn = {0081-1750},
+	url = {http://www.jstor.org/stable/271063},
+	doi = {10.2307/271063},
+	abstract = {It is argued that P-values and the tests based upon them give unsatisfactory results, especially in large samples. It is shown that, in regression, when there are many candidate independent variables, standard variable selection procedures can give very misleading results. Also, by selecting a single model, they ignore model uncertainty and so underestimate the uncertainty about quantities of interest. The Bayesian approach to hypothesis testing, model selection, and accounting for model uncertainty is presented. Implementing this is straightforward through the use of the simple and accurate {BIC} approximation, and it can be done using the output from standard software. Specific results are presented for most of the types of model commonly used in sociology. It is shown that this approach overcomes the difficulties with P-values and standard model selection procedures based on them. It also allows easy comparison of nonnested models, and permits the quantification of the evidence for a null hypothesis of interest, such as a convergence theory or a hypothesis about societal norms.},
+	pages = {111--163},
+	journaltitle = {Sociological Methodology},
+	author = {Raftery, Adrian E.},
+	urldate = {2018-01-16},
+	date = {1995},
+}
+
 @Article{BogaczEtAl2006,
   author = 	{Rafal Bogacz and Eric Brown and Jeff Moehlis and Philip Holmes and Jonathan D. Cohen},
   title = 	{The Physics of Optimal Decision Making: A Formal Analysis of Models of Performance in Two-Alternative Forced-Choice Tasks},
@@ -365,6 +478,22 @@ abstract = {We propose a new method for quickly calculating the probability dens
   volume = 	30,
   number = 	2,
   pages = 	{272--277}
+}
+
+@article{BusemeyerWang2000,
+	title = {Model Comparisons and Model Selections Based on Generalization Criterion Methodology},
+	volume = {44},
+	issn = {00222496},
+	url = {https://linkinghub.elsevier.com/retrieve/pii/S0022249699912828},
+	doi = {10.1006/jmps.1999.1282},
+	pages = {171--189},
+	number = {1},
+	journaltitle = {Journal of Mathematical Psychology},
+	shortjournal = {Journal of Mathematical Psychology},
+	author = {Busemeyer, Jerome R and Wang, Yi-Min},
+	urldate = {2020-03-11},
+	date = {2000-03},
+	langid = {english},
 }
 
 @Article{BusemeyerMyung1992,
@@ -1813,6 +1942,22 @@ abstract = {This paper introduces themultiattribute dynamicdecision model (MADD)
   year =	1986,
   publisher =	{The MIT Press},
   address =	{Cambridge, MA}
+}
+
+@article{Navarro2018,
+	title = {Between the Devil and the Deep Blue Sea: Tensions Between Scientific Judgement and Statistical Model Selection},
+	issn = {2522-087X},
+	url = {https://doi.org/10.1007/s42113-018-0019-z},
+	doi = {10.1007/s42113-018-0019-z},
+	shorttitle = {Between the Devil and the Deep Blue Sea},
+	abstract = {Discussions of model selection in the psychological literature typically frame the issues as a question of statistical inference, with the goal being to determine which model makes the best predictions about data. Within this setting, advocates of leave-one-out cross-validation and Bayes factors disagree on precisely which prediction problem model selection questions should aim to answer. In this comment, I discuss some of these issues from a scientific perspective. What goal does model selection serve when all models are known to be systematically wrong? How might “toy problems” tell a misleading story? How does the scientific goal of explanation align with (or differ from) traditional statistical concerns? I do not offer answers to these questions, but hope to highlight the reasons why psychological researchers cannot avoid asking them.},
+	journaltitle = {Computational Brain \& Behavior},
+	shortjournal = {Comput Brain Behav},
+	author = {Navarro, Danielle J.},
+	urldate = {2018-11-29},
+	date = {2018-11-27},
+	langid = {english},
+	keywords = {Model selection, Science, Statistics},
 }
 
 @InProceedings{SanbornEtAl2006,

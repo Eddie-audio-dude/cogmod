@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.39">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; Model complexity and model comparison – Computational Cognitive Models</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./diffusion_fit.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-03787a5611acd63027d79b3f02190e6e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./model_comparison.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Computational Cognitive Models</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ebrw.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./r_coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Programming with R</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./random_walk.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion_sim.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">From random walk to diffusion</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion_fit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Fitting a diffusion model to data</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model_comparison.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#complexity-and-generalization" id="toc-complexity-and-generalization" class="nav-link active" data-scroll-target="#complexity-and-generalization"><span class="header-section-number">7.1</span> Complexity and generalization</a></li>
+  <li><a href="#cross-validation" id="toc-cross-validation" class="nav-link" data-scroll-target="#cross-validation"><span class="header-section-number">7.2</span> Cross-validation</a>
+  <ul class="collapse">
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example"><span class="header-section-number">7.2.1</span> Example</a></li>
+  <li><a href="#k-fold-cross-validation" id="toc-k-fold-cross-validation" class="nav-link" data-scroll-target="#k-fold-cross-validation"><span class="header-section-number">7.2.2</span> <span class="math inline">\(K\)</span>-fold cross-validation</a></li>
+  <li><a href="#leave-one-out-cross-validation" id="toc-leave-one-out-cross-validation" class="nav-link" data-scroll-target="#leave-one-out-cross-validation"><span class="header-section-number">7.2.3</span> Leave-one-out cross-validation</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">7.2.4</span> Summary</a></li>
+  </ul></li>
+  <li><a href="#akaike-information-criterion" id="toc-akaike-information-criterion" class="nav-link" data-scroll-target="#akaike-information-criterion"><span class="header-section-number">7.3</span> Akaike Information Criterion</a></li>
+  <li><a href="#bayes-factors-and-bayesian-information-criterion" id="toc-bayes-factors-and-bayesian-information-criterion" class="nav-link" data-scroll-target="#bayes-factors-and-bayesian-information-criterion"><span class="header-section-number">7.4</span> Bayes Factors and Bayesian Information Criterion</a></li>
+  <li><a href="#simplicity-vs.-complexity" id="toc-simplicity-vs.-complexity" class="nav-link" data-scroll-target="#simplicity-vs.-complexity"><span class="header-section-number">7.5</span> Simplicity vs.&nbsp;Complexity</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">7.6</span> Exercises</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In the previous chapter, we were introduced to the idea of using different “information criteria” to compare models with different numbers of parameters. The idea behind these criteria was to provide a quantitative “score” that rewards a model for fitting data but penalizes it for complexity, so as to identify which of a set of models achieved the best balance between complexity and fit. In this chapter, we delve more deeply into some of the methods by which we compare different models, focusing on just a handful of these methods for our purposes. That said, all model comparison approaches share the goal of balancing quality of fit against complexity, inviting us to consider more broadly the different reasons we might compare models and why we (sometimes) prefer simpler models over more complex ones.</p>
+<section id="complexity-and-generalization" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="complexity-and-generalization"><span class="header-section-number">7.1</span> Complexity and generalization</h2>
+<p>In a way, the issue with model complexity boils down to the same issue we have in statistics when using a sample to estimate some population quantity. In statistics, where we use models on the “descriptive” end of the modeling continuum, our goal is to identify patterns in our sample of data that we would expect to see in other samples from some broader population. In that way, we <em>generalize</em> whatever conclusions we draw about our sample to this broader population. We have essentially the same goal when applying a cognitive model, even though it falls on the “causal” end of the modeling continuum: By fitting the model to a sample of data, we are hoping to draw some inferences about how a sample of participants accomplished a particular task. We hope that those inferences apply more broadly, i.e., that we can make a <em>general</em> statement about how some broader population accomplishes that task.</p>
+<p>The challenge we face in both statistics and cognitive modeling is that we know that not every sample from the same population is identical. This sampling variability has two consequences: First, it is possible that our observed data sample is <em>biased</em>, in the sense that it has some idiosyncratic property that is not representative of what we would expect to see in the population more broadly. In that case, what we conclude about our sample may not generalize to the broader population. Second, even if our sample were unbiased, variability in the population means that we cannot expect our conclusions to generalize equally well to every member of the population—all we can hope is that our conclusions apply <em>on average</em>.</p>
+<p>Addressing the consequences of sampling variability is challenging because, by definition, we do not know how variable the population is nor whether our sample is biased or not. In statistics, we address this lack of omniscience by constructing a descriptive model which enables us to estimate how wrong we might be. This is the meaning behind the “standard error” in traditional statistics or the posterior distribution in Bayesian statistics. In the end, we confine ourselves to conclusions that are supported by estimates that are strong enough to overcome this baseline level of wrongness, in which case we call our results “significant” or “credible”. Of course, this does not completely inoculate us from drawing improper generalizations, but it helps us pay attention to data patterns that are more likely to generalize while still acknowledging our uncertainty.</p>
+<p>Our techniques for comparing computational cognitive models serve the same function as a “standard error” or posterior distribution in descriptive statistical modeling. A good model fit may be due to idiosyncracies of the model or of the sample, neither of which may be representative of the broader population to which we are hoping to generalize. Because a more complex model has more flexibility to fit any possible sample, we want to avoid favoring a complex model unless it fits better <em>over and above</em> the degree to which we would expect it to fit better just due to its flexibility. As in statistics, model comparison is not guaranteed to identify the “true” model that explains performance on some task more generally. However, model comparison is a valuable tool that helps us identify the aspects of a model that are most essential for explaining performance and which are most likely to generalize.</p>
+</section>
+<section id="cross-validation" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="cross-validation"><span class="header-section-number">7.2</span> Cross-validation</h2>
+<p>The motivation behind many issues in model comparison is exemplified by the approach known as <em>cross-validation</em> <span class="citation" data-cites="ArlotCelisse2010 Browne2000 Zucchini2000">(<a href="references.html#ref-ArlotCelisse2010" role="doc-biblioref">Arlot &amp; Celisse, 2010</a>; <a href="references.html#ref-Browne2000" role="doc-biblioref">Browne, 2000</a>; <a href="references.html#ref-Zucchini2000" role="doc-biblioref">Zucchini, 2000</a>)</span>. In cross-validation, one divides the sample of data into two parts, a <em>training</em> set and a <em>testing</em> set. The model is fit to the data in the training set and we then compute the log-likelihood of the data in the testing set, using the parameter values obtained by fitting the model to the training set. A model is preferred to the extent that is able to assign higher likelihood to the data in the training set. The rationale behind cross-validation is, thus, to evaluate a model on its ability to <em>generalize</em> from the training data to the test data. A model that is too flexible will tend to “over-fit” the various idiosyncratic features of the training data that are not reproduced in the testing data, meaning it will perform worse on average than a model that captures the systematic aspects that are common to both the training and testing data.</p>
+<section id="example" class="level3" data-number="7.2.1">
+<h3 data-number="7.2.1" class="anchored" data-anchor-id="example"><span class="header-section-number">7.2.1</span> Example</h3>
+<p>To make this situation concrete, let’s use a diffusion model to simulate some data and then use cross-validation to compare different potential models we could use to fit that data. Let’s again assume we are doing a recognition memory task, where target items have positive drift rates and foil items have negative drift rates. We will also assume that there is trial-by-trial variability in drift rates (the <code>sv</code> parameter) and that it is the same for both targets and foils.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>n_trials <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>target_trials <span class="ot">&lt;-</span> <span class="fu">sampWiener</span>(<span class="at">N =</span> n_trials, <span class="at">a =</span> <span class="dv">2</span>, <span class="at">v =</span> <span class="fl">0.5</span>, <span class="at">w =</span> <span class="fl">0.5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>, <span class="at">sv =</span> <span class="fl">0.3</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>foil_trials <span class="ot">&lt;-</span> <span class="fu">sampWiener</span>(<span class="at">N =</span> n_trials, <span class="at">a =</span> <span class="dv">2</span>, <span class="at">v =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">w =</span> <span class="fl">0.5</span>, <span class="at">t0 =</span> <span class="fl">0.2</span>, <span class="at">sv =</span> <span class="fl">0.3</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>(all_trials <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">rt =</span> <span class="fu">c</span>(target_trials<span class="sc">$</span>q, foil_trials<span class="sc">$</span>q),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">response =</span> <span class="fu">factor</span>(<span class="fu">c</span>(target_trials<span class="sc">$</span>response, foil_trials<span class="sc">$</span>response), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"lower"</span>, <span class="st">"upper"</span>)),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">item =</span> <span class="fu">factor</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"Target"</span>, <span class="st">"Foil"</span>), <span class="at">each =</span> n_trials), <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Target"</span>, <span class="st">"Foil"</span>))</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 200 × 3
+      rt response item  
+   &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt; 
+ 1 1.29  upper    Target
+ 2 0.973 upper    Target
+ 3 0.695 upper    Target
+ 4 1.75  upper    Target
+ 5 1.17  upper    Target
+ 6 1.18  upper    Target
+ 7 1.91  upper    Target
+ 8 1.46  upper    Target
+ 9 0.988 upper    Target
+10 0.554 upper    Target
+# ℹ 190 more rows</code></pre>
+</div>
+</div>
+<p>If we were coming to this data “fresh”, like we would in a real experiment, we might consider applying a few models, since we wouldn’t know which one best accounts for our data. For the sake of the present example, let’s focus on three possible models:</p>
+<ul>
+<li><strong>Model A</strong> assumes that <em>both</em> the mean drift rate (<code>v</code>) and the drift rate standard deviation (<code>sv</code>) are the same for both targets and foils. This model is “incorrect”, in the sense that it assumes equal parameters for both targets and foils. Nonetheless, we may want to verify that participants are actually able to distinguish between targets and foils. In a different experiment, we might be interested in comparing two conditions to see whether drift rate differs between them. In any case, we can think of model A as a sort of “null” model.</li>
+<li><strong>Model B</strong> assumes that the mean drift rate (<code>v</code>) varies between targets and foils, but the drift rate standard deviation (<code>sv</code>) is the same for both targets and foils. This model is “correct”, in the sense that it allows parameters to vary in the same way that they did in our simulations.</li>
+<li><strong>Model C</strong> assumes that <em>both</em> the mean drift rate (<code>v</code>) and drift rate standard deviation (<code>sv</code>) vary between targets and foils. This model is “incorrect”, in the sense that it is <em>too flexible</em> relative to how the parameters varied in simulation. Nonetheless, we expect that this model will probably fit better than the “correct” model (B) since the additional drift rate variability parameter will enable it to fit any quirks in the simulated data.</li>
+</ul>
+<section id="the-steps-of-cross-validation" class="level4" data-number="7.2.1.1">
+<h4 data-number="7.2.1.1" class="anchored" data-anchor-id="the-steps-of-cross-validation"><span class="header-section-number">7.2.1.1</span> The steps of cross-validation</h4>
+<p>To see how cross-validation works, let’s go through a single example of applying it to our simulated data. First, we need to split our data into “training” and “testing” sets. We will do this randomly, so as not to introduce any bias. Relatedly, we will need to make sure that all the conditions of the experiment are represented in both testing and training sets in the same proportion that they are in the full data. Again, this avoids introducing bias by not “over-representing” one condition or the other.</p>
+<p>For our first pass, let’s have the training and testing data be of equal size. We will use R’s <code>sample</code> function to randomly assign each trial within each condition (defined by <code>item</code>) to either the training or testing set.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>all_trials_traintest <span class="ot">&lt;-</span> all_trials <span class="sc">%&gt;%</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(item) <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">set =</span> <span class="fu">factor</span>(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            <span class="co"># In the line below, `n()` is the number of trials within the groups defined by the variables in the `group_by` line above</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"training"</span>, <span class="st">"testing"</span>), <span class="fu">round</span>(<span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>) <span class="sc">*</span> <span class="fu">n</span>())))[<span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>()],</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"training"</span>, <span class="st">"testing"</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>You may already have noticed something important about cross-validation: Because we have to divide the data up at random, it can give different results each time you do it! We will return to this issue.</p>
+<p>For now, though, once we have divided up our data, we need to <em>fit</em> each model to <em>only</em> the training data. This looks just like it did in the previous chapter, where we are using <code>fit_wienr</code> to find parameter estimates for each model.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit_a <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"training"</span>),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>fit_b <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"training"</span>),</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>fit_c <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"training"</span>),</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">sv_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We can take a look at each of the <code>fit</code>s to see what the estimated parameters are and how well each model fared on the training data:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fit_a</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$par
+        a[1]         v[1]         w[1]        t0[1]        sv[1] 
+2.091667e+00 1.159507e-01 4.695512e-01 1.982995e-01 1.731895e-10 
+
+$value
+[1] 165.1481
+
+$convergence
+[1] 1
+
+$message
+[1] "Stopped by small gradient (grtol)."
+
+$invhessian.lt
+ [1]  9.527092e-03  1.491059e-04  1.064512e-04 -1.656450e-03  3.294449e-04
+ [6]  1.339079e-02 -2.183984e-03  2.129479e-04  2.940087e-05  1.135847e-03
+[11] -1.118024e-04 -7.466536e-06  8.637283e-04 -1.958822e-04  7.797146e-01
+
+$info
+ maxgradient     laststep      stepmax        neval 
+2.435586e-08 2.894598e-07 1.838266e-03 2.200000e+01 </code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fit_b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$par
+      a[1]       v[1]       v[2]       w[1]      t0[1]      sv[1] 
+ 2.3376486  0.8377254 -0.4882018  0.4610377  0.1776323  0.4922548 
+
+$value
+[1] 148.8284
+
+$convergence
+[1] 1
+
+$message
+[1] "Stopped by small gradient (grtol)."
+
+$invhessian.lt
+ [1]  0.0541570486  0.0358211608 -0.0340917434  0.0001095013 -0.0048551547
+ [6]  0.0931226495  0.0635757612 -0.0216317695 -0.0030307138 -0.0015420380
+[11]  0.0813262103  0.0578574019 -0.0027352232  0.0020638460 -0.0799306514
+[16]  0.0012060421 -0.0001094818  0.0001507736  0.0012252126 -0.0052349758
+[21]  0.2343820377
+
+$info
+ maxgradient     laststep      stepmax        neval 
+5.156036e-09 7.943901e-07 1.838266e-03 2.300000e+01 </code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>fit_c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$par
+      a[1]       v[1]       v[2]       w[1]      t0[1]      sv[1]      sv[2] 
+ 2.3478544  0.8629154 -0.4818190  0.4583973  0.1775218  0.5569940  0.4829696 
+
+$value
+[1] 148.8213
+
+$convergence
+[1] 1
+
+$message
+[1] "Stopped by small gradient (grtol)."
+
+$invhessian.lt
+ [1]  0.0588198420  0.0499271162 -0.0276548559 -0.0016398158 -0.0047462573
+ [6]  0.1222239896  0.0814171966  0.1050278225 -0.0079168115 -0.0075676409
+[11] -0.0013898078  0.1741511850  0.0577339615  0.0584003183 -0.0039679555
+[16]  0.0019161317 -0.0412546290 -0.0804351304  0.0016883348 -0.0001103656
+[21] -0.0109935933  0.0020953430  0.0012042522 -0.0045784185 -0.0048449822
+[26]  0.4517784401  0.1613120960  0.2311467593
+
+$info
+ maxgradient     laststep      stepmax        neval 
+3.801981e-08 2.683823e-07 5.252187e-03 2.100000e+01 </code></pre>
+</div>
+</div>
+<p>As expected, model A had the highest negative log-likelihood (i.e., the worst fit), followed by model B, with model C only doing barely better than model B. The estimated parameters for the “correct” model (B) are pretty close to those we used to simulate the data. Meanwhile, the estimated parameters for models A and C also tend to correspond pretty well with those used to generate the data (for example, the boundary separation <code>a</code>, response bias <code>w</code>, and residual time <code>t0</code> for those models are all pretty close to the values we used in simulation).</p>
+<p>But the real question is how well each model does with the <em>testing</em> data. To do that, we need to compute the negative log-likelihood of the data using the parameters estimated above. We can do that by passing the <code>par</code> element of the <code>fit</code>s above as the <code>init_par</code> argument to the <code>fit_wienr</code> function and setting the <code>return_nll</code> argument to <code>TRUE</code>.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"testing"</span>),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_a<span class="sc">$</span>par, <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 146.1184</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"testing"</span>),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_b<span class="sc">$</span>par, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 139.8552</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"testing"</span>),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_c<span class="sc">$</span>par, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">sv_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 140.3905</code></pre>
+</div>
+</div>
+<p>Based on these results, model A is the worst of the three, as we might have expected. But when evaluated on the testing data, model B actually fares slightly <em>better</em> than model C, despite the fact that model C achieved a better negative log-likelihood on the training data. This is an example of cross-validation working as intended—it has identified that model C is <em>too flexible</em> in this context. Model C “overfit” the training data to such an extent that it did not generalize as well to the testing data as model B.</p>
+</section>
+<section id="repeating-cross-validation" class="level4" data-number="7.2.1.2">
+<h4 data-number="7.2.1.2" class="anchored" data-anchor-id="repeating-cross-validation"><span class="header-section-number">7.2.1.2</span> Repeating cross-validation</h4>
+<p>As noted above, though, we would get different results from cross-validation if we split the data into training/testing sets differently. To get a sense of which models are <em>consistently</em> able to generalize better, we need to replicate the cross-validation procedure several times, each with a different training/test split. In the code below, I use a <code>for</code> loop to do this. In the <code>cv_results</code> tibble, I keep track of the negative log-likelihood that each model achieves on both the training and testing data, so I can plot those at the end.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>n_cv <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>cv_results <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (cv_index <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_cv) {</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Split data into training/testing sets</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    all_trials_traintest <span class="ot">&lt;-</span> all_trials <span class="sc">%&gt;%</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">group_by</span>(item) <span class="sc">%&gt;%</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">set =</span> <span class="fu">factor</span>(</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>                <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="fu">c</span>(<span class="st">"training"</span>, <span class="st">"testing"</span>), <span class="fu">round</span>(<span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>) <span class="sc">*</span> <span class="fu">n</span>())))[<span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>()],</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>                <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"training"</span>, <span class="st">"testing"</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Fit each model to the training data</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    fit_a <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>        all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"training"</span>),</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>    fit_b <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>        all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"training"</span>),</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>    fit_c <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>        all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"training"</span>),</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">sv_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Evaluate each model on the testing data</span></span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>    test_nll_a <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>        all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"testing"</span>),</span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_a<span class="sc">$</span>par, <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>    test_nll_b <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>        all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"testing"</span>),</span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_b<span class="sc">$</span>par, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>    test_nll_c <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>        all_trials_traintest <span class="sc">%&gt;%</span></span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"testing"</span>),</span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_c<span class="sc">$</span>par, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">sv_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Save results of current iteration</span></span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a>    cv_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a>        cv_results,</span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a>            <span class="at">set =</span> <span class="st">"training"</span>,</span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a>            <span class="at">model =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>),</span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a>            <span class="at">nll =</span> <span class="fu">c</span>(fit_a<span class="sc">$</span>value, fit_b<span class="sc">$</span>value, fit_c<span class="sc">$</span>value)</span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb17-61"><a href="#cb17-61" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
+<span id="cb17-62"><a href="#cb17-62" aria-hidden="true" tabindex="-1"></a>            <span class="at">set =</span> <span class="st">"testing"</span>,</span>
+<span id="cb17-63"><a href="#cb17-63" aria-hidden="true" tabindex="-1"></a>            <span class="at">model =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>),</span>
+<span id="cb17-64"><a href="#cb17-64" aria-hidden="true" tabindex="-1"></a>            <span class="at">nll =</span> <span class="fu">c</span>(test_nll_a, test_nll_b, test_nll_c)</span>
+<span id="cb17-65"><a href="#cb17-65" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb17-66"><a href="#cb17-66" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-67"><a href="#cb17-67" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-68"><a href="#cb17-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-69"><a href="#cb17-69" aria-hidden="true" tabindex="-1"></a>cv_results <span class="sc">%&gt;%</span></span>
+<span id="cb17-70"><a href="#cb17-70" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">set =</span> <span class="fu">factor</span>(set, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"training"</span>, <span class="st">"testing"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb17-71"><a href="#cb17-71" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> model, <span class="at">y =</span> nll, <span class="at">color =</span> model)) <span class="sc">+</span></span>
+<span id="cb17-72"><a href="#cb17-72" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(<span class="at">width =</span> <span class="fl">0.4</span>), <span class="at">alpha =</span> <span class="fl">0.1</span>, <span class="at">size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb17-73"><a href="#cb17-73" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun.data =</span> mean_cl_boot) <span class="sc">+</span></span>
+<span id="cb17-74"><a href="#cb17-74" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"set"</span>, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb17-75"><a href="#cb17-75" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Model"</span>, <span class="at">y =</span> <span class="st">"Negative log-likelihood"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="model_comparison_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>Small, light points show each individual cross-validation run, the large points show the mean and bootstrapped 95% confidence interval across runs.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Notice that model C does, on average, achieve a slightly better NLL than model B on the <em>training</em> data. Specifically, the average NLL for model B on the training data is 141.9735778 and for model C is 141.4932351. However, model B achieves a slightly better NLL than model C on the <em>testing</em> data (146.5512123 for model B, 146.6566674 for model C). These differences are not particularly large, of course, but they show the basic idea behind cross-validation as an approach to model comparison.</p>
+</section>
+</section>
+<section id="k-fold-cross-validation" class="level3" data-number="7.2.2">
+<h3 data-number="7.2.2" class="anchored" data-anchor-id="k-fold-cross-validation"><span class="header-section-number">7.2.2</span> <span class="math inline">\(K\)</span>-fold cross-validation</h3>
+<p>In the example above, the testing and training sets were the same size. This is not terribly efficient. Because the models are only being fit to half the data, there is more variability/uncertainty in the estimated parameters than there would be if they were fit to the entire dataset. As such, in most applications of cross-validation, the training set is larger than the testing set.</p>
+<p>These applications are often referred to as “<span class="math inline">\(K\)</span>-fold cross-validation” because they involve splitting the data into <span class="math inline">\(K\)</span> evenly-sized sets and then performing cross-validation <span class="math inline">\(K\)</span> times. Each time, a different one of the <span class="math inline">\(K\)</span> sets is treated as the “testing” data, with the remaining <span class="math inline">\(K - 1\)</span> sets used for training. A common choice for <span class="math inline">\(K\)</span> is 10, such that the proportion of data “left out” for testing is 0.1, not 0.5.</p>
+<p>Let’s see how we would implement <span class="math inline">\(K\)</span>-fold cross-validation in our running example. The first step is to split the data into <span class="math inline">\(K\)</span> equal sets. The code below shows one way to do this using the <code>sample</code> function like we did in the example above. Notice that we use the <code>rep</code> function to repeat each index <code>ceiling(n() / K)</code> times. The <code>ceiling</code> function rounds any fractional amounts <em>up</em>, so we will always have at least as many indexes to sample from as we have trials. The <code>[1:n()]</code> truncates the vector of repeated indices so that it has exactly <code>n()</code> elements.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>K <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>all_trials_split <span class="ot">&lt;-</span> all_trials <span class="sc">%&gt;%</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(item) <span class="sc">%&gt;%</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">set =</span> <span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>K, <span class="fu">ceiling</span>(<span class="fu">n</span>() <span class="sc">/</span> K))[<span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>()]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The result looks like this, although it is worth keeping in mind that different runs will produce different splits since they are done randomly.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>all_trials_split</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 200 × 4
+# Groups:   item [2]
+      rt response item     set
+   &lt;dbl&gt; &lt;fct&gt;    &lt;fct&gt;  &lt;int&gt;
+ 1 1.29  upper    Target     4
+ 2 0.973 upper    Target     9
+ 3 0.695 upper    Target     6
+ 4 1.75  upper    Target     1
+ 5 1.17  upper    Target     4
+ 6 1.18  upper    Target     8
+ 7 1.91  upper    Target     2
+ 8 1.46  upper    Target    10
+ 9 0.988 upper    Target     3
+10 0.554 upper    Target     2
+# ℹ 190 more rows</code></pre>
+</div>
+</div>
+<p>Once we have split the data, we can adapt the <code>for</code> loop we used earlier so that it loops over the <span class="math inline">\(K\)</span> <code>fold</code>s in the splitted data.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>k_fold_cv_results <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (fold <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>K) {</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Fit each model to the training data</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    fit_a <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        all_trials_split <span class="sc">%&gt;%</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">!=</span> fold),</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    fit_b <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        all_trials_split <span class="sc">%&gt;%</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">!=</span> fold),</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    fit_c <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>        all_trials_split <span class="sc">%&gt;%</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">!=</span> fold),</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">sv_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Evaluate each model on the testing data</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    test_nll_a <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>        all_trials_split <span class="sc">%&gt;%</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">==</span> fold),</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_a<span class="sc">$</span>par, <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>    test_nll_b <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>        all_trials_split <span class="sc">%&gt;%</span></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">==</span> fold),</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_b<span class="sc">$</span>par, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>    test_nll_c <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>        all_trials_split <span class="sc">%&gt;%</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>            <span class="fu">filter</span>(set <span class="sc">==</span> fold),</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_c<span class="sc">$</span>par, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">sv_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Save results of current iteration</span></span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>    k_fold_cv_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>        k_fold_cv_results,</span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>            <span class="at">fold =</span> fold,</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>            <span class="at">set =</span> <span class="st">"training"</span>,</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>            <span class="at">model =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>),</span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>            <span class="at">nll =</span> <span class="fu">c</span>(fit_a<span class="sc">$</span>value, fit_b<span class="sc">$</span>value, fit_c<span class="sc">$</span>value)</span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>            <span class="at">fold =</span> fold,</span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a>            <span class="at">set =</span> <span class="st">"testing"</span>,</span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>            <span class="at">model =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>),</span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a>            <span class="at">nll =</span> <span class="fu">c</span>(test_nll_a, test_nll_b, test_nll_c)</span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>k_fold_cv_results <span class="sc">%&gt;%</span></span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">set =</span> <span class="fu">factor</span>(set, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"training"</span>, <span class="st">"testing"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> model, <span class="at">y =</span> nll, <span class="at">color =</span> model)) <span class="sc">+</span></span>
+<span id="cb21-63"><a href="#cb21-63" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(<span class="at">width =</span> <span class="fl">0.1</span>), <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb21-64"><a href="#cb21-64" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun.data =</span> mean_cl_boot) <span class="sc">+</span></span>
+<span id="cb21-65"><a href="#cb21-65" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"set"</span>, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb21-66"><a href="#cb21-66" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Model"</span>, <span class="at">y =</span> <span class="st">"Negative log-likelihood"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model_comparison_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The result looks pretty similar to what we had previously, in that model C fits slightly better than model B on the training data, but they fare about equally well on the testing data.</p>
+</section>
+<section id="leave-one-out-cross-validation" class="level3" data-number="7.2.3">
+<h3 data-number="7.2.3" class="anchored" data-anchor-id="leave-one-out-cross-validation"><span class="header-section-number">7.2.3</span> Leave-one-out cross-validation</h3>
+<p>As a reminder, each time we run <span class="math inline">\(K\)</span>-fold cross-validation, we will get a slightly different result because of the random way in which we split the data. Moreover, using <span class="math inline">\(K\)</span>-fold CV was motivated by an attempt to make <em>efficient</em> use of the data at hand, so as not to artificially inflate our uncertainty about estimated model parameters. If we take these two issues—randomness and efficiency—seriously, then the best way to do cross-validation would actually be to have as many “folds” as we have observations. In other words, we fit each model to <em>all but one</em> observation and then test them on the one that we left out and repeat this process for all <span class="math inline">\(N\)</span> observations in our dataset. That solves the efficiency problem, since the models are able to train on essentially all of the data. It also solves the randomness problem because instead of doing CV with random subsets, we do it <em>exhaustively</em>, once for each observation. This approach is, prosaically, referred to as Leave-One-Out Cross-Validation (LOOCV).</p>
+<p>We said LOOCV resolves the “efficiency” issue with cross-validation, but only in the sense that the models are able to make use of nearly all the data. LOOCV is certainly <em>not</em> efficient in terms of computing time, since it requires fitting each model <span class="math inline">\(N\)</span> times, once for each left-out observation. We typically apply computational cognitive models to data from experiments where we have a few hundred trials per participant (and we would need to replicate LOOCV for each participant too). Moreover, as we’ve seen, estimating best-fitting parameters even for a relatively simple cognitive model like a diffusion model is not trivial. Therefore, LOOCV is almost never used in practice.</p>
+<p>For fun, though, let’s try it with our running example, where the code below adapts the <span class="math inline">\(K\)</span>-fold CV code we used in the previous section. Note the use of the “negative indexing” trick to exclude each observation <code>i</code> from the training data in the <code>for</code> loop.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>loocv_results <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(all_trials)) {</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Fit each model to the training data</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    fit_a <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        all_trials[<span class="sc">-</span>i,],</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    fit_b <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        all_trials[<span class="sc">-</span>i,],</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    fit_c <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>        all_trials[<span class="sc">-</span>i,],</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">sv_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Evaluate each model on the testing data</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    test_nll_a <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>        all_trials[i,],</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_a<span class="sc">$</span>par, <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    test_nll_b <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>        all_trials[i,],</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_b<span class="sc">$</span>par, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>    test_nll_c <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>        all_trials[i,],</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">init_par =</span> fit_c<span class="sc">$</span>par, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">sv_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>, <span class="at">return_nll =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Save results of current iteration</span></span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>    loocv_results <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>        loocv_results,</span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>            <span class="at">fold =</span> i,</span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>            <span class="at">set =</span> <span class="st">"training"</span>,</span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a>            <span class="at">model =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>),</span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>            <span class="at">nll =</span> <span class="fu">c</span>(fit_a<span class="sc">$</span>value, fit_b<span class="sc">$</span>value, fit_c<span class="sc">$</span>value)</span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a>            <span class="at">fold =</span> i,</span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a>            <span class="at">set =</span> <span class="st">"testing"</span>,</span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a>            <span class="at">model =</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>),</span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>            <span class="at">nll =</span> <span class="fu">c</span>(test_nll_a, test_nll_b, test_nll_c)</span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-53"><a href="#cb22-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-54"><a href="#cb22-54" aria-hidden="true" tabindex="-1"></a>loocv_results <span class="sc">%&gt;%</span></span>
+<span id="cb22-55"><a href="#cb22-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">set =</span> <span class="fu">factor</span>(set, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"training"</span>, <span class="st">"testing"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb22-56"><a href="#cb22-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> model, <span class="at">y =</span> nll, <span class="at">color =</span> model)) <span class="sc">+</span></span>
+<span id="cb22-57"><a href="#cb22-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">position =</span> <span class="fu">position_jitter</span>(<span class="at">width =</span> <span class="fl">0.1</span>), <span class="at">alpha =</span> <span class="fl">0.1</span>, <span class="at">size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb22-58"><a href="#cb22-58" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun.data =</span> mean_cl_boot) <span class="sc">+</span></span>
+<span id="cb22-59"><a href="#cb22-59" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"set"</span>, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb22-60"><a href="#cb22-60" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Model"</span>, <span class="at">y =</span> <span class="st">"Negative log-likelihood"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="model_comparison_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Consistent with the other varieties of CV above, LOOCV finds that model A generalizes the worst on average (mean testing NLL = 1.5718645), followed by model C (mean testing NLL = 1.4550586) then closely by model B ((mean testing NLL = 1.453186)). Again, the difference between models B and C is not dramatic, but consider that model C consistently outperforms model B on the <em>training</em> data—the message that we get from LOOCV is that this advantage is due to overfitting, not because model C captures anything systematic beyond that which is captured by model B. Therefore, we should prefer the simpler model B when deciding which model best explains our data.</p>
+</section>
+<section id="summary" class="level3" data-number="7.2.4">
+<h3 data-number="7.2.4" class="anchored" data-anchor-id="summary"><span class="header-section-number">7.2.4</span> Summary</h3>
+<p>Cross-validation is not always the most practical approach to assessing model fit vs.&nbsp;complexity. That said, it shows one reason why we might prefer a simpler model: Such a model is less likely to “overfit” our data and is therefore better able to generalize to new data. This has practical advantages if we are using the model to make predictions about future unseen data. It is also theoretically meaningful because a model that generalizes better is <em>probably</em> one that has mechanisms that are important for producing the systematic features of our data.</p>
+</section>
+</section>
+<section id="akaike-information-criterion" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="akaike-information-criterion"><span class="header-section-number">7.3</span> Akaike Information Criterion</h2>
+<p>The practical issues with cross-validation mean that it is rarely used to compare cognitive models. That said, one of the model comparison approaches we saw in the last chapter, the Akaike Information Criterion (AIC; <span class="citation" data-cites="Akaike1974">Akaike (<a href="references.html#ref-Akaike1974" role="doc-biblioref">1974</a>)</span>), is in fact an asymptotic approximation to LOOCV. We won’t prove this fact here, but check out <span class="citation" data-cites="Stone1977">(<a href="references.html#ref-Stone1977" role="doc-biblioref"><strong>Stone1977?</strong></a>)</span>. For our purposes, we can simply appreciate that the asymptotic equivalence of AIC and LOOCV is very convenient because it means that we can often reasonably approximate LOOCV while only needing to fit the model once.</p>
+<p>Let’s calculate the AIC for each of the three models in our running example. To do this, we will first need to fit each model to the <em>full</em> dataset (no more splitting into testing/training sets). This is done in the chunk of code below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fit_a <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    all_trials,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>fit_b <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    all_trials,</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>fit_c <span class="ot">&lt;-</span> <span class="fu">with</span>(</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    all_trials,</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_wienr</span>(<span class="at">rt =</span> rt, <span class="at">response =</span> response, <span class="at">drift_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">sv_index =</span> <span class="fu">as.numeric</span>(item), <span class="at">fit_sv =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now recall that the AIC is defined as</p>
+<p><span class="math display">\[
+AIC = 2 \times NLL + 2 \times N_p
+\]</span></p>
+<p>where <span class="math inline">\(NLL\)</span> is the negative log-likelihood of the fitted model and <span class="math inline">\(N_p\)</span> is the number of free parameters in the model. Thus, the code below computes the AIC for each of the three models</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> fit_a<span class="sc">$</span>value <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">length</span>(fit_a<span class="sc">$</span>par)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 630.4553</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> fit_b<span class="sc">$</span>value <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">length</span>(fit_b<span class="sc">$</span>par)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 583.0139</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> fit_c<span class="sc">$</span>value <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">length</span>(fit_c<span class="sc">$</span>par)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 583.6266</code></pre>
+</div>
+</div>
+<p>Like with cross-validation above, AIC finds that model A is the worst and that model B has a slight advantage over model C.</p>
+<p>Returning to LOOCV for a moment, recall that the value we obtained was the <em>mean negative log-likelihood</em> across each of the <span class="math inline">\(N\)</span> left-out observations. Meanwhile, the <span class="math inline">\(NLL\)</span> we get from fitting the full model is the <em>summed negative log-likelihood</em> across all <span class="math inline">\(N\)</span> observations. So if we want to put the results from LOOCV on the same scale as the results we get from AIC, we need to multiply them by <span class="math inline">\(2N\)</span>. I do this in the chunk of code below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>loocv_results <span class="sc">%&gt;%</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(set <span class="sc">==</span> <span class="st">"testing"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(model) <span class="sc">%&gt;%</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">rescaled_result =</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sum</span>(nll))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 2
+  model rescaled_result
+  &lt;chr&gt;           &lt;dbl&gt;
+1 A                629.
+2 B                581.
+3 C                582.</code></pre>
+</div>
+</div>
+<p>Although the reader is again referred to <span class="citation" data-cites="Stone1977">(<a href="references.html#ref-Stone1977" role="doc-biblioref"><strong>Stone1977?</strong></a>)</span> for a formal proof, this example shows that, when appropriately rescaled, AIC and LOOCV give very similar results and will generally lead us to the same conclusions regarding which of a set of models to prefer.</p>
+<p>This rough equivalence also shows that AIC ultimately assesses models on their <em>predictive</em> performance, that is, their ability to fit future unseen data generated by the same processes that produced our original data.</p>
+</section>
+<section id="bayes-factors-and-bayesian-information-criterion" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="bayes-factors-and-bayesian-information-criterion"><span class="header-section-number">7.4</span> Bayes Factors and Bayesian Information Criterion</h2>
+<p>In the last chapter, we were introduced to another model comparison metric, the so-called “Bayesian” Information Criterion (BIC; <span class="citation" data-cites="Schwartz1978">(<a href="references.html#ref-Schwartz1978" role="doc-biblioref"><strong>Schwartz1978?</strong></a>)</span>). The BIC is, under certain very restrictive circumstances, asymptotically equivalent to a Bayes Factor <span class="citation" data-cites="Raftery1995">(<a href="references.html#ref-Raftery1995" role="doc-biblioref">Raftery, 1995</a>)</span>. The relationship between AIC/LOOCV and the Bayes factor/BIC can be summarized like this: AIC/LOOCV assess the ability of a model to fit future data <em>conditional on</em> the data that has already been observed; Bayes factors/BIC assess the ability of a model to fit <em>any</em> data, irrespective of the data that has already been observed. In other words, AIC/LOOCV assess the <em>posterior predictive</em> ability of a model whereas BIC/Bayes Factors assess the <em>prior predictive</em> ability of a model <span class="citation" data-cites="VehtariLampinen2002 GelmanHwangVehtari2014 PiironenVehtari2017">(<a href="references.html#ref-GelmanHwangVehtari2014" role="doc-biblioref">Gelman et al., 2014</a>; <a href="references.html#ref-PiironenVehtari2017" role="doc-biblioref">Piironen &amp; Vehtari, 2017</a>; <a href="references.html#ref-VehtariLampinen2002" role="doc-biblioref">Vehtari &amp; Lampinen, 2002</a>)</span>.</p>
+<p>It is worth repeating that BIC does not have the same formal relationship to Bayes factors that AIC has to LOOCV, so BIC should <em>not</em> be thought of, outside of very special cases, as equivalent to a Bayes factor. Nonetheless, it has the same underlying motivation, which is to favor models that make more limited predictions <em>a priori</em>. This is why the formula for BIC imposes a stronger penalty for the number of free parameters in a model, because the flexibility afforded by those parameters doesn’t just allow the model to “overfit” the data we observed, it allows it to overfit <em>any</em> data we <em>might have</em> observed.</p>
+</section>
+<section id="simplicity-vs.-complexity" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="simplicity-vs.-complexity"><span class="header-section-number">7.5</span> Simplicity vs.&nbsp;Complexity</h2>
+<p>Ultimately, model comparison allows us to answer the question, “what is the simplest model, among those I am considering, that is sufficient to achieve a good quantiative fit to the data in my sample?” By laying out this question explicitly, we are in a position to see three of the important qualifiers on any conclusions we draw based on model comparisons:</p>
+<ul>
+<li><strong>Defining “simplicity”</strong>: Different model comparison metrics have different operational definitions of “simplicity”. AIC and BIC each define it in terms of the number of free parameters in a model. Cross-validation defines it in terms of how well a model fit to training data can account for test data. A Bayes factor defines it in terms of the prior predictive distribution of a model, etc.</li>
+<li><strong>Conditional on the set of models being compared</strong>: Although it may be possible to identify a “preferred” model using a model comparison metric, that preference is only with respect to the set of models being compared. It is entirely possible that an additional unconsidered model would be preferred if it were included. It may also be the case that the “preferred” model is only the “least bad” model among those under consideration—that’s why it is always important to verify that a model is actually reproducing the data patterns that you think are most important in your application.</li>
+<li><strong>Conditional on the sample</strong>: It may be that a different sample would have lead to a different “preferred” model, although as noted above, model comparison metrics are usually designed to account for this form of sampling variability. This qualification is more important when attempting to generalize more broadly, for example, to other kinds of related tasks or to the same task but with different materials.</li>
+</ul>
+<p>Often, model comparison is analogized to “Occam’s Razor”, the famous principle that, if many explanations are available, we should prefer the simplest one. The issue with this analogy is that it conflates two ways in which a model can be “simple”: A model can be “simple” according to one of the operational definitions of simplicity/complexity employed by a particular model comparison metric. But a model can also be “simple” in the sense that it is easier for a scientist to understand or to describe to someone else. The first sense of “simplicity” can be quantified (as in the methods reviewed in this chapter), but the second sense of “simplicity” is more to do with the background and expertise of particular scientists, the means by which they communicate, and the broader culture in which they are working. In other words, the second sense of “simplicity” has to do with the fact that a causal model is not meant just to fit data, but also to help people understand why the data turned out that way. As the bumper sticker says, scientists are people too and, being limited creatures, cannot understand everything. This second sense of simplicity should not be dismissed, though: If someone can understand a model more easily, they may also be able to devise predictions, tests, and extensions of the model more easily too.</p>
+<p>Because the two senses of “simplicity” are separate, they are not guaranteed to align with one another. There may be cases in which a model that is “simple” in the sense of having few free parameters or a narrow prior predictive distribution may be very difficult to explain or describe. It is also possible that a model that is easier to explain or describe might be more flexible or have more parameters than needed to account for any particular sample of data. The latter situation is likely to occur if a model is designed to account for a wide variety of phenomena—such a model may contain mechanisms (with associated parameters) that are only relevant for certain phenomena.</p>
+<p>It is also worth repeating that a simpler model—regardless of the sense of “simplicity”—is not guaranteed to be any more “true” or “correct” than a complex model. The “truth”, whatever that is, is almost certainly more complex than any model we would devise. Rather, given that all models are deliberate simplifications, the virtue of a simpler model is that (a) it is more likely to generalize well because it is less likely that its ability to fit data is due to some idiosyncratic property of the model or the sample; and (b) it is often (but not always) easier to describe and explain.</p>
+</section>
+<section id="exercises" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="exercises"><span class="header-section-number">7.6</span> Exercises</h2>
+<ol type="1">
+<li>The discussions of cross-validation and generalization in this chapter focused on situations in which we wanted to “generalize” to data from the same (simulated) participant in the same (simulated) task. How would you adapt cross-validation to assess other kinds of generalization, such as from one participant to another? Or from one task to another? In formulating your thoughts, you may want to read <span class="citation" data-cites="BusemeyerWang2000">Busemeyer &amp; Wang (<a href="references.html#ref-BusemeyerWang2000" role="doc-biblioref">2000</a>)</span> and <span class="citation" data-cites="Navarro2018">Navarro (<a href="references.html#ref-Navarro2018" role="doc-biblioref">2018</a>)</span>.</li>
+<li>Unlike in cognitive modeling, where cross-validation is rarely used, machine learning models are often compared using cross-validation. Models in machine learning sit on the “descriptive” end of the modeling spectrum. Machine learning models are typically applied to very large datasets and have a lot of free parameters (e.g., each weight in a neural network model is technically a free parameter). Why do you think cross-validation is more common in machine learning than in cognitive modeling?</li>
+<li>Given that AIC and BIC judge models according to different criteria, which do you think is better suited for identifying the model the “best explains” a given set of data? What reasons might there be to prefer one approach over the other? Could the term “explain” have different interpretations in different applications?</li>
+</ol>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-Akaike1974" class="csl-entry" role="listitem">
+Akaike, H. (1974). <a href="https://www.ncbi.nlm.nih.gov/pubmed/1100705">A new look at the statistical model identification</a>. <em>IEEE Transactions on Automatic Control</em>, <em>19</em>(6), 716–723.
+</div>
+<div id="ref-ArlotCelisse2010" class="csl-entry" role="listitem">
+Arlot, S., &amp; Celisse, A. (2010). A survey of cross-validation procedures for model selection. <em>Statistics Surveys</em>, <em>4</em>, 40–79. <a href="https://doi.org/10.1214/09-SS054">https://doi.org/10.1214/09-SS054</a>
+</div>
+<div id="ref-Browne2000" class="csl-entry" role="listitem">
+Browne, M. W. (2000). Cross-validation methods. <em>Journal of Mathematical Psychology</em>, <em>44</em>(1), 108–132. <a href="https://doi.org/10.1006/jmps.1999.1279">https://doi.org/10.1006/jmps.1999.1279</a>
+</div>
+<div id="ref-BusemeyerWang2000" class="csl-entry" role="listitem">
+Busemeyer, J. R., &amp; Wang, Y.-M. (2000). Model comparisons and model selections based on generalization criterion methodology. <em>Journal of Mathematical Psychology</em>, <em>44</em>(1), 171–189. <a href="https://doi.org/10.1006/jmps.1999.1282">https://doi.org/10.1006/jmps.1999.1282</a>
+</div>
+<div id="ref-GelmanHwangVehtari2014" class="csl-entry" role="listitem">
+Gelman, A., Hwang, J., &amp; Vehtari, A. (2014). Understanding predictive information criteria for bayesian models. <em>Statistics and Computing</em>, <em>24</em>(6), 997–1016. <a href="https://doi.org/10.1007/s11222-013-9416-2">https://doi.org/10.1007/s11222-013-9416-2</a>
+</div>
+<div id="ref-Navarro2018" class="csl-entry" role="listitem">
+Navarro, D. J. (2018). Between the devil and the deep blue sea: Tensions between scientific judgement and statistical model selection. <em>Computational Brain &amp; Behavior</em>. <a href="https://doi.org/10.1007/s42113-018-0019-z">https://doi.org/10.1007/s42113-018-0019-z</a>
+</div>
+<div id="ref-PiironenVehtari2017" class="csl-entry" role="listitem">
+Piironen, J., &amp; Vehtari, A. (2017). Comparison of bayesian predictive methods for model selection. <em>Statistics and Computing</em>, <em>27</em>(3), 711–735. <a href="https://doi.org/10.1007/s11222-016-9649-y">https://doi.org/10.1007/s11222-016-9649-y</a>
+</div>
+<div id="ref-Raftery1995" class="csl-entry" role="listitem">
+Raftery, A. E. (1995). Bayesian model selection in social research. <em>Sociological Methodology</em>, <em>25</em>, 111–163. <a href="https://doi.org/10.2307/271063">https://doi.org/10.2307/271063</a>
+</div>
+<div id="ref-VehtariLampinen2002" class="csl-entry" role="listitem">
+Vehtari, A., &amp; Lampinen, J. (2002). Bayesian model assessment and comparison using cross-validation predictive densities. <em>Neural Computation</em>, <em>14</em>(10), 2439–2468. <a href="https://doi.org/10.1162/08997660260293292">https://doi.org/10.1162/08997660260293292</a>
+</div>
+<div id="ref-Zucchini2000" class="csl-entry" role="listitem">
+Zucchini, W. (2000). An introduction to model selection. <em>Journal of Mathematical Psychology</em>, <em>44</em>(1), 41–61. <a href="https://doi.org/10.1006/jmps.1999.1276">https://doi.org/10.1006/jmps.1999.1276</a>
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./diffusion_fit.html" class="pagination-link" aria-label="Fitting a diffusion model to data">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Fitting a diffusion model to data</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

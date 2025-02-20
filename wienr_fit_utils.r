@@ -28,7 +28,7 @@ qWDM <- function(p, response, ...) {
     return(res$root)
 }
 
-fit_wienr <- function(rt, response, fit_sv = FALSE, fit_sw = FALSE, fit_st0 = FALSE, optim_control = list(), init_par = NULL, drift_index = NULL, bound_index = NULL, resid_index = NULL, sv_index = NULL, sw_index = NULL, st0_index = NULL, ...) {
+fit_wienr <- function(rt, response, fit_sv = FALSE, fit_sw = FALSE, fit_st0 = FALSE, optim_control = list(), init_par = NULL, drift_index = NULL, bound_index = NULL, resid_index = NULL, sv_index = NULL, sw_index = NULL, st0_index = NULL, return_nll = FALSE, ...) {
     if (!is.factor(response)) response <- as.factor(response)
     response_numeric <- as.numeric(response)
     
@@ -224,6 +224,21 @@ fit_wienr <- function(rt, response, fit_sv = FALSE, fit_sw = FALSE, fit_st0 = FA
         }
         
         return(-grad)
+    }
+    
+    if (return_nll) {
+        # Only return the negative log-likelihood using the initial parameters
+        return(neg_log_likelihood(
+            par = init_par,
+            rt = rt,
+            response = response_numeric,
+            bound_index = bound_index,
+            drift_index = drift_index,
+            resid_index = resid_index,
+            sv_index = sv_index,
+            sw_index = sw_index,
+            st0_index = st0_index
+        ))
     }
     
     if (!is.na(init_par["sw[1]"]) | !is.na(init_par["st0[1]"])) {
