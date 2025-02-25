@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.39">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -84,17 +84,17 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./references.html" rel="next">
+<link href="./blast_example.html" rel="next">
 <link href="./diffusion_fit.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-03787a5611acd63027d79b3f02190e6e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -164,7 +164,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./model_comparison.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./random_walk.html">First foray</a></li><li class="breadcrumb-item"><a href="./model_comparison.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -195,48 +195,76 @@ window.Quarto = {
  <span class="menu-text">Preface</span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Perspectives</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./intro.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./ebrw.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./r_coding.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Programming with R</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">First foray</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./random_walk.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./diffusion_sim.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">From random walk to diffusion</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./diffusion_fit.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Fitting a diffusion model to data</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item">
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./model_comparison.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./blast_example.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A worked example</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./references.html" class="sidebar-item-text sidebar-link">
@@ -271,7 +299,7 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./random_walk.html">First foray</a></li><li class="breadcrumb-item"><a href="./model_comparison.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></h1>
 </div>
@@ -391,7 +419,7 @@ window.Quarto = {
 <div class="cell-output cell-output-stdout">
 <pre><code>$par
         a[1]         v[1]         w[1]        t0[1]        sv[1] 
-2.091667e+00 1.159507e-01 4.695512e-01 1.982995e-01 1.731895e-10 
+2.091667e+00 1.159507e-01 4.695512e-01 1.982995e-01 1.731908e-10 
 
 $value
 [1] 165.1481
@@ -403,13 +431,16 @@ $message
 [1] "Stopped by small gradient (grtol)."
 
 $invhessian.lt
- [1]  9.527092e-03  1.491059e-04  1.064512e-04 -1.656450e-03  3.294449e-04
- [6]  1.339079e-02 -2.183984e-03  2.129479e-04  2.940087e-05  1.135847e-03
-[11] -1.118024e-04 -7.466536e-06  8.637283e-04 -1.958822e-04  7.797146e-01
+ [1]  9.527092e-03  1.491059e-04  1.064512e-04 -1.656450e-03  3.294452e-04
+ [6]  1.339079e-02 -2.183984e-03  2.129479e-04  2.940070e-05  1.135847e-03
+[11] -1.118024e-04 -7.466557e-06  8.637283e-04 -1.958818e-04  7.797146e-01
 
 $info
  maxgradient     laststep      stepmax        neval 
-2.435586e-08 2.894598e-07 1.838266e-03 2.200000e+01 </code></pre>
+2.435416e-08 2.894598e-07 1.838266e-03 2.200000e+01 
+
+attr(,"class")
+[1] "ucminf"</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -433,12 +464,15 @@ $invhessian.lt
  [1]  0.0541570486  0.0358211608 -0.0340917434  0.0001095013 -0.0048551547
  [6]  0.0931226495  0.0635757612 -0.0216317695 -0.0030307138 -0.0015420380
 [11]  0.0813262103  0.0578574019 -0.0027352232  0.0020638460 -0.0799306514
-[16]  0.0012060421 -0.0001094818  0.0001507736  0.0012252126 -0.0052349758
-[21]  0.2343820377
+[16]  0.0012060421 -0.0001094818  0.0001507737  0.0012252126 -0.0052349758
+[21]  0.2343820376
 
 $info
  maxgradient     laststep      stepmax        neval 
-5.156036e-09 7.943901e-07 1.838266e-03 2.300000e+01 </code></pre>
+5.156144e-09 7.943901e-07 1.838266e-03 2.300000e+01 
+
+attr(,"class")
+[1] "ucminf"</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -459,16 +493,19 @@ $message
 [1] "Stopped by small gradient (grtol)."
 
 $invhessian.lt
- [1]  0.0588198420  0.0499271162 -0.0276548559 -0.0016398158 -0.0047462573
- [6]  0.1222239896  0.0814171966  0.1050278225 -0.0079168115 -0.0075676409
-[11] -0.0013898078  0.1741511850  0.0577339615  0.0584003183 -0.0039679555
-[16]  0.0019161317 -0.0412546290 -0.0804351304  0.0016883348 -0.0001103656
-[21] -0.0109935933  0.0020953430  0.0012042522 -0.0045784185 -0.0048449822
-[26]  0.4517784401  0.1613120960  0.2311467593
+ [1]  0.0588198407  0.0499271148 -0.0276548552 -0.0016398157 -0.0047462573
+ [6]  0.1222239863  0.0814171946  0.1050278210 -0.0079168106 -0.0075676409
+[11] -0.0013898078  0.1741511816  0.0577339592  0.0584003179 -0.0039679555
+[16]  0.0019161317 -0.0412546271 -0.0804351293  0.0016883348 -0.0001103656
+[21] -0.0109935932  0.0020953431  0.0012042522 -0.0045784184 -0.0048449821
+[26]  0.4517784322  0.1613120906  0.2311467565
 
 $info
  maxgradient     laststep      stepmax        neval 
-3.801981e-08 2.683823e-07 5.252187e-03 2.100000e+01 </code></pre>
+3.801980e-08 2.683823e-07 5.252187e-03 2.100000e+01 
+
+attr(,"class")
+[1] "ucminf"</code></pre>
 </div>
 </div>
 <p>As expected, model A had the highest negative log-likelihood (i.e., the worst fit), followed by model B, with model C only doing barely better than model B. The estimated parameters for the “correct” model (B) are pretty close to those we used to simulate the data. Meanwhile, the estimated parameters for models A and C also tend to correspond pretty well with those used to generate the data (for example, the boundary separation <code>a</code>, response bias <code>w</code>, and residual time <code>t0</code> for those models are all pretty close to the values we used in simulation).</p>
@@ -1030,6 +1067,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -1140,6 +1179,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
+      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {
@@ -1372,8 +1412,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./references.html" class="pagination-link" aria-label="References">
-        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./blast_example.html" class="pagination-link" aria-label="A worked example">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">A worked example</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

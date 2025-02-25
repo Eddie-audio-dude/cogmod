@@ -5,17 +5,22 @@ project:
 book:
   title: "Computational Cognitive Models"
   author: "Gregory E. Cox"
-  date: "2/11/2025"
+  date: "2/25/2025"
   chapters:
     - index.qmd
-    - intro.qmd
-    - ebrw.qmd
-    - r_coding.qmd
-    - random_walk.qmd
-    - diffusion_sim.qmd
-    - diffusion_fit.qmd
-    - model_comparison.qmd
-    # - blast_example.qmd
+    - part: "Perspectives"
+      chapters:
+        - intro.qmd
+        - ebrw.qmd
+        - r_coding.qmd
+    - part: "First foray"
+      chapters:
+        - random_walk.qmd
+        - diffusion_sim.qmd
+        - diffusion_fit.qmd
+        - model_comparison.qmd
+        - blast_example.qmd
+        # - accumulator_models.qmd
     - references.qmd
 
 bibliography: references.bib

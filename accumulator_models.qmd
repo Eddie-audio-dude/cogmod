@@ -1,0 +1,831 @@
+# Accumulator models of choice and response time
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(patchwork)
+
+set.seed(12222)
+```
+
+So far, we have focused on models that are designed to explain how people choose between two opposing options.  We built a random walk model and a diffusion model and then saw how we could fit a diffusion model to choice/RT data.  For the latter purpose, we relied on the `WienR` package to calculate the (log-)likelihood of making a particular choice at a particular time.  This is because the math for calculating those likelihoods is not trivial, requiring some bespoke numerical approximations that are beyond the scope of this course.  Nonetheless, our cognitive models so far have touched on several major themes that are shared by all cognitive models:
+
+* **Representations**: in making a decision, the model assumes that a decision-maker maintains a *representation* of the degree to which the evidence they have accumulated so far favors one option or the other.
+* **Processes**: Behavior, in the form of a choice and a response time, is the result of applying an *evidence accumulation* process to the decision-maker's representation of their current state of evidence.
+* **Simulation**: We saw how we could set different *parameters* of a model in such a way that it generated different patterns of behavior.
+* **Fitting**: We saw how we could use the computer to search for the parameters of the model that assign the highest likelihood to a set of observed data, which gives us insight into how someone performed a particular decision task.
+* **Comparison**: We saw how we could use model comparison to test hypotheses regarding which of several models "best" accounts for a particular set of data, in the sense that the model achieves a balance between fit and complexity.
+
+In this chapter, we will build a new class of model that allows us to address more complex choice scenarios.  We will not only write our own simulation code, like we did before; we will also write our own likelihood function so we can get a bit more insight into how those work.  The specific category of model we will address are called *accumulator models*.
+
+Accumulator models are very similar to the random walk and diffusion models of choice that we have seen already.  Like those models, they aim to explain *choices* and *response times* in terms of an *evidence accumulation* process.  The difference is in how accumulator models *represent* the decision-maker's momentary states of evidence.  Instead of representing evidence as a single value representing the "balance" of evidence between two options, accumulator models represent evidence in terms of multiple values.  In some accumulator models, each option available to a decision maker is associated with its own evidence value.  But it is also possible to make accumulator models more general than that.  For example, perhaps each feature of an item (like the color and shape of an object) are processed in separate channels, each of which is associated with an evidence value.  In these more general models, it is possible to formulate different *decision rules* by specifying how values map onto making different choices.
+
+The preceding overview may seem a bit abstract, so let's consider a concrete situation that will let us see how accumulator models can be used model different kinds of tasks with different characteristics and decision rules.  This situation is a *visual search* task.  In a visual search task, a participant is shown a *search array* consisting of items; one or more of those items could be a "target" for which the participant is supposed to search.  For example, an array could consist of colored shapes, with the target defined as a red square.
+
+In the first version of the visual search task we will consider, let's say that each array shown to the participant contains exactly one target item and the job of the participant is to identify which item is the target.  Let's say that the participant expresses their choice by making a *saccade* (an eye movement) so that they fixate the item they think is the target.  (Alternatively, they could make their selection by clicking on the item if using a mouse or tapping on the item if using a touchscreen.)  The point is that, unlike in the random walk and diffusion models we've considered so far, the participant may have *more than two* options if there are more than two items in the array.  A similar situation could arise when deciding which of several products to buy, for example.
+
+## Race model simulations
+
+The first kind of accumulator model we will build is called a *race model* for the simple reason that it models making a decision as a *race* between different evidence accumulation processes.  Each option is associated with a level of evidence which can fluctuate over time as evidence that either favors or disfavors that option gets accumulated.  Whichever accumulator first reaches a threshold level of evidence then determines the outcome of the choice, and the response time depends on how long the "winning" accumulator needed to reach threshold (plus residual time, of course).
+
+As we will see, each accumulator can be modeled as a diffusion or random walk process.  The only difference is that instead of stopping when it hits either an upper or lower boundary, there is only one upper boundary that acts as the "finishing line".  In general, different accumulators may have different threshold levels.
+
+Thus, accumulator models instantiate the same four theoretical constructs as random walk/diffusion models:  Decisions still depend on *accumulating evidence* regarding the available options.  Decisions depend on accumulating until a threshold amount of evidence is reached, such that higher thresholds amount to greater *response caution*.  However, because thresholds can be set at different levels for different options, there is the possibility of *response bias*.  Finally, we must acknowledge the ever-present *residual time* that contributes to observed response times.
+
+### A single accumulator
+
+To begin, let's simulate just a single accumulator.  Although there are a number of ways to do this (and we will consider some variations later on), we will make a minor modification to the `diffusion_sim` function we wrote already.  We will simply remove the lower boundary, so that the process will stop only when hitting its upper threshold.  The revised function is shown below, along with comments that indicate the meaning of each of the function arguments.
+
+```{r}
+#| code-fold: show
+
+# Function arguments
+# v: "drift rate", the average evidence in support of this option
+# a: threshold level of evidence
+# t0: residual time
+# dt: how long each tiny time interval lasts
+# t_max: optional "cut off" time to stop accumulating
+accum_sim <- function(v = 0, a = 1, t0 = 0.2, dt = 0.01, t_max = Inf) {
+    x <- 0
+    t <- t0
+    
+    x_record <- x
+    t_record <- t
+    
+    while (x < a & t < t_max) {
+        x_sample <- rnorm(n = 1, mean = v * dt, sd = sqrt(dt))
+        x <- x + x_sample
+        t <- t + dt
+        x_record <- c(x_record, x)
+        t_record <- c(t_record, t)
+    }
+    
+    return(data.frame(t = t_record, x = x_record))
+}
+```
+
+Let's see what the behavior of one of these single accumulators looks like.  The chunk of code below simulates 1000 trials using a few different settings of the drift rate parameter `v` and the threshold parameter `a`.  Note that because there is only one threshold and only one accumulator, there are no "choices" being made yet.  We are just simulating how long it takes a single accumulator to reach its threshold.
+
+```{r}
+#| code-fold: show
+
+N_sims <- 1000
+
+paramsToSim <- expand_grid(a = c(1, 2), v = c(1, 2, 3))
+
+sim_rt_results <- c()
+
+for (param_index in 1:nrow(paramsToSim)) {
+    for (sim_index in 1:N_sims) {
+        this_sim <- accum_sim(
+            v = paramsToSim$v[param_index],
+            a = paramsToSim$a[param_index]
+        )
+        
+        sim_rt_results <- rbind(
+            sim_rt_results,
+            tibble(
+                sim_index = sim_index,
+                v = paramsToSim$v[param_index],
+                a = paramsToSim$a[param_index],
+                finishing_time = max(this_sim$t)
+            )
+        )
+    }
+}
+
+# Plot conditional RT distributions
+dens_plot <- sim_rt_results %>%
+    ggplot(aes(x = finishing_time, color = v, linetype = factor(a), group = interaction(v, a))) +
+    geom_density() +
+    scale_color_gradient2(mid = "#bbbbbb") +
+    coord_cartesian(xlim = c(0, 5)) +
+    labs(x = "Finishing time", y = "Density", color = "Drift rate (v)", linetype = "Threshold (a)")
+
+cdf_plot <- sim_rt_results %>%
+    ggplot(aes(x = finishing_time, color = v, linetype = factor(a), group = interaction(v, a))) +
+    stat_ecdf() +
+    scale_color_gradient2(mid = "#bbbbbb") +
+    coord_cartesian(xlim = c(0, 5), ylim = c(0, 1)) +
+    labs(x = "Finishing time", y = "Cumulative", color = "Drift rate (v)", linetype = "Threshold (a)")
+
+print(
+    dens_plot + cdf_plot + plot_layout(nrow = 1, guides = "collect")
+)
+```
+
+The code below plots two graphs.  The left graph shows the *probability density function (PDF)* of the simulated finishing times for each combination of drift rate (`v`) and threshold (`a`).  The right graph shows the *cumulative distribution function (CDF)* of the simulated finishing times.  The left graph shows the probability of finishing at time $t$.  The right graph shows the probability of having finished *at or before* time $t$.  Both the PDF and the CDF will turn out to be important when we simulate a race between multiple accumulators.
+
+For now, though, we can appreciate two things, which are fairly intuitive:
+
+* The greater the drift rate `v`, the faster the accumulator is to finish.
+* The greater the threshold `a`, the slower the accumulator is to finish.
+
+### A race between independent accumulators
+
+Now let's introduce a second accumulator to the mix.  To return to our visual search example, this would correspond to a search array with two items.  For now, we will assume that each accumulator operates *independently* of the other, meaning that the evidence accumulated by each accumulator is not affected by the evidence level of the other.  Shortly, we will relax this assumption for our simulations.  Unfortunately, we will have to keep the independence assumption when we later write a function that computes the likelihood of a particular accumulator winning at a particular time.  When accumulators can interact with one another, computing the likelihood is a *lot* harder and requires some bespoke numerical methods that are beyond this course.
+
+For now, we need to modify our simulation code so that it treats `x` not as a single number, but as a *vector* where each element corresponds to the evidence level in each accumulator.  As a corollary to that, we will also need to treat the `v` and `a` arguments as vectors, since they may differ between accumulators.  That said, the first three lines of code in the function will repeat the values of `v` and `a` if necessary, so we can be lazy and provide just a single value if we want it to be equal across accumulators.
+
+```{r}
+#| code-fold: show
+
+# Function arguments
+# v: "drift rate", the average evidence in support of each option
+# a: threshold level of evidence for each accumulator
+# t0: residual time
+# dt: how long each tiny time interval lasts
+# t_max: optional "cut off" time to stop accumulating
+race_sim <- function(v = 0, a = 1, t0 = 0.2, dt = 0.01, t_max = Inf) {
+    n_accum <- max(length(v), length(a))
+    
+    v <- rep(v, n_accum)[1:n_accum]
+    a <- rep(a, n_accum)[1:n_accum]
+    
+    x <- rep(0, n_accum)
+    t <- t0
+    
+    x_record <- x
+    t_record <- t
+    
+    while (all(x < a) & t < t_max) {
+        x_sample <- rnorm(n = n_accum, mean = v * dt, sd = sqrt(dt))
+        x <- x + x_sample
+        t <- t + dt
+        x_record <- rbind(x_record, x)
+        t_record <- c(t_record, t)
+    }
+    
+    to_return <- cbind(t_record, x_record)
+    
+    colnames(to_return) <- c("t", paste0("x", 1:n_accum))
+    
+    return(as_tibble(to_return))
+}
+```
+
+Note that each time we run the simulation, we get the trajectory of accumulated evidence for both accumulators, labeled `x1` and `x2`.
+
+```{r}
+#| code-fold: show
+
+race_sim(v = c(1, 0), a = 1, t0 = 0.2)
+```
+
+This makes for some lovely plots:
+
+```{r}
+race_sim(v = c(1, 0), a = 1, t0 = 0.2) %>%
+    pivot_longer(matches("x(\\d+)"), names_to = "accumulator", values_to = "x") %>%
+    ggplot(aes(x = t, y = x, color = accumulator)) +
+    geom_line() +
+    geom_hline(yintercept = 1, linetype = "dashed") +
+    labs(x = "Time", y = "Accumulated evidence", color = "Accumulator")
+```
+
+We can also easily simulate situations with more than two options.  For example, maybe there are four items in the search array.  Say that item 1 is the search target, a red square.  Item 2 is a red circle---it matches the target in color but not shape.  Item 3 is a blue square---it matches the target in shape but not color.  Finally, item 4 is a blue circle, which matches in neither color nor shape.  If "evidence" reflects the degree of match between an item and the search target, then it would make sense for the drift rate for item 1 to be the greatest, the drift rate for item 4 to be the smallest, and the drift rates for items 2 and 3 to be intermediate (whether the drift rate for item 2 is greater than for item 3 may depend on how much attention is devoted to each feature).  I picked some sensible-seeming values for those drift rates in the simulation below, also assuming the same threshold of `a = 2` across all accumulators.
+
+```{r}
+race_sim(v = c(1, 0.4, 0.2, 0), a = 2, t0 = 0.2) %>%
+    pivot_longer(matches("x(\\d+)"), names_to = "accumulator", values_to = "x") %>%
+    ggplot(aes(x = t, y = x, color = accumulator)) +
+    geom_line() +
+    geom_hline(yintercept = 2, linetype = "dashed") +
+    labs(x = "Time", y = "Accumulated evidence", color = "Accumulator")
+```
+
+Although the graph above is just one simulated trial, it gives a visual sense of how evidence accumulation works in a race model.  It also shows how the option with the highest drift rate (accumulator `x1`) need not always win the race!
+
+Of course, to get a sense of the full distribution of behavior this model predicts, we can return to our old friend, the Quantile-Probability plot.  The code below simulates 2000 trials using the same parameter values as those used in the plot above.
+
+```{r eval = TRUE, echo = TRUE}
+#| code-fold: show
+
+n_sims <- 1000
+
+sim_results <- c()
+
+for (i in 1:n_sims) {
+    current_result <- race_sim(c(1, 0.4, 0.2, 0), a = 2, t0 = 0.2)
+    
+    # Extract just the choice and RT
+    rt <- current_result$t[nrow(current_result)]
+    choice <- which.max(current_result[nrow(current_result), 2:ncol(current_result)])
+    
+    # "Bind" the current simulation to the ongoing record of simulation results
+    sim_results <- rbind(
+        sim_results,
+        tibble(
+            sim_index = i,
+            rt = rt,
+            choice = choice
+        )
+    )
+}
+
+# Plot conditional RT distributions
+sim_results %>%
+    ggplot(aes(x = rt, color = factor(choice))) +
+    geom_density() +
+    labs(x = "Response time", y = "Frequency", color = "Choice", title = "Conditional RT distributions")
+
+# Quantile-probability plot
+sim_choice_p <- sim_results %>%
+    group_by(choice) %>%
+    count() %>%
+    ungroup() %>%
+    mutate(p_resp = n / sum(n))
+
+sim_rt_q <- sim_results %>%
+    group_by(choice) %>%
+    reframe(rt_q = quantile(rt, probs = c(0.1, 0.3, 0.5, 0.7, 0.9)))
+
+full_join(sim_choice_p, sim_rt_q) %>%
+    ggplot(aes(x = p_resp, y = rt_q, color = factor(choice))) +
+    geom_point() +
+    expand_limits(x = c(0, 1)) +
+    labs(x = "Response proportion", y = "RT Quantile", color = "Choice", title = "Quantile-Probability Plot")
+```
+
+There's a couple things worth noting in the simulations above.  First, looking at the QP plot, it is clear that accumulators with higher drift rates tend to "win" the race more often---the target item (item 1) gets chosen more often than the other items.  However, you may also have noticed that the RT distributions look pretty similar regardless of which item was actually chosen in the end.  This is somewhat reminiscent of how error and correct RT distributions were the same in the diffusion/random walk until we introduced trial-by-trial variability in drift rates.  The behavior of a race model is actually a bit more complicated, though.
+
+To get a better sense of what's going on, let's run another set of simulations.  In the following, we assume only two items, a target and a distractor.  The target will always have a drift rate of 1 but we will vary the drift rate associated with the distractor.  This might happen, for example, if we make the distractor progressively more similar to the target.  We will keep a threshold of 2 on both accumulators and residual time of 0.2.
+
+```{r eval = TRUE, echo = TRUE}
+#| code-fold: show
+
+n_sims <- 1000
+
+sim_results <- c()
+
+for (distractor_drift in c(0, 0.5, 0.9)) {
+    for (i in 1:n_sims) {
+        current_result <- race_sim(c(1, distractor_drift), a = 2, t0 = 0.2)
+        
+        # Extract just the choice and RT
+        rt <- current_result$t[nrow(current_result)]
+        choice <- which.max(current_result[nrow(current_result), 2:ncol(current_result)])
+        
+        # "Bind" the current simulation to the ongoing record of simulation results
+        sim_results <- rbind(
+            sim_results,
+            tibble(
+                distractor_drift = distractor_drift,
+                sim_index = i,
+                rt = rt,
+                choice = choice
+            )
+        )
+    }
+}
+
+# Quantile-probability plot
+sim_choice_p <- sim_results %>%
+    group_by(distractor_drift, choice) %>%
+    count() %>%
+    group_by(distractor_drift) %>%
+    mutate(p_resp = n / sum(n))
+
+sim_rt_q <- sim_results %>%
+    group_by(distractor_drift, choice) %>%
+    reframe(rt_q = quantile(rt, probs = c(0.1, 0.3, 0.5, 0.7, 0.9)))
+
+full_join(sim_choice_p, sim_rt_q) %>%
+    ggplot(aes(x = p_resp, y = rt_q, color = factor(choice))) +
+    geom_point() +
+    expand_limits(x = c(0, 1)) +
+    facet_wrap("distractor_drift", labeller = label_both) +
+    labs(x = "Response proportion", y = "RT Quantile", color = "Choice", title = "Quantile-Probability Plot")
+```
+
+As the drift rate for the distractor (item 2) increases, two things happen:  The probability of choosing the distractor increases and response times *decrease*.  Meanwhile, if you choose the distractor, you tend to do so a bit *faster* than when you pick the target.
+
+Speeding up when the competition gets more heated---that seems a bit counterintuitive, no?  However, it is a consequence of **statistical facilitation** [@Raab1962], which is a general phenomenon exhibited by race models.  It happens because, for an accumulator to "win" the race, it must have been faster than its competition.  Therefore, when the distractor has a high drift rate, the target must be *even faster* in order to win.
+
+For the same reason, if we introduce more distractors---and therefore more "runners" in the race---the race model also produces faster responses.  This is shown in the simulations below, which vary the number of distractors in the array, assuming each distractor has a drift rate of 0.1.
+
+```{r eval = TRUE, echo = TRUE}
+#| code-fold: show
+
+n_sims <- 1000
+
+sim_results <- c()
+
+for (num_distractors in c(1, 3, 7)) {
+    for (i in 1:n_sims) {
+        current_result <- race_sim(c(1, rep(0.1, num_distractors)), a = 2, t0 = 0.2)
+        
+        # Extract just the choice and RT
+        rt <- current_result$t[nrow(current_result)]
+        choice <- which.max(current_result[nrow(current_result), 2:ncol(current_result)])
+        
+        # "Bind" the current simulation to the ongoing record of simulation results
+        sim_results <- rbind(
+            sim_results,
+            tibble(
+                num_distractors = num_distractors,
+                sim_index = i,
+                rt = rt,
+                # Note that I don't bother to keep track of which distractor was selected
+                choice = factor(ifelse(choice == 1, "Target", "Distractor"), levels = c("Target", "Distractor"))
+            )
+        )
+    }
+}
+
+# Quantile-probability plot
+sim_choice_p <- sim_results %>%
+    group_by(num_distractors, choice) %>%
+    count() %>%
+    group_by(num_distractors) %>%
+    mutate(p_resp = n / sum(n))
+
+sim_rt_q <- sim_results %>%
+    group_by(num_distractors, choice) %>%
+    reframe(rt_q = quantile(rt, probs = c(0.1, 0.3, 0.5, 0.7, 0.9)))
+
+full_join(sim_choice_p, sim_rt_q) %>%
+    ggplot(aes(x = p_resp, y = rt_q, color = factor(choice))) +
+    geom_point() +
+    expand_limits(x = c(0, 1)) +
+    facet_wrap("num_distractors", labeller = label_both) +
+    labs(x = "Response proportion", y = "RT Quantile", color = "Choice", title = "Quantile-Probability Plot")
+```
+
+First, it is clear that introducing more distractors means the probability of selecting the target decreases, which makes intuitive sense.  But paradoxically, making the decision *harder* and more error-prone by introducing more distractors has *sped up* the model.  This is statistical facilitation once again---for any single accumulator to "win" the race it has to be faster than *all of its competitors*.
+
+Finally, it is worth remarking once again that errors (i.e., selecting a distractor) take about the same amount of time as correct responses, regardless of the number of distractors.
+
+### Introducing competition
+
+To enable the race model to be a bit more flexible---and potentially more psychologically realistic---we will introduce two kinds of *competition* between the accumulators.  As noted above, some forms of competition do not permit easy computation of likelihoods, but they are still important from a theoretical standpoint.
+
+#### Feedforward competition
+
+The first kind of competition we introduce is *feedforward* competition.  This mechanism treats the drift rate for an accumulator as something that can be *inhibited* by the drift rates for other accumulators.
+
+To get mathy about it, let $v_i$ stand for the drift rate to accumulator $i$, assuming $N$ total accumulators.  Then the *inhibited* drift rate $v_i'$ is
+
+$$
+v_i' = v_i - \alpha \sum_{i \neq j}^n v_j
+$$
+
+where $\sum_{i \neq j}^n v_j$ is the sum of the drift rates for all *other* accumulators and $\alpha$ is a free parameter representing the strength of feedforward competition.
+
+The code below introduces such a parameter, but calls it `feedforward_comp` instead of $\alpha$.  This parameter is used to define a new vector of drift rates `v_comp` which represents the drift rates `v` after being subject to feedforward competition.
+
+```{r}
+#| code-fold: show
+
+# Function arguments
+# v: "drift rate", the average evidence in support of each option
+# a: threshold level of evidence for each accumulator
+# t0: residual time
+# dt: how long each tiny time interval lasts
+# t_max: optional "cut off" time to stop accumulating
+# feedforward_comp: strength of feed-forward competition between accumulators
+race_sim <- function(v = 0, a = 1, t0 = 0.2, dt = 0.01, t_max = Inf, feedforward_comp = 0) {
+    n_accum <- max(length(v), length(a))
+    
+    v <- rep(v, n_accum)[1:n_accum]
+    a <- rep(a, n_accum)[1:n_accum]
+    
+    v_comp <- rep(0, n_accum)
+    
+    for (i in 1:n_accum) {
+        v_comp[i] <- v[i] - feedforward_comp * sum(v[-i])
+    }
+    
+    x <- rep(0, n_accum)
+    t <- t0
+    
+    x_record <- x
+    t_record <- t
+    
+    while (all(x < a) & t < t_max) {
+        x_sample <- rnorm(n = n_accum, mean = v_comp * dt, sd = sqrt(dt))
+        x <- x + x_sample
+        t <- t + dt
+        x_record <- rbind(x_record, x)
+        t_record <- c(t_record, t)
+    }
+    
+    to_return <- cbind(t_record, x_record)
+    
+    colnames(to_return) <- c("t", paste0("x", 1:n_accum))
+    
+    return(as_tibble(to_return))
+}
+```
+
+Let's take the new model out for a spin!  First, let's repeat the simulations varying distractor strength, but now set `feedforward_comp = 0.5`.
+
+```{r eval = TRUE, echo = TRUE}
+#| code-fold: show
+
+n_sims <- 1000
+
+sim_results <- c()
+
+for (distractor_drift in c(0, 0.5, 0.9)) {
+    for (i in 1:n_sims) {
+        current_result <- race_sim(c(1, distractor_drift), a = 2, t0 = 0.2, feedforward_comp = 0.5)
+        
+        # Extract just the choice and RT
+        rt <- current_result$t[nrow(current_result)]
+        choice <- which.max(current_result[nrow(current_result), 2:ncol(current_result)])
+        
+        # "Bind" the current simulation to the ongoing record of simulation results
+        sim_results <- rbind(
+            sim_results,
+            tibble(
+                distractor_drift = distractor_drift,
+                sim_index = i,
+                rt = rt,
+                choice = choice
+            )
+        )
+    }
+}
+
+# Quantile-probability plot
+sim_choice_p <- sim_results %>%
+    group_by(distractor_drift, choice) %>%
+    count() %>%
+    group_by(distractor_drift) %>%
+    mutate(p_resp = n / sum(n))
+
+sim_rt_q <- sim_results %>%
+    group_by(distractor_drift, choice) %>%
+    reframe(rt_q = quantile(rt, probs = c(0.1, 0.3, 0.5, 0.7, 0.9)))
+
+full_join(sim_choice_p, sim_rt_q) %>%
+    ggplot(aes(x = p_resp, y = rt_q, color = factor(choice))) +
+    geom_point() +
+    expand_limits(x = c(0, 1)) +
+    facet_wrap("distractor_drift", labeller = label_both) +
+    labs(x = "Response proportion", y = "RT Quantile", color = "Choice", title = "Quantile-Probability Plot")
+```
+
+Adding feedforward competition now causes the model to slow down when the distractor is more similar to a target.  This matches the intuition we may have about many tasks that a harder choice should take longer, on average.  Feedforward competition produces this behavior because strong competitors with high drift rates *reduce* the drift rates for all accumulators.
+
+What about increasing the number of options?  The simulations below replicate our earlier simulations in which we varied the number of distractors.  By introducing feedforward competition, each additional distractor now acts to *suppress* the drift rate for the target accumulator.
+
+```{r eval = TRUE, echo = TRUE}
+#| code-fold: show
+
+n_sims <- 1000
+
+sim_results <- c()
+
+for (num_distractors in c(1, 3, 7)) {
+    for (i in 1:n_sims) {
+        current_result <- race_sim(c(1, rep(0.1, num_distractors)), a = 2, t0 = 0.2, feedforward_comp = 0.5)
+        
+        # Extract just the choice and RT
+        rt <- current_result$t[nrow(current_result)]
+        choice <- which.max(current_result[nrow(current_result), 2:ncol(current_result)])
+        
+        # "Bind" the current simulation to the ongoing record of simulation results
+        sim_results <- rbind(
+            sim_results,
+            tibble(
+                num_distractors = num_distractors,
+                sim_index = i,
+                rt = rt,
+                # Note that I don't bother to keep track of which distractor was selected
+                choice = factor(ifelse(choice == 1, "Target", "Distractor"), levels = c("Target", "Distractor"))
+            )
+        )
+    }
+}
+
+# Quantile-probability plot
+sim_choice_p <- sim_results %>%
+    group_by(num_distractors, choice) %>%
+    count() %>%
+    group_by(num_distractors) %>%
+    mutate(p_resp = n / sum(n))
+
+sim_rt_q <- sim_results %>%
+    group_by(num_distractors, choice) %>%
+    reframe(rt_q = quantile(rt, probs = c(0.1, 0.3, 0.5, 0.7, 0.9)))
+
+full_join(sim_choice_p, sim_rt_q) %>%
+    ggplot(aes(x = p_resp, y = rt_q, color = factor(choice))) +
+    geom_point() +
+    expand_limits(x = c(0, 1)) +
+    facet_wrap("num_distractors", labeller = label_both) +
+    labs(x = "Response proportion", y = "RT Quantile", color = "Choice", title = "Quantile-Probability Plot")
+```
+
+As shown above, with feedforward competition between accumulators, adding more distractors slows responding, in keeping with intuition.  That said, it is still the case that the race model predicts errors (selecting a distractor) to be faster than correct responses.  Again, statistical facilitation is at work---the only way for a race model to make an error is for the "wrong" accumulator (i.e., one with a comparatively low drift rate) to be *even faster* than the "right" accumulator (i.e., one with a comparatively high drift rate).
+
+#### Lateral competition
+
+A different form of competition enables race models to predict slower errors than correct responses: *lateral competition*.  Lateral competition occurs between accumulators *during the accumulation process*, unlike feedforward competition which only affects the "inputs" to the accumulators.  With lateral competition, the level of evidence in one accumulator acts to *suppress* the level of evidence in other accumulators.
+
+Mathematically, lateral competition enters into the equation that describes how evidence evolves from one moment in time to the next:
+$$
+\overbrace{x_i(t + \Delta t)}^{\text{Updated evidence}} = \underbrace{x_i(t)}_{\text{Current accumulated evidence}} + \overbrace{\Delta x_i(t)}^{\text{Current sample of evidence}} - \underbrace{\beta \Delta t \sum_{j \neq i}^N x_j(t)}_{\text{Lateral competition}}
+$$
+As described in the equation above, during each interval of time, the evidence in accumulator $i$ not only receives a new sample of evidence, it *loses* some evidence in proportion to how much evidence has accumulated in the *other* accumulators (accumulators $j$, where $j \neq i$).  Conceptually, lateral competition embodies the idea that having accumulated a lot of evidence for one option counts as evidence *against* picking the other options, encouraging a sort of "winner-take-all" competition.  Metaphorically, we can think of lateral competition as sort of like the [famous chariot race scene in *Ben Hur*](https://youtu.be/1LVp4tvl5O4?si=nonwd9GF7XzWZk94), where instead of the competitors running in their own separate lanes, they are able to "jostle" with one another during the event.
+
+The chunk of code below amends our race model simulation to include lateral competition.  It also includes a new argument to the function `min_x`, which sets the *minimum allowable value* for accumulated evidence.  By default, `min_x = -Inf`, such that evidence is allowed to be negative.  However, we will see that allowing negative evidence results in some interesting (not necessarily incorrect!) behavior from the model.
+
+```{r}
+#| code-fold: show
+
+# Function arguments
+# v: "drift rate", the average evidence in support of each option
+# a: threshold level of evidence for each accumulator
+# t0: residual time
+# dt: how long each tiny time interval lasts
+# t_max: optional "cut off" time to stop accumulating
+# feedforward_comp: strength of feed-forward competition between accumulators
+# lateral_comp: strength of lateral competition between accumulators
+# min_x: accumulators are constrained to have at minimum *this much* evidence
+race_sim <- function(v = 0, a = 1, t0 = 0.2, dt = 0.01, t_max = Inf, feedforward_comp = 0, lateral_comp = 0, min_x = -Inf) {
+    n_accum <- max(length(v), length(a))
+    
+    v <- rep(v, n_accum)[1:n_accum]
+    a <- rep(a, n_accum)[1:n_accum]
+    
+    v_comp <- rep(0, n_accum)
+    
+    for (i in 1:n_accum) {
+        v_comp[i] <- v[i] - feedforward_comp * sum(v[-i])
+    }
+    
+    x <- rep(0, n_accum)
+    t <- t0
+    
+    x_record <- x
+    t_record <- t
+    
+    while (all(x < a) & t < t_max) {
+        # Compute the total amount of lateral competition for each accumulator
+        lat <- rep(0, n_accum)
+        for (i in 1:n_accum) {
+            lat[i] <- sum(x[-i])
+        }
+        
+        x_sample <- rnorm(n = n_accum, mean = v_comp * dt, sd = sqrt(dt))
+        
+        # Updated values account for lateral competition and use "pmax" to keep them above "min_x"
+        x <- pmax(min_x, x + x_sample - dt * lateral_comp * lat)
+        t <- t + dt
+        x_record <- rbind(x_record, x)
+        t_record <- c(t_record, t)
+    }
+    
+    to_return <- cbind(t_record, x_record)
+    
+    colnames(to_return) <- c("t", paste0("x", 1:n_accum))
+    
+    return(as_tibble(to_return))
+}
+```
+
+To see the effect of lateral competition, let's take a look at some simulated trials.  For comparison purposes, I have set R's "random seed" to the same value prior to each simulation, which has the effect of making the sequence of random evidence samples the same for each simulated trial.  This allows us to focus on the effects of lateral competition and of enforcing a minimum evidence level.
+
+```{r}
+set.seed(2)
+baseline_sim <- race_sim(v = c(1, 0), a = 2, t0 = 0.2, lateral_comp = 0, min_x = -Inf)
+
+set.seed(2)
+lateral_sim <- race_sim(v = c(1, 0), a = 2, t0 = 0.2, lateral_comp = 1, min_x = -Inf)
+
+set.seed(2)
+lateral_min_sim <- race_sim(v = c(1, 0), a = 2, t0 = 0.2, lateral_comp = 1, min_x = 0)
+
+all_sims <- rbind(
+    baseline_sim %>% mutate(label = "No lateral competition,\nno minimum value"),
+    lateral_sim %>% mutate(label = "Lateral competition,\nno minimum value"),
+    lateral_min_sim %>% mutate(label = "Lateral competition,\nnonnegative evidence")
+) %>%
+    mutate(label = factor(label, levels = c("No lateral competition,\nno minimum value", "Lateral competition,\nno minimum value", "Lateral competition,\nnonnegative evidence")))
+
+all_sims %>%
+    pivot_longer(matches("x(\\d+)"), names_to = "accumulator", values_to = "x") %>%
+    ggplot(aes(x = t, y = x, color = accumulator)) +
+    geom_line() +
+    geom_hline(yintercept = 2, linetype = "dashed") +
+    geom_hline(yintercept = 0, linetype = "dotted") +
+    facet_wrap("label", nrow = 1) +
+    labs(x = "Time", y = "Accumulated evidence", color = "Accumulator")
+```
+
+Comparing the first two plots (with and without lateral competition), we can see that the effect of lateral competition is twofold: the "stronger" accumulator (`x1`) suppresses the "weaker" accumulator (`x2`), causing its evidence level to diminish over time.  Comparing the second two plots, we can see that an accumulator with negative evidence can actually *accelerate* accumulation for its competitors---after all, subtracting a negative is a positive!  When evidence is constrained to be non-negative (as in the third plot), that kind of acceleration is no longer possible.
+
+It is worth noting that many models with lateral competition are inspired by the ways that individual neurons interact, making an analogy between the level of accumulated evidence and the amount of activity in either a single neuron or group of neurons [@UsherMcClelland2001; @PurcellEtAl2010; @PurcellEtAl2012; @TeodorescuUsher2013].  Because neural activity cannot be negative, these models also constrain evidence to be non-negative.  As a result, most models that include some form of lateral competition also assume that the level of accumulated evidence cannot be negative, although this assumption is not strictly required.
+
+Now let's see the effect of lateral competition on the model's predictions regarding distractor similarity and number of distractors.  The simulations below set the lateral competition parameter to 1 and, in keeping with the majority of models with lateral competition, do not allow for negative evidence.
+
+```{r eval = TRUE, echo = TRUE}
+#| code-fold: show
+
+n_sims <- 1000
+
+sim_results <- c()
+
+for (distractor_drift in c(0, 0.5, 0.9)) {
+    for (i in 1:n_sims) {
+        current_result <- race_sim(c(1, distractor_drift), a = 2, t0 = 0.2, feedforward_comp = 0, lateral_comp = 1, min_x = 0)
+        
+        # Extract just the choice and RT
+        rt <- current_result$t[nrow(current_result)]
+        choice <- which.max(current_result[nrow(current_result), 2:ncol(current_result)])
+        
+        # "Bind" the current simulation to the ongoing record of simulation results
+        sim_results <- rbind(
+            sim_results,
+            tibble(
+                distractor_drift = distractor_drift,
+                sim_index = i,
+                rt = rt,
+                choice = choice
+            )
+        )
+    }
+}
+
+# Quantile-probability plot
+sim_choice_p <- sim_results %>%
+    group_by(distractor_drift, choice) %>%
+    count() %>%
+    group_by(distractor_drift) %>%
+    mutate(p_resp = n / sum(n))
+
+sim_rt_q <- sim_results %>%
+    group_by(distractor_drift, choice) %>%
+    reframe(rt_q = quantile(rt, probs = c(0.1, 0.3, 0.5, 0.7, 0.9)))
+
+full_join(sim_choice_p, sim_rt_q) %>%
+    ggplot(aes(x = p_resp, y = rt_q, color = factor(choice))) +
+    geom_point() +
+    expand_limits(x = c(0, 1)) +
+    facet_wrap("distractor_drift", labeller = label_both) +
+    labs(x = "Response proportion", y = "RT Quantile", color = "Choice", title = "Quantile-Probability Plot")
+```
+
+With lateral inhibition, errors (choosing 2) are generally slower than correct responses (choosing 1).  This is because errors tend to occur when the correct response has more competition from the error accumulators.  Notice, though, that making the distractor stronger does not slow responding overall---it actually speeds responses.  Statistical facilitation still occurs even in the presence of lateral competition.
+
+But while increasing the strength of competition doesn't necessarily slow responding, the simulations below show that increasing the number of competitors does slow responding if there is lateral competition.  The more competitors in the race, the more lateral competition there is, slowing down all the accumulators.
+
+```{r eval = TRUE, echo = TRUE}
+#| code-fold: show
+
+n_sims <- 1000
+
+sim_results <- c()
+
+for (num_distractors in c(1, 3, 7)) {
+    for (i in 1:n_sims) {
+        current_result <- race_sim(c(1, rep(0.1, num_distractors)), a = 2, t0 = 0.2, lateral_comp = 1, min_x = 0)
+        
+        # Extract just the choice and RT
+        rt <- current_result$t[nrow(current_result)]
+        choice <- which.max(current_result[nrow(current_result), 2:ncol(current_result)])
+        
+        # "Bind" the current simulation to the ongoing record of simulation results
+        sim_results <- rbind(
+            sim_results,
+            tibble(
+                num_distractors = num_distractors,
+                sim_index = i,
+                rt = rt,
+                # Note that I don't bother to keep track of which distractor was selected
+                choice = factor(ifelse(choice == 1, "Target", "Distractor"), levels = c("Target", "Distractor"))
+            )
+        )
+    }
+}
+
+# Quantile-probability plot
+sim_choice_p <- sim_results %>%
+    group_by(num_distractors, choice) %>%
+    count() %>%
+    group_by(num_distractors) %>%
+    mutate(p_resp = n / sum(n))
+
+sim_rt_q <- sim_results %>%
+    group_by(num_distractors, choice) %>%
+    reframe(rt_q = quantile(rt, probs = c(0.1, 0.3, 0.5, 0.7, 0.9)))
+
+full_join(sim_choice_p, sim_rt_q) %>%
+    ggplot(aes(x = p_resp, y = rt_q, color = factor(choice))) +
+    geom_point() +
+    expand_limits(x = c(0, 1)) +
+    facet_wrap("num_distractors", labeller = label_both) +
+    labs(x = "Response proportion", y = "RT Quantile", color = "Choice", title = "Quantile-Probability Plot")
+```
+
+#### Summary
+
+Feedforward competition diminishes the drift rates for each accumulator, with the result that stronger competition tends to slow responding overall.  However, feedforward competition still generally predicts fast errors because errors occur when the accumulators for incorrect responses happen to be fast enough to "beat" the accumulator associated with the correct response.
+
+Lateral competition does not always predict that stronger competition will slow responding.  Lateral competition can produce slow errors because they arise in trials where the incorrect accumulators happened to be strong enough to *impede* the correct accumulator.
+
+Note that the race model theory for slow errors is different from how slow errors were explained with a diffusion model.  With a diffusion model, slow errors arose from trial-by-trial variability in the drift rate.  One of your exercises will be to compare and contrast these two theories of slow errors.
+
+## Race model likelihood function
+
+In the previous section, we build code to simulate a race model, where each accumulator was associated with a particular response.  We will now write a function to calculate the negative log-likelihood of a response at a particular time.  This will enable us to *fit* a race model to data.
+
+## Decision rules
+
+$$
+f_i \left( t \mid a_i, v_i, t_{0i} \right) = \frac{a_i}{\sqrt{2 \pi \left(t - t_{0i} \right)^3}} \exp \left\lbrace -\frac{\left[a_i - v_i \left(t - t_{0i} \right) \right]^2}{2 \left(t - t_{0i} \right)} \right\rbrace
+$$
+
+$$
+F_i \left( t \mid a_i, v_i, t_{0i} \right) = \Phi \left[ \frac{v_i \left( t - t_{0i} \right) - a_i}{\sqrt{t - t_{0i}}} \right] + \exp \left( 2 a_i v_i \right) \Phi \left[ -\frac{v_i \left( t - t_{0i} \right) + a_i}{\sqrt{t - t_{0i}}} \right]
+$$
+
+\begin{align}
+\lim_{t \rightarrow \infty} F_i \left( t \mid a_i, v_i, t_{0i} \right) & =
+    \begin{cases}
+        \Phi \left( \infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( -\infty \right) & \text{if } v_i > 0 \\
+        \Phi \left( 0 \right) + \exp \left( 0 \right) \Phi \left( 0 \right) & \text{if } v_i = 0 \\
+        \Phi \left( -\infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( \infty \right) & \text{if } v_i < 0
+    \end{cases} \\
+    & = \begin{cases}
+        1 + \exp \left( 2 a_i v_i \right) \times 0 & \text{if } v_i > 0 \\
+        \frac{1}{2} + 1 \times \frac{1}{2} & \text{if } v_i = 0 \\
+        0 + \exp \left( 2 a_i v_i \right) \times 1 & \text{if } v_i < 0
+    \end{cases} \\
+    & = \begin{cases}
+        1 & \text{if } v_i \geq 0 \\
+        \exp \left( 2 a_i v_i \right) & \text{if } v_i < 0
+    \end{cases}
+\end{align}
+
+```{r}
+#| code-fold: show
+
+accum_pdf <- function(t, a, v, t0) {
+    t_minus_t0 <- pmax(0, t - t0)
+    pdf <- a * exp(-(a - v * t_minus_t0)^2 / (2 * t_minus_t0)) / sqrt(2 * pi * t_minus_t0^3)
+    pdf[t_minus_t0 <= 0] <- 0
+    return(pdf)
+}
+
+accum_cdf <- function(t, a, v, t0) {
+    t_minus_t0 <- pmax(0, t - t0)
+    cdf <- pnorm((v * t_minus_t0 - a) / sqrt(t_minus_t0)) + exp(2 * a * v) * pnorm(-(v * t_minus_t0 + a) / sqrt(t_minus_t0))
+    return(cdf)
+}
+
+race_nll <- function(par, rt, response, v_index, a_index, n_v = max(v_index), n_a = max(a_index)) {
+    v <- par[paste0("v[", 1:n_v, "]")]
+    a <- par[paste0("a[", 1:n_a, "]")]
+    t0 <- par["t0"]
+    ff <- par["ff"]
+    
+    nll <- rep(0, length(rt))
+    
+    for (i in 1:length(rt)) {
+        v_comp <- rep(0, ncol(v_index))
+    
+        for (j in 1:n_accum) {
+            v_comp[j] <- v[j] - ff * sum(v[-j])
+        }
+        
+        nll[i] <- -log(accum_pdf(t = rt[i], a = a[a_index[i, response]], v = v_comp[v_index[i, response]], t0 = t0) * prod(1 - accum_cdf(t = rt[i], a = a[a_index[i, -response]], v = v_comp[v_index[i, -response]], t0 = t0)))
+    }
+    
+    return(sum(nll))
+}
+```
+
+```{r}
+toPlot <- expand_grid(t = seq(0, 3, length.out = 101), a = c(1, 2), v = seq(-3, 3, length.out = 7)) %>%
+    mutate(threshold_factor = factor(a, levels = sort(unique(a)), labels = paste("Threshold =", sort(unique(a))))) %>%
+    mutate(d = accum_pdf(t = t, a = a, v = v, t0 = 0)) %>%
+    mutate(p = accum_cdf(t = t, a = a, v = v, t0 = 0))
+
+pdf_plot <- toPlot %>%
+    ggplot(aes(x = t, y = d, color = v, group = factor(v))) +
+    geom_line() +
+    scale_color_gradient2(mid = "#bbbbbb") +
+    facet_wrap("threshold_factor", ncol = 1) +
+    labs(x = "Time (s)", y = "Accumulator PDF", color = "Drift rate")
+
+cdf_plot <- toPlot %>%
+    ggplot(aes(x = t, y = p, color = v, group = factor(v))) +
+    geom_line() +
+    scale_color_gradient2(mid = "#bbbbbb") +
+    expand_limits(y = c(0, 1)) +
+    facet_wrap("threshold_factor", ncol = 1) +
+    labs(x = "Time (s)", y = "Accumulator CDF", color = "Drift rate")
+
+print(
+    pdf_plot + cdf_plot + plot_layout(guides = "collect", nrow = 1)
+)
+```
+
+## Exercises
+
+1. Consider potential psychological interpretations of feedforward inhibition and lateral inhibition.  In particular, relate these two forms of competition to the constructs of *attention* and *capacity*.
+2. Compare and contrast the explanations for slow errors provided by the diffusion model and by lateral competition.
+3. The accumulator models we explored in the chapter are all *stochastic* accumulators, since value of the evidence being accumulated fluctuates randomly around a mean.  Implement the LBA.
