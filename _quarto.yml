@@ -8,10 +8,9 @@ book:
   date: "2/25/2025"
   chapters:
     - index.qmd
-    - part: "Perspectives"
+    - part: "Background"
       chapters:
         - intro.qmd
-        - ebrw.qmd
         - r_coding.qmd
     - part: "First foray"
       chapters:
@@ -20,7 +19,8 @@ book:
         - diffusion_fit.qmd
         - model_comparison.qmd
         - blast_example.qmd
-        # - accumulator_models.qmd
+        - accumulator_models.qmd
+        - ebrw.qmd
     - references.qmd
 
 bibliography: references.bib

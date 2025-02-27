@@ -7,6 +7,8 @@ library(patchwork)
 set.seed(12222)
 ```
 
+**Notice: This chapter will be updated!**
+
 So far, we have focused on models that are designed to explain how people choose between two opposing options.  We built a random walk model and a diffusion model and then saw how we could fit a diffusion model to choice/RT data.  For the latter purpose, we relied on the `WienR` package to calculate the (log-)likelihood of making a particular choice at a particular time.  This is because the math for calculating those likelihoods is not trivial, requiring some bespoke numerical approximations that are beyond the scope of this course.  Nonetheless, our cognitive models so far have touched on several major themes that are shared by all cognitive models:
 
 * **Representations**: in making a decision, the model assumes that a decision-maker maintains a *representation* of the degree to which the evidence they have accumulated so far favors one option or the other.
@@ -195,7 +197,7 @@ race_sim(v = c(1, 0.4, 0.2, 0), a = 2, t0 = 0.2) %>%
 
 Although the graph above is just one simulated trial, it gives a visual sense of how evidence accumulation works in a race model.  It also shows how the option with the highest drift rate (accumulator `x1`) need not always win the race!
 
-Of course, to get a sense of the full distribution of behavior this model predicts, we can return to our old friend, the Quantile-Probability plot.  The code below simulates 2000 trials using the same parameter values as those used in the plot above.
+Of course, to get a sense of the full distribution of behavior this model predicts, we can return to our old friend, the Quantile-Probability plot.  The code below simulates 1000 trials using the same parameter values as those used in the plot above.
 
 ```{r eval = TRUE, echo = TRUE}
 #| code-fold: show
@@ -246,7 +248,60 @@ full_join(sim_choice_p, sim_rt_q) %>%
     labs(x = "Response proportion", y = "RT Quantile", color = "Choice", title = "Quantile-Probability Plot")
 ```
 
-There's a couple things worth noting in the simulations above.  First, looking at the QP plot, it is clear that accumulators with higher drift rates tend to "win" the race more often---the target item (item 1) gets chosen more often than the other items.  However, you may also have noticed that the RT distributions look pretty similar regardless of which item was actually chosen in the end.  This is somewhat reminiscent of how error and correct RT distributions were the same in the diffusion/random walk until we introduced trial-by-trial variability in drift rates.  The behavior of a race model is actually a bit more complicated, though.
+There's a couple things worth noting in the simulations above.  First, looking at the QP plot, it is clear that accumulators with higher drift rates tend to "win" the race more often---the target item (item 1) gets chosen more often than the other items.  However, you may also have noticed that the RT distributions look pretty similar regardless of which item was actually chosen in the end.  This is somewhat reminiscent of how error and correct RT distributions were the same in the diffusion/random walk until we introduced trial-by-trial variability in drift rates.
+
+The next set of simulations illustrate how we can model response bias by allowing the threshold to vary between accumulators.  In the simulations below, I use four accumulators representing the factorial combination of two values of drift rate (`v` is either `1` or `0`) and two values of threshold (`a` is either `1` or `2`).
+
+```{r eval = TRUE, echo = TRUE}
+#| code-fold: show
+
+n_sims <- 1000
+
+sim_results <- c()
+
+for (i in 1:n_sims) {
+    current_result <- race_sim(c(1, 1, 0, 0), a = c(2, 1, 2, 1), t0 = 0.2)
+    
+    # Extract just the choice and RT
+    rt <- current_result$t[nrow(current_result)]
+    choice <- which.max(current_result[nrow(current_result), 2:ncol(current_result)])
+    
+    # "Bind" the current simulation to the ongoing record of simulation results
+    sim_results <- rbind(
+        sim_results,
+        tibble(
+            sim_index = i,
+            rt = rt,
+            choice = choice
+        )
+    )
+}
+
+# Plot conditional RT distributions
+sim_results %>%
+    ggplot(aes(x = rt, color = factor(choice))) +
+    geom_density() +
+    labs(x = "Response time", y = "Frequency", color = "Choice", title = "Conditional RT distributions")
+
+# Quantile-probability plot
+sim_choice_p <- sim_results %>%
+    group_by(choice) %>%
+    count() %>%
+    ungroup() %>%
+    mutate(p_resp = n / sum(n))
+
+sim_rt_q <- sim_results %>%
+    group_by(choice) %>%
+    reframe(rt_q = quantile(rt, probs = c(0.1, 0.3, 0.5, 0.7, 0.9)))
+
+full_join(sim_choice_p, sim_rt_q) %>%
+    ggplot(aes(x = p_resp, y = rt_q, color = factor(choice))) +
+    geom_point() +
+    expand_limits(x = c(0, 1)) +
+    labs(x = "Response proportion", y = "RT Quantile", color = "Choice", title = "Quantile-Probability Plot")
+```
+
+The results show that, as would make sense, accumulators with lower thresholds (2 and 4) tend to win more quickly than those with higher thresholds (1 and 3).  The simulations also illustrate a tendency which we are about to explore:  Accumulators with lower drift rates (3 and 4) tend to be associated with *faster* responses.
 
 To get a better sense of what's going on, let's run another set of simulations.  In the following, we assume only two items, a target and a distractor.  The target will always have a drift rate of 1 but we will vary the drift rate associated with the distractor.  This might happen, for example, if we make the distractor progressively more similar to the target.  We will keep a threshold of 2 on both accumulators and residual time of 0.2.
 
@@ -728,104 +783,107 @@ Lateral competition does not always predict that stronger competition will slow 
 
 Note that the race model theory for slow errors is different from how slow errors were explained with a diffusion model.  With a diffusion model, slow errors arose from trial-by-trial variability in the drift rate.  One of your exercises will be to compare and contrast these two theories of slow errors.
 
-## Race model likelihood function
+<!-- ## Race model likelihood function -->
 
-In the previous section, we build code to simulate a race model, where each accumulator was associated with a particular response.  We will now write a function to calculate the negative log-likelihood of a response at a particular time.  This will enable us to *fit* a race model to data.
+<!-- In the previous section, we build code to simulate a race model, where each accumulator was associated with a particular response.  We will now write a function to calculate the negative log-likelihood of a response at a particular time.  This will enable us to *fit* a race model to data. -->
 
-## Decision rules
+<!-- ## Decision rules -->
 
-$$
-f_i \left( t \mid a_i, v_i, t_{0i} \right) = \frac{a_i}{\sqrt{2 \pi \left(t - t_{0i} \right)^3}} \exp \left\lbrace -\frac{\left[a_i - v_i \left(t - t_{0i} \right) \right]^2}{2 \left(t - t_{0i} \right)} \right\rbrace
-$$
+<!-- $$ -->
+<!-- f_i \left( t \mid a_i, v_i, t_{0i} \right) = \frac{a_i}{\sqrt{2 \pi \left(t - t_{0i} \right)^3}} \exp \left\lbrace -\frac{\left[a_i - v_i \left(t - t_{0i} \right) \right]^2}{2 \left(t - t_{0i} \right)} \right\rbrace -->
+<!-- $$ -->
 
-$$
-F_i \left( t \mid a_i, v_i, t_{0i} \right) = \Phi \left[ \frac{v_i \left( t - t_{0i} \right) - a_i}{\sqrt{t - t_{0i}}} \right] + \exp \left( 2 a_i v_i \right) \Phi \left[ -\frac{v_i \left( t - t_{0i} \right) + a_i}{\sqrt{t - t_{0i}}} \right]
-$$
+<!-- $$ -->
+<!-- F_i \left( t \mid a_i, v_i, t_{0i} \right) = \Phi \left[ \frac{v_i \left( t - t_{0i} \right) - a_i}{\sqrt{t - t_{0i}}} \right] + \exp \left( 2 a_i v_i \right) \Phi \left[ -\frac{v_i \left( t - t_{0i} \right) + a_i}{\sqrt{t - t_{0i}}} \right] -->
+<!-- $$ -->
 
-\begin{align}
-\lim_{t \rightarrow \infty} F_i \left( t \mid a_i, v_i, t_{0i} \right) & =
-    \begin{cases}
-        \Phi \left( \infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( -\infty \right) & \text{if } v_i > 0 \\
-        \Phi \left( 0 \right) + \exp \left( 0 \right) \Phi \left( 0 \right) & \text{if } v_i = 0 \\
-        \Phi \left( -\infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( \infty \right) & \text{if } v_i < 0
-    \end{cases} \\
-    & = \begin{cases}
-        1 + \exp \left( 2 a_i v_i \right) \times 0 & \text{if } v_i > 0 \\
-        \frac{1}{2} + 1 \times \frac{1}{2} & \text{if } v_i = 0 \\
-        0 + \exp \left( 2 a_i v_i \right) \times 1 & \text{if } v_i < 0
-    \end{cases} \\
-    & = \begin{cases}
-        1 & \text{if } v_i \geq 0 \\
-        \exp \left( 2 a_i v_i \right) & \text{if } v_i < 0
-    \end{cases}
-\end{align}
+<!-- \begin{align} -->
+<!-- \lim_{t \rightarrow \infty} F_i \left( t \mid a_i, v_i, t_{0i} \right) & = -->
+<!--     \begin{cases} -->
+<!--         \Phi \left( \infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( -\infty \right) & \text{if } v_i > 0 \\ -->
+<!--         \Phi \left( 0 \right) + \exp \left( 0 \right) \Phi \left( 0 \right) & \text{if } v_i = 0 \\ -->
+<!--         \Phi \left( -\infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( \infty \right) & \text{if } v_i < 0 -->
+<!--     \end{cases} \\ -->
+<!--     & = \begin{cases} -->
+<!--         1 + \exp \left( 2 a_i v_i \right) \times 0 & \text{if } v_i > 0 \\ -->
+<!--         \frac{1}{2} + 1 \times \frac{1}{2} & \text{if } v_i = 0 \\ -->
+<!--         0 + \exp \left( 2 a_i v_i \right) \times 1 & \text{if } v_i < 0 -->
+<!--     \end{cases} \\ -->
+<!--     & = \begin{cases} -->
+<!--         1 & \text{if } v_i \geq 0 \\ -->
+<!--         \exp \left( 2 a_i v_i \right) & \text{if } v_i < 0 -->
+<!--     \end{cases} -->
+<!-- \end{align} -->
 
-```{r}
-#| code-fold: show
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
 
-accum_pdf <- function(t, a, v, t0) {
-    t_minus_t0 <- pmax(0, t - t0)
-    pdf <- a * exp(-(a - v * t_minus_t0)^2 / (2 * t_minus_t0)) / sqrt(2 * pi * t_minus_t0^3)
-    pdf[t_minus_t0 <= 0] <- 0
-    return(pdf)
-}
+<!-- accum_pdf <- function(t, a, v, t0) { -->
+<!--     t_minus_t0 <- pmax(0, t - t0) -->
+<!--     pdf <- a * exp(-(a - v * t_minus_t0)^2 / (2 * t_minus_t0)) / sqrt(2 * pi * t_minus_t0^3) -->
+<!--     pdf[t_minus_t0 <= 0] <- 0 -->
+<!--     return(pdf) -->
+<!-- } -->
 
-accum_cdf <- function(t, a, v, t0) {
-    t_minus_t0 <- pmax(0, t - t0)
-    cdf <- pnorm((v * t_minus_t0 - a) / sqrt(t_minus_t0)) + exp(2 * a * v) * pnorm(-(v * t_minus_t0 + a) / sqrt(t_minus_t0))
-    return(cdf)
-}
+<!-- accum_cdf <- function(t, a, v, t0) { -->
+<!--     t_minus_t0 <- pmax(0, t - t0) -->
+<!--     cdf <- pnorm((v * t_minus_t0 - a) / sqrt(t_minus_t0)) + exp(2 * a * v) * pnorm(-(v * t_minus_t0 + a) / sqrt(t_minus_t0)) -->
+<!--     return(cdf) -->
+<!-- } -->
 
-race_nll <- function(par, rt, response, v_index, a_index, n_v = max(v_index), n_a = max(a_index)) {
-    v <- par[paste0("v[", 1:n_v, "]")]
-    a <- par[paste0("a[", 1:n_a, "]")]
-    t0 <- par["t0"]
-    ff <- par["ff"]
-    
-    nll <- rep(0, length(rt))
-    
-    for (i in 1:length(rt)) {
-        v_comp <- rep(0, ncol(v_index))
-    
-        for (j in 1:n_accum) {
-            v_comp[j] <- v[j] - ff * sum(v[-j])
-        }
-        
-        nll[i] <- -log(accum_pdf(t = rt[i], a = a[a_index[i, response]], v = v_comp[v_index[i, response]], t0 = t0) * prod(1 - accum_cdf(t = rt[i], a = a[a_index[i, -response]], v = v_comp[v_index[i, -response]], t0 = t0)))
-    }
-    
-    return(sum(nll))
-}
-```
+<!-- race_nll <- function(par, rt, response, v_index, a_index, n_v = max(v_index), n_a = max(a_index)) { -->
+<!--     v <- par[paste0("v[", 1:n_v, "]")] -->
+<!--     a <- par[paste0("a[", 1:n_a, "]")] -->
+<!--     t0 <- par["t0"] -->
+<!--     ff <- par["ff"] -->
 
-```{r}
-toPlot <- expand_grid(t = seq(0, 3, length.out = 101), a = c(1, 2), v = seq(-3, 3, length.out = 7)) %>%
-    mutate(threshold_factor = factor(a, levels = sort(unique(a)), labels = paste("Threshold =", sort(unique(a))))) %>%
-    mutate(d = accum_pdf(t = t, a = a, v = v, t0 = 0)) %>%
-    mutate(p = accum_cdf(t = t, a = a, v = v, t0 = 0))
+<!--     nll <- rep(0, length(rt)) -->
 
-pdf_plot <- toPlot %>%
-    ggplot(aes(x = t, y = d, color = v, group = factor(v))) +
-    geom_line() +
-    scale_color_gradient2(mid = "#bbbbbb") +
-    facet_wrap("threshold_factor", ncol = 1) +
-    labs(x = "Time (s)", y = "Accumulator PDF", color = "Drift rate")
+<!--     for (i in 1:length(rt)) { -->
+<!--         v_comp <- rep(0, ncol(v_index)) -->
 
-cdf_plot <- toPlot %>%
-    ggplot(aes(x = t, y = p, color = v, group = factor(v))) +
-    geom_line() +
-    scale_color_gradient2(mid = "#bbbbbb") +
-    expand_limits(y = c(0, 1)) +
-    facet_wrap("threshold_factor", ncol = 1) +
-    labs(x = "Time (s)", y = "Accumulator CDF", color = "Drift rate")
+<!--         for (j in 1:n_accum) { -->
+<!--             v_comp[j] <- v[j] - ff * sum(v[-j]) -->
+<!--         } -->
 
-print(
-    pdf_plot + cdf_plot + plot_layout(guides = "collect", nrow = 1)
-)
-```
+<!--         nll[i] <- -log( -->
+<!--             accum_pdf(t = rt[i], a = a[a_index[i, response]], v = v_comp[v_index[i, response]], t0 = t0) * -->
+<!--                 prod(1 - accum_cdf(t = rt[i], a = a[a_index[i, -response]], v = v_comp[v_index[i, -response]], t0 = t0)) -->
+<!--         ) -->
+<!--     } -->
+
+<!--     return(sum(nll)) -->
+<!-- } -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- toPlot <- expand_grid(t = seq(0, 3, length.out = 101), a = c(1, 2), v = seq(-3, 3, length.out = 7)) %>% -->
+<!--     mutate(threshold_factor = factor(a, levels = sort(unique(a)), labels = paste("Threshold =", sort(unique(a))))) %>% -->
+<!--     mutate(d = accum_pdf(t = t, a = a, v = v, t0 = 0)) %>% -->
+<!--     mutate(p = accum_cdf(t = t, a = a, v = v, t0 = 0)) -->
+
+<!-- pdf_plot <- toPlot %>% -->
+<!--     ggplot(aes(x = t, y = d, color = v, group = factor(v))) + -->
+<!--     geom_line() + -->
+<!--     scale_color_gradient2(mid = "#bbbbbb") + -->
+<!--     facet_wrap("threshold_factor", ncol = 1) + -->
+<!--     labs(x = "Time (s)", y = "Accumulator PDF", color = "Drift rate") -->
+
+<!-- cdf_plot <- toPlot %>% -->
+<!--     ggplot(aes(x = t, y = p, color = v, group = factor(v))) + -->
+<!--     geom_line() + -->
+<!--     scale_color_gradient2(mid = "#bbbbbb") + -->
+<!--     expand_limits(y = c(0, 1)) + -->
+<!--     facet_wrap("threshold_factor", ncol = 1) + -->
+<!--     labs(x = "Time (s)", y = "Accumulator CDF", color = "Drift rate") -->
+
+<!-- print( -->
+<!--     pdf_plot + cdf_plot + plot_layout(guides = "collect", nrow = 1) -->
+<!-- ) -->
+<!-- ``` -->
 
 ## Exercises
 
 1. Consider potential psychological interpretations of feedforward inhibition and lateral inhibition.  In particular, relate these two forms of competition to the constructs of *attention* and *capacity*.
 2. Compare and contrast the explanations for slow errors provided by the diffusion model and by lateral competition.
-3. The accumulator models we explored in the chapter are all *stochastic* accumulators, since value of the evidence being accumulated fluctuates randomly around a mean.  Implement the LBA.
+<!-- 3. The accumulator models we explored in the chapter are all *stochastic* accumulators, since value of the evidence being accumulated fluctuates randomly around a mean.  Implement the LBA. -->
