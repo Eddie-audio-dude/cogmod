@@ -5,7 +5,7 @@ project:
 book:
   title: "Computational Cognitive Models"
   author: "Gregory E. Cox"
-  date: "2/25/2025"
+  date: "3/4/2025"
   chapters:
     - index.qmd
     - part: "Background"
@@ -32,6 +32,6 @@ format:
     code-fold: true
 
 execute:
-  cache: true
+  cache: false
 
 editor: source
