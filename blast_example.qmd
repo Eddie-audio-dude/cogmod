@@ -370,7 +370,8 @@ aov_ez(
         mutate(
             difficulty = factor(index, levels = 1:4, labels = c("Easy", "Hard", "Easy", "Hard")),
             correct_response = factor(index, levels = 1:4, labels = c("Non-blast", "Non-blast", "Blast", "Blast")),
-            val = if_else(correct_response == "Blast", val, -val)),
+            val = if_else(correct_response == "Blast", val, -val)
+    ),
     between = "group",
     within = c("difficulty", "correct_response")
 )
@@ -403,7 +404,8 @@ aov_ez(
         mutate(
             difficulty = factor(index, levels = 1:4, labels = c("Easy", "Hard", "Easy", "Hard")),
             correct_response = factor(index, levels = 1:4, labels = c("Non-blast", "Non-blast", "Blast", "Blast")),
-            val = if_else(correct_response == "Blast", val, -val)),
+            val = if_else(correct_response == "Blast", val, -val)
+    ),
     between = "group",
     within = c("difficulty", "correct_response"),
     covariate = "nomt_centered",
@@ -434,9 +436,28 @@ model_qp %>%
     facet_grid(blockType ~ group, scales = "free_y")
 ```
 
-The upshot is that it looke like the model is, at least on average, doing a very good job of capturing the response proportion and a pretty good one capturing the RT quantiles.  That said, some of the misfits for the highest and lowest quantiles (see, e.g., the green points in the "Speed" conditions) may be due to sampling error, as discussed earlier.
+The upshot is that it looks like the model is, at least on average, doing a very good job of capturing the response proportion and a pretty good one capturing the RT quantiles.  That said, some of the misfits for the highest and lowest quantiles (see, e.g., the green points in the "Speed" conditions) may be due to sampling error, as discussed earlier.
 
 ## Exercises
 
 1. Run an ANOVA analysis on other estimated model parameters, like bias (`w`), residual time (`t0`), and the two variability parameters (`sv` and `st0`).  Do you find evidence for differences, on average, between groups or between conditions (for `sv` and `st0`, you can only compare between groups)?
 2. Using the `sv_index` and `st0_index` parameters, modify the diffusion model we used above so that drift rate variability and residual time variability can also vary by block type.  Does this more complex model provide a better account of the data, as scored by either AIC or BIC?
+3. Modify the way we defined `drift_index` so that it allows drift rates to vary by `blockType` as well as `difficulty` and `correct_response` (this will just involve adding the additional factor to the `interaction` function).  Leave everything else the same as we specified it in the main text and re-run the model fits.  Using an ANOVA on the drift rates, do you find evidence that drift rates vary as a function of block type?  Note that, to do this analysis, you will have to "reverse-engineer" the `index` number to recover the correct factor combination, like we did in the main text.  The basic idea is shown below, where you'll have to figure out how to correctly assign the `labels` in the `mutate` line below.
+```{r echo = TRUE, eval = FALSE}
+#| code-fold: show
+
+aov_ez(
+    id = "subject",
+    dv = "val",
+    data = model_pars %>%
+        filter(par == "v") %>%
+        mutate(
+            difficulty = factor(index, levels = 1:8, labels = c(___)),
+            correct_response = factor(index, levels = 1:8, labels = c(___)),
+            blockType = factor(index, levels = 1:8, labels = c(___)),
+            val = if_else(correct_response == "Blast", val, -val)
+    ),
+    between = "group",
+    within = c("difficulty", "correct_response")
+)
+```

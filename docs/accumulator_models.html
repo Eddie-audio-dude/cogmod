@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.5.57">
+<meta name="generator" content="quarto-1.6.39">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,10 +91,10 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-03787a5611acd63027d79b3f02190e6e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -293,7 +293,20 @@ window.Quarto = {
   <li><a href="#a-race-between-independent-accumulators" id="toc-a-race-between-independent-accumulators" class="nav-link" data-scroll-target="#a-race-between-independent-accumulators"><span class="header-section-number">8.1.2</span> A race between independent accumulators</a></li>
   <li><a href="#introducing-competition" id="toc-introducing-competition" class="nav-link" data-scroll-target="#introducing-competition"><span class="header-section-number">8.1.3</span> Introducing competition</a></li>
   </ul></li>
-  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">8.2</span> Exercises</a></li>
+  <li><a href="#race-model-likelihood-function" id="toc-race-model-likelihood-function" class="nav-link" data-scroll-target="#race-model-likelihood-function"><span class="header-section-number">8.2</span> Race model likelihood function</a>
+  <ul class="collapse">
+  <li><a href="#math-to-code" id="toc-math-to-code" class="nav-link" data-scroll-target="#math-to-code"><span class="header-section-number">8.2.1</span> Math to Code</a></li>
+  <li><a href="#likelihood-for-multiple-trials" id="toc-likelihood-for-multiple-trials" class="nav-link" data-scroll-target="#likelihood-for-multiple-trials"><span class="header-section-number">8.2.2</span> Likelihood for multiple trials</a></li>
+  <li><a href="#extracting-parameters" id="toc-extracting-parameters" class="nav-link" data-scroll-target="#extracting-parameters"><span class="header-section-number">8.2.3</span> Extracting parameters</a></li>
+  </ul></li>
+  <li><a href="#fitting-the-race-model" id="toc-fitting-the-race-model" class="nav-link" data-scroll-target="#fitting-the-race-model"><span class="header-section-number">8.3</span> Fitting the race model</a>
+  <ul class="collapse">
+  <li><a href="#simulating-some-data" id="toc-simulating-some-data" class="nav-link" data-scroll-target="#simulating-some-data"><span class="header-section-number">8.3.1</span> Simulating some data</a></li>
+  <li><a href="#fitting-parameters" id="toc-fitting-parameters" class="nav-link" data-scroll-target="#fitting-parameters"><span class="header-section-number">8.3.2</span> Fitting parameters</a></li>
+  <li><a href="#model-comparison" id="toc-model-comparison" class="nav-link" data-scroll-target="#model-comparison"><span class="header-section-number">8.3.3</span> Model comparison</a></li>
+  </ul></li>
+  <li><a href="#decision-rules" id="toc-decision-rules" class="nav-link" data-scroll-target="#decision-rules"><span class="header-section-number">8.4</span> Decision rules</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">8.5</span> Exercises</a></li>
   </ul>
 </nav>
     </div>
@@ -1196,15 +1209,1165 @@ v_i' = v_i - \alpha \sum_{i \neq j}^n v_j
 <p>Feedforward competition diminishes the drift rates for each accumulator, with the result that stronger competition tends to slow responding overall. However, feedforward competition still generally predicts fast errors because errors occur when the accumulators for incorrect responses happen to be fast enough to “beat” the accumulator associated with the correct response.</p>
 <p>Lateral competition does not always predict that stronger competition will slow responding. Lateral competition can produce slow errors because they arise in trials where the incorrect accumulators happened to be strong enough to <em>impede</em> the correct accumulator.</p>
 <p>Note that the race model theory for slow errors is different from how slow errors were explained with a diffusion model. With a diffusion model, slow errors arose from trial-by-trial variability in the drift rate. One of your exercises will be to compare and contrast these two theories of slow errors.</p>
-<!-- ## Race model likelihood function -->
-<!-- In the previous section, we build code to simulate a race model, where each accumulator was associated with a particular response.  We will now write a function to calculate the negative log-likelihood of a response at a particular time.  This will enable us to *fit* a race model to data. -->
-<!-- ## Decision rules -->
-<!-- $$ -->
-<!-- f_i \left( t \mid a_i, v_i, t_{0i} \right) = \frac{a_i}{\sqrt{2 \pi \left(t - t_{0i} \right)^3}} \exp \left\lbrace -\frac{\left[a_i - v_i \left(t - t_{0i} \right) \right]^2}{2 \left(t - t_{0i} \right)} \right\rbrace -->
-<!-- $$ -->
-<!-- $$ -->
-<!-- F_i \left( t \mid a_i, v_i, t_{0i} \right) = \Phi \left[ \frac{v_i \left( t - t_{0i} \right) - a_i}{\sqrt{t - t_{0i}}} \right] + \exp \left( 2 a_i v_i \right) \Phi \left[ -\frac{v_i \left( t - t_{0i} \right) + a_i}{\sqrt{t - t_{0i}}} \right] -->
-<!-- $$ -->
+</section>
+</section>
+</section>
+<section id="race-model-likelihood-function" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="race-model-likelihood-function"><span class="header-section-number">8.2</span> Race model likelihood function</h2>
+<p>In the previous section, we built code to simulate a race model, where each accumulator was associated with a particular response. We will now write a function to calculate the negative log-likelihood (NLL) of a response at a particular time. This will enable us to <em>fit</em> a race model to data. The process of building the function will also illustrate the essential ingredients in any NLL function, namely</p>
+<ol type="1">
+<li>Translating a mathematical expression of the likelihood into code.</li>
+<li>Deciding how to represent the data to be fit, along with any experimental factors relevant to the model.</li>
+<li>Extracting the values for the model’s parameters from a vector (this last step is necessary for using most parameter search algorithms).</li>
+</ol>
+<section id="math-to-code" class="level3" data-number="8.2.1">
+<h3 data-number="8.2.1" class="anchored" data-anchor-id="math-to-code"><span class="header-section-number">8.2.1</span> Math to Code</h3>
+<p>In the previous section, we began by simulating just a single accumulator with a single boundary. There were three parameters describing the accumulator: the <em>drift rate</em>, the <em>threshold</em>, and the <em>residual time</em>. There is, in fact, a mathematical expression for the distribution of finishing times for this process: the <a href="https://en.wikipedia.org/wiki/Inverse_Gaussian_distribution">shifted Wald distribution</a> (also called the shifted inverse Gaussian distribution).</p>
+<p>As you can see in the Wikipedia entry, it is possible to write a mathematical expression for both the <strong>probability density function (PDF)</strong> (the probability of finishing <em>at</em> a particular time) and the <strong>cumulative distribution function (CDF)</strong> (the probability of finishing <em>by</em> a particular time). Since the Wikipedia entry doesn’t explicitly include residual time in its formulae, let’s write them out ourselves for our own reference.</p>
+<section id="probability-density-function-for-a-single-accumulator" class="level4" data-number="8.2.1.1">
+<h4 data-number="8.2.1.1" class="anchored" data-anchor-id="probability-density-function-for-a-single-accumulator"><span class="header-section-number">8.2.1.1</span> Probability density function for a single accumulator</h4>
+<p>The PDF, describing the probability that accumulator <span class="math inline">\(i\)</span> reaches its threshold at time <span class="math inline">\(t\)</span>, can be written <span class="math display">\[
+f_i \left( t \mid a_i, v_i, t_{0i} \right) = \frac{a_i}{\sqrt{2 \pi \left(t - t_{0i} \right)^3}} \exp \left\lbrace -\frac{\left[a_i - v_i \left(t - t_{0i} \right) \right]^2}{2 \left(t - t_{0i} \right)} \right\rbrace
+\]</span> where <span class="math inline">\(a_i\)</span> is the threshold, <span class="math inline">\(v_i\)</span> is the drift rate, and <span class="math inline">\(t_{0i}\)</span> is the residual time. While the expression above may look a bit cumbersome, it only involves elementary mathematical operations which are already implemented in R (and almost all programming languages). Therefore, we can write an R function that will compute the PDF for a single accumulator. That’s what I’ve done below. Note the comments in the code below explain the purpose of each line.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>accum_pdf <span class="ot">&lt;-</span> <span class="cf">function</span>(t, a, v, t0) {</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Because the term "t - t0" shows up multiple times in the formula, it's easier</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># to compute it once and then refer back to it whenever we need it.  It also</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># gives us a way to "clip" the values so they cannot be negative, since that</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># would otherwise give a weird result.</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    t_minus_t0 <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="dv">0</span>, t <span class="sc">-</span> t0)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The next line is a direct implementation of the formula above.</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    pdf <span class="ot">&lt;-</span> a <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>(a <span class="sc">-</span> v <span class="sc">*</span> t_minus_t0)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> t_minus_t0)) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> t_minus_t0<span class="sc">^</span><span class="dv">3</span>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This does some final error-checking, ensuring that there is zero probability</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># of finishing in zero (or negative) time.</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    pdf[t_minus_t0 <span class="sc">&lt;=</span> <span class="dv">0</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Finally, we use an explicit "return" statement to say exactly what the</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># function gives back.</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(pdf)</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Cool. Let’s take this function out for a spin!</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accum_pdf</span>(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">t =</span> <span class="dv">1</span>,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">a =</span> <span class="dv">2</span>,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">v =</span> <span class="dv">1</span>,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">t0 =</span> <span class="fl">0.2</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.4533567</code></pre>
+</div>
+</div>
+<p>Nice! But perhaps even more impressive is that the function will also accept <em>vectors</em> for its arguments, not just single numbers. This is very convenient for us because we will often want to compute the likelihood for many trials all at once. While we could use a <code>for</code> loop for that purpose, R code runs much faster if we can use vectors instead.</p>
+<p>For example, here’s what we get if we want to compute the likelihood of a single accumulator finishing at a range of times:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accum_pdf</span>(</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">t =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>, <span class="fl">2.5</span>, <span class="dv">3</span>),</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">a =</span> <span class="dv">2</span>,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">v =</span> <span class="dv">1</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">t0 =</span> <span class="fl">0.2</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.00000000 0.03930126 0.45335671 0.44583815 0.32674264 0.22431135 0.15190405</code></pre>
+</div>
+</div>
+<p>Notice that we get a vector back from the function, which is the likelihood for <em>each</em> finishing time in the vector we supplied for the <code>t</code> argument.</p>
+<p>We can also supply vectors for the other arguments to the function if we want. This is illustrated in the example below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accum_pdf</span>(</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">t =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>),</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">a =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">1</span>),</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">v =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>),</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">t0 =</span> <span class="fl">0.2</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.0393012555 0.1851666937 2.3877559853 0.4533567093 1.0089639117
+[6] 0.1637813117 0.3267426369 0.1622555916 0.0007628903</code></pre>
+</div>
+</div>
+<p>Just be aware that you can supply vectors with unequal lengths and R will “recycle” them until they are the length of the longest vector you supplied. This is generally a bad idea, though, because it can lead to all sorts of “silent” errors.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accum_pdf</span>(</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">t =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>),</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">a =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>),</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">v =</span> <span class="dv">1</span>,</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">t0 =</span> <span class="fl">0.2</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.03930126 0.54377310 0.44583815 0.13829084</code></pre>
+</div>
+</div>
+<p>At least R will give you a warning if you supply vectors that can’t be recycled evenly.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accum_pdf</span>(</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">t =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="dv">1</span>, <span class="fl">1.5</span>, <span class="dv">2</span>),</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">a =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">3</span>),</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">v =</span> <span class="dv">1</span>,</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">t0 =</span> <span class="fl">0.2</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in a - v * t_minus_t0: longer object length is not a multiple of
+shorter object length</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in a * exp(-(a - v * t_minus_t0)^2/(2 * t_minus_t0)): longer object
+length is not a multiple of shorter object length</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.03930126 0.54377310 0.26569371 0.32674264</code></pre>
+</div>
+</div>
+<p>But in general, you should adhere to the following rule: For each argument to the function, provide <em>either</em> a single number <em>or</em> a vector that is the same length as any other vectors you might supply.</p>
+<p>One nice side-effect of being able to provide vectors to our <code>accum_pdf</code> function is that we can use it to make some nice plots of the distributions of finishing times for different combinations of parameter values:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">expand_grid</span>(<span class="at">a =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">v =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), <span class="at">t0 =</span> <span class="fl">0.2</span>, <span class="at">t =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="at">length.out =</span> <span class="dv">201</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">pdf =</span> <span class="fu">accum_pdf</span>(<span class="at">t =</span> t, <span class="at">a =</span> a, <span class="at">v =</span> v, <span class="at">t0 =</span> t0)) <span class="sc">%&gt;%</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> pdf, <span class="at">color =</span> v, <span class="at">linetype =</span> <span class="fu">factor</span>(a), <span class="at">group =</span> <span class="fu">interaction</span>(v, a))) <span class="sc">+</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time (s)"</span>, <span class="at">y =</span> <span class="st">"PDF"</span>, <span class="at">color =</span> <span class="st">"Drift rate (v)"</span>, <span class="at">linetype =</span> <span class="st">"Threshold (a)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="accumulator_models_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="cumulative-distribution-function-for-a-single-accumulator" class="level4" data-number="8.2.1.2">
+<h4 data-number="8.2.1.2" class="anchored" data-anchor-id="cumulative-distribution-function-for-a-single-accumulator"><span class="header-section-number">8.2.1.2</span> Cumulative distribution function for a single accumulator</h4>
+<p>Just like there’s a mathematical expression for the PDF, we have one for the CDF too. As a reminder, the CDF is the probability that accumulator <span class="math inline">\(i\)</span> reached threshold <em>by</em> time <span class="math inline">\(t\)</span>. The formula is given below, using the same parameters as the formula for the PDF above: <span class="math display">\[
+F_i \left( t \mid a_i, v_i, t_{0i} \right) = \Phi \left[ \frac{v_i \left( t - t_{0i} \right) - a_i}{\sqrt{t - t_{0i}}} \right] + \exp \left( 2 a_i v_i \right) \Phi \left[ -\frac{v_i \left( t - t_{0i} \right) + a_i}{\sqrt{t - t_{0i}}} \right]
+\]</span> The only new thing in the CDF formula is <span class="math inline">\(\Phi \left( \cdot \right)\)</span>, which is a shorthand for the CDF of the standard normal distribution. Recall that the standard normal distribution has a mean of zero and a standard deviation of one. Fortunately, this is built into R in the form of the <code>pnorm</code> function. Although you can supply a <code>mean</code> and <code>sd</code> to <code>pnorm</code>, if you don’t, it will use default settings of <code>mean = 0</code> and <code>sd = 1</code>, amounting to a standard normal distribution.</p>
+<p>We can thus write an R function to calculate the expression in the formula above for the CDF. This function is shown below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>accum_cdf <span class="ot">&lt;-</span> <span class="cf">function</span>(t, a, v, t0) {</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># As with the pdf function, I compute "t - t0" once at the very beginning,</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># which also offers an opportunity to "clip" any negative values that result.</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    t_minus_t0 <span class="ot">&lt;-</span> <span class="fu">pmax</span>(<span class="dv">0</span>, t <span class="sc">-</span> t0)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This expression is a direct translation of the formula above</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>    cdf <span class="ot">&lt;-</span> <span class="fu">pnorm</span>((v <span class="sc">*</span> t_minus_t0 <span class="sc">-</span> a) <span class="sc">/</span> <span class="fu">sqrt</span>(t_minus_t0)) <span class="sc">+</span> <span class="fu">exp</span>(<span class="dv">2</span> <span class="sc">*</span> a <span class="sc">*</span> v) <span class="sc">*</span> <span class="fu">pnorm</span>(<span class="sc">-</span>(v <span class="sc">*</span> t_minus_t0 <span class="sc">+</span> a) <span class="sc">/</span> <span class="fu">sqrt</span>(t_minus_t0))</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This formula doesn't give weird results when t_minus_t0 == 0, so we can just</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># return the result as-is.</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(cdf)</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Like <code>accum_pdf</code>, <code>accum_cdf</code> can accept vectors for its arguments too (with the same caveat that you should be sure to supply only single values or vectors of the same length to avoid unpredictable “recycling” issues). We can thus make some very nice plots, just like we did for the PDF:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">expand_grid</span>(<span class="at">a =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">v =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>), <span class="at">t0 =</span> <span class="fl">0.2</span>, <span class="at">t =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">5</span>, <span class="at">length.out =</span> <span class="dv">201</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cdf =</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> t, <span class="at">a =</span> a, <span class="at">v =</span> v, <span class="at">t0 =</span> t0)) <span class="sc">%&gt;%</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> cdf, <span class="at">color =</span> v, <span class="at">linetype =</span> <span class="fu">factor</span>(a), <span class="at">group =</span> <span class="fu">interaction</span>(v, a))) <span class="sc">+</span></span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time (s)"</span>, <span class="at">y =</span> <span class="st">"CDF"</span>, <span class="at">color =</span> <span class="st">"Drift rate (v)"</span>, <span class="at">linetype =</span> <span class="st">"Threshold (a)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="accumulator_models_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="likelihood-expression" class="level4" data-number="8.2.1.3">
+<h4 data-number="8.2.1.3" class="anchored" data-anchor-id="likelihood-expression"><span class="header-section-number">8.2.1.3</span> Likelihood expression</h4>
+<p>Armed with functions for calculating the PDF and CDF for a single accumulator, we are now in a position to write a function that computes the <em>likelihood</em> of a <em>particular</em> accumulator winning at a particular time <span class="math inline">\(t\)</span>. We will first write the likelihood mathematically and then translate it into an R function, like we did for the PDF and CDF.</p>
+<p>To understand the math, it may help to think conceptually first: If accumulator <span class="math inline">\(i\)</span> is the first of <span class="math inline">\(N\)</span> accumulators to reach its threshold at time <span class="math inline">\(t\)</span>, that means two things must be true: First, and most obvious, accumulator <span class="math inline">\(i\)</span> must have hit threshold at time <span class="math inline">\(t\)</span>. Second, and perhaps less obvious, is that <em>none of the other accumulators</em> must have hit threshold by time <span class="math inline">\(t\)</span>. The likelihood must therefore express the probability that <em>both</em> of these things are true.</p>
+<p>There are two more conceptual ingredients we need to express the likelihood function: First, we need to know how to express the probability that a non-winning accumulator <em>hasn’t</em> hit threshold by time <span class="math inline">\(t\)</span>. Since the CDF is the probability that an accumulator <em>has</em> hit threshold by time <span class="math inline">\(t\)</span>, the probability that it <em>hasn’t</em> is just one minus the CDF, since “has already hit threshold” and “hasn’t already hit threshold” are mutually exclusive and exhaustive possibilities. Second, we have to remember that the joint probability of multiple independent events being true is the <em>product</em> of the individual probabilities.</p>
+<p>Finally, we can express the likelihood that accumulator <span class="math inline">\(i\)</span> is the <em>first</em> out of <span class="math inline">\(N\)</span> accumulators to reach its threshold at time <span class="math inline">\(t\)</span>: <span class="math display">\[
+\overbrace{L \left(i, t \right)}^{\text{Likelihood that } i \text{ wins at } t} = \underbrace{f_i \left( t \mid a_i, v_i, t_{0i} \right)}_{i \text{ finishes at } t} \overbrace{\prod_{j \neq i}^N \left[1 - F_j \left(t \mid a_j, v_j, t_{0j} \right) \right]}^{\text{Nothing else has finished by } t}
+\]</span></p>
+<p>It is worth emphasizing that the formula above only works when the accumulators are (conditionally) <em>independent</em> of one another. As a result, the race model cannot include lateral competition or any other interactions between accumulators that would cause them to be dependent on one another. It can, however, accommodate feedforward competition, since that affects the drift rates but not how the accumulators evolve from moment to moment. We will return to feedforward competition later in this section.</p>
+<p>To translate the likelihood formula above into R code, we will first see how to compute it for a single trial. We will then generalize that approach so we can compute the likelihood for many trials, exploiting the fact that our <code>accum_pdf</code> and <code>accum_cdf</code> functions can accept vectors as arguments.</p>
+<p>But first, let’s imagine a concrete situation: Say we present an array of three items in a visual search task. The target is a red square and the job of the participant is to select which of the three items is the target. The item in position 1 is a blue circle and so doesn’t resemble the target at all; let’s say it has a drift rate of 0. The item in position 2 is the target—let’s say it has a drift rate of 2. Finally, the item in position 3 is a red circle, matching the target’s color but not its shape—let’s say it has a drift rate of 1. Let’s assume that all accumulators have the same threshold value (2) and the same residual time (0.2). We can now write the parameters for all three accumulators as vectors, although we will be pedantic and write out the same value 3 times for the threshold and residual time:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>t0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>What is the likelihood of selecting the target (item 2) in 1 second? Based on the formula above, we can compute that likelihood in R using the <code>accum_pdf</code> and <code>accum_cdf</code> functions from earlier:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>t0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a><span class="fu">accum_pdf</span>(<span class="at">t =</span> <span class="dv">1</span>, <span class="at">a =</span> a[<span class="dv">2</span>], <span class="at">v =</span> v[<span class="dv">2</span>], <span class="at">t0 =</span> t0[<span class="dv">2</span>]) <span class="sc">*</span></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> <span class="dv">1</span>, <span class="at">a =</span> a[<span class="dv">1</span>], <span class="at">v =</span> v[<span class="dv">1</span>], <span class="at">t0 =</span> t0[<span class="dv">1</span>])) <span class="sc">*</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> <span class="dv">1</span>, <span class="at">a =</span> a[<span class="dv">3</span>], <span class="at">v =</span> v[<span class="dv">3</span>], <span class="at">t0 =</span> t0[<span class="dv">3</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8481769</code></pre>
+</div>
+</div>
+<p>We are going to make the expression above a bit more general and more compact. First, rather than refer explicitly to a response time of <code>1</code>, we will refer to a variable <code>rt</code> (which we can set to one):</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>t0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>)</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>rt <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a><span class="fu">accum_pdf</span>(<span class="at">t =</span> rt, <span class="at">a =</span> a[<span class="dv">2</span>], <span class="at">v =</span> v[<span class="dv">2</span>], <span class="at">t0 =</span> t0[<span class="dv">2</span>]) <span class="sc">*</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> rt, <span class="at">a =</span> a[<span class="dv">1</span>], <span class="at">v =</span> v[<span class="dv">1</span>], <span class="at">t0 =</span> t0[<span class="dv">1</span>])) <span class="sc">*</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> rt, <span class="at">a =</span> a[<span class="dv">3</span>], <span class="at">v =</span> v[<span class="dv">3</span>], <span class="at">t0 =</span> t0[<span class="dv">3</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8481769</code></pre>
+</div>
+</div>
+<p>Second, we can use the <code>prod</code> function to multiply together the two terms at the end, making use of the fact that <code>accum_cdf</code> can accept vectors as arguments:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>t0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>rt <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a><span class="fu">accum_pdf</span>(<span class="at">t =</span> rt, <span class="at">a =</span> a[<span class="dv">2</span>], <span class="at">v =</span> v[<span class="dv">2</span>], <span class="at">t0 =</span> t0[<span class="dv">2</span>]) <span class="sc">*</span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">prod</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> rt, <span class="at">a =</span> a[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>)], <span class="at">v =</span> v[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>)], <span class="at">t0 =</span> t0[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>)]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8481769</code></pre>
+</div>
+</div>
+<p>Third, instead of explicitly referring to individual accumulators, we can define a variable called <code>response</code> (and set it to 2), and use the “negative indexing trick” for the second term:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>t0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>)</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>rt <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>response <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a><span class="fu">accum_pdf</span>(<span class="at">t =</span> rt, <span class="at">a =</span> a[response], <span class="at">v =</span> v[response], <span class="at">t0 =</span> t0[response]) <span class="sc">*</span></span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">prod</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> rt, <span class="at">a =</span> a[<span class="sc">-</span>response], <span class="at">v =</span> v[<span class="sc">-</span>response], <span class="at">t0 =</span> t0[<span class="sc">-</span>response]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8481769</code></pre>
+</div>
+</div>
+<p>Nice! The only problem now is that our code only applies to a single trial at a time. In the next section, we confront the issue of how to compute the likelihood for multiple trials.</p>
+</section>
+</section>
+<section id="likelihood-for-multiple-trials" class="level3" data-number="8.2.2">
+<h3 data-number="8.2.2" class="anchored" data-anchor-id="likelihood-for-multiple-trials"><span class="header-section-number">8.2.2</span> Likelihood for multiple trials</h3>
+<p>In the previous section, we effectively translated a mathematical expression of the model into R code that performs the relevant computations to find the likelihood of a given response at a given time. To apply this code to an entire dataset, which contains many trials, we need to think about how to specify the details of each individual trial.</p>
+<section id="characterizing-each-trial" class="level4" data-number="8.2.2.1">
+<h4 data-number="8.2.2.1" class="anchored" data-anchor-id="characterizing-each-trial"><span class="header-section-number">8.2.2.1</span> Characterizing each trial</h4>
+<p>Again, it will help to think about a concrete task like visual search. Any given trial involves a number of items, each of which can occupy a given position in the visual search array. For example, one trial might have 3 items with the target occupying the second position while another trial might have 6 items with the target occupying the fifth position. The distractors occupying the non-target positions could be of varying types depending on whether they are more or less similar to the target. Therefore, to characterize any individual trial in this experiment, we need to know, for each possible location that could contain an item, whether or not it does contain an item and, if so, what kind of item it is.</p>
+<p>There are a few ways we could represent this information in an R data structure, but the simplest is in the form of a <em>matrix</em>. Each row of the matrix will correspond to a different trial in the experiment and each column of the matrix corresponds to a different location that may or may not contain an item on that trial. We can give each type of item a numerical index. For example, maybe <code>1</code> corresponds to targets, <code>2</code> corresponds to similar distractors, and <code>3</code> corresponds to dissimilar distractors. To indicate that a location does not contain an item, we can give it the value <code>NA</code>. For example, the following matrix could describe four trials in a search experiment with six possible display locations:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="cn">NA</span>, <span class="cn">NA</span>,  <span class="dv">2</span>, <span class="cn">NA</span>, <span class="cn">NA</span>,</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>,  <span class="dv">1</span>,  <span class="dv">2</span>,  <span class="dv">3</span>,  <span class="dv">3</span>,  <span class="dv">3</span>,</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="dv">3</span>,  <span class="dv">1</span>,  <span class="dv">3</span>, <span class="cn">NA</span>,</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>    <span class="cn">NA</span>,  <span class="dv">3</span>, <span class="cn">NA</span>,  <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">1</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">4</span>, <span class="at">ncol =</span> <span class="dv">6</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4] [,5] [,6]
+[1,]    1   NA   NA    2   NA   NA
+[2,]    2    1    2    3    3    3
+[3,]   NA   NA    3    1    3   NA
+[4,]   NA    3   NA    2   NA    1</code></pre>
+</div>
+</div>
+<p>Alternatively, we could imagine a decision making task in which each trial presents three options selected from a set of six possible products:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>,</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">4</span>, <span class="dv">5</span>,</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">6</span>, <span class="dv">4</span>, <span class="dv">2</span>,</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">5</span>, <span class="dv">2</span>, <span class="dv">6</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">4</span>, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3]
+[1,]    1    2    3
+[2,]    1    4    5
+[3,]    6    4    2
+[4,]    5    2    6</code></pre>
+</div>
+</div>
+<p>These concrete examples suggest the general structure of the tasks to which we can typically apply a race model: Each trial presents a number of options, each of which is selected from a set of possible options. Moreover, sometimes the ordering/location of the options may matter (like in visual search) but sometimes it may not (like in the decision task).</p>
+</section>
+<section id="defining-model-parameters" class="level4" data-number="8.2.2.2">
+<h4 data-number="8.2.2.2" class="anchored" data-anchor-id="defining-model-parameters"><span class="header-section-number">8.2.2.2</span> Defining model parameters</h4>
+<p>These examples also suggest what kind of <em>parameters</em> our model will need to have. Specifically, we will need to have a <em>drift rate</em> parameter for <em>each type of item</em> in the experiment. We could have a single threshold parameter that applies to all accumulators. Alternatively, we could allow different locations to have different thresholds, modeling the idea that there may be a <em>bias</em> in favor of choosing options in particular locations. Similarly, we could have a single residual time parameter for all accumulators <em>or</em> we could allow residual time to vary by location, allowing us to model situations in which processing begins earlier for some locations than others.</p>
+<p>Let’s again make this concrete and return to the visual search experiment. We will keep things simple and assume just one threshold parameter and one residual time parameter apply to all accumulators, regardless of location. We will have three possible values of drift rate for three categories of item:</p>
+<ol type="1">
+<li>Targets</li>
+<li>Similar distractors</li>
+<li>Dissimilar distractors</li>
+</ol>
+<p>To compute the likelihood for each trial, we will need to refer to the corresponding row in the matrix and use the drift rates that correspond to the items shown on that trial.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify item types/locations for each trial</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>items <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="cn">NA</span>, <span class="cn">NA</span>,  <span class="dv">2</span>, <span class="cn">NA</span>, <span class="cn">NA</span>,</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>,  <span class="dv">1</span>,  <span class="dv">2</span>,  <span class="dv">3</span>,  <span class="dv">3</span>,  <span class="dv">3</span>,</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>    <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="dv">3</span>,  <span class="dv">1</span>,  <span class="dv">3</span>, <span class="cn">NA</span>,</span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>    <span class="cn">NA</span>,  <span class="dv">3</span>, <span class="cn">NA</span>,  <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">1</span></span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">4</span>, <span class="at">ncol =</span> <span class="dv">6</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Responses and response times for each trial</span></span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Notice that responses refer to the *position* of the chosen item!</span></span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>response <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">4</span>)</span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>rt <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">1.5</span>, <span class="fl">0.7</span>, <span class="fl">1.2</span>)</span>
+<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-14"><a href="#cb58-14" aria-hidden="true" tabindex="-1"></a>n_trials <span class="ot">&lt;-</span> <span class="fu">nrow</span>(items)</span>
+<span id="cb58-15"><a href="#cb58-15" aria-hidden="true" tabindex="-1"></a>n_locations <span class="ot">&lt;-</span> <span class="fu">ncol</span>(items)</span>
+<span id="cb58-16"><a href="#cb58-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-17"><a href="#cb58-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Model parameters</span></span>
+<span id="cb58-18"><a href="#cb58-18" aria-hidden="true" tabindex="-1"></a><span class="co"># One drift rate for each type of item</span></span>
+<span id="cb58-19"><a href="#cb58-19" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb58-20"><a href="#cb58-20" aria-hidden="true" tabindex="-1"></a><span class="co"># One threshold for each possible location</span></span>
+<span id="cb58-21"><a href="#cb58-21" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">2</span>, n_locations)</span>
+<span id="cb58-22"><a href="#cb58-22" aria-hidden="true" tabindex="-1"></a><span class="co"># One residual time for each possible location</span></span>
+<span id="cb58-23"><a href="#cb58-23" aria-hidden="true" tabindex="-1"></a>t0 <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fl">0.2</span>, n_locations)</span>
+<span id="cb58-24"><a href="#cb58-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-25"><a href="#cb58-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Allocate vector that will eventually contain the negative log-likelihood</span></span>
+<span id="cb58-26"><a href="#cb58-26" aria-hidden="true" tabindex="-1"></a><span class="co"># for each trial</span></span>
+<span id="cb58-27"><a href="#cb58-27" aria-hidden="true" tabindex="-1"></a>nll <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_trials)</span>
+<span id="cb58-28"><a href="#cb58-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-29"><a href="#cb58-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate the log-likelihood for each trial</span></span>
+<span id="cb58-30"><a href="#cb58-30" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_trials) {</span>
+<span id="cb58-31"><a href="#cb58-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Note that the whole thing is wrapped in "-log()" so we get the negative log-likelihood</span></span>
+<span id="cb58-32"><a href="#cb58-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Note also the use of "na.rm = TRUE" in the "prod()" function to ignore any locations</span></span>
+<span id="cb58-33"><a href="#cb58-33" aria-hidden="true" tabindex="-1"></a>    <span class="co"># that don't contain an item</span></span>
+<span id="cb58-34"><a href="#cb58-34" aria-hidden="true" tabindex="-1"></a>    nll[i] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log</span>(</span>
+<span id="cb58-35"><a href="#cb58-35" aria-hidden="true" tabindex="-1"></a>        <span class="fu">accum_pdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[response[i]], <span class="at">v =</span> v[items[i, response[i]]], <span class="at">t0 =</span> t0[response[i]]) <span class="sc">*</span></span>
+<span id="cb58-36"><a href="#cb58-36" aria-hidden="true" tabindex="-1"></a>            <span class="fu">prod</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[<span class="sc">-</span>response[i]], <span class="at">v =</span> v[items[i, <span class="sc">-</span>response[i]]], <span class="at">t0 =</span> t0[<span class="sc">-</span>response[i]]), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb58-37"><a href="#cb58-37" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb58-38"><a href="#cb58-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb58-39"><a href="#cb58-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-40"><a href="#cb58-40" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(nll)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.6611439 1.9408143 0.1954480 1.6747733</code></pre>
+</div>
+</div>
+<p>You’ll note that the NLL for each trial is calculated using a <code>for</code> loop at the end—there are ways to make this more efficient, but I will leave those as an exercise for the reader!</p>
+</section>
+</section>
+<section id="extracting-parameters" class="level3" data-number="8.2.3">
+<h3 data-number="8.2.3" class="anchored" data-anchor-id="extracting-parameters"><span class="header-section-number">8.2.3</span> Extracting parameters</h3>
+<p>We are almost there! We have code that will take a set of model parameters and a representation of the options on each trial and compute the negative log-likelihood of each response made on each trial. All that is left is to “wrap” this code into a function. However, we will need to define the arguments of this function in a particular way in order to get the function to play nicely with the parameter search functions we will use. Specifically, the function will need to take the following arguments:</p>
+<ul>
+<li>The matrix that specifies the options on each trial; we called this <code>items</code> in the code above.</li>
+<li>The vector of responses made on each trial; we called this <code>response</code> in the code above.</li>
+<li>The vector of response times on each trial; we called this <code>rt</code> in the code above.</li>
+<li>Finally, and this is the tricky part, we need a <strong>single vector</strong> that contains all the parameters of our model. As we will see, the “trick” is to <em>extract</em> the parameter values from this vector based on the <em>names</em> of the elements in the vector.</li>
+</ul>
+<p>Let’s lay out the outline of our function before we get to the tricky part:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>race_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, response, rt, items) {</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>    n_trials <span class="ot">&lt;-</span> <span class="fu">nrow</span>(items)</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>    n_locations <span class="ot">&lt;-</span> <span class="fu">ncol</span>(items)</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># TRICKY PART HERE</span></span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>    v <span class="ot">&lt;-</span> ...</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>    a <span class="ot">&lt;-</span> ...</span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>    t0 <span class="ot">&lt;-</span> ...</span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>    nll <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_trials)</span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_trials) {</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>        nll[i] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log</span>(</span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a>            <span class="fu">accum_pdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[response[i]], <span class="at">v =</span> v[items[i, response[i]]], <span class="at">t0 =</span> t0[response[i]]) <span class="sc">*</span></span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a>                <span class="fu">prod</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[<span class="sc">-</span>response[i]], <span class="at">v =</span> v[items[i, <span class="sc">-</span>response[i]]], <span class="at">t0 =</span> t0[<span class="sc">-</span>response[i]]), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb60-19"><a href="#cb60-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">sum</span>(nll))</span>
+<span id="cb60-20"><a href="#cb60-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>To get a grasp on the problem we have to solve, it’ll be good to have in mind a picture of what <code>par</code> looks like. It will be a <em>named</em> vector, meaning it will look something like this:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[1]"</span> <span class="ot">=</span> <span class="dv">2</span>,</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[2]"</span> <span class="ot">=</span> <span class="dv">1</span>,</span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[3]"</span> <span class="ot">=</span> <span class="dv">0</span>,</span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span> <span class="ot">=</span> <span class="dv">2</span>,</span>
+<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t0"</span> <span class="ot">=</span> <span class="fl">0.2</span></span>
+<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We can use the names of the elements to extract them, like so:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>par[<span class="st">"a"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>a 
+2 </code></pre>
+</div>
+</div>
+<p>We can also get a bit clever by using the <code>paste0</code> function:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>par[<span class="fu">paste0</span>(<span class="st">"v["</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="st">"]"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>v[1] v[2] v[3] 
+   2    1    0 </code></pre>
+</div>
+</div>
+<p>Finally, we can check to see whether the vector contains an element with a particular name by using <code>is.na</code>, which is <code>TRUE</code> if an element does not exist in the vector:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.na</span>(par[<span class="st">"t0"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   t0 
+FALSE </code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.na</span>(par[<span class="st">"t0[1]"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;NA&gt; 
+TRUE </code></pre>
+</div>
+</div>
+<p>The latter trick will allow us to make our <code>race_nll</code> function more general, because we can check to see whether the <code>par</code> vector contains, for example, several threshold parameters or only one. The whole shebang is illustrated in the complete function below:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>race_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, response, rt, items, <span class="at">n_items =</span> <span class="fu">max</span>(items, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>    n_trials <span class="ot">&lt;-</span> <span class="fu">nrow</span>(items)</span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>    n_locations <span class="ot">&lt;-</span> <span class="fu">ncol</span>(items)</span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"v"</span>])) {</span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a>        v <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"v["</span>, <span class="dv">1</span><span class="sc">:</span>n_items, <span class="st">"]"</span>)]</span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a>        v <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"v"</span>], n_items)</span>
+<span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb70-11"><a href="#cb70-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"a"</span>])) {</span>
+<span id="cb70-12"><a href="#cb70-12" aria-hidden="true" tabindex="-1"></a>        a <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"a["</span>, <span class="dv">1</span><span class="sc">:</span>n_locations, <span class="st">"]"</span>)]</span>
+<span id="cb70-13"><a href="#cb70-13" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb70-14"><a href="#cb70-14" aria-hidden="true" tabindex="-1"></a>        a <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"a"</span>], n_locations)</span>
+<span id="cb70-15"><a href="#cb70-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb70-16"><a href="#cb70-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb70-17"><a href="#cb70-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"t0"</span>])) {</span>
+<span id="cb70-18"><a href="#cb70-18" aria-hidden="true" tabindex="-1"></a>        t0 <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"t0["</span>, <span class="dv">1</span><span class="sc">:</span>n_locations, <span class="st">"]"</span>)]</span>
+<span id="cb70-19"><a href="#cb70-19" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb70-20"><a href="#cb70-20" aria-hidden="true" tabindex="-1"></a>        t0 <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"t0"</span>], n_locations)</span>
+<span id="cb70-21"><a href="#cb70-21" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb70-22"><a href="#cb70-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb70-23"><a href="#cb70-23" aria-hidden="true" tabindex="-1"></a>    nll <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_trials)</span>
+<span id="cb70-24"><a href="#cb70-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb70-25"><a href="#cb70-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_trials) {</span>
+<span id="cb70-26"><a href="#cb70-26" aria-hidden="true" tabindex="-1"></a>        nll[i] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log</span>(</span>
+<span id="cb70-27"><a href="#cb70-27" aria-hidden="true" tabindex="-1"></a>            <span class="fu">accum_pdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[response[i]], <span class="at">v =</span> v[items[i, response[i]]], <span class="at">t0 =</span> t0[response[i]]) <span class="sc">*</span></span>
+<span id="cb70-28"><a href="#cb70-28" aria-hidden="true" tabindex="-1"></a>                <span class="fu">prod</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[<span class="sc">-</span>response[i]], <span class="at">v =</span> v[items[i, <span class="sc">-</span>response[i]]], <span class="at">t0 =</span> t0[<span class="sc">-</span>response[i]]), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb70-29"><a href="#cb70-29" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb70-30"><a href="#cb70-30" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb70-31"><a href="#cb70-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb70-32"><a href="#cb70-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">sum</span>(nll))</span>
+<span id="cb70-33"><a href="#cb70-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>For each parameter, we check to see whether the <code>par</code> vector contains an element named without an index after it. If so, then the corresponding value is “recycled” for each item/location. Otherwise, we assume that the <code>par</code> vector contains different indexed values for each item/location and we extract those from the <code>par</code> vector for later use. Notice that I added a function argument called <code>n_items</code> so we can specify how many different item types there could be; the default value (the largest number specified in the <code>items</code> matrix) should work, but there may be situations in which it doesn’t.</p>
+<p>Before closing this section, you may have noticed something missing! We could include a feedforward competition parameter too. However, that is left as an exercise for the reader.</p>
+</section>
+</section>
+<section id="fitting-the-race-model" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="fitting-the-race-model"><span class="header-section-number">8.3</span> Fitting the race model</h2>
+<p>Finally, we have our <code>race_nll</code> function which we can use to <em>fit</em> the race model to data, that is, to find the parameters of the model that assign the highest likelihood to some set of data.</p>
+<section id="simulating-some-data" class="level3" data-number="8.3.1">
+<h3 data-number="8.3.1" class="anchored" data-anchor-id="simulating-some-data"><span class="header-section-number">8.3.1</span> Simulating some data</h3>
+<p>To do that, we’ll first need some data! For example purposes, we can <em>simulate</em> some plausible data. Like we did with the diffusion model, the advantage of fitting simulated data is that we know the “ground truth” and can therefore see how well we can <em>recover</em> the parameters we used to generate the data.</p>
+<p>The chunk of code below simulates data in a visual search experiment in which two factors are manipulated, set size and target-distractor similarity. Since the simulations don’t allow for different parameters for different locations, I keep things simple and have the target always appear in location 1.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>v <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>t0 <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a>n_trials_per_cond <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>set_size_vals <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>)</span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-9"><a href="#cb71-9" aria-hidden="true" tabindex="-1"></a>items <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb71-10"><a href="#cb71-10" aria-hidden="true" tabindex="-1"></a>response <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb71-11"><a href="#cb71-11" aria-hidden="true" tabindex="-1"></a>rt <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb71-12"><a href="#cb71-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb71-13"><a href="#cb71-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (set_size <span class="cf">in</span> set_size_vals) {</span>
+<span id="cb71-14"><a href="#cb71-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (td_sim <span class="cf">in</span> <span class="fu">c</span>(<span class="st">"low"</span>, <span class="st">"high"</span>)) {</span>
+<span id="cb71-15"><a href="#cb71-15" aria-hidden="true" tabindex="-1"></a>        distractor_type <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(td_sim <span class="sc">==</span> <span class="st">"low"</span>, <span class="dv">3</span>, <span class="dv">2</span>)</span>
+<span id="cb71-16"><a href="#cb71-16" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb71-17"><a href="#cb71-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_trials_per_cond) {</span>
+<span id="cb71-18"><a href="#cb71-18" aria-hidden="true" tabindex="-1"></a>            items <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb71-19"><a href="#cb71-19" aria-hidden="true" tabindex="-1"></a>                items,</span>
+<span id="cb71-20"><a href="#cb71-20" aria-hidden="true" tabindex="-1"></a>                <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">rep</span>(distractor_type, set_size <span class="sc">-</span> <span class="dv">1</span>), <span class="fu">rep</span>(<span class="cn">NA</span>, <span class="fu">max</span>(set_size_vals) <span class="sc">-</span> set_size))</span>
+<span id="cb71-21"><a href="#cb71-21" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb71-22"><a href="#cb71-22" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb71-23"><a href="#cb71-23" aria-hidden="true" tabindex="-1"></a>            current_result <span class="ot">&lt;-</span> <span class="fu">race_sim</span>(<span class="at">v =</span> <span class="fu">c</span>(v[<span class="dv">1</span>], <span class="fu">rep</span>(v[distractor_type], set_size <span class="sc">-</span> <span class="dv">1</span>)), <span class="at">a =</span> a, <span class="at">t0 =</span> t0, <span class="at">dt =</span> <span class="fl">0.001</span>)</span>
+<span id="cb71-24"><a href="#cb71-24" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb71-25"><a href="#cb71-25" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Extract just the choice and RT</span></span>
+<span id="cb71-26"><a href="#cb71-26" aria-hidden="true" tabindex="-1"></a>            rt <span class="ot">&lt;-</span> <span class="fu">c</span>(rt, current_result<span class="sc">$</span>t[<span class="fu">nrow</span>(current_result)])</span>
+<span id="cb71-27"><a href="#cb71-27" aria-hidden="true" tabindex="-1"></a>            response <span class="ot">&lt;-</span> <span class="fu">c</span>(response, <span class="fu">which.max</span>(current_result[<span class="fu">nrow</span>(current_result), <span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(current_result)]))</span>
+<span id="cb71-28"><a href="#cb71-28" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb71-29"><a href="#cb71-29" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb71-30"><a href="#cb71-30" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>In the end, we have our matrix specifying what is in each display:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>items</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
+  [1,]    1    3   NA   NA   NA   NA   NA   NA
+  [2,]    1    3   NA   NA   NA   NA   NA   NA
+  [3,]    1    3   NA   NA   NA   NA   NA   NA
+  [4,]    1    3   NA   NA   NA   NA   NA   NA
+  [5,]    1    3   NA   NA   NA   NA   NA   NA
+  [6,]    1    3   NA   NA   NA   NA   NA   NA
+  [7,]    1    3   NA   NA   NA   NA   NA   NA
+  [8,]    1    3   NA   NA   NA   NA   NA   NA
+  [9,]    1    3   NA   NA   NA   NA   NA   NA
+ [10,]    1    3   NA   NA   NA   NA   NA   NA
+ [11,]    1    3   NA   NA   NA   NA   NA   NA
+ [12,]    1    3   NA   NA   NA   NA   NA   NA
+ [13,]    1    3   NA   NA   NA   NA   NA   NA
+ [14,]    1    3   NA   NA   NA   NA   NA   NA
+ [15,]    1    3   NA   NA   NA   NA   NA   NA
+ [16,]    1    3   NA   NA   NA   NA   NA   NA
+ [17,]    1    3   NA   NA   NA   NA   NA   NA
+ [18,]    1    3   NA   NA   NA   NA   NA   NA
+ [19,]    1    3   NA   NA   NA   NA   NA   NA
+ [20,]    1    3   NA   NA   NA   NA   NA   NA
+ [21,]    1    3   NA   NA   NA   NA   NA   NA
+ [22,]    1    3   NA   NA   NA   NA   NA   NA
+ [23,]    1    3   NA   NA   NA   NA   NA   NA
+ [24,]    1    3   NA   NA   NA   NA   NA   NA
+ [25,]    1    3   NA   NA   NA   NA   NA   NA
+ [26,]    1    3   NA   NA   NA   NA   NA   NA
+ [27,]    1    3   NA   NA   NA   NA   NA   NA
+ [28,]    1    3   NA   NA   NA   NA   NA   NA
+ [29,]    1    3   NA   NA   NA   NA   NA   NA
+ [30,]    1    3   NA   NA   NA   NA   NA   NA
+ [31,]    1    3   NA   NA   NA   NA   NA   NA
+ [32,]    1    3   NA   NA   NA   NA   NA   NA
+ [33,]    1    3   NA   NA   NA   NA   NA   NA
+ [34,]    1    3   NA   NA   NA   NA   NA   NA
+ [35,]    1    3   NA   NA   NA   NA   NA   NA
+ [36,]    1    3   NA   NA   NA   NA   NA   NA
+ [37,]    1    3   NA   NA   NA   NA   NA   NA
+ [38,]    1    3   NA   NA   NA   NA   NA   NA
+ [39,]    1    3   NA   NA   NA   NA   NA   NA
+ [40,]    1    3   NA   NA   NA   NA   NA   NA
+ [41,]    1    3   NA   NA   NA   NA   NA   NA
+ [42,]    1    3   NA   NA   NA   NA   NA   NA
+ [43,]    1    3   NA   NA   NA   NA   NA   NA
+ [44,]    1    3   NA   NA   NA   NA   NA   NA
+ [45,]    1    3   NA   NA   NA   NA   NA   NA
+ [46,]    1    3   NA   NA   NA   NA   NA   NA
+ [47,]    1    3   NA   NA   NA   NA   NA   NA
+ [48,]    1    3   NA   NA   NA   NA   NA   NA
+ [49,]    1    3   NA   NA   NA   NA   NA   NA
+ [50,]    1    3   NA   NA   NA   NA   NA   NA
+ [51,]    1    2   NA   NA   NA   NA   NA   NA
+ [52,]    1    2   NA   NA   NA   NA   NA   NA
+ [53,]    1    2   NA   NA   NA   NA   NA   NA
+ [54,]    1    2   NA   NA   NA   NA   NA   NA
+ [55,]    1    2   NA   NA   NA   NA   NA   NA
+ [56,]    1    2   NA   NA   NA   NA   NA   NA
+ [57,]    1    2   NA   NA   NA   NA   NA   NA
+ [58,]    1    2   NA   NA   NA   NA   NA   NA
+ [59,]    1    2   NA   NA   NA   NA   NA   NA
+ [60,]    1    2   NA   NA   NA   NA   NA   NA
+ [61,]    1    2   NA   NA   NA   NA   NA   NA
+ [62,]    1    2   NA   NA   NA   NA   NA   NA
+ [63,]    1    2   NA   NA   NA   NA   NA   NA
+ [64,]    1    2   NA   NA   NA   NA   NA   NA
+ [65,]    1    2   NA   NA   NA   NA   NA   NA
+ [66,]    1    2   NA   NA   NA   NA   NA   NA
+ [67,]    1    2   NA   NA   NA   NA   NA   NA
+ [68,]    1    2   NA   NA   NA   NA   NA   NA
+ [69,]    1    2   NA   NA   NA   NA   NA   NA
+ [70,]    1    2   NA   NA   NA   NA   NA   NA
+ [71,]    1    2   NA   NA   NA   NA   NA   NA
+ [72,]    1    2   NA   NA   NA   NA   NA   NA
+ [73,]    1    2   NA   NA   NA   NA   NA   NA
+ [74,]    1    2   NA   NA   NA   NA   NA   NA
+ [75,]    1    2   NA   NA   NA   NA   NA   NA
+ [76,]    1    2   NA   NA   NA   NA   NA   NA
+ [77,]    1    2   NA   NA   NA   NA   NA   NA
+ [78,]    1    2   NA   NA   NA   NA   NA   NA
+ [79,]    1    2   NA   NA   NA   NA   NA   NA
+ [80,]    1    2   NA   NA   NA   NA   NA   NA
+ [81,]    1    2   NA   NA   NA   NA   NA   NA
+ [82,]    1    2   NA   NA   NA   NA   NA   NA
+ [83,]    1    2   NA   NA   NA   NA   NA   NA
+ [84,]    1    2   NA   NA   NA   NA   NA   NA
+ [85,]    1    2   NA   NA   NA   NA   NA   NA
+ [86,]    1    2   NA   NA   NA   NA   NA   NA
+ [87,]    1    2   NA   NA   NA   NA   NA   NA
+ [88,]    1    2   NA   NA   NA   NA   NA   NA
+ [89,]    1    2   NA   NA   NA   NA   NA   NA
+ [90,]    1    2   NA   NA   NA   NA   NA   NA
+ [91,]    1    2   NA   NA   NA   NA   NA   NA
+ [92,]    1    2   NA   NA   NA   NA   NA   NA
+ [93,]    1    2   NA   NA   NA   NA   NA   NA
+ [94,]    1    2   NA   NA   NA   NA   NA   NA
+ [95,]    1    2   NA   NA   NA   NA   NA   NA
+ [96,]    1    2   NA   NA   NA   NA   NA   NA
+ [97,]    1    2   NA   NA   NA   NA   NA   NA
+ [98,]    1    2   NA   NA   NA   NA   NA   NA
+ [99,]    1    2   NA   NA   NA   NA   NA   NA
+[100,]    1    2   NA   NA   NA   NA   NA   NA
+[101,]    1    3    3    3   NA   NA   NA   NA
+[102,]    1    3    3    3   NA   NA   NA   NA
+[103,]    1    3    3    3   NA   NA   NA   NA
+[104,]    1    3    3    3   NA   NA   NA   NA
+[105,]    1    3    3    3   NA   NA   NA   NA
+[106,]    1    3    3    3   NA   NA   NA   NA
+[107,]    1    3    3    3   NA   NA   NA   NA
+[108,]    1    3    3    3   NA   NA   NA   NA
+[109,]    1    3    3    3   NA   NA   NA   NA
+[110,]    1    3    3    3   NA   NA   NA   NA
+[111,]    1    3    3    3   NA   NA   NA   NA
+[112,]    1    3    3    3   NA   NA   NA   NA
+[113,]    1    3    3    3   NA   NA   NA   NA
+[114,]    1    3    3    3   NA   NA   NA   NA
+[115,]    1    3    3    3   NA   NA   NA   NA
+[116,]    1    3    3    3   NA   NA   NA   NA
+[117,]    1    3    3    3   NA   NA   NA   NA
+[118,]    1    3    3    3   NA   NA   NA   NA
+[119,]    1    3    3    3   NA   NA   NA   NA
+[120,]    1    3    3    3   NA   NA   NA   NA
+[121,]    1    3    3    3   NA   NA   NA   NA
+[122,]    1    3    3    3   NA   NA   NA   NA
+[123,]    1    3    3    3   NA   NA   NA   NA
+[124,]    1    3    3    3   NA   NA   NA   NA
+[125,]    1    3    3    3   NA   NA   NA   NA
+[126,]    1    3    3    3   NA   NA   NA   NA
+[127,]    1    3    3    3   NA   NA   NA   NA
+[128,]    1    3    3    3   NA   NA   NA   NA
+[129,]    1    3    3    3   NA   NA   NA   NA
+[130,]    1    3    3    3   NA   NA   NA   NA
+[131,]    1    3    3    3   NA   NA   NA   NA
+[132,]    1    3    3    3   NA   NA   NA   NA
+[133,]    1    3    3    3   NA   NA   NA   NA
+[134,]    1    3    3    3   NA   NA   NA   NA
+[135,]    1    3    3    3   NA   NA   NA   NA
+[136,]    1    3    3    3   NA   NA   NA   NA
+[137,]    1    3    3    3   NA   NA   NA   NA
+[138,]    1    3    3    3   NA   NA   NA   NA
+[139,]    1    3    3    3   NA   NA   NA   NA
+[140,]    1    3    3    3   NA   NA   NA   NA
+[141,]    1    3    3    3   NA   NA   NA   NA
+[142,]    1    3    3    3   NA   NA   NA   NA
+[143,]    1    3    3    3   NA   NA   NA   NA
+[144,]    1    3    3    3   NA   NA   NA   NA
+[145,]    1    3    3    3   NA   NA   NA   NA
+[146,]    1    3    3    3   NA   NA   NA   NA
+[147,]    1    3    3    3   NA   NA   NA   NA
+[148,]    1    3    3    3   NA   NA   NA   NA
+[149,]    1    3    3    3   NA   NA   NA   NA
+[150,]    1    3    3    3   NA   NA   NA   NA
+[151,]    1    2    2    2   NA   NA   NA   NA
+[152,]    1    2    2    2   NA   NA   NA   NA
+[153,]    1    2    2    2   NA   NA   NA   NA
+[154,]    1    2    2    2   NA   NA   NA   NA
+[155,]    1    2    2    2   NA   NA   NA   NA
+[156,]    1    2    2    2   NA   NA   NA   NA
+[157,]    1    2    2    2   NA   NA   NA   NA
+[158,]    1    2    2    2   NA   NA   NA   NA
+[159,]    1    2    2    2   NA   NA   NA   NA
+[160,]    1    2    2    2   NA   NA   NA   NA
+[161,]    1    2    2    2   NA   NA   NA   NA
+[162,]    1    2    2    2   NA   NA   NA   NA
+[163,]    1    2    2    2   NA   NA   NA   NA
+[164,]    1    2    2    2   NA   NA   NA   NA
+[165,]    1    2    2    2   NA   NA   NA   NA
+[166,]    1    2    2    2   NA   NA   NA   NA
+[167,]    1    2    2    2   NA   NA   NA   NA
+[168,]    1    2    2    2   NA   NA   NA   NA
+[169,]    1    2    2    2   NA   NA   NA   NA
+[170,]    1    2    2    2   NA   NA   NA   NA
+[171,]    1    2    2    2   NA   NA   NA   NA
+[172,]    1    2    2    2   NA   NA   NA   NA
+[173,]    1    2    2    2   NA   NA   NA   NA
+[174,]    1    2    2    2   NA   NA   NA   NA
+[175,]    1    2    2    2   NA   NA   NA   NA
+[176,]    1    2    2    2   NA   NA   NA   NA
+[177,]    1    2    2    2   NA   NA   NA   NA
+[178,]    1    2    2    2   NA   NA   NA   NA
+[179,]    1    2    2    2   NA   NA   NA   NA
+[180,]    1    2    2    2   NA   NA   NA   NA
+[181,]    1    2    2    2   NA   NA   NA   NA
+[182,]    1    2    2    2   NA   NA   NA   NA
+[183,]    1    2    2    2   NA   NA   NA   NA
+[184,]    1    2    2    2   NA   NA   NA   NA
+[185,]    1    2    2    2   NA   NA   NA   NA
+[186,]    1    2    2    2   NA   NA   NA   NA
+[187,]    1    2    2    2   NA   NA   NA   NA
+[188,]    1    2    2    2   NA   NA   NA   NA
+[189,]    1    2    2    2   NA   NA   NA   NA
+[190,]    1    2    2    2   NA   NA   NA   NA
+[191,]    1    2    2    2   NA   NA   NA   NA
+[192,]    1    2    2    2   NA   NA   NA   NA
+[193,]    1    2    2    2   NA   NA   NA   NA
+[194,]    1    2    2    2   NA   NA   NA   NA
+[195,]    1    2    2    2   NA   NA   NA   NA
+[196,]    1    2    2    2   NA   NA   NA   NA
+[197,]    1    2    2    2   NA   NA   NA   NA
+[198,]    1    2    2    2   NA   NA   NA   NA
+[199,]    1    2    2    2   NA   NA   NA   NA
+[200,]    1    2    2    2   NA   NA   NA   NA
+[201,]    1    3    3    3    3    3    3    3
+[202,]    1    3    3    3    3    3    3    3
+[203,]    1    3    3    3    3    3    3    3
+[204,]    1    3    3    3    3    3    3    3
+[205,]    1    3    3    3    3    3    3    3
+[206,]    1    3    3    3    3    3    3    3
+[207,]    1    3    3    3    3    3    3    3
+[208,]    1    3    3    3    3    3    3    3
+[209,]    1    3    3    3    3    3    3    3
+[210,]    1    3    3    3    3    3    3    3
+[211,]    1    3    3    3    3    3    3    3
+[212,]    1    3    3    3    3    3    3    3
+[213,]    1    3    3    3    3    3    3    3
+[214,]    1    3    3    3    3    3    3    3
+[215,]    1    3    3    3    3    3    3    3
+[216,]    1    3    3    3    3    3    3    3
+[217,]    1    3    3    3    3    3    3    3
+[218,]    1    3    3    3    3    3    3    3
+[219,]    1    3    3    3    3    3    3    3
+[220,]    1    3    3    3    3    3    3    3
+[221,]    1    3    3    3    3    3    3    3
+[222,]    1    3    3    3    3    3    3    3
+[223,]    1    3    3    3    3    3    3    3
+[224,]    1    3    3    3    3    3    3    3
+[225,]    1    3    3    3    3    3    3    3
+[226,]    1    3    3    3    3    3    3    3
+[227,]    1    3    3    3    3    3    3    3
+[228,]    1    3    3    3    3    3    3    3
+[229,]    1    3    3    3    3    3    3    3
+[230,]    1    3    3    3    3    3    3    3
+[231,]    1    3    3    3    3    3    3    3
+[232,]    1    3    3    3    3    3    3    3
+[233,]    1    3    3    3    3    3    3    3
+[234,]    1    3    3    3    3    3    3    3
+[235,]    1    3    3    3    3    3    3    3
+[236,]    1    3    3    3    3    3    3    3
+[237,]    1    3    3    3    3    3    3    3
+[238,]    1    3    3    3    3    3    3    3
+[239,]    1    3    3    3    3    3    3    3
+[240,]    1    3    3    3    3    3    3    3
+[241,]    1    3    3    3    3    3    3    3
+[242,]    1    3    3    3    3    3    3    3
+[243,]    1    3    3    3    3    3    3    3
+[244,]    1    3    3    3    3    3    3    3
+[245,]    1    3    3    3    3    3    3    3
+[246,]    1    3    3    3    3    3    3    3
+[247,]    1    3    3    3    3    3    3    3
+[248,]    1    3    3    3    3    3    3    3
+[249,]    1    3    3    3    3    3    3    3
+[250,]    1    3    3    3    3    3    3    3
+[251,]    1    2    2    2    2    2    2    2
+[252,]    1    2    2    2    2    2    2    2
+[253,]    1    2    2    2    2    2    2    2
+[254,]    1    2    2    2    2    2    2    2
+[255,]    1    2    2    2    2    2    2    2
+[256,]    1    2    2    2    2    2    2    2
+[257,]    1    2    2    2    2    2    2    2
+[258,]    1    2    2    2    2    2    2    2
+[259,]    1    2    2    2    2    2    2    2
+[260,]    1    2    2    2    2    2    2    2
+[261,]    1    2    2    2    2    2    2    2
+[262,]    1    2    2    2    2    2    2    2
+[263,]    1    2    2    2    2    2    2    2
+[264,]    1    2    2    2    2    2    2    2
+[265,]    1    2    2    2    2    2    2    2
+[266,]    1    2    2    2    2    2    2    2
+[267,]    1    2    2    2    2    2    2    2
+[268,]    1    2    2    2    2    2    2    2
+[269,]    1    2    2    2    2    2    2    2
+[270,]    1    2    2    2    2    2    2    2
+[271,]    1    2    2    2    2    2    2    2
+[272,]    1    2    2    2    2    2    2    2
+[273,]    1    2    2    2    2    2    2    2
+[274,]    1    2    2    2    2    2    2    2
+[275,]    1    2    2    2    2    2    2    2
+[276,]    1    2    2    2    2    2    2    2
+[277,]    1    2    2    2    2    2    2    2
+[278,]    1    2    2    2    2    2    2    2
+[279,]    1    2    2    2    2    2    2    2
+[280,]    1    2    2    2    2    2    2    2
+[281,]    1    2    2    2    2    2    2    2
+[282,]    1    2    2    2    2    2    2    2
+[283,]    1    2    2    2    2    2    2    2
+[284,]    1    2    2    2    2    2    2    2
+[285,]    1    2    2    2    2    2    2    2
+[286,]    1    2    2    2    2    2    2    2
+[287,]    1    2    2    2    2    2    2    2
+[288,]    1    2    2    2    2    2    2    2
+[289,]    1    2    2    2    2    2    2    2
+[290,]    1    2    2    2    2    2    2    2
+[291,]    1    2    2    2    2    2    2    2
+[292,]    1    2    2    2    2    2    2    2
+[293,]    1    2    2    2    2    2    2    2
+[294,]    1    2    2    2    2    2    2    2
+[295,]    1    2    2    2    2    2    2    2
+[296,]    1    2    2    2    2    2    2    2
+[297,]    1    2    2    2    2    2    2    2
+[298,]    1    2    2    2    2    2    2    2
+[299,]    1    2    2    2    2    2    2    2
+[300,]    1    2    2    2    2    2    2    2</code></pre>
+</div>
+</div>
+<p>as well as our vectors for the response on each trial</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>response</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x2 x1 x1 
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  2  1  1 
+x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x2 x1 x1 x1 x1 x1 x1 
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  2  1  1  1  1  1  1 
+x1 x1 x1 x1 x1 x1 x1 x1 x2 x1 x1 x2 x2 x2 x1 x1 x1 x1 x2 x1 x1 x1 x1 x1 x1 x1 
+ 1  1  1  1  1  1  1  1  2  1  1  2  2  2  1  1  1  1  2  1  1  1  1  1  1  1 
+x1 x1 x1 x1 x1 x1 x2 x2 x1 x2 x2 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 
+ 1  1  1  1  1  1  2  2  1  2  2  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1 
+x1 x1 x2 x1 x1 x1 x3 x2 x1 x1 x2 x1 x1 x3 x1 x1 x2 x1 x1 x1 x2 x1 x1 x4 x1 x1 
+ 1  1  2  1  1  1  3  2  1  1  2  1  1  3  1  1  2  1  1  1  2  1  1  4  1  1 
+x1 x1 x1 x1 x4 x1 x1 x1 x1 x1 x1 x1 x1 x1 x1 x4 x1 x1 x1 x1 x3 x4 x1 x3 x3 x3 
+ 1  1  1  1  4  1  1  1  1  1  1  1  1  1  1  4  1  1  1  1  3  4  1  3  3  3 
+x3 x1 x4 x1 x2 x1 x2 x1 x2 x1 x1 x4 x1 x1 x4 x1 x3 x1 x2 x1 x2 x3 x2 x1 x1 x1 
+ 3  1  4  1  2  1  2  1  2  1  1  4  1  1  4  1  3  1  2  1  2  3  2  1  1  1 
+x1 x2 x1 x1 x1 x3 x1 x2 x1 x1 x2 x2 x3 x1 x4 x1 x1 x1 x5 x1 x1 x1 x8 x1 x1 x1 
+ 1  2  1  1  1  3  1  2  1  1  2  2  3  1  4  1  1  1  5  1  1  1  8  1  1  1 
+x1 x1 x1 x1 x4 x1 x1 x1 x1 x1 x1 x6 x3 x1 x1 x1 x1 x6 x1 x1 x1 x6 x8 x1 x1 x1 
+ 1  1  1  1  4  1  1  1  1  1  1  6  3  1  1  1  1  6  1  1  1  6  8  1  1  1 
+x1 x1 x1 x1 x1 x1 x5 x5 x1 x8 x1 x1 x1 x1 x1 x2 x7 x7 x1 x2 x4 x1 x1 x1 x2 x1 
+ 1  1  1  1  1  1  5  5  1  8  1  1  1  1  1  2  7  7  1  2  4  1  1  1  2  1 
+x8 x4 x1 x1 x7 x1 x1 x3 x1 x1 x1 x2 x1 x1 x7 x1 x4 x2 x1 x8 x8 x1 x4 x6 x7 x7 
+ 8  4  1  1  7  1  1  3  1  1  1  2  1  1  7  1  4  2  1  8  8  1  4  6  7  7 
+x1 x2 x1 x3 x8 x1 x4 x1 x4 x5 x6 x2 x2 x1 
+ 1  2  1  3  8  1  4  1  4  5  6  2  2  1 </code></pre>
+</div>
+</div>
+<p>and the response time on each trial</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>rt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 1.136 1.101 1.486 0.996 2.043 1.382 0.707 0.847 2.243 0.693 0.730 0.806
+ [13] 0.802 1.124 1.344 1.546 2.010 1.841 0.872 0.842 1.963 0.713 1.208 1.815
+ [25] 0.835 1.085 1.266 1.825 1.375 1.861 1.673 1.858 1.324 1.014 1.641 0.946
+ [37] 1.185 1.218 1.597 1.051 0.693 1.790 0.637 0.715 0.562 2.067 2.230 1.848
+ [49] 1.058 1.741 0.622 0.820 0.513 0.949 1.324 0.818 1.033 0.604 0.741 0.890
+ [61] 0.635 0.671 0.612 1.055 0.878 1.054 1.021 1.444 0.844 1.069 0.843 1.347
+ [73] 1.013 1.190 0.664 1.068 0.780 0.887 0.678 1.048 0.939 0.522 0.610 0.759
+ [85] 0.928 1.490 1.495 0.810 1.180 1.248 0.948 1.064 0.696 1.127 0.703 1.098
+ [97] 0.925 1.023 0.802 0.857 1.059 0.643 0.906 1.362 1.182 1.383 1.069 0.721
+[109] 0.966 1.766 1.186 1.764 1.200 0.802 0.957 0.870 0.762 1.328 0.717 0.875
+[121] 1.167 0.762 0.881 2.739 2.425 1.378 1.231 1.073 0.900 1.812 0.860 0.782
+[133] 1.676 0.699 2.438 1.013 1.322 0.765 0.735 1.546 1.098 1.013 1.553 0.842
+[145] 1.384 1.729 0.851 0.900 1.505 1.736 0.607 1.279 0.704 0.537 0.933 1.349
+[157] 1.739 0.805 0.991 0.864 1.159 0.799 0.855 1.569 0.513 0.802 1.416 1.123
+[169] 1.201 0.764 0.658 1.417 1.054 0.757 0.795 0.799 1.025 0.986 0.792 0.898
+[181] 0.661 1.025 0.791 1.323 0.847 1.377 1.034 0.571 0.939 1.207 1.283 2.040
+[193] 1.200 0.986 0.736 1.062 0.549 0.677 0.863 0.847 1.065 0.929 1.000 0.792
+[205] 0.774 0.823 0.997 0.831 0.938 0.968 1.329 1.726 1.359 0.555 0.770 1.358
+[217] 0.492 1.361 0.806 1.713 1.617 1.124 0.846 1.028 0.494 1.828 0.637 1.457
+[229] 1.964 0.636 1.435 0.970 0.652 0.755 1.287 0.801 1.091 0.698 1.575 0.613
+[241] 0.777 0.717 0.640 1.480 0.759 0.567 1.047 0.693 1.204 0.756 0.644 0.944
+[253] 0.662 1.048 0.969 0.692 1.024 0.990 0.561 0.752 0.941 0.657 0.672 1.156
+[265] 0.647 1.046 0.683 0.583 0.699 0.977 0.823 0.698 0.536 0.888 0.840 0.882
+[277] 0.694 0.848 0.589 0.586 0.880 0.616 1.350 0.755 0.728 1.024 0.574 1.259
+[289] 1.166 0.738 0.841 0.621 0.761 0.611 0.908 1.407 1.049 1.232 0.754 1.079</code></pre>
+</div>
+</div>
+<p>These will be the data to which we will fit our race model.</p>
+</section>
+<section id="fitting-parameters" class="level3" data-number="8.3.2">
+<h3 data-number="8.3.2" class="anchored" data-anchor-id="fitting-parameters"><span class="header-section-number">8.3.2</span> Fitting parameters</h3>
+<p>Finally, we are in a position to fit the race model to our (simulated) data. We will be using R’s built-in <code>nlminb</code> function for this purpose, which operates very similarly to the <code>optim</code> function in R. The reason we are using <code>nlminb</code> here is because our model parameters should be <em>bounded</em>, i.e., restricted to fall within particular ranges. <code>nlminb</code> is a bit less clunky in this situation.</p>
+<p>Generally speaking, calling <code>nlminb</code> will look like this:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nlminb</span>(</span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># A vector of initial values that are the "starting point" for the search</span></span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">start =</span> ___,</span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The function that we want to optimize (i.e., get to be as small as possible)</span></span>
+<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">objective =</span> ___,</span>
+<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Lower and upper bounds on model parameters (these can be infinite)</span></span>
+<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower =</span> ___, <span class="at">upper =</span> ___,</span>
+<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Other options to set</span></span>
+<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> <span class="fu">list</span>(___),</span>
+<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Other arguments which will be conveyed to the `objective` to be optimized</span></span>
+<span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb78-12"><a href="#cb78-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>It is clear that we first need an initial set of parameter values. Our initial guess does not need to be very good, but it should at least be sensible. We will fit the model assuming different drift rates for each item type and a single threshold and residual time:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>start <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[1]"</span> <span class="ot">=</span> <span class="dv">0</span>,</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[2]"</span> <span class="ot">=</span> <span class="dv">0</span>,</span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[3]"</span> <span class="ot">=</span> <span class="dv">0</span>,</span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span> <span class="ot">=</span> <span class="dv">1</span>,</span>
+<span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t0"</span> <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb79-7"><a href="#cb79-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The values above were chosen because they are typical of what we might use as a “default” when fitting real data and we don’t know what the true values might be. We also need to specify the lower and upper bounds on each parameter; these bounds are also named vectors:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>lower <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[1]"</span> <span class="ot">=</span> <span class="sc">-</span><span class="cn">Inf</span>, <span class="co"># Drift rates allowed to be negative</span></span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[2]"</span> <span class="ot">=</span> <span class="sc">-</span><span class="cn">Inf</span>,</span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[3]"</span> <span class="ot">=</span> <span class="sc">-</span><span class="cn">Inf</span>,</span>
+<span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span> <span class="ot">=</span> <span class="dv">0</span>,       <span class="co"># Thresholds must be nonnegative, since accumulators start at zero</span></span>
+<span id="cb80-6"><a href="#cb80-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t0"</span> <span class="ot">=</span> <span class="dv">0</span>       <span class="co"># Minimum residual time is zero</span></span>
+<span id="cb80-7"><a href="#cb80-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb80-8"><a href="#cb80-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb80-9"><a href="#cb80-9" aria-hidden="true" tabindex="-1"></a>upper <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb80-10"><a href="#cb80-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[1]"</span> <span class="ot">=</span> <span class="cn">Inf</span>, <span class="co"># Drift rates and threshold can be as high as they need</span></span>
+<span id="cb80-11"><a href="#cb80-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[2]"</span> <span class="ot">=</span> <span class="cn">Inf</span>,</span>
+<span id="cb80-12"><a href="#cb80-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[3]"</span> <span class="ot">=</span> <span class="cn">Inf</span>,</span>
+<span id="cb80-13"><a href="#cb80-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span> <span class="ot">=</span> <span class="cn">Inf</span>,</span>
+<span id="cb80-14"><a href="#cb80-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t0"</span> <span class="ot">=</span> <span class="fu">min</span>(rt) <span class="co"># Residual time cannot be larger than the smallest RT</span></span>
+<span id="cb80-15"><a href="#cb80-15" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Finally, we have everything we need to fit the model:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">nlminb</span>(</span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">start =</span> start,</span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">objective =</span> race_nll,</span>
+<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower =</span> lower, <span class="at">upper =</span> upper,</span>
+<span id="cb81-5"><a href="#cb81-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Other options to set ("eval.max" is the most common one to play with)</span></span>
+<span id="cb81-6"><a href="#cb81-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> <span class="fu">list</span>(<span class="at">eval.max =</span> <span class="dv">1000</span>),</span>
+<span id="cb81-7"><a href="#cb81-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">rt =</span> rt,</span>
+<span id="cb81-8"><a href="#cb81-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">response =</span> response,</span>
+<span id="cb81-9"><a href="#cb81-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">items =</span> items</span>
+<span id="cb81-10"><a href="#cb81-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now let’s open our present:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$par
+      v[1]       v[2]       v[3]          a         t0 
+2.02086803 0.95210575 0.02240357 1.98372418 0.20802591 
+
+$objective
+[1] 350.1683
+
+$convergence
+[1] 0
+
+$iterations
+[1] 44
+
+$evaluations
+function gradient 
+      54      242 
+
+$message
+[1] "relative convergence (4)"</code></pre>
+</div>
+</div>
+<p>As we can see, the <code>fit</code> we got back from the <code>nlminb</code> function is actually a <em>list</em>. <code>fit$par</code> is a named vector giving us the best-fitting parameters, <code>fit$objective</code> is the best (smallest) value of NLL the model found. We also get some additional information, the most pertinent of which being <code>fit$convergence</code>—if this value is <code>0</code>, we are probably okay. Be sure to check out the help page on <code>nlminb</code> for more information and examples!</p>
+<p>For now, it is worth noting that the estimated values of the model parameters are pretty close to those we actually used to simulate the data.</p>
+</section>
+<section id="model-comparison" class="level3" data-number="8.3.3">
+<h3 data-number="8.3.3" class="anchored" data-anchor-id="model-comparison"><span class="header-section-number">8.3.3</span> Model comparison</h3>
+<p>Recall that our simulated data was from a visual search task in which distractors were allowed to vary in how similar they were to the target. Specifically, there were high-similarity distractor (with drift rates of 1) and low-similarity distractors (with drift rates of 0). In a real research context, we might be interested in testing the hypothesis that the two distractor types have different drift rates. We would address that question by fitting the model we used above, which allows for different drift rates for the two types, and also fitting a model in which we allow only a single drift rate parameter that applies to all distractors. We would then use AIC and BIC to decide whether the additional drift rate parameter improved the model fit enough to justify adding the parameter.</p>
+<p>Let’s see how that would go. How can we implement a model that assigns a single drift rate to both types of distractors? We will create a modified version of the <code>items</code> matrix that replaces all the <code>3</code>s with <code>2</code>s. We can then fit the model using this modified version. The effect of this will be to apply the same drift rate (which will be <code>v[2]</code> in our simpler model) to both types of foils. The code below accomplishes this.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create simpler version of the items matrix</span></span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>items_simple <span class="ot">&lt;-</span> items</span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Replace all 3's with 2's</span></span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a>items_simple[items_simple <span class="sc">==</span> <span class="dv">3</span>] <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb84-5"><a href="#cb84-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-6"><a href="#cb84-6" aria-hidden="true" tabindex="-1"></a>start_simple <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb84-7"><a href="#cb84-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[1]"</span> <span class="ot">=</span> <span class="dv">0</span>,</span>
+<span id="cb84-8"><a href="#cb84-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[2]"</span> <span class="ot">=</span> <span class="dv">0</span>,</span>
+<span id="cb84-9"><a href="#cb84-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span> <span class="ot">=</span> <span class="dv">1</span>,</span>
+<span id="cb84-10"><a href="#cb84-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t0"</span> <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb84-11"><a href="#cb84-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb84-12"><a href="#cb84-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-13"><a href="#cb84-13" aria-hidden="true" tabindex="-1"></a>lower_simple <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb84-14"><a href="#cb84-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[1]"</span> <span class="ot">=</span> <span class="sc">-</span><span class="cn">Inf</span>, <span class="co"># Drift rates allowed to be negative</span></span>
+<span id="cb84-15"><a href="#cb84-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[2]"</span> <span class="ot">=</span> <span class="sc">-</span><span class="cn">Inf</span>,</span>
+<span id="cb84-16"><a href="#cb84-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span> <span class="ot">=</span> <span class="dv">0</span>,       <span class="co"># Thresholds must be nonnegative, since accumulators start at zero</span></span>
+<span id="cb84-17"><a href="#cb84-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t0"</span> <span class="ot">=</span> <span class="dv">0</span>       <span class="co"># Minimum residual time is zero</span></span>
+<span id="cb84-18"><a href="#cb84-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb84-19"><a href="#cb84-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-20"><a href="#cb84-20" aria-hidden="true" tabindex="-1"></a>upper_simple <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb84-21"><a href="#cb84-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[1]"</span> <span class="ot">=</span> <span class="cn">Inf</span>, <span class="co"># Drift rates and threshold can be as high as they need</span></span>
+<span id="cb84-22"><a href="#cb84-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"v[2]"</span> <span class="ot">=</span> <span class="cn">Inf</span>,</span>
+<span id="cb84-23"><a href="#cb84-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"a"</span> <span class="ot">=</span> <span class="cn">Inf</span>,</span>
+<span id="cb84-24"><a href="#cb84-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t0"</span> <span class="ot">=</span> <span class="fu">min</span>(rt) <span class="co"># Residual time cannot be larger than the smallest RT</span></span>
+<span id="cb84-25"><a href="#cb84-25" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb84-26"><a href="#cb84-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-27"><a href="#cb84-27" aria-hidden="true" tabindex="-1"></a>fit_simple <span class="ot">&lt;-</span> <span class="fu">nlminb</span>(</span>
+<span id="cb84-28"><a href="#cb84-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">start =</span> start_simple,</span>
+<span id="cb84-29"><a href="#cb84-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">objective =</span> race_nll,</span>
+<span id="cb84-30"><a href="#cb84-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower =</span> lower_simple, <span class="at">upper =</span> upper_simple,</span>
+<span id="cb84-31"><a href="#cb84-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">control =</span> <span class="fu">list</span>(<span class="at">eval.max =</span> <span class="dv">1000</span>),</span>
+<span id="cb84-32"><a href="#cb84-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">rt =</span> rt,</span>
+<span id="cb84-33"><a href="#cb84-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">response =</span> response,</span>
+<span id="cb84-34"><a href="#cb84-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">items =</span> items_simple</span>
+<span id="cb84-35"><a href="#cb84-35" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>And here’s the result:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>fit_simple</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>$par
+     v[1]      v[2]         a        t0 
+1.7622345 0.1271764 1.6013550 0.2934703 
+
+$objective
+[1] 374.5381
+
+$convergence
+[1] 0
+
+$iterations
+[1] 26
+
+$evaluations
+function gradient 
+      38      121 
+
+$message
+[1] "relative convergence (4)"</code></pre>
+</div>
+</div>
+<p>As before, we can compute AIC for each model:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> fit<span class="sc">$</span>objective <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">length</span>(fit<span class="sc">$</span>par)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 710.3365</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> fit_simple<span class="sc">$</span>objective <span class="sc">+</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">length</span>(fit_simple<span class="sc">$</span>par)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 757.0762</code></pre>
+</div>
+</div>
+<p>as well as BIC</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> fit<span class="sc">$</span>objective <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">length</span>(rt)) <span class="sc">*</span> <span class="fu">length</span>(fit<span class="sc">$</span>par)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 728.8554</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span> <span class="sc">*</span> fit_simple<span class="sc">$</span>objective <span class="sc">+</span> <span class="fu">log</span>(<span class="fu">length</span>(rt)) <span class="sc">*</span> <span class="fu">length</span>(fit_simple<span class="sc">$</span>par)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 771.8914</code></pre>
+</div>
+</div>
+<p>On both counts, the original model (<code>fit</code>) is preferred, confirming that the two distractor types are best explained as having two different drift rates.</p>
+</section>
+</section>
+<section id="decision-rules" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="decision-rules"><span class="header-section-number">8.4</span> Decision rules</h2>
+<p>One final thing to note is that the race models we have explored so far assume that responses are based on whichever accumulator wins the race. This represents a <em>decision rule</em> that is <em>self-terminating</em> or <em>minimum time</em>. Alternatively, one could imagine tasks in which decisions could only be made once <em>all</em> accumulators had finished, amounting to an <em>exhaustive</em> or <em>maximum time</em> decision rule.</p>
+<p>For example, if the visual search task required participants not to pick which item was the target, but to decide whether or not a target was present <em>at all</em>, this would imply different decision rules for different responses. Responding that a target was present at all could be done using a self-terminating rule—if any accumulator reaches threshold, that could cause a participant to decide that there was a target in the display. On the other hand, saying that there were <em>no</em> targets in the display would require exhaustively processing each item to verify that it was not a target. This latter task constraint could imply that each accumulator has both upper and lower bounds, where the lower bound corresponds to a decision that the item is <em>not</em> a target. Alternatively, each item might be associated with <em>two</em> accumulators, one that accumulates evidence that supports the item being a target and another that accumulates evidence that the item is not a target. Finally, one could retain the same racing diffusion model we’ve been developing but include an additional <em>no target</em> accumulator that races against the accumulators for each item—if the “no target” accumulator wins, the participant decides that none of the items were targets.</p>
+<p>The point in laying out these possibilities is that, once we consider models with many possibly overlapping and interacting processes, we must also think carefully about how the results of those processes translate into observed behavior. There are many different ways of processing and combining information from multiple sources, each of which could lead to a different model of the task. The value of modeling is that this cornucopia of possibilities need not be overwhelming—we can build models that instantiate these different possibilities and see which best account for our data. There are even methods, known as Systems Factorial Technology <span class="citation" data-cites="TownsendNozawa1995 HouptEtAl2014 HardingEtAl2016">(<a href="references.html#ref-HardingEtAl2016" role="doc-biblioref">Harding et al., 2016</a>; <a href="references.html#ref-HouptEtAl2014" role="doc-biblioref">Houpt et al., 2014</a>; <a href="references.html#ref-TownsendNozawa1995" role="doc-biblioref">Townsend &amp; Nozawa, 1995</a>)</span>, that are specificially designed to obtain data to distinguish between different models in these situations.</p>
 <!-- \begin{align} -->
 <!-- \lim_{t \rightarrow \infty} F_i \left( t \mid a_i, v_i, t_{0i} \right) & = -->
 <!--     \begin{cases} -->
@@ -1229,11 +2392,6 @@ v_i' = v_i - \alpha \sum_{i \neq j}^n v_j
 <!--     pdf <- a * exp(-(a - v * t_minus_t0)^2 / (2 * t_minus_t0)) / sqrt(2 * pi * t_minus_t0^3) -->
 <!--     pdf[t_minus_t0 <= 0] <- 0 -->
 <!--     return(pdf) -->
-<!-- } -->
-<!-- accum_cdf <- function(t, a, v, t0) { -->
-<!--     t_minus_t0 <- pmax(0, t - t0) -->
-<!--     cdf <- pnorm((v * t_minus_t0 - a) / sqrt(t_minus_t0)) + exp(2 * a * v) * pnorm(-(v * t_minus_t0 + a) / sqrt(t_minus_t0)) -->
-<!--     return(cdf) -->
 <!-- } -->
 <!-- race_nll <- function(par, rt, response, v_index, a_index, n_v = max(v_index), n_a = max(a_index)) { -->
 <!--     v <- par[paste0("v[", 1:n_v, "]")] -->
@@ -1277,17 +2435,86 @@ v_i' = v_i - \alpha \sum_{i \neq j}^n v_j
 <!-- ) -->
 <!-- ``` -->
 </section>
-</section>
-</section>
-<section id="exercises" class="level2" data-number="8.2">
-<h2 data-number="8.2" class="anchored" data-anchor-id="exercises"><span class="header-section-number">8.2</span> Exercises</h2>
+<section id="exercises" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="exercises"><span class="header-section-number">8.5</span> Exercises</h2>
 <ol type="1">
-<li>Consider potential psychological interpretations of feedforward inhibition and lateral inhibition. In particular, relate these two forms of competition to the constructs of <em>attention</em> and <em>capacity</em>.</li>
-<li>Compare and contrast the explanations for slow errors provided by the diffusion model and by lateral competition. <!-- 3. The accumulator models we explored in the chapter are all *stochastic* accumulators, since value of the evidence being accumulated fluctuates randomly around a mean.  Implement the LBA. --></li>
+<li>Consider potential psychological interpretations of feedforward inhibition and lateral inhibition. In particular, see if you can relate these two forms of competition to the constructs of <em>attention</em> and <em>capacity</em>.</li>
+<li>As noted above, diffusion models explain slow errors in terms of trial-by-trial variability in drift rates, while accumulator models explain slow errors in terms of lateral competition between options. Compare and contrast theses. Are there circumstances in which one explanation may be more plausible than the other? Would it be possible to ascribe trial-by-trial variability <em>to</em> lateral competition?</li>
+<li>As noted in the chapter, it is possible to calculate the negative log-likelihood for the race model including feedforward competition. Implement this mechanism in the <code>race_nll</code> function. To get you started, the chunk of code below contains comments that suggest how this might be done.</li>
+</ol>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>race_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, response, rt, items, <span class="at">n_items =</span> <span class="fu">max</span>(items, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>    n_trials <span class="ot">&lt;-</span> <span class="fu">nrow</span>(items)</span>
+<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a>    n_locations <span class="ot">&lt;-</span> <span class="fu">ncol</span>(items)</span>
+<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"v"</span>])) {</span>
+<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a>        v <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"v["</span>, <span class="dv">1</span><span class="sc">:</span>n_items, <span class="st">"]"</span>)]</span>
+<span id="cb95-7"><a href="#cb95-7" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb95-8"><a href="#cb95-8" aria-hidden="true" tabindex="-1"></a>        v <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"v"</span>], n_items)</span>
+<span id="cb95-9"><a href="#cb95-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb95-10"><a href="#cb95-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb95-11"><a href="#cb95-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"a"</span>])) {</span>
+<span id="cb95-12"><a href="#cb95-12" aria-hidden="true" tabindex="-1"></a>        a <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"a["</span>, <span class="dv">1</span><span class="sc">:</span>n_locations, <span class="st">"]"</span>)]</span>
+<span id="cb95-13"><a href="#cb95-13" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb95-14"><a href="#cb95-14" aria-hidden="true" tabindex="-1"></a>        a <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"a"</span>], n_locations)</span>
+<span id="cb95-15"><a href="#cb95-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb95-16"><a href="#cb95-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb95-17"><a href="#cb95-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"t0"</span>])) {</span>
+<span id="cb95-18"><a href="#cb95-18" aria-hidden="true" tabindex="-1"></a>        t0 <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"t0["</span>, <span class="dv">1</span><span class="sc">:</span>n_locations, <span class="st">"]"</span>)]</span>
+<span id="cb95-19"><a href="#cb95-19" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb95-20"><a href="#cb95-20" aria-hidden="true" tabindex="-1"></a>        t0 <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"t0"</span>], n_locations)</span>
+<span id="cb95-21"><a href="#cb95-21" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb95-22"><a href="#cb95-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb95-23"><a href="#cb95-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Similar to the above, you can check and see whether a feedforward competition parameter is or is not included; if not, you'll want to set the value of feedforward to zero.</span></span>
+<span id="cb95-24"><a href="#cb95-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"feedforward"</span>])) {</span>
+<span id="cb95-25"><a href="#cb95-25" aria-hidden="true" tabindex="-1"></a>        feedforward <span class="ot">&lt;-</span> ...</span>
+<span id="cb95-26"><a href="#cb95-26" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb95-27"><a href="#cb95-27" aria-hidden="true" tabindex="-1"></a>        feedforward <span class="ot">&lt;-</span> ...</span>
+<span id="cb95-28"><a href="#cb95-28" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb95-29"><a href="#cb95-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb95-30"><a href="#cb95-30" aria-hidden="true" tabindex="-1"></a>    nll <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_trials)</span>
+<span id="cb95-31"><a href="#cb95-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb95-32"><a href="#cb95-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_trials) {</span>
+<span id="cb95-33"><a href="#cb95-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Since drift rates depend on the items presented on each trial, we'll need to calculate them</span></span>
+<span id="cb95-34"><a href="#cb95-34" aria-hidden="true" tabindex="-1"></a>        trial_v <span class="ot">&lt;-</span> v[items[i, ]]</span>
+<span id="cb95-35"><a href="#cb95-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb95-36"><a href="#cb95-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(trial_v)) {</span>
+<span id="cb95-37"><a href="#cb95-37" aria-hidden="true" tabindex="-1"></a>            trial_v[j] <span class="ot">&lt;-</span> ...</span>
+<span id="cb95-38"><a href="#cb95-38" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb95-39"><a href="#cb95-39" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb95-40"><a href="#cb95-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Note that the drift rates now refer to "trial_v"</span></span>
+<span id="cb95-41"><a href="#cb95-41" aria-hidden="true" tabindex="-1"></a>        nll[i] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log</span>(</span>
+<span id="cb95-42"><a href="#cb95-42" aria-hidden="true" tabindex="-1"></a>            <span class="fu">accum_pdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[response[i]], <span class="at">v =</span> trial_v[response[i]], <span class="at">t0 =</span> t0[response[i]]) <span class="sc">*</span></span>
+<span id="cb95-43"><a href="#cb95-43" aria-hidden="true" tabindex="-1"></a>                <span class="fu">prod</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[<span class="sc">-</span>response[i]], <span class="at">v =</span> trial_v[<span class="sc">-</span>response[i]], <span class="at">t0 =</span> t0[<span class="sc">-</span>response[i]]), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb95-44"><a href="#cb95-44" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb95-45"><a href="#cb95-45" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb95-46"><a href="#cb95-46" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb95-47"><a href="#cb95-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">sum</span>(nll))</span>
+<span id="cb95-48"><a href="#cb95-48" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ol start="4" type="1">
+<li>The Leaky Competing Accumulator (LCA) model was proposed by <span class="citation" data-cites="UsherMcClelland2001">Usher &amp; McClelland (<a href="references.html#ref-UsherMcClelland2001" role="doc-biblioref">2001</a>)</span>. In addition to lateral competition, the LCA (as the name implies) assumes that evidence “leaks” out of accumulators at a constant rate. Take a look at their paper (specifically equation 4 on page 559) and modify our race model simulation code to include a leakage parameter. Describe how you did this (and share your code too!).</li>
+<li>An extension to the racing diffusion model explored in this chapter was proposed by <span class="citation" data-cites="TillmanEtAl2020">Tillman et al. (<a href="references.html#ref-TillmanEtAl2020" role="doc-biblioref">2020</a>)</span>. Their model allows for trial-by-trial variability in the thresholds of the accumulators. Their Equation 5 and Appendix A provide formulae for the PDF and CDF of the resulting accumulators. Translate these formulae into R code that implements their extended racing diffusion model.</li>
+<li>The accumulator models we explored in the chapter are all <em>stochastic</em> accumulators, since value of the evidence being accumulated fluctuates randomly around a mean. <span class="citation" data-cites="BrownHeathcote2008">Brown &amp; Heathcote (<a href="references.html#ref-BrownHeathcote2008" role="doc-biblioref">2008</a>)</span> proposed a Linear Ballistic Accumulator (LBA) model which only has <em>between-trial</em> variability but is otherwise deterministic. Despite this unrealistic assumption, the model fits data well and often leads to similar conclusions as drawn from stochastic models of evidence accumulation <span class="citation" data-cites="DonkinEtAl2011">(<a href="references.html#ref-DonkinEtAl2011" role="doc-biblioref">Donkin et al., 2011</a>)</span>. Referring to the equations provided by <span class="citation" data-cites="BrownHeathcote2008">Brown &amp; Heathcote (<a href="references.html#ref-BrownHeathcote2008" role="doc-biblioref">2008</a>)</span> for the PDF and CDF of their Linear Ballistic Accumulators, implement their model.</li>
 </ol>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-BrownHeathcote2008" class="csl-entry" role="listitem">
+Brown, S., &amp; Heathcote, A. (2008). The simplest complete model of choice response time: Linear ballistic accumulation. <em>Cognitive Psychology</em>, <em>57</em>, 153–178.
+</div>
+<div id="ref-DonkinEtAl2011" class="csl-entry" role="listitem">
+Donkin, C., Brown, S., Heathcote, A., &amp; Wagenmakers, E.-J. (2011). Diffusion versus linear ballistic accumulation: Different models but the same conclusions about psychological processes? <em>Psychonomic Bulletin &amp; Review</em>, <em>55</em>, 140–151.
+</div>
+<div id="ref-HardingEtAl2016" class="csl-entry" role="listitem">
+Harding, B., Goulet, M.-A., Jolin, S., Tremblay, C., Villeneuve, S.-P., &amp; Durand, G. (2016). Systems factorial technology explained to humans. <em>The Quantitative Methods for Psychology</em>, <em>12</em>(1), 39–56.
+</div>
+<div id="ref-HouptEtAl2014" class="csl-entry" role="listitem">
+Houpt, J. W., Blaha, L. M., McIntire, J. P., Havig, P. R., &amp; Townsend, J. T. (2014). Systems factorial technology with <span>R</span>. <em>Behavior Research Methods</em>, <em>46</em>, 307–330.
+</div>
 <div id="ref-PurcellEtAl2010" class="csl-entry" role="listitem">
 Purcell, B. A., Heitz, R. P., Cohen, J. Y., Schall, J. D., Logan, G. D., &amp; Palmeri, T. J. (2010). Neurally constrained modeling of perceptual decision making. <em>Psychological Review</em>, <em>117</em>(4), 1113–1143. <a href="https://doi.org/10.1037/a0020311">https://doi.org/10.1037/a0020311</a>
 </div>
@@ -1299,6 +2526,12 @@ Raab, D. H. (1962). Statistical facilitation of simple reaction times. <em>Trans
 </div>
 <div id="ref-TeodorescuUsher2013" class="csl-entry" role="listitem">
 Teodorescu, A. R., &amp; Usher, M. (2013). Disentangling decision models: From independence to competition. <em>Psychological Review</em>, <em>120</em>(1), 1–38.
+</div>
+<div id="ref-TillmanEtAl2020" class="csl-entry" role="listitem">
+Tillman, G., Van Zandt, T., &amp; Logan, G. D. (2020). Sequential sampling models without random between-trial variability: The racing diffusion model of speeded decision making. <em>Psychonomic Bulletin &amp; Review</em>, <em>27</em>(5), 911–936. <a href="https://doi.org/10.3758/s13423-020-01719-6">https://doi.org/10.3758/s13423-020-01719-6</a>
+</div>
+<div id="ref-TownsendNozawa1995" class="csl-entry" role="listitem">
+Townsend, J. T., &amp; Nozawa, G. (1995). Spatio-temporal properties of elementary perception: An investigation of parallel, serial, and coactive theories. <em>Journal of Mathematical Psychology</em>, <em>39</em>, 321–359.
 </div>
 <div id="ref-UsherMcClelland2001" class="csl-entry" role="listitem">
 Usher, M., &amp; McClelland, J. L. (2001). The time course of perceptual choice: The leaky, competing accumulator model. <em>Psychological Review</em>, <em>108</em>(3), 550–592.
@@ -1389,8 +2622,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -1501,7 +2732,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
-      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {

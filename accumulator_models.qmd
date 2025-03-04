@@ -783,19 +783,703 @@ Lateral competition does not always predict that stronger competition will slow 
 
 Note that the race model theory for slow errors is different from how slow errors were explained with a diffusion model.  With a diffusion model, slow errors arose from trial-by-trial variability in the drift rate.  One of your exercises will be to compare and contrast these two theories of slow errors.
 
-<!-- ## Race model likelihood function -->
+## Race model likelihood function
 
-<!-- In the previous section, we build code to simulate a race model, where each accumulator was associated with a particular response.  We will now write a function to calculate the negative log-likelihood of a response at a particular time.  This will enable us to *fit* a race model to data. -->
+In the previous section, we built code to simulate a race model, where each accumulator was associated with a particular response.  We will now write a function to calculate the negative log-likelihood (NLL) of a response at a particular time.  This will enable us to *fit* a race model to data.  The process of building the function will also illustrate the essential ingredients in any NLL function, namely
 
-<!-- ## Decision rules -->
+1. Translating a mathematical expression of the likelihood into code.
+2. Deciding how to represent the data to be fit, along with any experimental factors relevant to the model.
+3. Extracting the values for the model's parameters from a vector (this last step is necessary for using most parameter search algorithms).
 
-<!-- $$ -->
-<!-- f_i \left( t \mid a_i, v_i, t_{0i} \right) = \frac{a_i}{\sqrt{2 \pi \left(t - t_{0i} \right)^3}} \exp \left\lbrace -\frac{\left[a_i - v_i \left(t - t_{0i} \right) \right]^2}{2 \left(t - t_{0i} \right)} \right\rbrace -->
-<!-- $$ -->
+### Math to Code
 
-<!-- $$ -->
-<!-- F_i \left( t \mid a_i, v_i, t_{0i} \right) = \Phi \left[ \frac{v_i \left( t - t_{0i} \right) - a_i}{\sqrt{t - t_{0i}}} \right] + \exp \left( 2 a_i v_i \right) \Phi \left[ -\frac{v_i \left( t - t_{0i} \right) + a_i}{\sqrt{t - t_{0i}}} \right] -->
-<!-- $$ -->
+In the previous section, we began by simulating just a single accumulator with a single boundary.  There were three parameters describing the accumulator: the *drift rate*, the *threshold*, and the *residual time*.  There is, in fact, a mathematical expression for the distribution of finishing times for this process: the [shifted Wald distribution](https://en.wikipedia.org/wiki/Inverse_Gaussian_distribution) (also called the shifted inverse Gaussian distribution).
+
+As you can see in the Wikipedia entry, it is possible to write a mathematical expression for both the **probability density function (PDF)** (the probability of finishing *at* a particular time) and the **cumulative distribution function (CDF)** (the probability of finishing *by* a particular time).  Since the Wikipedia entry doesn't explicitly include residual time in its formulae, let's write them out ourselves for our own reference.
+
+#### Probability density function for a single accumulator
+
+The PDF, describing the probability that accumulator $i$ reaches its threshold at time $t$, can be written
+$$
+f_i \left( t \mid a_i, v_i, t_{0i} \right) = \frac{a_i}{\sqrt{2 \pi \left(t - t_{0i} \right)^3}} \exp \left\lbrace -\frac{\left[a_i - v_i \left(t - t_{0i} \right) \right]^2}{2 \left(t - t_{0i} \right)} \right\rbrace
+$$
+where $a_i$ is the threshold, $v_i$ is the drift rate, and $t_{0i}$ is the residual time.  While the expression above may look a bit cumbersome, it only involves elementary mathematical operations which are already implemented in R (and almost all programming languages).  Therefore, we can write an R function that will compute the PDF for a single accumulator.  That's what I've done below.  Note the comments in the code below explain the purpose of each line.
+
+```{r}
+#| code-fold: show
+
+accum_pdf <- function(t, a, v, t0) {
+    # Because the term "t - t0" shows up multiple times in the formula, it's easier
+    # to compute it once and then refer back to it whenever we need it.  It also
+    # gives us a way to "clip" the values so they cannot be negative, since that
+    # would otherwise give a weird result.
+    t_minus_t0 <- pmax(0, t - t0)
+    
+    # The next line is a direct implementation of the formula above.
+    pdf <- a * exp(-(a - v * t_minus_t0)^2 / (2 * t_minus_t0)) / sqrt(2 * pi * t_minus_t0^3)
+    
+    # This does some final error-checking, ensuring that there is zero probability
+    # of finishing in zero (or negative) time.
+    pdf[t_minus_t0 <= 0] <- 0
+    
+    # Finally, we use an explicit "return" statement to say exactly what the
+    # function gives back.
+    return(pdf)
+}
+```
+
+Cool.  Let's take this function out for a spin!
+
+```{r}
+#| code-fold: show
+
+accum_pdf(
+    t = 1,
+    a = 2,
+    v = 1,
+    t0 = 0.2
+)
+```
+
+Nice!  But perhaps even more impressive is that the function will also accept *vectors* for its arguments, not just single numbers.  This is very convenient for us because we will often want to compute the likelihood for many trials all at once.  While we could use a `for` loop for that purpose, R code runs much faster if we can use vectors instead.
+
+For example, here's what we get if we want to compute the likelihood of a single accumulator finishing at a range of times:
+
+```{r}
+#| code-fold: show
+
+accum_pdf(
+    t = c(0, 0.5, 1, 1.5, 2, 2.5, 3),
+    a = 2,
+    v = 1,
+    t0 = 0.2
+)
+```
+
+Notice that we get a vector back from the function, which is the likelihood for *each* finishing time in the vector we supplied for the `t` argument.
+
+We can also supply vectors for the other arguments to the function if we want.  This is illustrated in the example below.
+
+```{r}
+#| code-fold: show
+
+accum_pdf(
+    t = c(0.5, 0.5, 0.5, 1, 1, 1, 2, 2, 2),
+    a = c(2, 2, 1, 2, 2, 1, 2, 2, 1),
+    v = c(1, 2, 3, 1, 2, 3, 1, 2, 3),
+    t0 = 0.2
+)
+```
+
+Just be aware that you can supply vectors with unequal lengths and R will "recycle" them until they are the length of the longest vector you supplied.  This is generally a bad idea, though, because it can lead to all sorts of "silent" errors.
+
+```{r}
+#| code-fold: show
+
+accum_pdf(
+    t = c(0.5, 1, 1.5, 2),
+    a = c(2, 1),
+    v = 1,
+    t0 = 0.2
+)
+```
+
+At least R will give you a warning if you supply vectors that can't be recycled evenly.
+
+```{r}
+#| code-fold: show
+
+accum_pdf(
+    t = c(0.5, 1, 1.5, 2),
+    a = c(2, 1, 3),
+    v = 1,
+    t0 = 0.2
+)
+```
+
+But in general, you should adhere to the following rule:  For each argument to the function, provide *either* a single number *or* a vector that is the same length as any other vectors you might supply.
+
+One nice side-effect of being able to provide vectors to our `accum_pdf` function is that we can use it to make some nice plots of the distributions of finishing times for different combinations of parameter values:
+
+```{r}
+expand_grid(a = c(1, 2), v = c(1, 2, 3), t0 = 0.2, t = seq(0, 5, length.out = 201)) %>%
+    mutate(pdf = accum_pdf(t = t, a = a, v = v, t0 = t0)) %>%
+    ggplot(aes(x = t, y = pdf, color = v, linetype = factor(a), group = interaction(v, a))) +
+    geom_line() +
+    labs(x = "Time (s)", y = "PDF", color = "Drift rate (v)", linetype = "Threshold (a)")
+```
+
+#### Cumulative distribution function for a single accumulator
+
+Just like there's a mathematical expression for the PDF, we have one for the CDF too.  As a reminder, the CDF is the probability that accumulator $i$ reached threshold *by* time $t$.  The formula is given below, using the same parameters as the formula for the PDF above:
+$$
+F_i \left( t \mid a_i, v_i, t_{0i} \right) = \Phi \left[ \frac{v_i \left( t - t_{0i} \right) - a_i}{\sqrt{t - t_{0i}}} \right] + \exp \left( 2 a_i v_i \right) \Phi \left[ -\frac{v_i \left( t - t_{0i} \right) + a_i}{\sqrt{t - t_{0i}}} \right]
+$$
+The only new thing in the CDF formula is $\Phi \left( \cdot \right)$, which is a shorthand for the CDF of the standard normal distribution.  Recall that the standard normal distribution has a mean of zero and a standard deviation of one.  Fortunately, this is built into R in the form of the `pnorm` function.  Although you can supply a `mean` and `sd` to `pnorm`, if you don't, it will use default settings of `mean = 0` and `sd = 1`, amounting to a standard normal distribution.
+
+We can thus write an R function to calculate the expression in the formula above for the CDF.  This function is shown below.
+
+```{r}
+#| code-fold: show
+
+accum_cdf <- function(t, a, v, t0) {
+    # As with the pdf function, I compute "t - t0" once at the very beginning,
+    # which also offers an opportunity to "clip" any negative values that result.
+    t_minus_t0 <- pmax(0, t - t0)
+    
+    # This expression is a direct translation of the formula above
+    cdf <- pnorm((v * t_minus_t0 - a) / sqrt(t_minus_t0)) + exp(2 * a * v) * pnorm(-(v * t_minus_t0 + a) / sqrt(t_minus_t0))
+    
+    # This formula doesn't give weird results when t_minus_t0 == 0, so we can just
+    # return the result as-is.
+    return(cdf)
+}
+```
+
+Like `accum_pdf`, `accum_cdf` can accept vectors for its arguments too (with the same caveat that you should be sure to supply only single values or vectors of the same length to avoid unpredictable "recycling" issues).  We can thus make some very nice plots, just like we did for the PDF:
+
+```{r}
+expand_grid(a = c(1, 2), v = c(1, 2, 3), t0 = 0.2, t = seq(0, 5, length.out = 201)) %>%
+    mutate(cdf = accum_cdf(t = t, a = a, v = v, t0 = t0)) %>%
+    ggplot(aes(x = t, y = cdf, color = v, linetype = factor(a), group = interaction(v, a))) +
+    geom_line() +
+    expand_limits(y = c(0, 1)) +
+    labs(x = "Time (s)", y = "CDF", color = "Drift rate (v)", linetype = "Threshold (a)")
+```
+
+#### Likelihood expression
+
+Armed with functions for calculating the PDF and CDF for a single accumulator, we are now in a position to write a function that computes the *likelihood* of a *particular* accumulator winning at a particular time $t$.  We will first write the likelihood mathematically and then translate it into an R function, like we did for the PDF and CDF.
+
+To understand the math, it may help to think conceptually first:  If accumulator $i$ is the first of $N$ accumulators to reach its threshold at time $t$, that means two things must be true:  First, and most obvious, accumulator $i$ must have hit threshold at time $t$.  Second, and perhaps less obvious, is that *none of the other accumulators* must have hit threshold by time $t$.  The likelihood must therefore express the probability that *both* of these things are true.
+
+There are two more conceptual ingredients we need to express the likelihood function:  First, we need to know how to express the probability that a non-winning accumulator *hasn't* hit threshold by time $t$.  Since the CDF is the probability that an accumulator *has* hit threshold by time $t$, the probability that it *hasn't* is just one minus the CDF, since "has already hit threshold" and "hasn't already hit threshold" are mutually exclusive and exhaustive possibilities.  Second, we have to remember that the joint probability of multiple independent events being true is the *product* of the individual probabilities.
+
+Finally, we can express the likelihood that accumulator $i$ is the *first* out of $N$ accumulators to reach its threshold at time $t$:
+$$
+\overbrace{L \left(i, t \right)}^{\text{Likelihood that } i \text{ wins at } t} = \underbrace{f_i \left( t \mid a_i, v_i, t_{0i} \right)}_{i \text{ finishes at } t} \overbrace{\prod_{j \neq i}^N \left[1 - F_j \left(t \mid a_j, v_j, t_{0j} \right) \right]}^{\text{Nothing else has finished by } t}
+$$
+
+It is worth emphasizing that the formula above only works when the accumulators are (conditionally) *independent* of one another.  As a result, the race model cannot include lateral competition or any other interactions between accumulators that would cause them to be dependent on one another.  It can, however, accommodate feedforward competition, since that affects the drift rates but not how the accumulators evolve from moment to moment.  We will return to feedforward competition later in this section.
+
+To translate the likelihood formula above into R code, we will first see how to compute it for a single trial.  We will then generalize that approach so we can compute the likelihood for many trials, exploiting the fact that our `accum_pdf` and `accum_cdf` functions can accept vectors as arguments.
+
+But first, let's imagine a concrete situation:  Say we present an array of three items in a visual search task.  The target is a red square and the job of the participant is to select which of the three items is the target.  The item in position 1 is a blue circle and so doesn't resemble the target at all; let's say it has a drift rate of 0.  The item in position 2 is the target---let's say it has a drift rate of 2.  Finally, the item in position 3 is a red circle, matching the target's color but not its shape---let's say it has a drift rate of 1.  Let's assume that all accumulators have the same threshold value (2) and the same residual time (0.2).  We can now write the parameters for all three accumulators as vectors, although we will be pedantic and write out the same value 3 times for the threshold and residual time:
+
+```{r}
+#| code-fold: show
+
+v <- c(0, 2, 1)
+a <- c(2, 2, 2)
+t0 <- c(0.2, 0.2, 0.2)
+```
+
+What is the likelihood of selecting the target (item 2) in 1 second?  Based on the formula above, we can compute that likelihood in R using the `accum_pdf` and `accum_cdf` functions from earlier:
+
+```{r}
+#| code-fold: show
+
+v <- c(0, 2, 1)
+a <- c(2, 2, 2)
+t0 <- c(0.2, 0.2, 0.2)
+
+accum_pdf(t = 1, a = a[2], v = v[2], t0 = t0[2]) *
+    (1 - accum_cdf(t = 1, a = a[1], v = v[1], t0 = t0[1])) *
+    (1 - accum_cdf(t = 1, a = a[3], v = v[3], t0 = t0[3]))
+```
+
+We are going to make the expression above a bit more general and more compact.  First, rather than refer explicitly to a response time of `1`, we will refer to a variable `rt` (which we can set to one):
+
+```{r}
+#| code-fold: show
+
+v <- c(0, 2, 1)
+a <- c(2, 2, 2)
+t0 <- c(0.2, 0.2, 0.2)
+
+rt <- 1
+
+accum_pdf(t = rt, a = a[2], v = v[2], t0 = t0[2]) *
+    (1 - accum_cdf(t = rt, a = a[1], v = v[1], t0 = t0[1])) *
+    (1 - accum_cdf(t = rt, a = a[3], v = v[3], t0 = t0[3]))
+```
+
+Second, we can use the `prod` function to multiply together the two terms at the end, making use of the fact that `accum_cdf` can accept vectors as arguments:
+
+```{r}
+#| code-fold: show
+
+v <- c(0, 2, 1)
+a <- c(2, 2, 2)
+t0 <- c(0.2, 0.2, 0.2)
+
+rt <- 1
+
+accum_pdf(t = rt, a = a[2], v = v[2], t0 = t0[2]) *
+    prod(1 - accum_cdf(t = rt, a = a[c(1, 3)], v = v[c(1, 3)], t0 = t0[c(1, 3)]))
+```
+
+Third, instead of explicitly referring to individual accumulators, we can define a variable called `response` (and set it to 2), and use the "negative indexing trick" for the second term:
+
+```{r}
+#| code-fold: show
+
+v <- c(0, 2, 1)
+a <- c(2, 2, 2)
+t0 <- c(0.2, 0.2, 0.2)
+
+rt <- 1
+response <- 2
+
+accum_pdf(t = rt, a = a[response], v = v[response], t0 = t0[response]) *
+    prod(1 - accum_cdf(t = rt, a = a[-response], v = v[-response], t0 = t0[-response]))
+```
+
+Nice!  The only problem now is that our code only applies to a single trial at a time.  In the next section, we confront the issue of how to compute the likelihood for multiple trials.
+
+### Likelihood for multiple trials
+
+In the previous section, we effectively translated a mathematical expression of the model into R code that performs the relevant computations to find the likelihood of a given response at a given time.  To apply this code to an entire dataset, which contains many trials, we need to think about how to specify the details of each individual trial.
+
+#### Characterizing each trial
+
+Again, it will help to think about a concrete task like visual search.  Any given trial involves a number of items, each of which can occupy a given position in the visual search array.  For example, one trial might have 3 items with the target occupying the second position while another trial might have 6 items with the target occupying the fifth position.  The distractors occupying the non-target positions could be of varying types depending on whether they are more or less similar to the target.  Therefore, to characterize any individual trial in this experiment, we need to know, for each possible location that could contain an item, whether or not it does contain an item and, if so, what kind of item it is.
+
+There are a few ways we could represent this information in an R data structure, but the simplest is in the form of a *matrix*.  Each row of the matrix will correspond to a different trial in the experiment and each column of the matrix corresponds to a different location that may or may not contain an item on that trial.  We can give each type of item a numerical index.  For example, maybe `1` corresponds to targets, `2` corresponds to similar distractors, and `3` corresponds to dissimilar distractors.  To indicate that a location does not contain an item, we can give it the value `NA`.  For example, the following matrix could describe four trials in a search experiment with six possible display locations:
+
+```{r}
+matrix(c(
+    1, NA, NA,  2, NA, NA,
+    2,  1,  2,  3,  3,  3,
+    NA, NA, 3,  1,  3, NA,
+    NA,  3, NA,  2, NA, 1
+), nrow = 4, ncol = 6, byrow = TRUE)
+```
+
+Alternatively, we could imagine a decision making task in which each trial presents three options selected from a set of six possible products:
+
+```{r}
+matrix(c(
+    1, 2, 3,
+    1, 4, 5,
+    6, 4, 2,
+    5, 2, 6
+), nrow = 4, ncol = 3, byrow = TRUE)
+```
+
+These concrete examples suggest the general structure of the tasks to which we can typically apply a race model:  Each trial presents a number of options, each of which is selected from a set of possible options.  Moreover, sometimes the ordering/location of the options may matter (like in visual search) but sometimes it may not (like in the decision task).
+
+#### Defining model parameters
+
+These examples also suggest what kind of *parameters* our model will need to have.  Specifically, we will need to have a *drift rate* parameter for *each type of item* in the experiment.  We could have a single threshold parameter that applies to all accumulators.  Alternatively, we could allow different locations to have different thresholds, modeling the idea that there may be a *bias* in favor of choosing options in particular locations.  Similarly, we could have a single residual time parameter for all accumulators *or* we could allow residual time to vary by location, allowing us to model situations in which processing begins earlier for some locations than others.
+
+Let's again make this concrete and return to the visual search experiment.  We will keep things simple and assume just one threshold parameter and one residual time parameter apply to all accumulators, regardless of location.  We will have three possible values of drift rate for three categories of item:
+
+1. Targets
+2. Similar distractors
+3. Dissimilar distractors
+
+To compute the likelihood for each trial, we will need to refer to the corresponding row in the matrix and use the drift rates that correspond to the items shown on that trial.
+
+```{r}
+#| code-fold: show
+
+# Specify item types/locations for each trial
+items <- matrix(c(
+    1, NA, NA,  2, NA, NA,
+    2,  1,  2,  3,  3,  3,
+    NA, NA, 3,  1,  3, NA,
+    NA,  3, NA,  2, NA, 1
+), nrow = 4, ncol = 6, byrow = TRUE)
+
+# Responses and response times for each trial
+# Notice that responses refer to the *position* of the chosen item!
+response <- c(1, 2, 4, 4)
+rt <- c(0.6, 1.5, 0.7, 1.2)
+
+n_trials <- nrow(items)
+n_locations <- ncol(items)
+
+# Model parameters
+# One drift rate for each type of item
+v <- c(2, 1, 0)
+# One threshold for each possible location
+a <- rep(2, n_locations)
+# One residual time for each possible location
+t0 <- rep(0.2, n_locations)
+
+# Allocate vector that will eventually contain the negative log-likelihood
+# for each trial
+nll <- rep(0, n_trials)
+
+# Calculate the log-likelihood for each trial
+for (i in 1:n_trials) {
+    # Note that the whole thing is wrapped in "-log()" so we get the negative log-likelihood
+    # Note also the use of "na.rm = TRUE" in the "prod()" function to ignore any locations
+    # that don't contain an item
+    nll[i] <- -log(
+        accum_pdf(t = rt[i], a = a[response[i]], v = v[items[i, response[i]]], t0 = t0[response[i]]) *
+            prod(1 - accum_cdf(t = rt[i], a = a[-response[i]], v = v[items[i, -response[i]]], t0 = t0[-response[i]]), na.rm = TRUE)
+    )
+}
+
+print(nll)
+```
+
+You'll note that the NLL for each trial is calculated using a `for` loop at the end---there are ways to make this more efficient, but I will leave those as an exercise for the reader!
+
+### Extracting parameters
+
+We are almost there!  We have code that will take a set of model parameters and a representation of the options on each trial and compute the negative log-likelihood of each response made on each trial.  All that is left is to "wrap" this code into a function.  However, we will need to define the arguments of this function in a particular way in order to get the function to play nicely with the parameter search functions we will use.  Specifically, the function will need to take the following arguments:
+
+* The matrix that specifies the options on each trial; we called this `items` in the code above.
+* The vector of responses made on each trial; we called this `response` in the code above.
+* The vector of response times on each trial; we called this `rt` in the code above.
+* Finally, and this is the tricky part, we need a **single vector** that contains all the parameters of our model.  As we will see, the "trick" is to *extract* the parameter values from this vector based on the *names* of the elements in the vector.
+
+Let's lay out the outline of our function before we get to the tricky part:
+
+```{r, eval = FALSE}
+#| code-fold: show
+
+race_nll <- function(par, response, rt, items) {
+    n_trials <- nrow(items)
+    n_locations <- ncol(items)
+    
+    # TRICKY PART HERE
+    v <- ...
+    a <- ...
+    t0 <- ...
+    
+    nll <- rep(0, n_trials)
+    
+    for (i in 1:n_trials) {
+        nll[i] <- -log(
+            accum_pdf(t = rt[i], a = a[response[i]], v = v[items[i, response[i]]], t0 = t0[response[i]]) *
+                prod(1 - accum_cdf(t = rt[i], a = a[-response[i]], v = v[items[i, -response[i]]], t0 = t0[-response[i]]), na.rm = TRUE)
+        )
+    }
+    
+    return(sum(nll))
+}
+```
+
+To get a grasp on the problem we have to solve, it'll be good to have in mind a picture of what `par` looks like.  It will be a *named* vector, meaning it will look something like this:
+
+```{r}
+par <- c(
+    "v[1]" = 2,
+    "v[2]" = 1,
+    "v[3]" = 0,
+    "a" = 2,
+    "t0" = 0.2
+)
+```
+
+We can use the names of the elements to extract them, like so:
+
+```{r}
+#| code-fold: show
+
+par["a"]
+```
+
+We can also get a bit clever by using the `paste0` function:
+
+```{r}
+#| code-fold: show
+
+par[paste0("v[", 1:3, "]")]
+```
+
+Finally, we can check to see whether the vector contains an element with a particular name by using `is.na`, which is `TRUE` if an element does not exist in the vector:
+
+```{r}
+#| code-fold: show
+
+is.na(par["t0"])
+
+is.na(par["t0[1]"])
+```
+
+The latter trick will allow us to make our `race_nll` function more general, because we can check to see whether the `par` vector contains, for example, several threshold parameters or only one.  The whole shebang is illustrated in the complete function below:
+
+```{r}
+#| code-fold: show
+
+race_nll <- function(par, response, rt, items, n_items = max(items, na.rm = TRUE)) {
+    n_trials <- nrow(items)
+    n_locations <- ncol(items)
+    
+    if (is.na(par["v"])) {
+        v <- par[paste0("v[", 1:n_items, "]")]
+    } else {
+        v <- rep(par["v"], n_items)
+    }
+    
+    if (is.na(par["a"])) {
+        a <- par[paste0("a[", 1:n_locations, "]")]
+    } else {
+        a <- rep(par["a"], n_locations)
+    }
+    
+    if (is.na(par["t0"])) {
+        t0 <- par[paste0("t0[", 1:n_locations, "]")]
+    } else {
+        t0 <- rep(par["t0"], n_locations)
+    }
+    
+    nll <- rep(0, n_trials)
+    
+    for (i in 1:n_trials) {
+        nll[i] <- -log(
+            accum_pdf(t = rt[i], a = a[response[i]], v = v[items[i, response[i]]], t0 = t0[response[i]]) *
+                prod(1 - accum_cdf(t = rt[i], a = a[-response[i]], v = v[items[i, -response[i]]], t0 = t0[-response[i]]), na.rm = TRUE)
+        )
+    }
+    
+    return(sum(nll))
+}
+```
+
+For each parameter, we check to see whether the `par` vector contains an element named without an index after it.  If so, then the corresponding value is "recycled" for each item/location.  Otherwise, we assume that the `par` vector contains different indexed values for each item/location and we extract those from the `par` vector for later use.  Notice that I added a function argument called `n_items` so we can specify how many different item types there could be; the default value (the largest number specified in the `items` matrix) should work, but there may be situations in which it doesn't.
+
+Before closing this section, you may have noticed something missing!  We could include a feedforward competition parameter too.  However, that is left as an exercise for the reader.
+
+## Fitting the race model
+
+Finally, we have our `race_nll` function which we can use to *fit* the race model to data, that is, to find the parameters of the model that assign the highest likelihood to some set of data.
+
+### Simulating some data
+
+To do that, we'll first need some data!  For example purposes, we can *simulate* some plausible data.  Like we did with the diffusion model, the advantage of fitting simulated data is that we know the "ground truth" and can therefore see how well we can *recover* the parameters we used to generate the data.
+
+The chunk of code below simulates data in a visual search experiment in which two factors are manipulated, set size and target-distractor similarity.  Since the simulations don't allow for different parameters for different locations, I keep things simple and have the target always appear in location 1.
+
+```{r}
+#| code-fold: show
+
+v <- c(2, 1, 0)
+a <- 2
+t0 <- 0.2
+
+n_trials_per_cond <- 50
+
+set_size_vals <- c(2, 4, 8)
+
+items <- c()
+response <- c()
+rt <- c()
+
+for (set_size in set_size_vals) {
+    for (td_sim in c("low", "high")) {
+        distractor_type <- ifelse(td_sim == "low", 3, 2)
+        
+        for (i in 1:n_trials_per_cond) {
+            items <- rbind(
+                items,
+                c(1, rep(distractor_type, set_size - 1), rep(NA, max(set_size_vals) - set_size))
+            )
+            
+            current_result <- race_sim(v = c(v[1], rep(v[distractor_type], set_size - 1)), a = a, t0 = t0, dt = 0.001)
+            
+            # Extract just the choice and RT
+            rt <- c(rt, current_result$t[nrow(current_result)])
+            response <- c(response, which.max(current_result[nrow(current_result), 2:ncol(current_result)]))
+        }
+    }
+}
+```
+
+In the end, we have our matrix specifying what is in each display:
+
+```{r}
+items
+```
+
+as well as our vectors for the response on each trial
+
+```{r}
+response
+```
+
+and the response time on each trial
+
+```{r}
+rt
+```
+
+These will be the data to which we will fit our race model.
+
+### Fitting parameters
+
+Finally, we are in a position to fit the race model to our (simulated) data.  We will be using R's built-in `nlminb` function for this purpose, which operates very similarly to the `optim` function in R.  The reason we are using `nlminb` here is because our model parameters should be *bounded*, i.e., restricted to fall within particular ranges.  `nlminb` is a bit less clunky in this situation.
+
+Generally speaking, calling `nlminb` will look like this:
+
+```{r eval = FALSE}
+#| code-fold: show
+
+nlminb(
+    # A vector of initial values that are the "starting point" for the search
+    start = ___,
+    # The function that we want to optimize (i.e., get to be as small as possible)
+    objective = ___,
+    # Lower and upper bounds on model parameters (these can be infinite)
+    lower = ___, upper = ___,
+    # Other options to set
+    control = list(___),
+    # Other arguments which will be conveyed to the `objective` to be optimized
+    ...
+)
+```
+
+It is clear that we first need an initial set of parameter values.  Our initial guess does not need to be very good, but it should at least be sensible.  We will fit the model assuming different drift rates for each item type and a single threshold and residual time:
+
+```{r}
+#| code-fold: show
+
+start <- c(
+    "v[1]" = 0,
+    "v[2]" = 0,
+    "v[3]" = 0,
+    "a" = 1,
+    "t0" = 0
+)
+```
+
+The values above were chosen because they are typical of what we might use as a "default" when fitting real data and we don't know what the true values might be.  We also need to specify the lower and upper bounds on each parameter; these bounds are also named vectors:
+
+```{r}
+#| code-fold: show
+
+lower <- c(
+    "v[1]" = -Inf, # Drift rates allowed to be negative
+    "v[2]" = -Inf,
+    "v[3]" = -Inf,
+    "a" = 0,       # Thresholds must be nonnegative, since accumulators start at zero
+    "t0" = 0       # Minimum residual time is zero
+)
+
+upper <- c(
+    "v[1]" = Inf, # Drift rates and threshold can be as high as they need
+    "v[2]" = Inf,
+    "v[3]" = Inf,
+    "a" = Inf,
+    "t0" = min(rt) # Residual time cannot be larger than the smallest RT
+)
+```
+
+Finally, we have everything we need to fit the model:
+
+```{r}
+#| code-fold: show
+
+fit <- nlminb(
+    start = start,
+    objective = race_nll,
+    lower = lower, upper = upper,
+    # Other options to set ("eval.max" is the most common one to play with)
+    control = list(eval.max = 1000),
+    rt = rt,
+    response = response,
+    items = items
+)
+```
+
+Now let's open our present:
+
+```{r}
+#| code-fold: show
+
+fit
+```
+
+As we can see, the `fit` we got back from the `nlminb` function is actually a *list*.  `fit$par` is a named vector giving us the best-fitting parameters, `fit$objective` is the best (smallest) value of NLL the model found.  We also get some additional information, the most pertinent of which being `fit$convergence`---if this value is `0`, we are probably okay.  Be sure to check out the help page on `nlminb` for more information and examples!
+
+For now, it is worth noting that the estimated values of the model parameters are pretty close to those we actually used to simulate the data.
+
+### Model comparison
+
+Recall that our simulated data was from a visual search task in which distractors were allowed to vary in how similar they were to the target.  Specifically, there were high-similarity distractor (with drift rates of 1) and low-similarity distractors (with drift rates of 0).  In a real research context, we might be interested in testing the hypothesis that the two distractor types have different drift rates.  We would address that question by fitting the model we used above, which allows for different drift rates for the two types, and also fitting a model in which we allow only a single drift rate parameter that applies to all distractors.  We would then use AIC and BIC to decide whether the additional drift rate parameter improved the model fit enough to justify adding the parameter.
+
+Let's see how that would go.  How can we implement a model that assigns a single drift rate to both types of distractors?  We will create a modified version of the `items` matrix that replaces all the `3`s with `2`s.  We can then fit the model using this modified version.  The effect of this will be to apply the same drift rate (which will be `v[2]` in our simpler model) to both types of foils.  The code below accomplishes this.
+
+```{r}
+#| code-fold: show
+
+# Create simpler version of the items matrix
+items_simple <- items
+# Replace all 3's with 2's
+items_simple[items_simple == 3] <- 2
+
+start_simple <- c(
+    "v[1]" = 0,
+    "v[2]" = 0,
+    "a" = 1,
+    "t0" = 0
+)
+
+lower_simple <- c(
+    "v[1]" = -Inf, # Drift rates allowed to be negative
+    "v[2]" = -Inf,
+    "a" = 0,       # Thresholds must be nonnegative, since accumulators start at zero
+    "t0" = 0       # Minimum residual time is zero
+)
+
+upper_simple <- c(
+    "v[1]" = Inf, # Drift rates and threshold can be as high as they need
+    "v[2]" = Inf,
+    "a" = Inf,
+    "t0" = min(rt) # Residual time cannot be larger than the smallest RT
+)
+
+fit_simple <- nlminb(
+    start = start_simple,
+    objective = race_nll,
+    lower = lower_simple, upper = upper_simple,
+    control = list(eval.max = 1000),
+    rt = rt,
+    response = response,
+    items = items_simple
+)
+```
+
+And here's the result:
+
+```{r}
+#| code-fold: show
+
+fit_simple
+```
+
+As before, we can compute AIC for each model:
+
+```{r}
+#| code-fold: show
+
+2 * fit$objective + 2 * length(fit$par)
+2 * fit_simple$objective + 2 * length(fit_simple$par)
+```
+
+as well as BIC
+
+```{r}
+#| code-fold: show
+
+2 * fit$objective + log(length(rt)) * length(fit$par)
+2 * fit_simple$objective + log(length(rt)) * length(fit_simple$par)
+```
+
+On both counts, the original model (`fit`) is preferred, confirming that the two distractor types are best explained as having two different drift rates.
+
+## Decision rules
+
+One final thing to note is that the race models we have explored so far assume that responses are based on whichever accumulator wins the race.  This represents a *decision rule* that is *self-terminating* or *minimum time*.  Alternatively, one could imagine tasks in which decisions could only be made once *all* accumulators had finished, amounting to an *exhaustive* or *maximum time* decision rule.
+
+For example, if the visual search task required participants not to pick which item was the target, but to decide whether or not a target was present *at all*, this would imply different decision rules for different responses.  Responding that a target was present at all could be done using a self-terminating rule---if any accumulator reaches threshold, that could cause a participant to decide that there was a target in the display.  On the other hand, saying that there were *no* targets in the display would require exhaustively processing each item to verify that it was not a target.  This latter task constraint could imply that each accumulator has both upper and lower bounds, where the lower bound corresponds to a decision that the item is *not* a target.  Alternatively, each item might be associated with *two* accumulators, one that accumulates evidence that supports the item being a target and another that accumulates evidence that the item is not a target.  Finally, one could retain the same racing diffusion model we've been developing but include an additional *no target* accumulator that races against the accumulators for each item---if the "no target" accumulator wins, the participant decides that none of the items were targets.
+
+The point in laying out these possibilities is that, once we consider models with many possibly overlapping and interacting processes, we must also think carefully about how the results of those processes translate into observed behavior.  There are many different ways of processing and combining information from multiple sources, each of which could lead to a different model of the task.  The value of modeling is that this cornucopia of possibilities need not be overwhelming---we can build models that instantiate these different possibilities and see which best account for our data.  There are even methods, known as Systems Factorial Technology [@TownsendNozawa1995; @HouptEtAl2014; @HardingEtAl2016], that are specificially designed to obtain data to distinguish between different models in these situations.
 
 <!-- \begin{align} -->
 <!-- \lim_{t \rightarrow \infty} F_i \left( t \mid a_i, v_i, t_{0i} \right) & = -->
@@ -823,12 +1507,6 @@ Note that the race model theory for slow errors is different from how slow error
 <!--     pdf <- a * exp(-(a - v * t_minus_t0)^2 / (2 * t_minus_t0)) / sqrt(2 * pi * t_minus_t0^3) -->
 <!--     pdf[t_minus_t0 <= 0] <- 0 -->
 <!--     return(pdf) -->
-<!-- } -->
-
-<!-- accum_cdf <- function(t, a, v, t0) { -->
-<!--     t_minus_t0 <- pmax(0, t - t0) -->
-<!--     cdf <- pnorm((v * t_minus_t0 - a) / sqrt(t_minus_t0)) + exp(2 * a * v) * pnorm(-(v * t_minus_t0 + a) / sqrt(t_minus_t0)) -->
-<!--     return(cdf) -->
 <!-- } -->
 
 <!-- race_nll <- function(par, rt, response, v_index, a_index, n_v = max(v_index), n_a = max(a_index)) { -->
@@ -884,6 +1562,61 @@ Note that the race model theory for slow errors is different from how slow error
 
 ## Exercises
 
-1. Consider potential psychological interpretations of feedforward inhibition and lateral inhibition.  In particular, relate these two forms of competition to the constructs of *attention* and *capacity*.
-2. Compare and contrast the explanations for slow errors provided by the diffusion model and by lateral competition.
-<!-- 3. The accumulator models we explored in the chapter are all *stochastic* accumulators, since value of the evidence being accumulated fluctuates randomly around a mean.  Implement the LBA. -->
+1. Consider potential psychological interpretations of feedforward inhibition and lateral inhibition.  In particular, see if you can relate these two forms of competition to the constructs of *attention* and *capacity*.
+2. As noted above, diffusion models explain slow errors in terms of trial-by-trial variability in drift rates, while accumulator models explain slow errors in terms of lateral competition between options.  Compare and contrast theses.  Are there circumstances in which one explanation may be more plausible than the other?  Would it be possible to ascribe trial-by-trial variability *to* lateral competition?
+3. As noted in the chapter, it is possible to calculate the negative log-likelihood for the race model including feedforward competition.  Implement this mechanism in the `race_nll` function.  To get you started, the chunk of code below contains comments that suggest how this might be done.
+```{r eval = FALSE}
+#| code-fold: show
+
+race_nll <- function(par, response, rt, items, n_items = max(items, na.rm = TRUE)) {
+    n_trials <- nrow(items)
+    n_locations <- ncol(items)
+    
+    if (is.na(par["v"])) {
+        v <- par[paste0("v[", 1:n_items, "]")]
+    } else {
+        v <- rep(par["v"], n_items)
+    }
+    
+    if (is.na(par["a"])) {
+        a <- par[paste0("a[", 1:n_locations, "]")]
+    } else {
+        a <- rep(par["a"], n_locations)
+    }
+    
+    if (is.na(par["t0"])) {
+        t0 <- par[paste0("t0[", 1:n_locations, "]")]
+    } else {
+        t0 <- rep(par["t0"], n_locations)
+    }
+    
+    # Similar to the above, you can check and see whether a feedforward competition parameter is or is not included; if not, you'll want to set the value of feedforward to zero.
+    if (is.na(par["feedforward"])) {
+        feedforward <- ...
+    } else {
+        feedforward <- ...
+    }
+    
+    nll <- rep(0, n_trials)
+    
+    for (i in 1:n_trials) {
+        # Since drift rates depend on the items presented on each trial, we'll need to calculate them
+        trial_v <- v[items[i, ]]
+        
+        for (j in 1:length(trial_v)) {
+            trial_v[j] <- ...
+        }
+        
+        # Note that the drift rates now refer to "trial_v"
+        nll[i] <- -log(
+            accum_pdf(t = rt[i], a = a[response[i]], v = trial_v[response[i]], t0 = t0[response[i]]) *
+                prod(1 - accum_cdf(t = rt[i], a = a[-response[i]], v = trial_v[-response[i]], t0 = t0[-response[i]]), na.rm = TRUE)
+        )
+    }
+    
+    return(sum(nll))
+}
+```
+4. The Leaky Competing Accumulator (LCA) model was proposed by @UsherMcClelland2001.  In addition to lateral competition, the LCA (as the name implies) assumes that evidence "leaks" out of accumulators at a constant rate.  Take a look at their paper (specifically equation 4 on page 559) and modify our race model simulation code to include a leakage parameter.  Describe how you did this (and share your code too!).
+5. An extension to the racing diffusion model explored in this chapter was proposed by @TillmanEtAl2020.  Their model allows for trial-by-trial variability in the thresholds of the accumulators.  Their Equation 5 and Appendix A provide formulae for the PDF and CDF of the resulting accumulators.  Translate these formulae into R code that implements their extended racing diffusion model.
+6. The accumulator models we explored in the chapter are all *stochastic* accumulators, since value of the evidence being accumulated fluctuates randomly around a mean.  @BrownHeathcote2008 proposed a Linear Ballistic Accumulator (LBA) model which only has *between-trial* variability but is otherwise deterministic.  Despite this unrealistic assumption, the model fits data well and often leads to similar conclusions as drawn from stochastic models of evidence accumulation [@DonkinEtAl2011].  Referring to the equations provided by @BrownHeathcote2008 for the PDF and CDF of their Linear Ballistic Accumulators, implement their model.
