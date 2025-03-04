@@ -7,8 +7,6 @@ library(patchwork)
 set.seed(12222)
 ```
 
-**Notice: This chapter will be updated!**
-
 So far, we have focused on models that are designed to explain how people choose between two opposing options.  We built a random walk model and a diffusion model and then saw how we could fit a diffusion model to choice/RT data.  For the latter purpose, we relied on the `WienR` package to calculate the (log-)likelihood of making a particular choice at a particular time.  This is because the math for calculating those likelihoods is not trivial, requiring some bespoke numerical approximations that are beyond the scope of this course.  Nonetheless, our cognitive models so far have touched on several major themes that are shared by all cognitive models:
 
 * **Representations**: in making a decision, the model assumes that a decision-maker maintains a *representation* of the degree to which the evidence they have accumulated so far favors one option or the other.
@@ -1479,86 +1477,63 @@ One final thing to note is that the race models we have explored so far assume t
 
 For example, if the visual search task required participants not to pick which item was the target, but to decide whether or not a target was present *at all*, this would imply different decision rules for different responses.  Responding that a target was present at all could be done using a self-terminating rule---if any accumulator reaches threshold, that could cause a participant to decide that there was a target in the display.  On the other hand, saying that there were *no* targets in the display would require exhaustively processing each item to verify that it was not a target.  This latter task constraint could imply that each accumulator has both upper and lower bounds, where the lower bound corresponds to a decision that the item is *not* a target.  Alternatively, each item might be associated with *two* accumulators, one that accumulates evidence that supports the item being a target and another that accumulates evidence that the item is not a target.  Finally, one could retain the same racing diffusion model we've been developing but include an additional *no target* accumulator that races against the accumulators for each item---if the "no target" accumulator wins, the participant decides that none of the items were targets.
 
-The point in laying out these possibilities is that, once we consider models with many possibly overlapping and interacting processes, we must also think carefully about how the results of those processes translate into observed behavior.  There are many different ways of processing and combining information from multiple sources, each of which could lead to a different model of the task.  The value of modeling is that this cornucopia of possibilities need not be overwhelming---we can build models that instantiate these different possibilities and see which best account for our data.  There are even methods, known as Systems Factorial Technology [@TownsendNozawa1995; @HouptEtAl2014; @HardingEtAl2016], that are specificially designed to obtain data to distinguish between different models in these situations.
+The point in laying out these possibilities is that, once we consider models with many possibly overlapping and interacting processes, we must also think carefully about how the results of those processes translate into observed behavior.  There are many different ways of processing and combining information from multiple sources, each of which could lead to a different model of the task.  The value of modeling is that this cornucopia of possibilities need not be overwhelming---we can build models that instantiate these different possibilities and see which best account for our data.  There are even methods, known as Systems Factorial Technology [@TownsendNozawa1995; @HouptEtAl2014; @HardingEtAl2016], that are specifically designed to obtain data to distinguish between different models in these situations.
 
-<!-- \begin{align} -->
-<!-- \lim_{t \rightarrow \infty} F_i \left( t \mid a_i, v_i, t_{0i} \right) & = -->
-<!--     \begin{cases} -->
-<!--         \Phi \left( \infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( -\infty \right) & \text{if } v_i > 0 \\ -->
-<!--         \Phi \left( 0 \right) + \exp \left( 0 \right) \Phi \left( 0 \right) & \text{if } v_i = 0 \\ -->
-<!--         \Phi \left( -\infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( \infty \right) & \text{if } v_i < 0 -->
-<!--     \end{cases} \\ -->
-<!--     & = \begin{cases} -->
-<!--         1 + \exp \left( 2 a_i v_i \right) \times 0 & \text{if } v_i > 0 \\ -->
-<!--         \frac{1}{2} + 1 \times \frac{1}{2} & \text{if } v_i = 0 \\ -->
-<!--         0 + \exp \left( 2 a_i v_i \right) \times 1 & \text{if } v_i < 0 -->
-<!--     \end{cases} \\ -->
-<!--     & = \begin{cases} -->
-<!--         1 & \text{if } v_i \geq 0 \\ -->
-<!--         \exp \left( 2 a_i v_i \right) & \text{if } v_i < 0 -->
-<!--     \end{cases} -->
-<!-- \end{align} -->
+## Excursus: Accumulators with negative drift rates
 
-<!-- ```{r} -->
-<!-- #| code-fold: show -->
+You may have noticed above that, when we fit our race model, we allowed the drift rates for accumulators to be negative.  When we were working with diffusion models, this was no big deal---a negative drift rate just means that samples of evidence are more likely to favor the choice associated with the lower bound than the upper bound.  The accumulators in our race model, though, do not have a lower bound and so an accumulator with a negative drift rate could actually keep going forever without reaching threshold.
 
-<!-- accum_pdf <- function(t, a, v, t0) { -->
-<!--     t_minus_t0 <- pmax(0, t - t0) -->
-<!--     pdf <- a * exp(-(a - v * t_minus_t0)^2 / (2 * t_minus_t0)) / sqrt(2 * pi * t_minus_t0^3) -->
-<!--     pdf[t_minus_t0 <= 0] <- 0 -->
-<!--     return(pdf) -->
-<!-- } -->
+Mathematically, we can actually compute how often that would happen.  This involves taking a look at the formula for the CDF.  Since the CDF is the probability that the accumulator has reached threshold by time $t$, we can find the probability that the accumulator *ever* reaches threshold by taking the limit of the CDF as $t$ approaches infinity.  As illustrated below, when the drift rate $v_i \geq 0$, this limit equals 1, meaning with nonnegative drift rates the accumulator will eventually reach threshold (though it may take a long time).  When the drift rate $v_i < 0$, though, the limit is $\exp \left( 2 a_i v_i \right)$.
 
-<!-- race_nll <- function(par, rt, response, v_index, a_index, n_v = max(v_index), n_a = max(a_index)) { -->
-<!--     v <- par[paste0("v[", 1:n_v, "]")] -->
-<!--     a <- par[paste0("a[", 1:n_a, "]")] -->
-<!--     t0 <- par["t0"] -->
-<!--     ff <- par["ff"] -->
+\begin{align}
+\lim_{t \rightarrow \infty} F_i \left( t \mid a_i, v_i, t_{0i} \right) & =
+    \begin{cases}
+        \Phi \left( \infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( -\infty \right) & \text{if } v_i > 0 \\
+        \Phi \left( 0 \right) + \exp \left( 0 \right) \Phi \left( 0 \right) & \text{if } v_i = 0 \\
+        \Phi \left( -\infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( \infty \right) & \text{if } v_i < 0
+    \end{cases} \\
+    & = \begin{cases}
+        1 + \exp \left( 2 a_i v_i \right) \times 0 & \text{if } v_i > 0 \\
+        \frac{1}{2} + 1 \times \frac{1}{2} & \text{if } v_i = 0 \\
+        0 + \exp \left( 2 a_i v_i \right) \times 1 & \text{if } v_i < 0
+    \end{cases} \\
+    & = \begin{cases}
+        1 & \text{if } v_i \geq 0 \\
+        \exp \left( 2 a_i v_i \right) & \text{if } v_i < 0
+    \end{cases}
+\end{align}
 
-<!--     nll <- rep(0, length(rt)) -->
+This behavior is illustrated in the graphs below.  In particular, note the asymptotic level of the CDF functions in the right set of plots as the drift rate grows more negative.
 
-<!--     for (i in 1:length(rt)) { -->
-<!--         v_comp <- rep(0, ncol(v_index)) -->
+```{r}
+toPlot <- expand_grid(t = seq(0, 3, length.out = 101), a = c(1, 2), v = seq(-3, 3, length.out = 7)) %>%
+    mutate(threshold_factor = factor(a, levels = sort(unique(a)), labels = paste("Threshold =", sort(unique(a))))) %>%
+    mutate(d = accum_pdf(t = t, a = a, v = v, t0 = 0)) %>%
+    mutate(p = accum_cdf(t = t, a = a, v = v, t0 = 0))
 
-<!--         for (j in 1:n_accum) { -->
-<!--             v_comp[j] <- v[j] - ff * sum(v[-j]) -->
-<!--         } -->
+pdf_plot <- toPlot %>%
+    ggplot(aes(x = t, y = d, color = v, group = factor(v))) +
+    geom_line() +
+    scale_color_gradient2(mid = "#bbbbbb") +
+    facet_wrap("threshold_factor", ncol = 1) +
+    labs(x = "Time (s)", y = "Accumulator PDF", color = "Drift rate")
 
-<!--         nll[i] <- -log( -->
-<!--             accum_pdf(t = rt[i], a = a[a_index[i, response]], v = v_comp[v_index[i, response]], t0 = t0) * -->
-<!--                 prod(1 - accum_cdf(t = rt[i], a = a[a_index[i, -response]], v = v_comp[v_index[i, -response]], t0 = t0)) -->
-<!--         ) -->
-<!--     } -->
+cdf_plot <- toPlot %>%
+    ggplot(aes(x = t, y = p, color = v, group = factor(v))) +
+    geom_line() +
+    scale_color_gradient2(mid = "#bbbbbb") +
+    expand_limits(y = c(0, 1)) +
+    facet_wrap("threshold_factor", ncol = 1) +
+    labs(x = "Time (s)", y = "Accumulator CDF", color = "Drift rate")
 
-<!--     return(sum(nll)) -->
-<!-- } -->
-<!-- ``` -->
+print(
+    pdf_plot + cdf_plot + plot_layout(guides = "collect", nrow = 1)
+)
+```
 
-<!-- ```{r} -->
-<!-- toPlot <- expand_grid(t = seq(0, 3, length.out = 101), a = c(1, 2), v = seq(-3, 3, length.out = 7)) %>% -->
-<!--     mutate(threshold_factor = factor(a, levels = sort(unique(a)), labels = paste("Threshold =", sort(unique(a))))) %>% -->
-<!--     mutate(d = accum_pdf(t = t, a = a, v = v, t0 = 0)) %>% -->
-<!--     mutate(p = accum_cdf(t = t, a = a, v = v, t0 = 0)) -->
+If there were only one accumulator involved, we would generally not want to allow for negative drift rates, since this would predict situations in which someone literally never responded.  (To my knowledge, no one has reported such a result, but maybe we just haven't waited long enough.)  In models with multiple accumulators, though, all that matters is that *at least one* accumulator has a nonnegative drift rate---that way, there will always be *a* winner that will initiate a response.  Indeed, in models with feedforward competition, it may be reasonable to allow that competition to result in negative drift rates, since this would effectively suppress responses associated with those accumulators.
 
-<!-- pdf_plot <- toPlot %>% -->
-<!--     ggplot(aes(x = t, y = d, color = v, group = factor(v))) + -->
-<!--     geom_line() + -->
-<!--     scale_color_gradient2(mid = "#bbbbbb") + -->
-<!--     facet_wrap("threshold_factor", ncol = 1) + -->
-<!--     labs(x = "Time (s)", y = "Accumulator PDF", color = "Drift rate") -->
-
-<!-- cdf_plot <- toPlot %>% -->
-<!--     ggplot(aes(x = t, y = p, color = v, group = factor(v))) + -->
-<!--     geom_line() + -->
-<!--     scale_color_gradient2(mid = "#bbbbbb") + -->
-<!--     expand_limits(y = c(0, 1)) + -->
-<!--     facet_wrap("threshold_factor", ncol = 1) + -->
-<!--     labs(x = "Time (s)", y = "Accumulator CDF", color = "Drift rate") -->
-
-<!-- print( -->
-<!--     pdf_plot + cdf_plot + plot_layout(guides = "collect", nrow = 1) -->
-<!-- ) -->
-<!-- ``` -->
+The larger point is that negative drift rates need not be excluded outright.  There may be theoretical reasons to allow for negative drift rates.  Moreover, in models that allow for negative drift rates, the optimization algorithm will tend to avoid combinations of parameter values that result in too many negative drift rates since these would be associated with a low likelihood of making a response.
 
 ## Exercises
 

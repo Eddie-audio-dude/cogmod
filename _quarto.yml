@@ -31,4 +31,7 @@ format:
     theme: pulse
     code-fold: true
 
+execute:
+  cache: true
+
 editor: source

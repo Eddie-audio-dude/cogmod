@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.39">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,10 +91,10 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-03787a5611acd63027d79b3f02190e6e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -306,7 +306,8 @@ window.Quarto = {
   <li><a href="#model-comparison" id="toc-model-comparison" class="nav-link" data-scroll-target="#model-comparison"><span class="header-section-number">8.3.3</span> Model comparison</a></li>
   </ul></li>
   <li><a href="#decision-rules" id="toc-decision-rules" class="nav-link" data-scroll-target="#decision-rules"><span class="header-section-number">8.4</span> Decision rules</a></li>
-  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">8.5</span> Exercises</a></li>
+  <li><a href="#excursus-accumulators-with-negative-drift-rates" id="toc-excursus-accumulators-with-negative-drift-rates" class="nav-link" data-scroll-target="#excursus-accumulators-with-negative-drift-rates"><span class="header-section-number">8.5</span> Excursus: Accumulators with negative drift rates</a></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">8.6</span> Exercises</a></li>
   </ul>
 </nav>
     </div>
@@ -332,7 +333,6 @@ window.Quarto = {
 </header>
 
 
-<p><strong>Notice: This chapter will be updated!</strong></p>
 <p>So far, we have focused on models that are designed to explain how people choose between two opposing options. We built a random walk model and a diffusion model and then saw how we could fit a diffusion model to choice/RT data. For the latter purpose, we relied on the <code>WienR</code> package to calculate the (log-)likelihood of making a particular choice at a particular time. This is because the math for calculating those likelihoods is not trivial, requiring some bespoke numerical approximations that are beyond the scope of this course. Nonetheless, our cognitive models so far have touched on several major themes that are shared by all cognitive models:</p>
 <ul>
 <li><strong>Representations</strong>: in making a decision, the model assumes that a decision-maker maintains a <em>representation</em> of the degree to which the evidence they have accumulated so far favors one option or the other.</li>
@@ -2232,7 +2232,7 @@ x1 x2 x1 x3 x8 x1 x4 x1 x4 x5 x6 x2 x2 x1
 <div class="cell-output cell-output-stdout">
 <pre><code>$par
       v[1]       v[2]       v[3]          a         t0 
-2.02086803 0.95210575 0.02240357 1.98372418 0.20802591 
+2.02086803 0.95210575 0.02240357 1.98372419 0.20802590 
 
 $objective
 [1] 350.1683
@@ -2367,76 +2367,70 @@ $message
 <h2 data-number="8.4" class="anchored" data-anchor-id="decision-rules"><span class="header-section-number">8.4</span> Decision rules</h2>
 <p>One final thing to note is that the race models we have explored so far assume that responses are based on whichever accumulator wins the race. This represents a <em>decision rule</em> that is <em>self-terminating</em> or <em>minimum time</em>. Alternatively, one could imagine tasks in which decisions could only be made once <em>all</em> accumulators had finished, amounting to an <em>exhaustive</em> or <em>maximum time</em> decision rule.</p>
 <p>For example, if the visual search task required participants not to pick which item was the target, but to decide whether or not a target was present <em>at all</em>, this would imply different decision rules for different responses. Responding that a target was present at all could be done using a self-terminating rule—if any accumulator reaches threshold, that could cause a participant to decide that there was a target in the display. On the other hand, saying that there were <em>no</em> targets in the display would require exhaustively processing each item to verify that it was not a target. This latter task constraint could imply that each accumulator has both upper and lower bounds, where the lower bound corresponds to a decision that the item is <em>not</em> a target. Alternatively, each item might be associated with <em>two</em> accumulators, one that accumulates evidence that supports the item being a target and another that accumulates evidence that the item is not a target. Finally, one could retain the same racing diffusion model we’ve been developing but include an additional <em>no target</em> accumulator that races against the accumulators for each item—if the “no target” accumulator wins, the participant decides that none of the items were targets.</p>
-<p>The point in laying out these possibilities is that, once we consider models with many possibly overlapping and interacting processes, we must also think carefully about how the results of those processes translate into observed behavior. There are many different ways of processing and combining information from multiple sources, each of which could lead to a different model of the task. The value of modeling is that this cornucopia of possibilities need not be overwhelming—we can build models that instantiate these different possibilities and see which best account for our data. There are even methods, known as Systems Factorial Technology <span class="citation" data-cites="TownsendNozawa1995 HouptEtAl2014 HardingEtAl2016">(<a href="references.html#ref-HardingEtAl2016" role="doc-biblioref">Harding et al., 2016</a>; <a href="references.html#ref-HouptEtAl2014" role="doc-biblioref">Houpt et al., 2014</a>; <a href="references.html#ref-TownsendNozawa1995" role="doc-biblioref">Townsend &amp; Nozawa, 1995</a>)</span>, that are specificially designed to obtain data to distinguish between different models in these situations.</p>
-<!-- \begin{align} -->
-<!-- \lim_{t \rightarrow \infty} F_i \left( t \mid a_i, v_i, t_{0i} \right) & = -->
-<!--     \begin{cases} -->
-<!--         \Phi \left( \infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( -\infty \right) & \text{if } v_i > 0 \\ -->
-<!--         \Phi \left( 0 \right) + \exp \left( 0 \right) \Phi \left( 0 \right) & \text{if } v_i = 0 \\ -->
-<!--         \Phi \left( -\infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( \infty \right) & \text{if } v_i < 0 -->
-<!--     \end{cases} \\ -->
-<!--     & = \begin{cases} -->
-<!--         1 + \exp \left( 2 a_i v_i \right) \times 0 & \text{if } v_i > 0 \\ -->
-<!--         \frac{1}{2} + 1 \times \frac{1}{2} & \text{if } v_i = 0 \\ -->
-<!--         0 + \exp \left( 2 a_i v_i \right) \times 1 & \text{if } v_i < 0 -->
-<!--     \end{cases} \\ -->
-<!--     & = \begin{cases} -->
-<!--         1 & \text{if } v_i \geq 0 \\ -->
-<!--         \exp \left( 2 a_i v_i \right) & \text{if } v_i < 0 -->
-<!--     \end{cases} -->
-<!-- \end{align} -->
-<!-- ```{r} -->
-<!-- #| code-fold: show -->
-<!-- accum_pdf <- function(t, a, v, t0) { -->
-<!--     t_minus_t0 <- pmax(0, t - t0) -->
-<!--     pdf <- a * exp(-(a - v * t_minus_t0)^2 / (2 * t_minus_t0)) / sqrt(2 * pi * t_minus_t0^3) -->
-<!--     pdf[t_minus_t0 <= 0] <- 0 -->
-<!--     return(pdf) -->
-<!-- } -->
-<!-- race_nll <- function(par, rt, response, v_index, a_index, n_v = max(v_index), n_a = max(a_index)) { -->
-<!--     v <- par[paste0("v[", 1:n_v, "]")] -->
-<!--     a <- par[paste0("a[", 1:n_a, "]")] -->
-<!--     t0 <- par["t0"] -->
-<!--     ff <- par["ff"] -->
-<!--     nll <- rep(0, length(rt)) -->
-<!--     for (i in 1:length(rt)) { -->
-<!--         v_comp <- rep(0, ncol(v_index)) -->
-<!--         for (j in 1:n_accum) { -->
-<!--             v_comp[j] <- v[j] - ff * sum(v[-j]) -->
-<!--         } -->
-<!--         nll[i] <- -log( -->
-<!--             accum_pdf(t = rt[i], a = a[a_index[i, response]], v = v_comp[v_index[i, response]], t0 = t0) * -->
-<!--                 prod(1 - accum_cdf(t = rt[i], a = a[a_index[i, -response]], v = v_comp[v_index[i, -response]], t0 = t0)) -->
-<!--         ) -->
-<!--     } -->
-<!--     return(sum(nll)) -->
-<!-- } -->
-<!-- ``` -->
-<!-- ```{r} -->
-<!-- toPlot <- expand_grid(t = seq(0, 3, length.out = 101), a = c(1, 2), v = seq(-3, 3, length.out = 7)) %>% -->
-<!--     mutate(threshold_factor = factor(a, levels = sort(unique(a)), labels = paste("Threshold =", sort(unique(a))))) %>% -->
-<!--     mutate(d = accum_pdf(t = t, a = a, v = v, t0 = 0)) %>% -->
-<!--     mutate(p = accum_cdf(t = t, a = a, v = v, t0 = 0)) -->
-<!-- pdf_plot <- toPlot %>% -->
-<!--     ggplot(aes(x = t, y = d, color = v, group = factor(v))) + -->
-<!--     geom_line() + -->
-<!--     scale_color_gradient2(mid = "#bbbbbb") + -->
-<!--     facet_wrap("threshold_factor", ncol = 1) + -->
-<!--     labs(x = "Time (s)", y = "Accumulator PDF", color = "Drift rate") -->
-<!-- cdf_plot <- toPlot %>% -->
-<!--     ggplot(aes(x = t, y = p, color = v, group = factor(v))) + -->
-<!--     geom_line() + -->
-<!--     scale_color_gradient2(mid = "#bbbbbb") + -->
-<!--     expand_limits(y = c(0, 1)) + -->
-<!--     facet_wrap("threshold_factor", ncol = 1) + -->
-<!--     labs(x = "Time (s)", y = "Accumulator CDF", color = "Drift rate") -->
-<!-- print( -->
-<!--     pdf_plot + cdf_plot + plot_layout(guides = "collect", nrow = 1) -->
-<!-- ) -->
-<!-- ``` -->
+<p>The point in laying out these possibilities is that, once we consider models with many possibly overlapping and interacting processes, we must also think carefully about how the results of those processes translate into observed behavior. There are many different ways of processing and combining information from multiple sources, each of which could lead to a different model of the task. The value of modeling is that this cornucopia of possibilities need not be overwhelming—we can build models that instantiate these different possibilities and see which best account for our data. There are even methods, known as Systems Factorial Technology <span class="citation" data-cites="TownsendNozawa1995 HouptEtAl2014 HardingEtAl2016">(<a href="references.html#ref-HardingEtAl2016" role="doc-biblioref">Harding et al., 2016</a>; <a href="references.html#ref-HouptEtAl2014" role="doc-biblioref">Houpt et al., 2014</a>; <a href="references.html#ref-TownsendNozawa1995" role="doc-biblioref">Townsend &amp; Nozawa, 1995</a>)</span>, that are specifically designed to obtain data to distinguish between different models in these situations.</p>
 </section>
-<section id="exercises" class="level2" data-number="8.5">
-<h2 data-number="8.5" class="anchored" data-anchor-id="exercises"><span class="header-section-number">8.5</span> Exercises</h2>
+<section id="excursus-accumulators-with-negative-drift-rates" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="excursus-accumulators-with-negative-drift-rates"><span class="header-section-number">8.5</span> Excursus: Accumulators with negative drift rates</h2>
+<p>You may have noticed above that, when we fit our race model, we allowed the drift rates for accumulators to be negative. When we were working with diffusion models, this was no big deal—a negative drift rate just means that samples of evidence are more likely to favor the choice associated with the lower bound than the upper bound. The accumulators in our race model, though, do not have a lower bound and so an accumulator with a negative drift rate could actually keep going forever without reaching threshold.</p>
+<p>Mathematically, we can actually compute how often that would happen. This involves taking a look at the formula for the CDF. Since the CDF is the probability that the accumulator has reached threshold by time <span class="math inline">\(t\)</span>, we can find the probability that the accumulator <em>ever</em> reaches threshold by taking the limit of the CDF as <span class="math inline">\(t\)</span> approaches infinity. As illustrated below, when the drift rate <span class="math inline">\(v_i \geq 0\)</span>, this limit equals 1, meaning with nonnegative drift rates the accumulator will eventually reach threshold (though it may take a long time). When the drift rate <span class="math inline">\(v_i &lt; 0\)</span>, though, the limit is <span class="math inline">\(\exp \left( 2 a_i v_i \right)\)</span>.</p>
+<p><span class="math display">\[\begin{align}
+\lim_{t \rightarrow \infty} F_i \left( t \mid a_i, v_i, t_{0i} \right) &amp; =
+    \begin{cases}
+        \Phi \left( \infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( -\infty \right) &amp; \text{if } v_i &gt; 0 \\
+        \Phi \left( 0 \right) + \exp \left( 0 \right) \Phi \left( 0 \right) &amp; \text{if } v_i = 0 \\
+        \Phi \left( -\infty \right) + \exp \left( 2 a_i v_i \right) \Phi \left( \infty \right) &amp; \text{if } v_i &lt; 0
+    \end{cases} \\
+    &amp; = \begin{cases}
+        1 + \exp \left( 2 a_i v_i \right) \times 0 &amp; \text{if } v_i &gt; 0 \\
+        \frac{1}{2} + 1 \times \frac{1}{2} &amp; \text{if } v_i = 0 \\
+        0 + \exp \left( 2 a_i v_i \right) \times 1 &amp; \text{if } v_i &lt; 0
+    \end{cases} \\
+    &amp; = \begin{cases}
+        1 &amp; \text{if } v_i \geq 0 \\
+        \exp \left( 2 a_i v_i \right) &amp; \text{if } v_i &lt; 0
+    \end{cases}
+\end{align}\]</span></p>
+<p>This behavior is illustrated in the graphs below. In particular, note the asymptotic level of the CDF functions in the right set of plots as the drift rate grows more negative.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>toPlot <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">t =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">101</span>), <span class="at">a =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>), <span class="at">v =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">7</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">threshold_factor =</span> <span class="fu">factor</span>(a, <span class="at">levels =</span> <span class="fu">sort</span>(<span class="fu">unique</span>(a)), <span class="at">labels =</span> <span class="fu">paste</span>(<span class="st">"Threshold ="</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(a))))) <span class="sc">%&gt;%</span></span>
+<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">d =</span> <span class="fu">accum_pdf</span>(<span class="at">t =</span> t, <span class="at">a =</span> a, <span class="at">v =</span> v, <span class="at">t0 =</span> <span class="dv">0</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">p =</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> t, <span class="at">a =</span> a, <span class="at">v =</span> v, <span class="at">t0 =</span> <span class="dv">0</span>))</span>
+<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a>pdf_plot <span class="ot">&lt;-</span> toPlot <span class="sc">%&gt;%</span></span>
+<span id="cb95-7"><a href="#cb95-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> d, <span class="at">color =</span> v, <span class="at">group =</span> <span class="fu">factor</span>(v))) <span class="sc">+</span></span>
+<span id="cb95-8"><a href="#cb95-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb95-9"><a href="#cb95-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_gradient2</span>(<span class="at">mid =</span> <span class="st">"#bbbbbb"</span>) <span class="sc">+</span></span>
+<span id="cb95-10"><a href="#cb95-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"threshold_factor"</span>, <span class="at">ncol =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb95-11"><a href="#cb95-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time (s)"</span>, <span class="at">y =</span> <span class="st">"Accumulator PDF"</span>, <span class="at">color =</span> <span class="st">"Drift rate"</span>)</span>
+<span id="cb95-12"><a href="#cb95-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-13"><a href="#cb95-13" aria-hidden="true" tabindex="-1"></a>cdf_plot <span class="ot">&lt;-</span> toPlot <span class="sc">%&gt;%</span></span>
+<span id="cb95-14"><a href="#cb95-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p, <span class="at">color =</span> v, <span class="at">group =</span> <span class="fu">factor</span>(v))) <span class="sc">+</span></span>
+<span id="cb95-15"><a href="#cb95-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb95-16"><a href="#cb95-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_gradient2</span>(<span class="at">mid =</span> <span class="st">"#bbbbbb"</span>) <span class="sc">+</span></span>
+<span id="cb95-17"><a href="#cb95-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb95-18"><a href="#cb95-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"threshold_factor"</span>, <span class="at">ncol =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb95-19"><a href="#cb95-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time (s)"</span>, <span class="at">y =</span> <span class="st">"Accumulator CDF"</span>, <span class="at">color =</span> <span class="st">"Drift rate"</span>)</span>
+<span id="cb95-20"><a href="#cb95-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb95-21"><a href="#cb95-21" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(</span>
+<span id="cb95-22"><a href="#cb95-22" aria-hidden="true" tabindex="-1"></a>    pdf_plot <span class="sc">+</span> cdf_plot <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">guides =</span> <span class="st">"collect"</span>, <span class="at">nrow =</span> <span class="dv">1</span>)</span>
+<span id="cb95-23"><a href="#cb95-23" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="accumulator_models_files/figure-html/unnamed-chunk-54-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If there were only one accumulator involved, we would generally not want to allow for negative drift rates, since this would predict situations in which someone literally never responded. (To my knowledge, no one has reported such a result, but maybe we just haven’t waited long enough.) In models with multiple accumulators, though, all that matters is that <em>at least one</em> accumulator has a nonnegative drift rate—that way, there will always be <em>a</em> winner that will initiate a response. Indeed, in models with feedforward competition, it may be reasonable to allow that competition to result in negative drift rates, since this would effectively suppress responses associated with those accumulators.</p>
+<p>The larger point is that negative drift rates need not be excluded outright. There may be theoretical reasons to allow for negative drift rates. Moreover, in models that allow for negative drift rates, the optimization algorithm will tend to avoid combinations of parameter values that result in too many negative drift rates since these would be associated with a low likelihood of making a response.</p>
+</section>
+<section id="exercises" class="level2" data-number="8.6">
+<h2 data-number="8.6" class="anchored" data-anchor-id="exercises"><span class="header-section-number">8.6</span> Exercises</h2>
 <ol type="1">
 <li>Consider potential psychological interpretations of feedforward inhibition and lateral inhibition. In particular, see if you can relate these two forms of competition to the constructs of <em>attention</em> and <em>capacity</em>.</li>
 <li>As noted above, diffusion models explain slow errors in terms of trial-by-trial variability in drift rates, while accumulator models explain slow errors in terms of lateral competition between options. Compare and contrast theses. Are there circumstances in which one explanation may be more plausible than the other? Would it be possible to ascribe trial-by-trial variability <em>to</em> lateral competition?</li>
@@ -2445,54 +2439,54 @@ $message
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>race_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, response, rt, items, <span class="at">n_items =</span> <span class="fu">max</span>(items, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) {</span>
-<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>    n_trials <span class="ot">&lt;-</span> <span class="fu">nrow</span>(items)</span>
-<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a>    n_locations <span class="ot">&lt;-</span> <span class="fu">ncol</span>(items)</span>
-<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"v"</span>])) {</span>
-<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a>        v <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"v["</span>, <span class="dv">1</span><span class="sc">:</span>n_items, <span class="st">"]"</span>)]</span>
-<span id="cb95-7"><a href="#cb95-7" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb95-8"><a href="#cb95-8" aria-hidden="true" tabindex="-1"></a>        v <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"v"</span>], n_items)</span>
-<span id="cb95-9"><a href="#cb95-9" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb95-10"><a href="#cb95-10" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb95-11"><a href="#cb95-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"a"</span>])) {</span>
-<span id="cb95-12"><a href="#cb95-12" aria-hidden="true" tabindex="-1"></a>        a <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"a["</span>, <span class="dv">1</span><span class="sc">:</span>n_locations, <span class="st">"]"</span>)]</span>
-<span id="cb95-13"><a href="#cb95-13" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb95-14"><a href="#cb95-14" aria-hidden="true" tabindex="-1"></a>        a <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"a"</span>], n_locations)</span>
-<span id="cb95-15"><a href="#cb95-15" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb95-16"><a href="#cb95-16" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb95-17"><a href="#cb95-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"t0"</span>])) {</span>
-<span id="cb95-18"><a href="#cb95-18" aria-hidden="true" tabindex="-1"></a>        t0 <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"t0["</span>, <span class="dv">1</span><span class="sc">:</span>n_locations, <span class="st">"]"</span>)]</span>
-<span id="cb95-19"><a href="#cb95-19" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb95-20"><a href="#cb95-20" aria-hidden="true" tabindex="-1"></a>        t0 <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"t0"</span>], n_locations)</span>
-<span id="cb95-21"><a href="#cb95-21" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb95-22"><a href="#cb95-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb95-23"><a href="#cb95-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Similar to the above, you can check and see whether a feedforward competition parameter is or is not included; if not, you'll want to set the value of feedforward to zero.</span></span>
-<span id="cb95-24"><a href="#cb95-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"feedforward"</span>])) {</span>
-<span id="cb95-25"><a href="#cb95-25" aria-hidden="true" tabindex="-1"></a>        feedforward <span class="ot">&lt;-</span> ...</span>
-<span id="cb95-26"><a href="#cb95-26" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb95-27"><a href="#cb95-27" aria-hidden="true" tabindex="-1"></a>        feedforward <span class="ot">&lt;-</span> ...</span>
-<span id="cb95-28"><a href="#cb95-28" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb95-29"><a href="#cb95-29" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb95-30"><a href="#cb95-30" aria-hidden="true" tabindex="-1"></a>    nll <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_trials)</span>
-<span id="cb95-31"><a href="#cb95-31" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb95-32"><a href="#cb95-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_trials) {</span>
-<span id="cb95-33"><a href="#cb95-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Since drift rates depend on the items presented on each trial, we'll need to calculate them</span></span>
-<span id="cb95-34"><a href="#cb95-34" aria-hidden="true" tabindex="-1"></a>        trial_v <span class="ot">&lt;-</span> v[items[i, ]]</span>
-<span id="cb95-35"><a href="#cb95-35" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb95-36"><a href="#cb95-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(trial_v)) {</span>
-<span id="cb95-37"><a href="#cb95-37" aria-hidden="true" tabindex="-1"></a>            trial_v[j] <span class="ot">&lt;-</span> ...</span>
-<span id="cb95-38"><a href="#cb95-38" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb95-39"><a href="#cb95-39" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb95-40"><a href="#cb95-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Note that the drift rates now refer to "trial_v"</span></span>
-<span id="cb95-41"><a href="#cb95-41" aria-hidden="true" tabindex="-1"></a>        nll[i] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log</span>(</span>
-<span id="cb95-42"><a href="#cb95-42" aria-hidden="true" tabindex="-1"></a>            <span class="fu">accum_pdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[response[i]], <span class="at">v =</span> trial_v[response[i]], <span class="at">t0 =</span> t0[response[i]]) <span class="sc">*</span></span>
-<span id="cb95-43"><a href="#cb95-43" aria-hidden="true" tabindex="-1"></a>                <span class="fu">prod</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[<span class="sc">-</span>response[i]], <span class="at">v =</span> trial_v[<span class="sc">-</span>response[i]], <span class="at">t0 =</span> t0[<span class="sc">-</span>response[i]]), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb95-44"><a href="#cb95-44" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb95-45"><a href="#cb95-45" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb95-46"><a href="#cb95-46" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb95-47"><a href="#cb95-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">sum</span>(nll))</span>
-<span id="cb95-48"><a href="#cb95-48" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>race_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, response, rt, items, <span class="at">n_items =</span> <span class="fu">max</span>(items, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>    n_trials <span class="ot">&lt;-</span> <span class="fu">nrow</span>(items)</span>
+<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a>    n_locations <span class="ot">&lt;-</span> <span class="fu">ncol</span>(items)</span>
+<span id="cb96-4"><a href="#cb96-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb96-5"><a href="#cb96-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"v"</span>])) {</span>
+<span id="cb96-6"><a href="#cb96-6" aria-hidden="true" tabindex="-1"></a>        v <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"v["</span>, <span class="dv">1</span><span class="sc">:</span>n_items, <span class="st">"]"</span>)]</span>
+<span id="cb96-7"><a href="#cb96-7" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb96-8"><a href="#cb96-8" aria-hidden="true" tabindex="-1"></a>        v <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"v"</span>], n_items)</span>
+<span id="cb96-9"><a href="#cb96-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb96-10"><a href="#cb96-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb96-11"><a href="#cb96-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"a"</span>])) {</span>
+<span id="cb96-12"><a href="#cb96-12" aria-hidden="true" tabindex="-1"></a>        a <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"a["</span>, <span class="dv">1</span><span class="sc">:</span>n_locations, <span class="st">"]"</span>)]</span>
+<span id="cb96-13"><a href="#cb96-13" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb96-14"><a href="#cb96-14" aria-hidden="true" tabindex="-1"></a>        a <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"a"</span>], n_locations)</span>
+<span id="cb96-15"><a href="#cb96-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb96-16"><a href="#cb96-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb96-17"><a href="#cb96-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"t0"</span>])) {</span>
+<span id="cb96-18"><a href="#cb96-18" aria-hidden="true" tabindex="-1"></a>        t0 <span class="ot">&lt;-</span> par[<span class="fu">paste0</span>(<span class="st">"t0["</span>, <span class="dv">1</span><span class="sc">:</span>n_locations, <span class="st">"]"</span>)]</span>
+<span id="cb96-19"><a href="#cb96-19" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb96-20"><a href="#cb96-20" aria-hidden="true" tabindex="-1"></a>        t0 <span class="ot">&lt;-</span> <span class="fu">rep</span>(par[<span class="st">"t0"</span>], n_locations)</span>
+<span id="cb96-21"><a href="#cb96-21" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb96-22"><a href="#cb96-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb96-23"><a href="#cb96-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Similar to the above, you can check and see whether a feedforward competition parameter is or is not included; if not, you'll want to set the value of feedforward to zero.</span></span>
+<span id="cb96-24"><a href="#cb96-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"feedforward"</span>])) {</span>
+<span id="cb96-25"><a href="#cb96-25" aria-hidden="true" tabindex="-1"></a>        feedforward <span class="ot">&lt;-</span> ...</span>
+<span id="cb96-26"><a href="#cb96-26" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb96-27"><a href="#cb96-27" aria-hidden="true" tabindex="-1"></a>        feedforward <span class="ot">&lt;-</span> ...</span>
+<span id="cb96-28"><a href="#cb96-28" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb96-29"><a href="#cb96-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb96-30"><a href="#cb96-30" aria-hidden="true" tabindex="-1"></a>    nll <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_trials)</span>
+<span id="cb96-31"><a href="#cb96-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb96-32"><a href="#cb96-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_trials) {</span>
+<span id="cb96-33"><a href="#cb96-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Since drift rates depend on the items presented on each trial, we'll need to calculate them</span></span>
+<span id="cb96-34"><a href="#cb96-34" aria-hidden="true" tabindex="-1"></a>        trial_v <span class="ot">&lt;-</span> v[items[i, ]]</span>
+<span id="cb96-35"><a href="#cb96-35" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb96-36"><a href="#cb96-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(trial_v)) {</span>
+<span id="cb96-37"><a href="#cb96-37" aria-hidden="true" tabindex="-1"></a>            trial_v[j] <span class="ot">&lt;-</span> ...</span>
+<span id="cb96-38"><a href="#cb96-38" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb96-39"><a href="#cb96-39" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb96-40"><a href="#cb96-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Note that the drift rates now refer to "trial_v"</span></span>
+<span id="cb96-41"><a href="#cb96-41" aria-hidden="true" tabindex="-1"></a>        nll[i] <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fu">log</span>(</span>
+<span id="cb96-42"><a href="#cb96-42" aria-hidden="true" tabindex="-1"></a>            <span class="fu">accum_pdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[response[i]], <span class="at">v =</span> trial_v[response[i]], <span class="at">t0 =</span> t0[response[i]]) <span class="sc">*</span></span>
+<span id="cb96-43"><a href="#cb96-43" aria-hidden="true" tabindex="-1"></a>                <span class="fu">prod</span>(<span class="dv">1</span> <span class="sc">-</span> <span class="fu">accum_cdf</span>(<span class="at">t =</span> rt[i], <span class="at">a =</span> a[<span class="sc">-</span>response[i]], <span class="at">v =</span> trial_v[<span class="sc">-</span>response[i]], <span class="at">t0 =</span> t0[<span class="sc">-</span>response[i]]), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb96-44"><a href="#cb96-44" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb96-45"><a href="#cb96-45" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb96-46"><a href="#cb96-46" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb96-47"><a href="#cb96-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">sum</span>(nll))</span>
+<span id="cb96-48"><a href="#cb96-48" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <ol start="4" type="1">
@@ -2622,6 +2616,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -2732,6 +2728,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
+      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {
