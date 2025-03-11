@@ -1176,7 +1176,7 @@ x \left( t + \Delta t \right) - x(t) &amp; \sim 2 \times \text{Bernoulli} \left(
 </details>
 <div class="cell-output-display">
 <div class="plotly html-widget html-fill-item" id="htmlwidget-254ba0c536aba6f5d5c3" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-254ba0c536aba6f5d5c3">{"x":{"visdat":{"53a5a733b000d":["function () ","plotlyVisDat"]},"cur_data":"53a5a733b000d","attrs":{"53a5a733b000d":{"x":{},"y":{},"z":{},"text":["Item 1","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8"],"mode":"markers+text","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"`Dimension 1`"},"yaxis":{"title":"`Dimension 2`"},"zaxis":{"title":"`Dimension 3`"}},"hovermode":"closest","showlegend":false},"source":"A","config":{"showSendToCloud":false},"data":[{"x":[-0.4679161611520406,-0.55492658286274077,-0.47428333513396143,-0.50625809279990275,0.51103974867404744,0.45783054068415885,0.56694547092957315,0.46756841166086582],"y":[-0.46321903909441836,0.49939063638984044,-0.13202067242339119,0.0055786743535065283,-0.22284422229517822,0.33649589490445841,-0.28836624054434484,0.26498496870952648],"z":[-0.080564994532971015,0.070994597405408214,0.43312164966214295,-0.40175330903355666,-0.3038158169562874,-0.27302187298276354,0.24624697977727203,0.30879276666075506],"text":["Item 1","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8"],"mode":"markers+text","type":"scatter3d","marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"line":{"color":"rgba(31,119,180,1)"},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-254ba0c536aba6f5d5c3">{"x":{"visdat":{"5fdba34542fe2":["function () ","plotlyVisDat"]},"cur_data":"5fdba34542fe2","attrs":{"5fdba34542fe2":{"x":{},"y":{},"z":{},"text":["Item 1","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8"],"mode":"markers+text","alpha_stroke":1,"sizes":[10,100],"spans":[1,20],"type":"scatter3d"}},"layout":{"margin":{"b":40,"l":60,"t":25,"r":10},"scene":{"xaxis":{"title":"`Dimension 1`"},"yaxis":{"title":"`Dimension 2`"},"zaxis":{"title":"`Dimension 3`"}},"hovermode":"closest","showlegend":false},"source":"A","config":{"showSendToCloud":false},"data":[{"x":[-0.4679161611520406,-0.55492658286274077,-0.47428333513396143,-0.50625809279990275,0.51103974867404744,0.45783054068415885,0.56694547092957315,0.46756841166086582],"y":[-0.46321903909441836,0.49939063638984044,-0.13202067242339119,0.0055786743535065283,-0.22284422229517822,0.33649589490445841,-0.28836624054434484,0.26498496870952648],"z":[-0.080564994532971015,0.070994597405408214,0.43312164966214295,-0.40175330903355666,-0.3038158169562874,-0.27302187298276354,0.24624697977727203,0.30879276666075506],"text":["Item 1","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8"],"mode":"markers+text","type":"scatter3d","marker":{"color":"rgba(31,119,180,1)","line":{"color":"rgba(31,119,180,1)"}},"error_y":{"color":"rgba(31,119,180,1)"},"error_x":{"color":"rgba(31,119,180,1)"},"line":{"color":"rgba(31,119,180,1)"},"frame":null}],"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <p>In addition for each trial of the recognition task, the <code>study_items</code> matrix tells us which of the two items had been presented as part of the set to be remembered and the <code>probe_item</code> vector tells us what the probe item was. These numbers refer to row in the <code>stim_coords</code> matrix.</p>
@@ -1930,46 +1930,43 @@ $message
 <p>In the plots above, each point represents a single trial. While we can see in the left plot (barely) that the model generally tends to predict a high probability of saying “yes” on trials where the participant actually said “yes”, it is much harder to see what is going on in the right plot that shows RT’s. The issue is that the model is making a prediction about the <em>mean</em> RT whereas each point represents a <em>sample</em> from the participant’s RT distribution.</p>
 <p>Therefore, a more informative way to judge whether the model is making sensible predictions is to compare its <em>mean</em> predictions against <em>average</em> observed performance. Since this is a recognition memory task, it makes the most sense to average performance depending on whether the probe item was a <em>target</em> (i.e., was one of the studied items) or a <em>foil</em> (i.e., was not one of the studied items). The code below first defines a new column in the <code>obs_pred</code> tibble that indicates the type of trial before aggregating both observed and predicted performance by probe type, then making plots similar to those above.</p>
 <div class="cell">
-<details class="code-fold">
+<details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Note the use of "%in%"</span></span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (probe_item[i] <span class="sc">%in%</span> study_items[i,]) {</span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>        obs_pred<span class="sc">$</span>probe_type[i] <span class="ot">&lt;-</span> <span class="st">"Target"</span></span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>        obs_pred<span class="sc">$</span>probe_type[i] <span class="ot">&lt;-</span> <span class="st">"Foil"</span></span>
-<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: Unknown or uninitialised column: `probe_type`.</code></pre>
-</div>
-<details class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>obs_pred<span class="sc">$</span>probe_type <span class="ot">&lt;-</span> <span class="fu">factor</span>(obs_pred<span class="sc">$</span>probe_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Target"</span>, <span class="st">"Foil"</span>))</span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>resp_plot <span class="ot">&lt;-</span> obs_pred <span class="sc">%&gt;%</span></span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(probe_type) <span class="sc">%&gt;%</span></span>
-<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_obs =</span> <span class="fu">mean</span>(response), <span class="at">mean_pred =</span> <span class="fu">mean</span>(p_yes)) <span class="sc">%&gt;%</span></span>
-<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mean_obs, <span class="at">y =</span> mean_pred, <span class="at">color =</span> probe_type)) <span class="sc">+</span></span>
-<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
-<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Target"</span> <span class="ot">=</span> <span class="st">"#377eb8"</span>, <span class="st">"Foil"</span> <span class="ot">=</span> <span class="st">"#e41a1c"</span>)) <span class="sc">+</span></span>
-<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Observed response proportion"</span>, <span class="at">y =</span> <span class="st">"Predicted P(</span><span class="sc">\"</span><span class="st">Yes</span><span class="sc">\"</span><span class="st">)"</span>, <span class="at">color =</span> <span class="cn">NULL</span>)</span>
-<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>rt_plot <span class="ot">&lt;-</span> obs_pred <span class="sc">%&gt;%</span></span>
-<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">pred_rt =</span> <span class="fu">if_else</span>(response <span class="sc">==</span> <span class="dv">1</span>, mean_rt_yes, mean_rt_no)) <span class="sc">%&gt;%</span></span>
-<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(probe_type) <span class="sc">%&gt;%</span></span>
-<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_obs =</span> <span class="fu">mean</span>(rt), <span class="at">mean_pred =</span> <span class="fu">mean</span>(pred_rt)) <span class="sc">%&gt;%</span></span>
-<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mean_obs, <span class="at">y =</span> mean_pred, <span class="at">color =</span> probe_type)) <span class="sc">+</span></span>
-<span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
-<span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb52-20"><a href="#cb52-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
-<span id="cb52-21"><a href="#cb52-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Target"</span> <span class="ot">=</span> <span class="st">"#377eb8"</span>, <span class="st">"Foil"</span> <span class="ot">=</span> <span class="st">"#e41a1c"</span>)) <span class="sc">+</span></span>
-<span id="cb52-22"><a href="#cb52-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Observed mean RT"</span>, <span class="at">y =</span> <span class="st">"Predicted mean RT"</span>, <span class="at">color =</span> <span class="cn">NULL</span>)</span>
-<span id="cb52-23"><a href="#cb52-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-24"><a href="#cb52-24" aria-hidden="true" tabindex="-1"></a>resp_plot <span class="sc">+</span> rt_plot <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">guides =</span> <span class="st">"collect"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>obs_pred<span class="sc">$</span>probe_type <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Note the use of "%in%"</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (probe_item[i] <span class="sc">%in%</span> study_items[i,]) {</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>        obs_pred<span class="sc">$</span>probe_type[i] <span class="ot">&lt;-</span> <span class="st">"Target"</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>        obs_pred<span class="sc">$</span>probe_type[i] <span class="ot">&lt;-</span> <span class="st">"Foil"</span></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>obs_pred<span class="sc">$</span>probe_type <span class="ot">&lt;-</span> <span class="fu">factor</span>(obs_pred<span class="sc">$</span>probe_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Target"</span>, <span class="st">"Foil"</span>))</span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a>resp_plot <span class="ot">&lt;-</span> obs_pred <span class="sc">%&gt;%</span></span>
+<span id="cb50-15"><a href="#cb50-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(probe_type) <span class="sc">%&gt;%</span></span>
+<span id="cb50-16"><a href="#cb50-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_obs =</span> <span class="fu">mean</span>(response), <span class="at">mean_pred =</span> <span class="fu">mean</span>(p_yes)) <span class="sc">%&gt;%</span></span>
+<span id="cb50-17"><a href="#cb50-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mean_obs, <span class="at">y =</span> mean_pred, <span class="at">color =</span> probe_type)) <span class="sc">+</span></span>
+<span id="cb50-18"><a href="#cb50-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb50-19"><a href="#cb50-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb50-20"><a href="#cb50-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb50-21"><a href="#cb50-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Target"</span> <span class="ot">=</span> <span class="st">"#377eb8"</span>, <span class="st">"Foil"</span> <span class="ot">=</span> <span class="st">"#e41a1c"</span>)) <span class="sc">+</span></span>
+<span id="cb50-22"><a href="#cb50-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Observed response proportion"</span>, <span class="at">y =</span> <span class="st">"Predicted P(</span><span class="sc">\"</span><span class="st">Yes</span><span class="sc">\"</span><span class="st">)"</span>, <span class="at">color =</span> <span class="cn">NULL</span>)</span>
+<span id="cb50-23"><a href="#cb50-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-24"><a href="#cb50-24" aria-hidden="true" tabindex="-1"></a>rt_plot <span class="ot">&lt;-</span> obs_pred <span class="sc">%&gt;%</span></span>
+<span id="cb50-25"><a href="#cb50-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">pred_rt =</span> <span class="fu">if_else</span>(response <span class="sc">==</span> <span class="dv">1</span>, mean_rt_yes, mean_rt_no)) <span class="sc">%&gt;%</span></span>
+<span id="cb50-26"><a href="#cb50-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(probe_type) <span class="sc">%&gt;%</span></span>
+<span id="cb50-27"><a href="#cb50-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_obs =</span> <span class="fu">mean</span>(rt), <span class="at">mean_pred =</span> <span class="fu">mean</span>(pred_rt)) <span class="sc">%&gt;%</span></span>
+<span id="cb50-28"><a href="#cb50-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mean_obs, <span class="at">y =</span> mean_pred, <span class="at">color =</span> probe_type)) <span class="sc">+</span></span>
+<span id="cb50-29"><a href="#cb50-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">slope =</span> <span class="dv">1</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb50-30"><a href="#cb50-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb50-31"><a href="#cb50-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb50-32"><a href="#cb50-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Target"</span> <span class="ot">=</span> <span class="st">"#377eb8"</span>, <span class="st">"Foil"</span> <span class="ot">=</span> <span class="st">"#e41a1c"</span>)) <span class="sc">+</span></span>
+<span id="cb50-33"><a href="#cb50-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Observed mean RT"</span>, <span class="at">y =</span> <span class="st">"Predicted mean RT"</span>, <span class="at">color =</span> <span class="cn">NULL</span>)</span>
+<span id="cb50-34"><a href="#cb50-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-35"><a href="#cb50-35" aria-hidden="true" tabindex="-1"></a>resp_plot <span class="sc">+</span> rt_plot <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">guides =</span> <span class="st">"collect"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -1994,106 +1991,106 @@ $message
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This could be derived using MDS</span></span>
-<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>stim_coords <span class="ot">&lt;-</span> ...</span>
-<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="co"># These could be actual trials in an experiment or used to construct imaginary trials for simulation</span></span>
-<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>study_items <span class="ot">&lt;-</span> ...</span>
-<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>probe_item <span class="ot">&lt;-</span> ...</span>
-<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a><span class="co"># These could be observed or simulated; they may not even be needed if you are just doing simulation</span></span>
-<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>response <span class="ot">&lt;-</span> ...</span>
-<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>rt <span class="ot">&lt;-</span> ...</span>
-<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a><span class="co"># This could be from a model fit or specified manually to do simulations</span></span>
-<span id="cb53-13"><a href="#cb53-13" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> ...</span>
-<span id="cb53-14"><a href="#cb53-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb53-15"><a href="#cb53-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Function arguments:</span></span>
-<span id="cb53-16"><a href="#cb53-16" aria-hidden="true" tabindex="-1"></a><span class="co"># par: this is a named vector of parameter values</span></span>
-<span id="cb53-17"><a href="#cb53-17" aria-hidden="true" tabindex="-1"></a><span class="co"># stim_coords: this is a matrix of the coordinates of the stimuli, where each row is a stimulus and each column is a dimension</span></span>
-<span id="cb53-18"><a href="#cb53-18" aria-hidden="true" tabindex="-1"></a><span class="co"># study_items: this is a matrix where each row is a trial and each column indicates the items that were studied on that trial</span></span>
-<span id="cb53-19"><a href="#cb53-19" aria-hidden="true" tabindex="-1"></a><span class="co"># probe_item: this is a vector giving the index of the probe item on each trial</span></span>
-<span id="cb53-20"><a href="#cb53-20" aria-hidden="true" tabindex="-1"></a><span class="co"># response: this is a vector where each value is 2 or 1, depending on whether the participant responsed "yes" (2) or "no" (1) on that trial</span></span>
-<span id="cb53-21"><a href="#cb53-21" aria-hidden="true" tabindex="-1"></a><span class="co"># rt: this is a vector of the response times from each trial</span></span>
-<span id="cb53-22"><a href="#cb53-22" aria-hidden="true" tabindex="-1"></a><span class="co"># n_sims: this indicates whether or not simulations are meant to be returned instead of the NLL</span></span>
-<span id="cb53-23"><a href="#cb53-23" aria-hidden="true" tabindex="-1"></a>ebrw_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, stim_coords, study_items, probe_item, response, rt, <span class="at">n_sims =</span> <span class="dv">0</span>) {</span>
-<span id="cb53-24"><a href="#cb53-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Compute the mean and SD of the drift for each trial</span></span>
-<span id="cb53-25"><a href="#cb53-25" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb53-26"><a href="#cb53-26" aria-hidden="true" tabindex="-1"></a>    stim_dists <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">dist</span>(stim_coords))</span>
-<span id="cb53-27"><a href="#cb53-27" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb53-28"><a href="#cb53-28" aria-hidden="true" tabindex="-1"></a>    evidence_mean <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
-<span id="cb53-29"><a href="#cb53-29" aria-hidden="true" tabindex="-1"></a>    evidence_sd <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
-<span id="cb53-30"><a href="#cb53-30" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb53-31"><a href="#cb53-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
-<span id="cb53-32"><a href="#cb53-32" aria-hidden="true" tabindex="-1"></a>        summed_sim <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">exp</span>(<span class="sc">-</span>par[<span class="st">"specificity"</span>] <span class="sc">*</span> stim_dists[probe_item[i], study_items[i,]]))</span>
-<span id="cb53-33"><a href="#cb53-33" aria-hidden="true" tabindex="-1"></a>        p <span class="ot">&lt;-</span> summed_sim <span class="sc">/</span> (summed_sim <span class="sc">+</span> par[<span class="st">"criterion"</span>])</span>
-<span id="cb53-34"><a href="#cb53-34" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb53-35"><a href="#cb53-35" aria-hidden="true" tabindex="-1"></a>        evidence_mean[i] <span class="ot">&lt;-</span> par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
-<span id="cb53-36"><a href="#cb53-36" aria-hidden="true" tabindex="-1"></a>        evidence_sd[i] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))</span>
-<span id="cb53-37"><a href="#cb53-37" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb53-38"><a href="#cb53-38" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb53-39"><a href="#cb53-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.infinite</span>(n_sims)) {</span>
-<span id="cb53-40"><a href="#cb53-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2a. Compute predicted response probabilities and mean RT's for each trial</span></span>
-<span id="cb53-41"><a href="#cb53-41" aria-hidden="true" tabindex="-1"></a>        result <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
-<span id="cb53-42"><a href="#cb53-42" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb53-43"><a href="#cb53-43" aria-hidden="true" tabindex="-1"></a>        evidence_var <span class="ot">&lt;-</span> evidence_sd<span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb53-44"><a href="#cb53-44" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb53-45"><a href="#cb53-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
-<span id="cb53-46"><a href="#cb53-46" aria-hidden="true" tabindex="-1"></a>            trial_p_yes <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">*</span> par[<span class="st">"w"</span>] <span class="sc">/</span> evidence_var[i])) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">/</span> evidence_var[i]))</span>
-<span id="cb53-47"><a href="#cb53-47" aria-hidden="true" tabindex="-1"></a>            trial_mean_rt_yes <span class="ot">&lt;-</span> par[<span class="st">"t0"</span>] <span class="sc">+</span> (par[<span class="st">"a"</span>] <span class="sc">/</span> evidence_mean[i]) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">/</span> <span class="fu">tanh</span>(par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">/</span> evidence_var[i]) <span class="sc">-</span> par[<span class="st">"w"</span>] <span class="sc">/</span> <span class="fu">tanh</span>(par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">*</span> par[<span class="st">"w"</span>] <span class="sc">/</span> evidence_var[i]))</span>
-<span id="cb53-48"><a href="#cb53-48" aria-hidden="true" tabindex="-1"></a>            trial_mean_rt_no <span class="ot">&lt;-</span> par[<span class="st">"t0"</span>] <span class="sc">+</span> (par[<span class="st">"a"</span>] <span class="sc">/</span> evidence_mean[i]) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">/</span> <span class="fu">tanh</span>(par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">/</span> evidence_var[i]) <span class="sc">-</span> (<span class="dv">1</span> <span class="sc">-</span> par[<span class="st">"w"</span>]) <span class="sc">/</span> <span class="fu">tanh</span>(par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> par[<span class="st">"w"</span>]) <span class="sc">/</span> evidence_var[i]))</span>
-<span id="cb53-49"><a href="#cb53-49" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb53-50"><a href="#cb53-50" aria-hidden="true" tabindex="-1"></a>            result <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb53-51"><a href="#cb53-51" aria-hidden="true" tabindex="-1"></a>                result,</span>
-<span id="cb53-52"><a href="#cb53-52" aria-hidden="true" tabindex="-1"></a>                <span class="fu">tibble</span>(<span class="at">trial =</span> i, <span class="at">p_yes =</span> trial_p_yes, <span class="at">mean_rt_yes =</span> trial_mean_rt_yes, <span class="at">mean_rt_no =</span> trial_mean_rt_no)</span>
-<span id="cb53-53"><a href="#cb53-53" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb53-54"><a href="#cb53-54" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb53-55"><a href="#cb53-55" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb53-56"><a href="#cb53-56" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3a. Return final result</span></span>
-<span id="cb53-57"><a href="#cb53-57" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(result)</span>
-<span id="cb53-58"><a href="#cb53-58" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span> (n_sims <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb53-59"><a href="#cb53-59" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2b. Simulate a response for each trial</span></span>
-<span id="cb53-60"><a href="#cb53-60" aria-hidden="true" tabindex="-1"></a>        result <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
-<span id="cb53-61"><a href="#cb53-61" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb53-62"><a href="#cb53-62" aria-hidden="true" tabindex="-1"></a>        <span class="co"># For each trial...</span></span>
-<span id="cb53-63"><a href="#cb53-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
-<span id="cb53-64"><a href="#cb53-64" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Simulate `n_sims` replications of this trial, using its corresponding parameters</span></span>
-<span id="cb53-65"><a href="#cb53-65" aria-hidden="true" tabindex="-1"></a>            trial_sim <span class="ot">&lt;-</span> <span class="fu">sampWiener</span>(</span>
-<span id="cb53-66"><a href="#cb53-66" aria-hidden="true" tabindex="-1"></a>                <span class="at">N =</span> n_sims,</span>
-<span id="cb53-67"><a href="#cb53-67" aria-hidden="true" tabindex="-1"></a>                <span class="at">a =</span> par[<span class="st">"a"</span>] <span class="sc">/</span> evidence_sd[i],</span>
-<span id="cb53-68"><a href="#cb53-68" aria-hidden="true" tabindex="-1"></a>                <span class="at">w =</span> par[<span class="st">"w"</span>],</span>
-<span id="cb53-69"><a href="#cb53-69" aria-hidden="true" tabindex="-1"></a>                <span class="at">v =</span> evidence_mean[i] <span class="sc">/</span> evidence_sd[i],</span>
-<span id="cb53-70"><a href="#cb53-70" aria-hidden="true" tabindex="-1"></a>                <span class="at">t0 =</span> par[<span class="st">"t0"</span>]</span>
-<span id="cb53-71"><a href="#cb53-71" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb53-72"><a href="#cb53-72" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb53-73"><a href="#cb53-73" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Append the new set of simulations to our `result`, including an indicator of which trial we are simulating and an index for each simulation</span></span>
-<span id="cb53-74"><a href="#cb53-74" aria-hidden="true" tabindex="-1"></a>            result <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb53-75"><a href="#cb53-75" aria-hidden="true" tabindex="-1"></a>                result,</span>
-<span id="cb53-76"><a href="#cb53-76" aria-hidden="true" tabindex="-1"></a>                <span class="fu">tibble</span>(<span class="at">trial =</span> i, <span class="at">sim_index =</span> <span class="dv">1</span><span class="sc">:</span>n_sims, <span class="at">rt =</span> trial_sim<span class="sc">$</span>q, <span class="at">response =</span> trial_sim<span class="sc">$</span>response)</span>
-<span id="cb53-77"><a href="#cb53-77" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb53-78"><a href="#cb53-78" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb53-79"><a href="#cb53-79" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb53-80"><a href="#cb53-80" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3b. Return final result</span></span>
-<span id="cb53-81"><a href="#cb53-81" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(result)</span>
-<span id="cb53-82"><a href="#cb53-82" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb53-83"><a href="#cb53-83" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2c. Calculate the log-likelihood of each observed response/RT on each trial</span></span>
-<span id="cb53-84"><a href="#cb53-84" aria-hidden="true" tabindex="-1"></a>        result <span class="ot">&lt;-</span> <span class="fu">try</span>(<span class="fu">WienerPDF</span>(</span>
-<span id="cb53-85"><a href="#cb53-85" aria-hidden="true" tabindex="-1"></a>            <span class="at">t =</span> rt,</span>
-<span id="cb53-86"><a href="#cb53-86" aria-hidden="true" tabindex="-1"></a>            <span class="at">response =</span> response,</span>
-<span id="cb53-87"><a href="#cb53-87" aria-hidden="true" tabindex="-1"></a>            <span class="at">a =</span> par[<span class="st">"a"</span>] <span class="sc">/</span> evidence_sd,</span>
-<span id="cb53-88"><a href="#cb53-88" aria-hidden="true" tabindex="-1"></a>            <span class="at">w =</span> par[<span class="st">"w"</span>],</span>
-<span id="cb53-89"><a href="#cb53-89" aria-hidden="true" tabindex="-1"></a>            <span class="at">v =</span> evidence_mean <span class="sc">/</span> evidence_sd,</span>
-<span id="cb53-90"><a href="#cb53-90" aria-hidden="true" tabindex="-1"></a>            <span class="at">t0 =</span> par[<span class="st">"t0"</span>]</span>
-<span id="cb53-91"><a href="#cb53-91" aria-hidden="true" tabindex="-1"></a>        ))</span>
-<span id="cb53-92"><a href="#cb53-92" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb53-93"><a href="#cb53-93" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3c. Return final result</span></span>
-<span id="cb53-94"><a href="#cb53-94" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (<span class="fu">class</span>(result) <span class="sc">==</span> <span class="st">"try-error"</span>) {</span>
-<span id="cb53-95"><a href="#cb53-95" aria-hidden="true" tabindex="-1"></a>            <span class="fu">return</span>(<span class="cn">Inf</span>)</span>
-<span id="cb53-96"><a href="#cb53-96" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
-<span id="cb53-97"><a href="#cb53-97" aria-hidden="true" tabindex="-1"></a>            <span class="fu">return</span>(<span class="sc">-</span><span class="fu">sum</span>(result<span class="sc">$</span>logvalue))</span>
-<span id="cb53-98"><a href="#cb53-98" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb53-99"><a href="#cb53-99" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb53-100"><a href="#cb53-100" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="co"># This could be derived using MDS</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>stim_coords <span class="ot">&lt;-</span> ...</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="co"># These could be actual trials in an experiment or used to construct imaginary trials for simulation</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>study_items <span class="ot">&lt;-</span> ...</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>probe_item <span class="ot">&lt;-</span> ...</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a><span class="co"># These could be observed or simulated; they may not even be needed if you are just doing simulation</span></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>response <span class="ot">&lt;-</span> ...</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>rt <span class="ot">&lt;-</span> ...</span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a><span class="co"># This could be from a model fit or specified manually to do simulations</span></span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> ...</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Function arguments:</span></span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a><span class="co"># par: this is a named vector of parameter values</span></span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a><span class="co"># stim_coords: this is a matrix of the coordinates of the stimuli, where each row is a stimulus and each column is a dimension</span></span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a><span class="co"># study_items: this is a matrix where each row is a trial and each column indicates the items that were studied on that trial</span></span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a><span class="co"># probe_item: this is a vector giving the index of the probe item on each trial</span></span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a><span class="co"># response: this is a vector where each value is 2 or 1, depending on whether the participant responsed "yes" (2) or "no" (1) on that trial</span></span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a><span class="co"># rt: this is a vector of the response times from each trial</span></span>
+<span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a><span class="co"># n_sims: this indicates whether or not simulations are meant to be returned instead of the NLL</span></span>
+<span id="cb51-23"><a href="#cb51-23" aria-hidden="true" tabindex="-1"></a>ebrw_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, stim_coords, study_items, probe_item, response, rt, <span class="at">n_sims =</span> <span class="dv">0</span>) {</span>
+<span id="cb51-24"><a href="#cb51-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Compute the mean and SD of the drift for each trial</span></span>
+<span id="cb51-25"><a href="#cb51-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb51-26"><a href="#cb51-26" aria-hidden="true" tabindex="-1"></a>    stim_dists <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">dist</span>(stim_coords))</span>
+<span id="cb51-27"><a href="#cb51-27" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb51-28"><a href="#cb51-28" aria-hidden="true" tabindex="-1"></a>    evidence_mean <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
+<span id="cb51-29"><a href="#cb51-29" aria-hidden="true" tabindex="-1"></a>    evidence_sd <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">length</span>(probe_item))</span>
+<span id="cb51-30"><a href="#cb51-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb51-31"><a href="#cb51-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
+<span id="cb51-32"><a href="#cb51-32" aria-hidden="true" tabindex="-1"></a>        summed_sim <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">exp</span>(<span class="sc">-</span>par[<span class="st">"specificity"</span>] <span class="sc">*</span> stim_dists[probe_item[i], study_items[i,]]))</span>
+<span id="cb51-33"><a href="#cb51-33" aria-hidden="true" tabindex="-1"></a>        p <span class="ot">&lt;-</span> summed_sim <span class="sc">/</span> (summed_sim <span class="sc">+</span> par[<span class="st">"criterion"</span>])</span>
+<span id="cb51-34"><a href="#cb51-34" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb51-35"><a href="#cb51-35" aria-hidden="true" tabindex="-1"></a>        evidence_mean[i] <span class="ot">&lt;-</span> par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb51-36"><a href="#cb51-36" aria-hidden="true" tabindex="-1"></a>        evidence_sd[i] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))</span>
+<span id="cb51-37"><a href="#cb51-37" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb51-38"><a href="#cb51-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb51-39"><a href="#cb51-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.infinite</span>(n_sims)) {</span>
+<span id="cb51-40"><a href="#cb51-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2a. Compute predicted response probabilities and mean RT's for each trial</span></span>
+<span id="cb51-41"><a href="#cb51-41" aria-hidden="true" tabindex="-1"></a>        result <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb51-42"><a href="#cb51-42" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb51-43"><a href="#cb51-43" aria-hidden="true" tabindex="-1"></a>        evidence_var <span class="ot">&lt;-</span> evidence_sd<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb51-44"><a href="#cb51-44" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb51-45"><a href="#cb51-45" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
+<span id="cb51-46"><a href="#cb51-46" aria-hidden="true" tabindex="-1"></a>            trial_p_yes <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">*</span> par[<span class="st">"w"</span>] <span class="sc">/</span> evidence_var[i])) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">/</span> evidence_var[i]))</span>
+<span id="cb51-47"><a href="#cb51-47" aria-hidden="true" tabindex="-1"></a>            trial_mean_rt_yes <span class="ot">&lt;-</span> par[<span class="st">"t0"</span>] <span class="sc">+</span> (par[<span class="st">"a"</span>] <span class="sc">/</span> evidence_mean[i]) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">/</span> <span class="fu">tanh</span>(par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">/</span> evidence_var[i]) <span class="sc">-</span> par[<span class="st">"w"</span>] <span class="sc">/</span> <span class="fu">tanh</span>(par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">*</span> par[<span class="st">"w"</span>] <span class="sc">/</span> evidence_var[i]))</span>
+<span id="cb51-48"><a href="#cb51-48" aria-hidden="true" tabindex="-1"></a>            trial_mean_rt_no <span class="ot">&lt;-</span> par[<span class="st">"t0"</span>] <span class="sc">+</span> (par[<span class="st">"a"</span>] <span class="sc">/</span> evidence_mean[i]) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">/</span> <span class="fu">tanh</span>(par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">/</span> evidence_var[i]) <span class="sc">-</span> (<span class="dv">1</span> <span class="sc">-</span> par[<span class="st">"w"</span>]) <span class="sc">/</span> <span class="fu">tanh</span>(par[<span class="st">"a"</span>] <span class="sc">*</span> evidence_mean[i] <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> par[<span class="st">"w"</span>]) <span class="sc">/</span> evidence_var[i]))</span>
+<span id="cb51-49"><a href="#cb51-49" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb51-50"><a href="#cb51-50" aria-hidden="true" tabindex="-1"></a>            result <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb51-51"><a href="#cb51-51" aria-hidden="true" tabindex="-1"></a>                result,</span>
+<span id="cb51-52"><a href="#cb51-52" aria-hidden="true" tabindex="-1"></a>                <span class="fu">tibble</span>(<span class="at">trial =</span> i, <span class="at">p_yes =</span> trial_p_yes, <span class="at">mean_rt_yes =</span> trial_mean_rt_yes, <span class="at">mean_rt_no =</span> trial_mean_rt_no)</span>
+<span id="cb51-53"><a href="#cb51-53" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb51-54"><a href="#cb51-54" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb51-55"><a href="#cb51-55" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb51-56"><a href="#cb51-56" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3a. Return final result</span></span>
+<span id="cb51-57"><a href="#cb51-57" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(result)</span>
+<span id="cb51-58"><a href="#cb51-58" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span> (n_sims <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb51-59"><a href="#cb51-59" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2b. Simulate a response for each trial</span></span>
+<span id="cb51-60"><a href="#cb51-60" aria-hidden="true" tabindex="-1"></a>        result <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb51-61"><a href="#cb51-61" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb51-62"><a href="#cb51-62" aria-hidden="true" tabindex="-1"></a>        <span class="co"># For each trial...</span></span>
+<span id="cb51-63"><a href="#cb51-63" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
+<span id="cb51-64"><a href="#cb51-64" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Simulate `n_sims` replications of this trial, using its corresponding parameters</span></span>
+<span id="cb51-65"><a href="#cb51-65" aria-hidden="true" tabindex="-1"></a>            trial_sim <span class="ot">&lt;-</span> <span class="fu">sampWiener</span>(</span>
+<span id="cb51-66"><a href="#cb51-66" aria-hidden="true" tabindex="-1"></a>                <span class="at">N =</span> n_sims,</span>
+<span id="cb51-67"><a href="#cb51-67" aria-hidden="true" tabindex="-1"></a>                <span class="at">a =</span> par[<span class="st">"a"</span>] <span class="sc">/</span> evidence_sd[i],</span>
+<span id="cb51-68"><a href="#cb51-68" aria-hidden="true" tabindex="-1"></a>                <span class="at">w =</span> par[<span class="st">"w"</span>],</span>
+<span id="cb51-69"><a href="#cb51-69" aria-hidden="true" tabindex="-1"></a>                <span class="at">v =</span> evidence_mean[i] <span class="sc">/</span> evidence_sd[i],</span>
+<span id="cb51-70"><a href="#cb51-70" aria-hidden="true" tabindex="-1"></a>                <span class="at">t0 =</span> par[<span class="st">"t0"</span>]</span>
+<span id="cb51-71"><a href="#cb51-71" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb51-72"><a href="#cb51-72" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb51-73"><a href="#cb51-73" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Append the new set of simulations to our `result`, including an indicator of which trial we are simulating and an index for each simulation</span></span>
+<span id="cb51-74"><a href="#cb51-74" aria-hidden="true" tabindex="-1"></a>            result <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb51-75"><a href="#cb51-75" aria-hidden="true" tabindex="-1"></a>                result,</span>
+<span id="cb51-76"><a href="#cb51-76" aria-hidden="true" tabindex="-1"></a>                <span class="fu">tibble</span>(<span class="at">trial =</span> i, <span class="at">sim_index =</span> <span class="dv">1</span><span class="sc">:</span>n_sims, <span class="at">rt =</span> trial_sim<span class="sc">$</span>q, <span class="at">response =</span> trial_sim<span class="sc">$</span>response)</span>
+<span id="cb51-77"><a href="#cb51-77" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb51-78"><a href="#cb51-78" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb51-79"><a href="#cb51-79" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb51-80"><a href="#cb51-80" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3b. Return final result</span></span>
+<span id="cb51-81"><a href="#cb51-81" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(result)</span>
+<span id="cb51-82"><a href="#cb51-82" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb51-83"><a href="#cb51-83" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2c. Calculate the log-likelihood of each observed response/RT on each trial</span></span>
+<span id="cb51-84"><a href="#cb51-84" aria-hidden="true" tabindex="-1"></a>        result <span class="ot">&lt;-</span> <span class="fu">try</span>(<span class="fu">WienerPDF</span>(</span>
+<span id="cb51-85"><a href="#cb51-85" aria-hidden="true" tabindex="-1"></a>            <span class="at">t =</span> rt,</span>
+<span id="cb51-86"><a href="#cb51-86" aria-hidden="true" tabindex="-1"></a>            <span class="at">response =</span> response,</span>
+<span id="cb51-87"><a href="#cb51-87" aria-hidden="true" tabindex="-1"></a>            <span class="at">a =</span> par[<span class="st">"a"</span>] <span class="sc">/</span> evidence_sd,</span>
+<span id="cb51-88"><a href="#cb51-88" aria-hidden="true" tabindex="-1"></a>            <span class="at">w =</span> par[<span class="st">"w"</span>],</span>
+<span id="cb51-89"><a href="#cb51-89" aria-hidden="true" tabindex="-1"></a>            <span class="at">v =</span> evidence_mean <span class="sc">/</span> evidence_sd,</span>
+<span id="cb51-90"><a href="#cb51-90" aria-hidden="true" tabindex="-1"></a>            <span class="at">t0 =</span> par[<span class="st">"t0"</span>]</span>
+<span id="cb51-91"><a href="#cb51-91" aria-hidden="true" tabindex="-1"></a>        ))</span>
+<span id="cb51-92"><a href="#cb51-92" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb51-93"><a href="#cb51-93" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 3c. Return final result</span></span>
+<span id="cb51-94"><a href="#cb51-94" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (<span class="fu">class</span>(result) <span class="sc">==</span> <span class="st">"try-error"</span>) {</span>
+<span id="cb51-95"><a href="#cb51-95" aria-hidden="true" tabindex="-1"></a>            <span class="fu">return</span>(<span class="cn">Inf</span>)</span>
+<span id="cb51-96"><a href="#cb51-96" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb51-97"><a href="#cb51-97" aria-hidden="true" tabindex="-1"></a>            <span class="fu">return</span>(<span class="sc">-</span><span class="fu">sum</span>(result<span class="sc">$</span>logvalue))</span>
+<span id="cb51-98"><a href="#cb51-98" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb51-99"><a href="#cb51-99" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb51-100"><a href="#cb51-100" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -2101,34 +2098,34 @@ $message
 <h2 data-number="9.7" class="anchored" data-anchor-id="exercises"><span class="header-section-number">9.7</span> Exercises</h2>
 <ol type="1">
 <li>You may have noticed that our implementation of the EBRW assumes that each list of studied items is the same length. Describe how to modify our <code>ebrw_nll</code> function so that <code>study_items</code> can include <code>NA</code> values, thus allowing for lists to vary in length, similar to how we allowed our race model to be robust to sets of different size. <em>Hint: All this involves is putting a <code>na.rm = TRUE</code> somewhere in our code!</em></li>
-<li>This is a follow-up to the previous exercise. In applications of the EBRW to experiments that vary the number of items, it is typical to assume that the “criterion” varies linearly with list length <span class="citation" data-cites="NosofskyEtAl2011 NosofskyEtAl2014EBRW">(<a href="references.html#ref-NosofskyEtAl2011" role="doc-biblioref">Nosofsky et al., 2011</a>; <a href="references.html#ref-NosofskyEtAl2014EBRW" role="doc-biblioref"><strong>NosofskyEtAl2014EBRW?</strong></a>)</span>. Modify our <code>ebrw_nll</code> function to accommodate this version of the model. The chunk of code below gives a suggestion about how this might be done in such a way that preserves the functionality of the code we used throughout this chapter.</li>
+<li>This is a follow-up to the previous exercise. In applications of the EBRW to experiments that vary the number of items, it is typical to assume that the “criterion” varies linearly with list length <span class="citation" data-cites="NosofskyEtAl2011 NosofskyEtAl2014">(<a href="references.html#ref-NosofskyEtAl2011" role="doc-biblioref">Nosofsky et al., 2011</a>, <a href="references.html#ref-NosofskyEtAl2014" role="doc-biblioref">2014</a>)</span>. Modify our <code>ebrw_nll</code> function to accommodate this version of the model. The chunk of code below gives a suggestion about how this might be done in such a way that preserves the functionality of the code we used throughout this chapter by keeping the “criterion” parameter and adding a “criterion_slope” parameter.</li>
 </ol>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>ebrw_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, stim_coords, study_items, probe_item, response, rt, <span class="at">n_sims =</span> <span class="dv">0</span>) {</span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    ...</span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"criterion_slope"</span>])) {</span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>        criterion_slope <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>        criterion_slope <span class="ot">&lt;-</span> par[<span class="st">"criterion_slope"</span>]</span>
-<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
-<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>        summed_sim <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">exp</span>(<span class="sc">-</span>par[<span class="st">"specificity"</span>] <span class="sc">*</span> stim_dists[probe_item[i], study_items[i,]]))</span>
-<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># HINT: You will need to find the value of `list_length` on each trial---how will you do this?  (You might think about the fact that we are using `NA` values to indicate when `study_items[i,]` has fewer items than the number of columns in `study_items`).</span></span>
-<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>        this_criterion <span class="ot">&lt;-</span> par[<span class="st">"criterion"</span>] <span class="sc">+</span> criterion_slope <span class="sc">*</span> list_length</span>
-<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>        p <span class="ot">&lt;-</span> summed_sim <span class="sc">/</span> (summed_sim <span class="sc">+</span> this_criterion)</span>
-<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>        evidence_mean[i] <span class="ot">&lt;-</span> par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
-<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a>        evidence_sd[i] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))</span>
-<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb54-21"><a href="#cb54-21" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb54-22"><a href="#cb54-22" aria-hidden="true" tabindex="-1"></a>    ...</span>
-<span id="cb54-23"><a href="#cb54-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>ebrw_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, stim_coords, study_items, probe_item, response, rt, <span class="at">n_sims =</span> <span class="dv">0</span>) {</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"criterion_slope"</span>])) {</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>        criterion_slope <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>        criterion_slope <span class="ot">&lt;-</span> par[<span class="st">"criterion_slope"</span>]</span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(probe_item)) {</span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>        summed_sim <span class="ot">&lt;-</span> <span class="fu">sum</span>(<span class="fu">exp</span>(<span class="sc">-</span>par[<span class="st">"specificity"</span>] <span class="sc">*</span> stim_dists[probe_item[i], study_items[i,]]))</span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb52-13"><a href="#cb52-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># HINT: You will need to find the value of `list_length` on each trial---how will you do this?  (You might think about the fact that we are using `NA` values to indicate when `study_items[i,]` has fewer items than the number of columns in `study_items`).</span></span>
+<span id="cb52-14"><a href="#cb52-14" aria-hidden="true" tabindex="-1"></a>        this_criterion <span class="ot">&lt;-</span> par[<span class="st">"criterion"</span>] <span class="sc">+</span> criterion_slope <span class="sc">*</span> list_length</span>
+<span id="cb52-15"><a href="#cb52-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb52-16"><a href="#cb52-16" aria-hidden="true" tabindex="-1"></a>        p <span class="ot">&lt;-</span> summed_sim <span class="sc">/</span> (summed_sim <span class="sc">+</span> this_criterion)</span>
+<span id="cb52-17"><a href="#cb52-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb52-18"><a href="#cb52-18" aria-hidden="true" tabindex="-1"></a>        evidence_mean[i] <span class="ot">&lt;-</span> par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> (<span class="dv">2</span> <span class="sc">*</span> p <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb52-19"><a href="#cb52-19" aria-hidden="true" tabindex="-1"></a>        evidence_sd[i] <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sqrt</span>(par[<span class="st">"retrieval_rate"</span>] <span class="sc">*</span> p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p))</span>
+<span id="cb52-20"><a href="#cb52-20" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb52-21"><a href="#cb52-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb52-22"><a href="#cb52-22" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb52-23"><a href="#cb52-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 

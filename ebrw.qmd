@@ -1212,6 +1212,10 @@ In the plots above, each point represents a single trial.  While we can see in t
 Therefore, a more informative way to judge whether the model is making sensible predictions is to compare its *mean* predictions against *average* observed performance.  Since this is a recognition memory task, it makes the most sense to average performance depending on whether the probe item was a *target* (i.e., was one of the studied items) or a *foil* (i.e., was not one of the studied items).  The code below first defines a new column in the `obs_pred` tibble that indicates the type of trial before aggregating both observed and predicted performance by probe type, then making plots similar to those above.
 
 ```{r}
+#| code-fold: show
+
+obs_pred$probe_type <- NA
+
 for (i in 1:length(probe_item)) {
     # Note the use of "%in%"
     if (probe_item[i] %in% study_items[i,]) {
@@ -1369,7 +1373,7 @@ ebrw_nll <- function(par, stim_coords, study_items, probe_item, response, rt, n_
 ## Exercises
 
 1. You may have noticed that our implementation of the EBRW assumes that each list of studied items is the same length.  Describe how to modify our `ebrw_nll` function so that `study_items` can include `NA` values, thus allowing for lists to vary in length, similar to how we allowed our race model to be robust to sets of different size.  *Hint: All this involves is putting a `na.rm = TRUE` somewhere in our code!*
-2. This is a follow-up to the previous exercise.  In applications of the EBRW to experiments that vary the number of items, it is typical to assume that the "criterion" varies linearly with list length [@NosofskyEtAl2011; @NosofskyEtAl2014EBRW].  Modify our `ebrw_nll` function to accommodate this version of the model.  The chunk of code below gives a suggestion about how this might be done in such a way that preserves the functionality of the code we used throughout this chapter.
+2. This is a follow-up to the previous exercise.  In applications of the EBRW to experiments that vary the number of items, it is typical to assume that the "criterion" varies linearly with list length [@NosofskyEtAl2011; @NosofskyEtAl2014].  Modify our `ebrw_nll` function to accommodate this version of the model.  The chunk of code below gives a suggestion about how this might be done in such a way that preserves the functionality of the code we used throughout this chapter by keeping the "criterion" parameter and adding a "criterion_slope" parameter.
 ```{r eval = FALSE}
 #| code-fold: show
 
