@@ -1,0 +1,24 @@
+# Distributed representations, similarity, and recognition
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(patchwork)
+library(colorspace)
+library(plotly)
+library(WienR)
+
+set.seed(12222)
+```
+
+In the previous chapter, we were introduced to the Exemplar-Based Random Walk (EBRW) model.  We saw how it could be used to model behavior in a *recognition memory* task in which a participant studies a number of items and is then presented with a "probe" item and must decide whether or not the probe was among the items that were studied.  The EBRW explained such decisions in terms of *summed similarity* between the probe and each studied item.  In the EBRW, similarity was a function of the *distance* between *representations* of the probe and study items.  The probe and study items were represented as *points* in a multidimensional space.  Each dimension of this space corresponds to a "feature" or "attribute" that an item could have, with different coordinates corresponding to different values of that feature/attribute.  Often, these features/attributes can be identified with particular physical characteristics of an item (like hue, brightness, roughness, etc.).
+
+The EBRW is a great example of how a computational cognitive model can help explain behavior in terms of *latent representations* that someone forms of their experience.  It is also an example of a *distributed representation* of an item, in that an item is characterized by the particular *distribution* or *configuration* of values it has across a number of features/attributes.  In this chapter, we explore more general forms of distributed representations and more general ways that we can model similarity between representations.  We will continue to model representations of items as sets of numbers---that is, as a *vector*---but we will abandon the notion that each element of the vector has a direct relationship with physical characteristics of the item.
+
+## Cosine similarity
+
+### Transformed dot-product (MINERVA)
+
+## Likelihood (REM)
+
+## Cosine to likelihood
+

@@ -12,7 +12,7 @@ book:
       chapters:
         - intro.qmd
         - r_coding.qmd
-    - part: "First foray"
+    - part: "Modeling behavior"
       chapters:
         - random_walk.qmd
         - diffusion_sim.qmd
@@ -20,6 +20,8 @@ book:
         - model_comparison.qmd
         - blast_example.qmd
         - accumulator_models.qmd
+    - part: "Coupling behavior to structured representations"
+      chapters:
         - ebrw.qmd
     - references.qmd
 

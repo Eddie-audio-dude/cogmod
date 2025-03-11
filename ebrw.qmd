@@ -12,9 +12,13 @@ my_theme <- theme_classic()
 theme_set(my_theme)
 
 hue <- 0
+
+set.seed(12222)
 ```
 
-The **Exemplar-Based Random Walk (EBRW)** [@NosofskyPalmeri1997; @NosofskyEtAl2011] is a dynamic extension of the **Generalized Context Model (GCM)** [@Nosofsky1986].  According to these models, each time you experience an item in a particular context, it leaves a "trace" in memory.  This trace is called an "exemplar" or an "instance" and it consists of a record of the **values** the item had for particular **features**.  When you are presented with a **probe** item, it *activates* each of these exemplars in memory in proportion to how similar the features of the probe are to the features of the exemplars in memory.
+So far, we have focused on models that explain behavior (choice and response time) in terms of how representations of "evidence" are processed via some form of accumulation.  We pointed out that the "evidence" in these models was an abstract quantity that would be interpreted differently depending on the application---the "evidence" for Buridan's Ass was largely perceptual in nature, based on the visual features of his two hay piles; the "evidence" in a recognition memory task came from processes that compared a probe item to the contents of memory; the "evidence" in a visual search task cam from processes that compared the items in the display to a representation of the search target.  In this chapter, we begin to dig deeper by explaining where this evidence comes from in a particular task domain.  Specifically, we will explore the **Exemplar-Based Random Walk (EBRW)** model [@NosofskyPalmeri1997; @NosofskyEtAl2011].  We will see how this model explains choice and response time in a recognition memory task by explaining *how* the relevant evidence is derived.
+
+The EBRW is a dynamic extension of the earlier **Generalized Context Model (GCM)** [@Nosofsky1986].  According to both tbe EBRW and GCM, each time you experience an item in a particular context, it leaves a "trace" in memory.  This trace is called an "exemplar" or an "instance" and it consists of a record of the **values** the item had for particular **features** or **attributes**.  When you are presented with a **probe** item, it *activates* each of these exemplars in memory in proportion to how *similar* the features of the probe are to the features of the exemplars in memory.
 
 The EBRW was originally developed to account for choice and RT in *categorization* tasks.  In what follows, we apply EBRW to a *recognition* task.  Recognition decisions are based on the summed activation across all exemplars in memory, which is termed the "familiarity" of the probe.  The extent to which familiarity is higher than a **criterion** determines the extent to which the probe will be recognized as having been seen before.  Specifically, familiarity determines the **rate at which evidence accumulates** toward either a "yes" or "no" decision regarding whether the probe item was seen before.  If the accumulated evidence reaches an upper threshold, a "yes" decision is made; otherwise, if the accumulated evidence reaches a lower threshold, a "no" decision is made.
 
@@ -50,7 +54,7 @@ The perceived **distance** between any two of these colors is the Euclidean dist
 $$
 d_{ij} = \sqrt{\sum_{k = 1}^{N_F} w_k \left(x_{ik} - x_{jk} \right)^2}
 $$
-where $w_k$ is the weight given to feature $k$, $x_{ik}$ is the value of item $i$ on feature $k$, $x_{jk}$ is the value of item $j$ on feature $k$, $d_{ij}$ is the perceived distance between items $i$ and $j$, and $N_F$ is the number of features which in this example is 3 (hue, chroma, and luminance).  Note also that while Euclidean distance is appropriate for colors, other types of distance metrics may be more appropriate for other kinds of stimuli.
+where $w_k$ is the weight given to feature $k$, $x_{ik}$ is the value of item $i$ on feature $k$, $x_{jk}$ is the value of item $j$ on feature $k$, $d_{ij}$ is the perceived distance between items $i$ and $j$, and $N_F$ is the number of features which in this example is 3 (hue, chroma, and luminance).  Note also that while Euclidean distance is appropriate for colors, other types of distance metrics may be more appropriate for other kinds of stimuli, particularly those with *separable* dimensions which are perceived independently from one another [e.g., @GarnerFelfoldy1970].
 
 Perceived **similarity** between two items, $s_{ij}$, is an exponential function of the psychological distance between those items:
 $$
@@ -65,7 +69,7 @@ expand_grid(d = seq(0, 10, length.out = 151), c = seq(0.25, 3, by = 0.25)) %>%
     geom_line() +
     scale_color_continuous_sequential() +
     labs(x = expression(d[ij]), y = expression(s[ij])) +
-    theme(legend.position = c(1, 1), legend.justification = c(1, 1))
+    theme(legend.position = "inside", legend.position.inside = c(1, 1), legend.justification = c(1, 1))
 ```
 
 ### Summed similarity
@@ -468,7 +472,7 @@ For example purposes, this implementation doesn't include all of the bells and w
 # stim_coords: this is a matrix of the coordinates of the stimuli, where each row is a stimulus and each column is a dimension
 # study_items: this is a matrix where each row is a trial and each column indicates the items that were studied on that trial
 # probe_item: this is a vector giving the index of the probe item on each trial
-# response: this is a vector where each value is 2 or 1, depending on whether the participant responsed "yes" (2) or "no" (1) on that trial
+# response: this is a vector where each value is 2 or 1, depending on whether the participant responded "yes" (2) or "no" (1) on that trial
 # rt: this is a vector of the response times from each trial
 ebrw_nll <- function(par, stim_coords, study_items, probe_item, response, rt) {
     # 1. Compute the mean and SD of the drift for each trial
@@ -693,7 +697,15 @@ to_plot <- as.data.frame(stim_coords)
 colnames(to_plot) <- paste("Dimension", 1:ncol(stim_coords))
 rownames(to_plot) <- paste("Item", 1:nrow(stim_coords))
 
-plot_ly(data = to_plot, x = ~ `Dimension 1`, y = ~ `Dimension 2`, z = ~ `Dimension 3`, type = "scatter3d", text = rownames(to_plot))
+plot_ly(
+    data = to_plot,
+    x = ~ `Dimension 1`,
+    y = ~ `Dimension 2`,
+    z = ~ `Dimension 3`,
+    type = "scatter3d",
+    text = rownames(to_plot),
+    mode = "markers+text"
+)
 ```
 
 In addition for each trial of the recognition task, the `study_items` matrix tells us which of the two items had been presented as part of the set to be remembered and the `probe_item` vector tells us what the probe item was.  These numbers refer to row in the `stim_coords` matrix.
@@ -772,7 +784,616 @@ And the final result!
 fit
 ```
 
-The beauty of this result is that we have explained why this participant did what they did in terms of
+It may seem like a lot of work for such a simple result---six numbers!  But it helps to take a step back and realize what we have just done.  We had a participant provide similarity ratings for pairs of unusual auditory stimuli that they had never heard before.  We found a way to *represent* how that participant perceives those stimuli in terms of coordinates in a multidimensional space.  We could then infer, from their choices and response times in a recognition task, how well this participant could remember these stimuli and how they used perceived similarity to make their choices.  We have explained why this participant did what they did not just in terms of accumulating evidence for a decision, but in terms of how they got that evidence from their memory for novel auditory stimuli.
 
-a. Their internal representations of the stimuli, modeled as coordinates in a latent psychological space.
-b. A decision process that involves continuously sampling exemplars from memory until a criterion is reached.
+## Predictions by simulation and math
+
+As impressive as it is to have "reverse-engineered" the contents of a participant's memory from their behavior, there are still some pieces we have left out of the puzzle.  Specifically, although we developed a function to calculate the NLL for the purpose of estimating parameters, we haven't yet built a function to *simulate* data using the EBRW.  That is the purpose of this section.  We will also see some explicit mathematical formulae for predicting *average* performance without the need to run many simulations.  In the end, this will enable us to (a) verify the quality of our model fit by comparing its predictions to observations; and (b) make predictions for novel experimental conditions that we may not have observed.
+
+Finally, this section demonstrates a general technique that is often useful in programming a model:  Having a single function that can return *either* the NLL *or* predictions.  Since the model parameters have the same meaning regardless of whether we are calculating likelihoods or making predictions, we can just tell the function what we want it to do with those parameters.  The value of this approach is that we won't accidentally write simulation code that differs in some important way from our likelihood code.  For example, if we change the parameters for our likelihood code, we want to make sure that our simulation code respects that change; the approach we take in this section forces us to do this and thereby keep our model consistent.
+
+### Simulating individual trials
+
+First, we will see how we can modify our `ebrw_nll` function to return simulated behavior instead of just the negative log-likelihood of observed choices and RT's.  The chunk of code below gives an outline of our approach, which involves adding a new argument to the function called `n_sims`.  By default, `n_sims = 0`, which indicates that the function should *not* do any simulation but should instead return the NLL, as it did above.  As you might anticipate, we will need an `if...else` structure to check whether `n_sims > 0` or not.
+
+```{r}
+#| code-fold: show
+
+# Function arguments:
+# par: this is a named vector of parameter values
+# stim_coords: this is a matrix of the coordinates of the stimuli, where each row is a stimulus and each column is a dimension
+# study_items: this is a matrix where each row is a trial and each column indicates the items that were studied on that trial
+# probe_item: this is a vector giving the index of the probe item on each trial
+# response: this is a vector where each value is 2 or 1, depending on whether the participant responsed "yes" (2) or "no" (1) on that trial
+# rt: this is a vector of the response times from each trial
+# n_sims: this indicates whether or not simulations are meant to be returned instead of the NLL
+ebrw_nll <- function(par, stim_coords, study_items, probe_item, response, rt, n_sims = 0) {
+    # 1. Compute the mean and SD of the drift for each trial
+    
+    stim_dists <- as.matrix(dist(stim_coords))
+    
+    evidence_mean <- rep(0, length(probe_item))
+    evidence_sd <- rep(0, length(probe_item))
+    
+    for (i in 1:length(probe_item)) {
+        summed_sim <- sum(exp(-par["specificity"] * stim_dists[probe_item[i], study_items[i,]]))
+        p <- summed_sim / (summed_sim + par["criterion"])
+        
+        evidence_mean[i] <- par["retrieval_rate"] * (2 * p - 1)
+        evidence_sd[i] <- 2 * sqrt(par["retrieval_rate"] * p * (1 - p))
+    }
+    
+    if (n_sims > 0) {
+        # 2a. Simulate a response for each trial
+        
+        # SIMULATION CODE GOES HERE
+        
+        # 3a. Return final result
+        return(result)
+    } else {
+        # 2b. Calculate the log-likelihood of each observed response/RT on each trial
+        result <- try(WienerPDF(
+            t = rt,
+            response = response,
+            a = par["a"] / evidence_sd,
+            w = par["w"],
+            v = evidence_mean / evidence_sd,
+            t0 = par["t0"]
+        ))
+        
+        # 3b. Return final result
+        if (class(result) == "try-error") {
+            return(Inf)
+        } else {
+            return(-sum(result$logvalue))
+        }
+    }
+}
+```
+
+It is worth pointing out that, aside from the `if...else` structure, nothing else has changed about the function:  Other than `n_sims` it takes exactly the same arguments, meaning it will still use the provided parameters to compute the drift rates for each trial of an experiment based on the similarity between the studied items and the probe.
+
+You may wonder at this point why `n_sims` is a number---why didn't we use a boolean like `do_simulation` which could be either `TRUE` or `FALSE`?  This is because we may want to simulate *multiple replications* of a given trial.  For example, we may want to simulate an experiment in which the same study/test items are repeated.  Alternatively, we may want to use a large number of simulations so that we can estimate the entire *distribution* of possible responses and response times that a participant might produce on a given trial.  In any case, by allowing `n_sims` to be a number rather than just `TRUE` or `FALSE`, we are making our function more flexible---something for which our future selves will thank our current selves.
+
+Back to the business at hand, we need to fill in the blank where it says `SIMULATION CODE HERE`.  Recall that we are using the `WienR` package, which includes a `sampWiener` function for simulating choices and RT's.  We used this to build our diffusion simulation code and we can use it again here.  The only challenge is that, unlike `WienerPDF`, `sampWiener` can only take a single value for the diffusion model parameters (e.g., `a`, `v`, `w`, etc.) at a time.  So we will use a `for` loop to simulate behavior on each individual trial, as shown in the code below (as usual, there are alternative approaches that are more efficient than a `for` loop, but our aim at the moment is for transparency):
+
+```{r}
+#| code-fold: show
+
+# Function arguments:
+# par: this is a named vector of parameter values
+# stim_coords: this is a matrix of the coordinates of the stimuli, where each row is a stimulus and each column is a dimension
+# study_items: this is a matrix where each row is a trial and each column indicates the items that were studied on that trial
+# probe_item: this is a vector giving the index of the probe item on each trial
+# response: this is a vector where each value is 2 or 1, depending on whether the participant responsed "yes" (2) or "no" (1) on that trial
+# rt: this is a vector of the response times from each trial
+# n_sims: this indicates whether or not simulations are meant to be returned instead of the NLL
+ebrw_nll <- function(par, stim_coords, study_items, probe_item, response, rt, n_sims = 0) {
+    # 1. Compute the mean and SD of the drift for each trial
+    
+    stim_dists <- as.matrix(dist(stim_coords))
+    
+    evidence_mean <- rep(0, length(probe_item))
+    evidence_sd <- rep(0, length(probe_item))
+    
+    for (i in 1:length(probe_item)) {
+        summed_sim <- sum(exp(-par["specificity"] * stim_dists[probe_item[i], study_items[i,]]))
+        p <- summed_sim / (summed_sim + par["criterion"])
+        
+        evidence_mean[i] <- par["retrieval_rate"] * (2 * p - 1)
+        evidence_sd[i] <- 2 * sqrt(par["retrieval_rate"] * p * (1 - p))
+    }
+    
+    if (n_sims > 0) {
+        # 2a. Simulate a response for each trial
+        result <- c()
+        
+        # For each trial...
+        for (i in 1:length(probe_item)) {
+            # Simulate `n_sims` replications of this trial, using its corresponding parameters
+            trial_sim <- sampWiener(
+                N = n_sims,
+                a = par["a"] / evidence_sd[i],
+                w = par["w"],
+                v = evidence_mean[i] / evidence_sd[i],
+                t0 = par["t0"]
+            )
+            
+            # Append the new set of simulations to our `result`, including an indicator of which trial we are simulating and an index for each simulation
+            result <- rbind(
+                result,
+                tibble(trial = i, sim_index = 1:n_sims, rt = trial_sim$q, response = trial_sim$response)
+            )
+        }
+        
+        # 3a. Return final result
+        return(result)
+    } else {
+        # 2b. Calculate the log-likelihood of each observed response/RT on each trial
+        result <- try(WienerPDF(
+            t = rt,
+            response = response,
+            a = par["a"] / evidence_sd,
+            w = par["w"],
+            v = evidence_mean / evidence_sd,
+            t0 = par["t0"]
+        ))
+        
+        # 3b. Return final result
+        if (class(result) == "try-error") {
+            return(Inf)
+        } else {
+            return(-sum(result$logvalue))
+        }
+    }
+}
+```
+
+The code above uses our old trick of creating an "empty" tibble (`results <- c()`) and then appending each new set of simulations to the `results` tibble before returning it.  Let's take the new code out for a spin!
+
+First, let's see how easy it is to simulate data that comes from exactly the same trials that our participant experienced:
+
+```{r}
+#| code-fold: show
+
+sim_trials <- ebrw_nll(
+    par = fit$par,
+    stim_coords = stim_coords,
+    study_items = study_items,
+    probe_item = probe_item,
+    n_sims = 1
+)
+
+print(sim_trials)
+```
+
+Notice that for the `par` argument, we used the fitted parameter values we found earlier, which are in `fit$par`.  We also used the exact same `stim_coords`, `study_items`, and `probe_item` arguments as we used when fitting this participant's data.  So essentially what we just did is simulate an *imaginary but plausible* dataset that this participant *could have* produced, assuming that the EBRW is a good model of their performance.
+
+While simulating a single dataset has its value---like with the parameter recovery exercises we did with diffusion models---we might be more interested in the *distribution* of responses and response times that this participant might produce.  This is one reason why it is handy to be able to set `n_sims` to a large value, as in the chunk of code below.  We can then estimate, for example, the *probability* of making a "yes" response in a particular trial, or the *mean* correct response time.  That said, the next section will show us how we can obtain predictions for response probabilities and mean RT's mathematically.  However, mathematical formulae won't always be available, so we will often fall back on simulations.
+
+```{r}
+#| code-fold: show
+
+# Simulate many trials
+sim_trials <- ebrw_nll(
+    par = fit$par,
+    stim_coords = stim_coords,
+    study_items = study_items,
+    probe_item = probe_item,
+    n_sims = 1000
+)
+
+# Obtain mean predictions for each trial
+sim_means <- sim_trials %>%
+    group_by(trial) %>%
+    summarize(
+        sim_p_upper = mean(response == "upper"),
+        sim_mean_rt_yes = mean(rt[response == "upper"]),
+        sim_mean_rt_no = mean(rt[response == "lower"])
+    )
+
+print(sim_means)
+```
+
+You may already notice one issue with using simulation to obtain average model predictions.  According to the fitted model, there is almost no chance that this participant gives a "yes" response on trial 9.  Even in 1000 simulations, the model never produced a "yes" response on that trial.  As a result, we would need to simulate *many* trials before we got a stable estimate of the mean RT for a "yes" response on the trial (though, given how unlikely it is, maybe we wouldn't be too interested in that prediction anyway).
+
+Out of curiousity, let's see what the study items and probe were for trial 9:
+
+```{r}
+#| code-fold: show
+
+study_items[9,]
+probe_item[9]
+```
+
+If you refer back to the MDS plot above, we see that items 3 and 4 (the studied items on trial 9) both fall on one end of "Dimension 1" whereas item 6 (the probe item) falls on the other side.  In other words, the probe is pretty far from *both* studied items, so it makes sense that the EBRW would predict a very low probability that this participant incorrectly says "yes" on that trial.
+
+### Mathematical expressions for response probability and mean RT's
+
+Many cognitive models are sufficiently complex that there aren't mathematical expressions for their predictions.  However, the Wiener diffusion model (i.e., without any extra trial-by-trial variability) actually has mathematical expressions for the mean response probability and mean response times (for each response).  These formulae aren't exactly pretty, but they only involve elementary functions that are built into R, so we can translate them into code.
+
+\begin{align}
+\hat{p}_i & = \frac{1 - \exp \left( -\frac{2 a v_i w}{s_i^2} \right)}{1 - \exp\left(-\frac{2 a v_i}{s_i^2} \right)} \\
+\widehat{RT}_{Y,i} & = t_0 + \frac{a}{v_i} \left[ \frac{1}{\tanh \left( \frac{a v_i}{s_i^2} \right)} - \frac{w}{\tanh \left( \frac{a v_i w}{s_i^2} \right)} \right] \\
+\widehat{RT}_{N,i} & = t_0 + \frac{a}{v_i} \left[ \frac{1}{\tanh \left( \frac{a v_i}{s_i^2} \right)} - \frac{1 - w}{\tanh \left( \frac{a v_i \left(1 - w \right)}{s_i^2} \right)} \right]
+\end{align}
+
+It may help to keep in mind the following "Rosetta stone" that relates the mathematical notation to things that we recognize from our code:
+
+* $\hat{p}_i$: Probability of giving a "yes" response on trial $i$.
+* $\widehat{RT}_{Y,i}$: Mean RT for "yes" responses on trial $i$.
+* $\widehat{RT}_{N,i}$: Mean RT for "no" responses on trial $i$.
+* $a$: Boundary separation, `par["a"]`.
+* $w$: Response bias, `par["w"]`.
+* $t_0$: Residual time, `par["t0"]`.
+* $v_i$: Mean drift rate on trial $i$, `evidence_mean[i]`.
+* $s_i$: Standard deviation of drift on trial $i$, `evidence_sd[i]`.
+
+Finally, $\tanh$ is the [hyperbolic tangent](https://en.wikipedia.org/wiki/Hyperbolic_functions#Hyperbolic_tangent) function, which is built into R as `tanh()`.  This function is defined by
+$$
+\tanh \left(x \right) = \frac{\exp \left( x \right) - \exp \left(-x \right)}{\exp \left( x \right) + \exp \left(-x \right)}
+$$
+and it looks like this:
+
+```{r}
+tibble(x = seq(-3, 3, length.out = 201)) %>%
+    mutate(y = tanh(x)) %>%
+    ggplot(aes(x = x, y = y)) +
+    geom_line() +
+    labs(x = "x", y = "tanh(x)")
+```
+
+Armed with these mathematical expressions, we can readily translate them into R code.  We'll first do that and then see how we can insert that code into our `ebrw_nll` function.  In the following, we are again using a `for` loop over each trial, using `i` as the index for the trial.  Like we did with the simulations, we will first create an empty `result` and then append the predicted response probabilities and mean RT's for each trial.  Also, since the term $s_i^2$ appears many times across all three formulae, we will want to compute it once and then refer back to it again later.  The result is stored as the vector `evidence_var`.
+
+```{r eval = FALSE}
+#| code-fold: show
+
+result <- c()
+
+# For convenience, we compute this first so we can refer to it each time we need it later
+evidence_var <- evidence_sd^2
+
+for (i in 1:length(probe_item)) {
+    trial_p_yes <- (1 - exp(-2 * par["a"] * evidence_mean[i] * par["w"] / evidence_var[i])) / (1 - exp(-2 * par["a"] * evidence_mean[i] / evidence_var[i]))
+    trial_mean_rt_yes <- par["t0"] + (par["a"] / evidence_mean[i]) * (1 / tanh(par["a"] * evidence_mean[i] / evidence_var[i]) - par["w"] / tanh(par["a"] * evidence_mean[i] * par["w"] / evidence_var[i]))
+    trial_mean_rt_no <- par["t0"] + (par["a"] / evidence_mean[i]) * (1 / tanh(par["a"] * evidence_mean[i] / evidence_var[i]) - (1 - par["w"]) / tanh(par["a"] * evidence_mean[i] * (1 - par["w"]) / evidence_var[i]))
+    
+    result <- rbind(
+        result,
+        tibble(trial = i, p_yes = trial_p_yes, mean_rt_yes = trial_mean_rt_yes, mean_rt_no = trial_mean_rt_no)
+    )
+}
+```
+
+Now we just need to figure out how to get the chunk of code above into our `ebrw_nll` function.  There are a number of reasonable ways to do this.  For example, we could add a new argument called something like `return_math_pred` which we could set to be `TRUE` or `FALSE` depending on whether we wanted the mathematically-computed mean predictions.  However, since we already have the `n_sims` argument we added earlier, we can do something a bit clever.  Since the mean predictions are based on what we would observe over an infinite number of simulations, we can allow a user to set `n_sims = Inf`, where `Inf` is R's special shorthand for "infinity".  R uses the `is.infinite` function to check whether a number is infinite or not.
+
+As such, in the code below, we "daisy-chain" the `if...else` construction we built in the previous section.  We first check `if (is.infinite(n_sims))` and, if so, run the chunk of code above.  We then check for `else if (n_sims > 0)` and, if so, run the specified but finite number of simulations per trial.  Finally, the `else` statement computes the negative log-likelihoods.
+
+```{r}
+#| code-fold: show
+
+# Function arguments:
+# par: this is a named vector of parameter values
+# stim_coords: this is a matrix of the coordinates of the stimuli, where each row is a stimulus and each column is a dimension
+# study_items: this is a matrix where each row is a trial and each column indicates the items that were studied on that trial
+# probe_item: this is a vector giving the index of the probe item on each trial
+# response: this is a vector where each value is 2 or 1, depending on whether the participant responsed "yes" (2) or "no" (1) on that trial
+# rt: this is a vector of the response times from each trial
+# n_sims: this indicates whether or not simulations are meant to be returned instead of the NLL
+ebrw_nll <- function(par, stim_coords, study_items, probe_item, response, rt, n_sims = 0) {
+    # 1. Compute the mean and SD of the drift for each trial
+    
+    stim_dists <- as.matrix(dist(stim_coords))
+    
+    evidence_mean <- rep(0, length(probe_item))
+    evidence_sd <- rep(0, length(probe_item))
+    
+    for (i in 1:length(probe_item)) {
+        summed_sim <- sum(exp(-par["specificity"] * stim_dists[probe_item[i], study_items[i,]]))
+        p <- summed_sim / (summed_sim + par["criterion"])
+        
+        evidence_mean[i] <- par["retrieval_rate"] * (2 * p - 1)
+        evidence_sd[i] <- 2 * sqrt(par["retrieval_rate"] * p * (1 - p))
+    }
+    
+    if (is.infinite(n_sims)) {
+        # 2a. Compute predicted response probabilities and mean RT's for each trial
+        result <- c()
+        
+        evidence_var <- evidence_sd^2
+        
+        for (i in 1:length(probe_item)) {
+            trial_p_yes <- (1 - exp(-2 * par["a"] * evidence_mean[i] * par["w"] / evidence_var[i])) / (1 - exp(-2 * par["a"] * evidence_mean[i] / evidence_var[i]))
+            trial_mean_rt_yes <- par["t0"] + (par["a"] / evidence_mean[i]) * (1 / tanh(par["a"] * evidence_mean[i] / evidence_var[i]) - par["w"] / tanh(par["a"] * evidence_mean[i] * par["w"] / evidence_var[i]))
+            trial_mean_rt_no <- par["t0"] + (par["a"] / evidence_mean[i]) * (1 / tanh(par["a"] * evidence_mean[i] / evidence_var[i]) - (1 - par["w"]) / tanh(par["a"] * evidence_mean[i] * (1 - par["w"]) / evidence_var[i]))
+            
+            result <- rbind(
+                result,
+                tibble(trial = i, p_yes = trial_p_yes, mean_rt_yes = trial_mean_rt_yes, mean_rt_no = trial_mean_rt_no)
+            )
+        }
+        
+        # 3a. Return final result
+        return(result)
+    } else if (n_sims > 0) {
+        # 2b. Simulate a response for each trial
+        result <- c()
+        
+        # For each trial...
+        for (i in 1:length(probe_item)) {
+            # Simulate `n_sims` replications of this trial, using its corresponding parameters
+            trial_sim <- sampWiener(
+                N = n_sims,
+                a = par["a"] / evidence_sd[i],
+                w = par["w"],
+                v = evidence_mean[i] / evidence_sd[i],
+                t0 = par["t0"]
+            )
+            
+            # Append the new set of simulations to our `result`, including an indicator of which trial we are simulating and an index for each simulation
+            result <- rbind(
+                result,
+                tibble(trial = i, sim_index = 1:n_sims, rt = trial_sim$q, response = trial_sim$response)
+            )
+        }
+        
+        # 3b. Return final result
+        return(result)
+    } else {
+        # 2c. Calculate the log-likelihood of each observed response/RT on each trial
+        result <- try(WienerPDF(
+            t = rt,
+            response = response,
+            a = par["a"] / evidence_sd,
+            w = par["w"],
+            v = evidence_mean / evidence_sd,
+            t0 = par["t0"]
+        ))
+        
+        # 3c. Return final result
+        if (class(result) == "try-error") {
+            return(Inf)
+        } else {
+            return(-sum(result$logvalue))
+        }
+    }
+}
+```
+
+Again, let's see how this works.  The code below computes the predicted mean response probabilities and RT's for each trial:
+
+```{r}
+#| code-fold: show
+
+math_pred <- ebrw_nll(
+    par = fit$par,
+    stim_coords = stim_coords,
+    study_items = study_items,
+    probe_item = probe_item,
+    n_sims = Inf
+)
+
+math_pred
+```
+
+Let's see how the mathematical predictions compare to those we derived from our 1000 simulations earlier, at least for the first few trials:
+
+```{r}
+knitr::kable(full_join(sim_means, math_pred, by = "trial")[1:12,], digits = 3)
+```
+
+As we can see, the simulated means tend to be close to the mathematical predictions, but can be off when it comes to predicting mean RT's for rare responses, since those predictions are based on only a few simulated trials.
+
+### Comparing predicted to observed
+
+As noted above, being able to compute predictions from the EBRW is important to verify that it is doing a good job fitting the data.  A common way to do this is to make a plot with observed values on the horizontal axis and predicted value on the vertical axis.  To the extent that the points in the plot cluster around the diagonal, we have reason to believe that the model's predictions are closely aligned with what was observed.  Relatedly, we can report the $R^2$ value, i.e., the proportion of variance explained by the model; this is just the square of the Pearson correlation coefficient.
+
+In the present application, we have two observed values on each trial: the response and the RT.  Thus, we'll need to make two plots, one for each measure.  But to do that, we'll first need to get both the observed and predicted data into the same data structure.  That's what the chunk of code below does.
+
+```{r}
+#| code-fold: show
+
+# This tibble contains the observed data for each trial
+obs_data <- tibble(
+    trial = 1:length(probe_item),
+    rt = rt,
+    response = response - 1 # The "- 1" is because "response" is coded as 2 ("yes") and 1 ("no"), but it'll be easier to instead code this as 1 ("yes") and 0 ("no").
+)
+
+# Since both the observed and predicted data contain a "trial" column, use that to join them together
+obs_pred <- full_join(obs_data, math_pred, by = "trial")
+```
+
+Now let's try to naively plot the observed and predicted data against one another, as we just described.  Note that this will not really work as intended!
+
+```{r}
+resp_plot <- obs_pred %>%
+    ggplot(aes(x = response, y = p_yes, color = factor(response))) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+    geom_point() +
+    coord_equal() +
+    scale_color_manual(values = c("1" = "#377eb8", "0" = "#e41a1c")) +
+    labs(x = "Observed response", y = "Predicted P(\"Yes\")", color = "Response")
+
+rt_plot <- obs_pred %>%
+    mutate(pred_rt = if_else(response == 1, mean_rt_yes, mean_rt_no)) %>%
+    ggplot(aes(x = rt, y = pred_rt, color = factor(response))) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+    geom_point() +
+    coord_equal() +
+    scale_color_manual(values = c("1" = "#377eb8", "0" = "#e41a1c")) +
+    labs(x = "Observed RT", y = "Predicted mean RT", color = "Response")
+
+resp_plot + rt_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+In the plots above, each point represents a single trial.  While we can see in the left plot (barely) that the model generally tends to predict a high probability of saying "yes" on trials where the participant actually said "yes", it is much harder to see what is going on in the right plot that shows RT's.  The issue is that the model is making a prediction about the *mean* RT whereas each point represents a *sample* from the participant's RT distribution.
+
+Therefore, a more informative way to judge whether the model is making sensible predictions is to compare its *mean* predictions against *average* observed performance.  Since this is a recognition memory task, it makes the most sense to average performance depending on whether the probe item was a *target* (i.e., was one of the studied items) or a *foil* (i.e., was not one of the studied items).  The code below first defines a new column in the `obs_pred` tibble that indicates the type of trial before aggregating both observed and predicted performance by probe type, then making plots similar to those above.
+
+```{r}
+for (i in 1:length(probe_item)) {
+    # Note the use of "%in%"
+    if (probe_item[i] %in% study_items[i,]) {
+        obs_pred$probe_type[i] <- "Target"
+    } else {
+        obs_pred$probe_type[i] <- "Foil"
+    }
+}
+
+obs_pred$probe_type <- factor(obs_pred$probe_type, levels = c("Target", "Foil"))
+
+resp_plot <- obs_pred %>%
+    group_by(probe_type) %>%
+    summarize(mean_obs = mean(response), mean_pred = mean(p_yes)) %>%
+    ggplot(aes(x = mean_obs, y = mean_pred, color = probe_type)) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+    geom_point() +
+    coord_equal() +
+    scale_color_manual(values = c("Target" = "#377eb8", "Foil" = "#e41a1c")) +
+    labs(x = "Observed response proportion", y = "Predicted P(\"Yes\")", color = NULL)
+
+rt_plot <- obs_pred %>%
+    mutate(pred_rt = if_else(response == 1, mean_rt_yes, mean_rt_no)) %>%
+    group_by(probe_type) %>%
+    summarize(mean_obs = mean(rt), mean_pred = mean(pred_rt)) %>%
+    ggplot(aes(x = mean_obs, y = mean_pred, color = probe_type)) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed") +
+    geom_point() +
+    coord_equal() +
+    scale_color_manual(values = c("Target" = "#377eb8", "Foil" = "#e41a1c")) +
+    labs(x = "Observed mean RT", y = "Predicted mean RT", color = NULL)
+
+resp_plot + rt_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+The above graphs are not only easier to see, they allow us to more fairly critique the model.  The model does a great job predicting response probabilities as well as mean RT for targets.  It looks like it predicts longer mean RT to foils than was observed, but that could also reflect sampling variability.  In general, the plots above suggest that the model is generally good at fitting this participant's data, though it may be missing something about the RT's.  That misfit in part justifies the more complex version of the EBRW that @GillespieCox2024 fit to these data.
+
+### Making novel predictions
+
+Now that we have the ability to quickly extract predictions from the EBRW, it is worth pointing out that we can now make predictions about how this participant would respond in a trial they did not experience, perhaps with a different set of study items or a different probe item.
+
+To go even broader, we could imagine a new experiment in which the auditory stimuli were degraded by noise.  In that case, we might expect the participant's sensitivity parameter to be lower in that condition.  We could simulate how this would affect their recognition performance with this stimuli (though it is likely that, in such an experiment, the participant would also adjust their response caution and response bias to compensate).
+
+The point is that the EBRW permits us to make predictions regarding particular experimental manipulations, which can then help us design future experiments.  This is because the EBRW's predictions depend upon the specifics of how a participant represents the items in the experiment and contains parameters with meanings that are clearly linked to cognitive constructs like "sensitivity".  This was not necessarily the case with the "generic" decision models we explored earlier in the course.
+
+## Putting it all together
+
+The chunk of code below puts all our EBRW work in one place.  There are blanks left in certain areas that could either be filled by observed results or by your own imagination.  This chunk thus serves as a useful starting point for some of our exercises.
+
+```{r eval = FALSE}
+#| code-fold: show
+
+# This could be derived using MDS
+stim_coords <- ...
+
+# These could be actual trials in an experiment or used to construct imaginary trials for simulation
+study_items <- ...
+probe_item <- ...
+
+# These could be observed or simulated; they may not even be needed if you are just doing simulation
+response <- ...
+rt <- ...
+
+# This could be from a model fit or specified manually to do simulations
+par <- ...
+
+# Function arguments:
+# par: this is a named vector of parameter values
+# stim_coords: this is a matrix of the coordinates of the stimuli, where each row is a stimulus and each column is a dimension
+# study_items: this is a matrix where each row is a trial and each column indicates the items that were studied on that trial
+# probe_item: this is a vector giving the index of the probe item on each trial
+# response: this is a vector where each value is 2 or 1, depending on whether the participant responsed "yes" (2) or "no" (1) on that trial
+# rt: this is a vector of the response times from each trial
+# n_sims: this indicates whether or not simulations are meant to be returned instead of the NLL
+ebrw_nll <- function(par, stim_coords, study_items, probe_item, response, rt, n_sims = 0) {
+    # 1. Compute the mean and SD of the drift for each trial
+    
+    stim_dists <- as.matrix(dist(stim_coords))
+    
+    evidence_mean <- rep(0, length(probe_item))
+    evidence_sd <- rep(0, length(probe_item))
+    
+    for (i in 1:length(probe_item)) {
+        summed_sim <- sum(exp(-par["specificity"] * stim_dists[probe_item[i], study_items[i,]]))
+        p <- summed_sim / (summed_sim + par["criterion"])
+        
+        evidence_mean[i] <- par["retrieval_rate"] * (2 * p - 1)
+        evidence_sd[i] <- 2 * sqrt(par["retrieval_rate"] * p * (1 - p))
+    }
+    
+    if (is.infinite(n_sims)) {
+        # 2a. Compute predicted response probabilities and mean RT's for each trial
+        result <- c()
+        
+        evidence_var <- evidence_sd^2
+        
+        for (i in 1:length(probe_item)) {
+            trial_p_yes <- (1 - exp(-2 * par["a"] * evidence_mean[i] * par["w"] / evidence_var[i])) / (1 - exp(-2 * par["a"] * evidence_mean[i] / evidence_var[i]))
+            trial_mean_rt_yes <- par["t0"] + (par["a"] / evidence_mean[i]) * (1 / tanh(par["a"] * evidence_mean[i] / evidence_var[i]) - par["w"] / tanh(par["a"] * evidence_mean[i] * par["w"] / evidence_var[i]))
+            trial_mean_rt_no <- par["t0"] + (par["a"] / evidence_mean[i]) * (1 / tanh(par["a"] * evidence_mean[i] / evidence_var[i]) - (1 - par["w"]) / tanh(par["a"] * evidence_mean[i] * (1 - par["w"]) / evidence_var[i]))
+            
+            result <- rbind(
+                result,
+                tibble(trial = i, p_yes = trial_p_yes, mean_rt_yes = trial_mean_rt_yes, mean_rt_no = trial_mean_rt_no)
+            )
+        }
+        
+        # 3a. Return final result
+        return(result)
+    } else if (n_sims > 0) {
+        # 2b. Simulate a response for each trial
+        result <- c()
+        
+        # For each trial...
+        for (i in 1:length(probe_item)) {
+            # Simulate `n_sims` replications of this trial, using its corresponding parameters
+            trial_sim <- sampWiener(
+                N = n_sims,
+                a = par["a"] / evidence_sd[i],
+                w = par["w"],
+                v = evidence_mean[i] / evidence_sd[i],
+                t0 = par["t0"]
+            )
+            
+            # Append the new set of simulations to our `result`, including an indicator of which trial we are simulating and an index for each simulation
+            result <- rbind(
+                result,
+                tibble(trial = i, sim_index = 1:n_sims, rt = trial_sim$q, response = trial_sim$response)
+            )
+        }
+        
+        # 3b. Return final result
+        return(result)
+    } else {
+        # 2c. Calculate the log-likelihood of each observed response/RT on each trial
+        result <- try(WienerPDF(
+            t = rt,
+            response = response,
+            a = par["a"] / evidence_sd,
+            w = par["w"],
+            v = evidence_mean / evidence_sd,
+            t0 = par["t0"]
+        ))
+        
+        # 3c. Return final result
+        if (class(result) == "try-error") {
+            return(Inf)
+        } else {
+            return(-sum(result$logvalue))
+        }
+    }
+}
+```
+
+## Exercises
+
+1. You may have noticed that our implementation of the EBRW assumes that each list of studied items is the same length.  Describe how to modify our `ebrw_nll` function so that `study_items` can include `NA` values, thus allowing for lists to vary in length, similar to how we allowed our race model to be robust to sets of different size.  *Hint: All this involves is putting a `na.rm = TRUE` somewhere in our code!*
+2. This is a follow-up to the previous exercise.  In applications of the EBRW to experiments that vary the number of items, it is typical to assume that the "criterion" varies linearly with list length [@NosofskyEtAl2011; @NosofskyEtAl2014EBRW].  Modify our `ebrw_nll` function to accommodate this version of the model.  The chunk of code below gives a suggestion about how this might be done in such a way that preserves the functionality of the code we used throughout this chapter.
+```{r eval = FALSE}
+#| code-fold: show
+
+ebrw_nll <- function(par, stim_coords, study_items, probe_item, response, rt, n_sims = 0) {
+    ...
+    
+    if (is.na(par["criterion_slope"])) {
+        criterion_slope <- 0
+    } else {
+        criterion_slope <- par["criterion_slope"]
+    }
+    
+    for (i in 1:length(probe_item)) {
+        summed_sim <- sum(exp(-par["specificity"] * stim_dists[probe_item[i], study_items[i,]]))
+        
+        # HINT: You will need to find the value of `list_length` on each trial---how will you do this?  (You might think about the fact that we are using `NA` values to indicate when `study_items[i,]` has fewer items than the number of columns in `study_items`).
+        this_criterion <- par["criterion"] + criterion_slope * list_length
+        
+        p <- summed_sim / (summed_sim + this_criterion)
+        
+        evidence_mean[i] <- par["retrieval_rate"] * (2 * p - 1)
+        evidence_sd[i] <- 2 * sqrt(par["retrieval_rate"] * p * (1 - p))
+    }
+    
+    ...
+}
+```
