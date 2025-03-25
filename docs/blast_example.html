@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.39">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,10 +91,10 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-03787a5611acd63027d79b3f02190e6e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -278,6 +278,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="./ebrw.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_reps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Distributed representations, similarity, and recognition</span></span></a>
   </div>
 </li>
       </ul>
@@ -699,24 +705,15 @@ Attaching package: 'Matrix'</code></pre>
     expand, pack, unpack</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Registered S3 methods overwritten by 'car':
-  method                          from
-  influence.merMod                lme4
-  cooks.distance.influence.merMod lme4
-  dfbeta.influence.merMod         lme4
-  dfbetas.influence.merMod        lme4</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
 <pre><code>************
 Welcome to afex. For support visit: http://afex.singmann.science/</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>- Functions for ANOVAs: aov_car(), aov_ez(), and aov_4()
-- Methods for calculating p-values with mixed(): 'KR', 'S', 'LRT', and 'PB'
+- Methods for calculating p-values with mixed(): 'S', 'KR', 'LRT', and 'PB'
 - 'afex_aov' and 'mixed' objects can be passed to emmeans() for follow-up tests
-- NEWS: library('emmeans') now needs to be called explicitly!
 - Get and set global package options with: afex_options()
-- Set orthogonal sum-to-zero contrasts globally: set_sum_contrasts()
+- Set sum-to-zero contrasts globally: set_sum_contrasts()
 - For example analyses see: browseVignettes("afex")
 ************</code></pre>
 </div>
@@ -731,7 +728,7 @@ Attaching package: 'afex'</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set_sum_contrasts</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set_sum_contrasts</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>setting contr.sum globally: options(contrasts=c('contr.sum', 'contr.poly'))</code></pre>
@@ -741,13 +738,13 @@ Attaching package: 'afex'</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aov_ez</span>(</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"subject"</span>,      <span class="co"># Specify the name of the column that identifies unique participants</span></span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">dv =</span> <span class="st">"val"</span>,          <span class="co"># Specify the name of the column that contains the values to be analyzed</span></span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> model_pars <span class="sc">%&gt;%</span> <span class="fu">filter</span>(par <span class="sc">==</span> <span class="st">"a"</span>), <span class="co"># The data for this ANOVA is stored in "model_pars", but we are only interested in the estimates of the "a" parameter</span></span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">between =</span> <span class="st">"group"</span>,   <span class="co"># Specify the name of the column that identifies between-subject comparisons</span></span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">within =</span> <span class="st">"index"</span>     <span class="co"># Specify the name of the column that identifies within-subject comparisons</span></span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aov_ez</span>(</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"subject"</span>,      <span class="co"># Specify the name of the column that identifies unique participants</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">dv =</span> <span class="st">"val"</span>,          <span class="co"># Specify the name of the column that contains the values to be analyzed</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> model_pars <span class="sc">%&gt;%</span> <span class="fu">filter</span>(par <span class="sc">==</span> <span class="st">"a"</span>), <span class="co"># The data for this ANOVA is stored in "model_pars", but we are only interested in the estimates of the "a" parameter</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">between =</span> <span class="st">"group"</span>,   <span class="co"># Specify the name of the column that identifies between-subject comparisons</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">within =</span> <span class="st">"index"</span>     <span class="co"># Specify the name of the column that identifies within-subject comparisons</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Anova Table (Type 3 tests)
@@ -769,17 +766,17 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '+' 0.1 ' ' 1</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aov_ez</span>(</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"subject"</span>,</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">dv =</span> <span class="st">"val"</span>,</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> model_pars <span class="sc">%&gt;%</span></span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(par <span class="sc">==</span> <span class="st">"v"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">difficulty =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Easy"</span>, <span class="st">"Hard"</span>, <span class="st">"Easy"</span>, <span class="st">"Hard"</span>)),</span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">correct_response =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Non-blast"</span>, <span class="st">"Non-blast"</span>, <span class="st">"Blast"</span>, <span class="st">"Blast"</span>))),</span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">between =</span> <span class="st">"group"</span>,</span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">within =</span> <span class="fu">c</span>(<span class="st">"difficulty"</span>, <span class="st">"correct_response"</span>)</span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aov_ez</span>(</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"subject"</span>,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">dv =</span> <span class="st">"val"</span>,</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> model_pars <span class="sc">%&gt;%</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(par <span class="sc">==</span> <span class="st">"v"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">difficulty =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Easy"</span>, <span class="st">"Hard"</span>, <span class="st">"Easy"</span>, <span class="st">"Hard"</span>)),</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">correct_response =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Non-blast"</span>, <span class="st">"Non-blast"</span>, <span class="st">"Blast"</span>, <span class="st">"Blast"</span>))),</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">between =</span> <span class="st">"group"</span>,</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">within =</span> <span class="fu">c</span>(<span class="st">"difficulty"</span>, <span class="st">"correct_response"</span>)</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Anova Table (Type 3 tests)
@@ -802,19 +799,19 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '+' 0.1 ' ' 1</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aov_ez</span>(</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"subject"</span>,</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">dv =</span> <span class="st">"val"</span>,</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> model_pars <span class="sc">%&gt;%</span></span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(par <span class="sc">==</span> <span class="st">"v"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
-<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">difficulty =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Easy"</span>, <span class="st">"Hard"</span>, <span class="st">"Easy"</span>, <span class="st">"Hard"</span>)),</span>
-<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">correct_response =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Non-blast"</span>, <span class="st">"Non-blast"</span>, <span class="st">"Blast"</span>, <span class="st">"Blast"</span>)),</span>
-<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">val =</span> <span class="fu">if_else</span>(correct_response <span class="sc">==</span> <span class="st">"Blast"</span>, val, <span class="sc">-</span>val)</span>
-<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">between =</span> <span class="st">"group"</span>,</span>
-<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">within =</span> <span class="fu">c</span>(<span class="st">"difficulty"</span>, <span class="st">"correct_response"</span>)</span>
-<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aov_ez</span>(</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"subject"</span>,</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">dv =</span> <span class="st">"val"</span>,</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> model_pars <span class="sc">%&gt;%</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(par <span class="sc">==</span> <span class="st">"v"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">difficulty =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Easy"</span>, <span class="st">"Hard"</span>, <span class="st">"Easy"</span>, <span class="st">"Hard"</span>)),</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">correct_response =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Non-blast"</span>, <span class="st">"Non-blast"</span>, <span class="st">"Blast"</span>, <span class="st">"Blast"</span>)),</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">val =</span> <span class="fu">if_else</span>(correct_response <span class="sc">==</span> <span class="st">"Blast"</span>, val, <span class="sc">-</span>val)</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">between =</span> <span class="st">"group"</span>,</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">within =</span> <span class="fu">c</span>(<span class="st">"difficulty"</span>, <span class="st">"correct_response"</span>)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Anova Table (Type 3 tests)
@@ -840,11 +837,11 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '+' 0.1 ' ' 1</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract NOMT scores and center them.</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>nomt_scores <span class="ot">&lt;-</span> blast_data <span class="sc">%&gt;%</span></span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(group, subject) <span class="sc">%&gt;%</span></span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">nomt =</span> <span class="fu">first</span>(nomt)) <span class="sc">%&gt;%</span></span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">nomt_centered =</span> nomt <span class="sc">-</span> <span class="fu">mean</span>(nomt))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract NOMT scores and center them.</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>nomt_scores <span class="ot">&lt;-</span> blast_data <span class="sc">%&gt;%</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(group, subject) <span class="sc">%&gt;%</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">nomt =</span> <span class="fu">first</span>(nomt)) <span class="sc">%&gt;%</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">nomt_centered =</span> nomt <span class="sc">-</span> <span class="fu">mean</span>(nomt))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'group'. You can override using the
@@ -852,30 +849,30 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '+' 0.1 ' ' 1</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Append the NOMT scores to the parameter estimates</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>model_pars_nomt <span class="ot">&lt;-</span> <span class="fu">left_join</span>(model_pars, nomt_scores)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Append the NOMT scores to the parameter estimates</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>model_pars_nomt <span class="ot">&lt;-</span> <span class="fu">left_join</span>(model_pars, nomt_scores)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Joining with `by = join_by(group, subject)`</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the same ANOVA as above, now including `nomt_centered` as a `covariate`</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">aov_ez</span>(</span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"subject"</span>,</span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">dv =</span> <span class="st">"val"</span>,</span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> model_pars_nomt <span class="sc">%&gt;%</span></span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(par <span class="sc">==</span> <span class="st">"v"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
-<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">difficulty =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Easy"</span>, <span class="st">"Hard"</span>, <span class="st">"Easy"</span>, <span class="st">"Hard"</span>)),</span>
-<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">correct_response =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Non-blast"</span>, <span class="st">"Non-blast"</span>, <span class="st">"Blast"</span>, <span class="st">"Blast"</span>)),</span>
-<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">val =</span> <span class="fu">if_else</span>(correct_response <span class="sc">==</span> <span class="st">"Blast"</span>, val, <span class="sc">-</span>val)</span>
-<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">between =</span> <span class="st">"group"</span>,</span>
-<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">within =</span> <span class="fu">c</span>(<span class="st">"difficulty"</span>, <span class="st">"correct_response"</span>),</span>
-<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">covariate =</span> <span class="st">"nomt_centered"</span>,</span>
-<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">factorize =</span> <span class="cn">FALSE</span>  <span class="co"># This last setting is necessary to ensure that "nomt_centered" isn't accidentally treated like a factor</span></span>
-<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Run the same ANOVA as above, now including `nomt_centered` as a `covariate`</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="fu">aov_ez</span>(</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"subject"</span>,</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">dv =</span> <span class="st">"val"</span>,</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> model_pars_nomt <span class="sc">%&gt;%</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(par <span class="sc">==</span> <span class="st">"v"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">difficulty =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Easy"</span>, <span class="st">"Hard"</span>, <span class="st">"Easy"</span>, <span class="st">"Hard"</span>)),</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">correct_response =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Non-blast"</span>, <span class="st">"Non-blast"</span>, <span class="st">"Blast"</span>, <span class="st">"Blast"</span>)),</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">val =</span> <span class="fu">if_else</span>(correct_response <span class="sc">==</span> <span class="st">"Blast"</span>, val, <span class="sc">-</span>val)</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">between =</span> <span class="st">"group"</span>,</span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">within =</span> <span class="fu">c</span>(<span class="st">"difficulty"</span>, <span class="st">"correct_response"</span>),</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">covariate =</span> <span class="st">"nomt_centered"</span>,</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">factorize =</span> <span class="cn">FALSE</span>  <span class="co"># This last setting is necessary to ensure that "nomt_centered" isn't accidentally treated like a factor</span></span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Anova Table (Type 3 tests)
@@ -919,18 +916,18 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '+' 0.1 ' ' 1</code></pre>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>model_qp <span class="sc">%&gt;%</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">blockType =</span> <span class="fu">factor</span>(bound_index, <span class="at">labels =</span> <span class="fu">levels</span>(blast_data<span class="sc">$</span>blockType)),</span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">item_type =</span> <span class="fu">factor</span>(drift_index, <span class="at">labels =</span> <span class="fu">levels</span>(<span class="fu">interaction</span>(blast_data<span class="sc">$</span>difficulty, blast_data<span class="sc">$</span>correct_response, <span class="at">sep =</span> <span class="st">" "</span>, <span class="at">drop =</span> T)))</span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(group, blockType, item_type, response, source, rt_p) <span class="sc">%&gt;%</span></span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">rt_q =</span> <span class="fu">mean</span>(rt_q, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">p_resp =</span> <span class="fu">mean</span>(p_resp, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> p_resp, <span class="at">y =</span> rt_q, <span class="at">color =</span> item_type)) <span class="sc">+</span></span>
-<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">shape =</span> source), <span class="at">fill =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
-<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_linetype_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Observed"</span> <span class="ot">=</span> <span class="st">"solid"</span>, <span class="st">"Fitted"</span> <span class="ot">=</span> <span class="st">"dashed"</span>)) <span class="sc">+</span></span>
-<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Observed"</span> <span class="ot">=</span> <span class="dv">16</span>, <span class="st">"Fitted"</span> <span class="ot">=</span> <span class="dv">21</span>)) <span class="sc">+</span></span>
-<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(blockType <span class="sc">~</span> group, <span class="at">scales =</span> <span class="st">"free_y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>model_qp <span class="sc">%&gt;%</span></span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">blockType =</span> <span class="fu">factor</span>(bound_index, <span class="at">labels =</span> <span class="fu">levels</span>(blast_data<span class="sc">$</span>blockType)),</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">item_type =</span> <span class="fu">factor</span>(drift_index, <span class="at">labels =</span> <span class="fu">levels</span>(<span class="fu">interaction</span>(blast_data<span class="sc">$</span>difficulty, blast_data<span class="sc">$</span>correct_response, <span class="at">sep =</span> <span class="st">" "</span>, <span class="at">drop =</span> T)))</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(group, blockType, item_type, response, source, rt_p) <span class="sc">%&gt;%</span></span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">rt_q =</span> <span class="fu">mean</span>(rt_q, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">p_resp =</span> <span class="fu">mean</span>(p_resp, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> p_resp, <span class="at">y =</span> rt_q, <span class="at">color =</span> item_type)) <span class="sc">+</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">shape =</span> source), <span class="at">fill =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_linetype_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Observed"</span> <span class="ot">=</span> <span class="st">"solid"</span>, <span class="st">"Fitted"</span> <span class="ot">=</span> <span class="st">"dashed"</span>)) <span class="sc">+</span></span>
+<span id="cb44-11"><a href="#cb44-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Observed"</span> <span class="ot">=</span> <span class="dv">16</span>, <span class="st">"Fitted"</span> <span class="ot">=</span> <span class="dv">21</span>)) <span class="sc">+</span></span>
+<span id="cb44-12"><a href="#cb44-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(blockType <span class="sc">~</span> group, <span class="at">scales =</span> <span class="st">"free_y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>`summarise()` has grouped output by 'group', 'blockType', 'item_type',
@@ -961,20 +958,20 @@ data's linetype values.</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aov_ez</span>(</span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"subject"</span>,</span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">dv =</span> <span class="st">"val"</span>,</span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> model_pars <span class="sc">%&gt;%</span></span>
-<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(par <span class="sc">==</span> <span class="st">"v"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
-<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">difficulty =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, <span class="at">labels =</span> <span class="fu">c</span>(___)),</span>
-<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">correct_response =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, <span class="at">labels =</span> <span class="fu">c</span>(___)),</span>
-<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">blockType =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, <span class="at">labels =</span> <span class="fu">c</span>(___)),</span>
-<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">val =</span> <span class="fu">if_else</span>(correct_response <span class="sc">==</span> <span class="st">"Blast"</span>, val, <span class="sc">-</span>val)</span>
-<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>    ),</span>
-<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">between =</span> <span class="st">"group"</span>,</span>
-<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">within =</span> <span class="fu">c</span>(<span class="st">"difficulty"</span>, <span class="st">"correct_response"</span>)</span>
-<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">aov_ez</span>(</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> <span class="st">"subject"</span>,</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">dv =</span> <span class="st">"val"</span>,</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> model_pars <span class="sc">%&gt;%</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(par <span class="sc">==</span> <span class="st">"v"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">difficulty =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, <span class="at">labels =</span> <span class="fu">c</span>(___)),</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">correct_response =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, <span class="at">labels =</span> <span class="fu">c</span>(___)),</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">blockType =</span> <span class="fu">factor</span>(index, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, <span class="at">labels =</span> <span class="fu">c</span>(___)),</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">val =</span> <span class="fu">if_else</span>(correct_response <span class="sc">==</span> <span class="st">"Blast"</span>, val, <span class="sc">-</span>val)</span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">between =</span> <span class="st">"group"</span>,</span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">within =</span> <span class="fu">c</span>(<span class="st">"difficulty"</span>, <span class="st">"correct_response"</span>)</span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 
@@ -1072,6 +1069,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -1182,6 +1181,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
+      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {

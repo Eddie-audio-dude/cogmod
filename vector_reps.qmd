@@ -4,7 +4,7 @@
 library(tidyverse)
 library(patchwork)
 library(colorspace)
-library(plotly)
+library(mvtnorm)
 library(WienR)
 
 set.seed(12222)
@@ -14,11 +14,220 @@ In the previous chapter, we were introduced to the Exemplar-Based Random Walk (E
 
 The EBRW is a great example of how a computational cognitive model can help explain behavior in terms of *latent representations* that someone forms of their experience.  It is also an example of a *distributed representation* of an item, in that an item is characterized by the particular *distribution* or *configuration* of values it has across a number of features/attributes.  In this chapter, we explore more general forms of distributed representations and more general ways that we can model similarity between representations.  We will continue to model representations of items as sets of numbers---that is, as a *vector*---but we will abandon the notion that each element of the vector has a direct relationship with physical characteristics of the item.
 
-## Cosine similarity
+## Representations
 
-### Transformed dot-product (MINERVA)
+While it is beyond the scope of our course to delve into the philosophy behind the idea of "representation", it is worth spending some time to think about what a "representation" is in the context of a cognitive model, so that we can at least arrive at a reasonable operational definition of the term.  For additional discussion, see [].
 
-## Likelihood (REM)
+For our purposes, we can define a *representation* as a formal entity posited by a cognitive model that enables certain kinds of *processes* that, when applied to that representation, enable the model to make predictions about performance in a particular task context.  You may notice that this definition of a representation is tied to both the processes posited by a model as well as the kinds of predictions the model is expected to make.  This is because a representation only has meaning in the context of these other aspects of the model.
 
-## Cosine to likelihood
+We can think of a representation as a kind of "code" that conveys information that can be "read" by a suitable process.  To take a concrete, if not exactly cognitive, example, consider the task of sorting mail.  Imagine that we are working in a distribution center that receives packages that are intended to go to different parts of the country.  Our job is to route those packages to the post office nearest their final destinations.  We can accomplish this task by reading (processing) the ZIP codes on each package.  The ZIP code is a numerical *representation* of the *geographical area* for which a package is destined, which when *processed* by an appropriate reader enables them to route the package to the correct office.  This example illustrates the essential characteristics of a representation:
 
+* A ZIP code only serves as a representation of geographical area *when processed appropriately*.  If you don't have sensory organs to see the numbers or you do not know how to interpret the numbers, the ZIP code is meaningless.  As noted above, a representation only has meaning in the context of the processes applied to it to accomplish a task.
+* There isn't necessarily just one way to represent something.  We could write ZIP codes with Roman numerals instead of Arabic numerals---while this would entail changing the kind of process applied to the ZIP code (because the two formats must be read in different ways), both are legitimate ways of representing geographical regions in the context of the mail-sorting task.  We could even use a graphical representation, like a map with a dot indicating the destination.  Again, such a representation would need to be *processed* appropriately.
+* The structure of a representation may or may not enable multiple kinds of processes to be applied to it, potentially to serve different tasks.  For example, ZIP codes do not just serve as labels for different regions---nearby regions have similar ZIP codes.  This is because the earlier digits indicate broad geographic regions while later digits represent narrower subdivisions of those larger regions.  Therefore, one could apply a comparison process to these ZIP codes to determine not just whether two packages were going to the *same* region, but whether they were going to *nearby* regions.  This would enable sorting to be robust to certain kinds of contingencies.  For example, if the post office in one region were closed, the comparison process could allow you to determine the *nearest* open office to send the package to.  A graphical representation of the postal destination would allow for even finer gradations of similarity.
+* Positing a representation does not necessarily commit to any particular way that such a representation may be *implemented*.  Here, I use the term "implementation" in the same way as in the three levels of description posited by @Marr1982.  A ZIP code can be "implemented" as ink on a page, as pixels on a screen, as an etching on a tablet, as a sound wave (if spoken aloud), etc.  While these different implementations of a ZIP code would entail different implementations of how they were processed, they do not alter the *form* or *content* of the ZIP code.  The broader point is that the kinds of representations posited by cognitive models are defined not by their physical forms, but rather by their abstract structure and the kinds of processes they support.
+
+We can see how these principles manifested in the random walk/diffusion/race models we explored earlier.  As we discussed, these models *represent* a decision-maker's current state of mind in terms of one or more *numbers* that represent the degree to which the decision-maker favors each option they are choosing between.  Representing evidence as a number enables an evidence accumulation *process* that can be modeled via the mathematical operation of addition.  These models do *not* necessarily claim that the numbers that represent accumulated evidence are "implemented" in any particular way.  That said, as we will see later in this course, it is possible to relate representations of accumulated evidence to scalp [@PhiliastidesEtAl2006] and single-neuron [@PurcellEtAl2010; @PurcellEtAl2012; @ShadlenNewsome2001] electrophysiology as well as fMRI BOLD signals [@TurnerEtAl2013].
+
+## Types of vector representations
+
+Many cognitive models make use of representations that take the form of *vectors*, that is, as ordered collections of numbers.  We saw one kind of vector representation in the EBRW.  In the EBRW, each item was represented as a vector of coordinates that specified that item's position within a multidimensional space.  That representation enabled the EBRW to operationalize *similarity* as a function of *distance* between vector representations of items.  We now consider other broad classes of vector representations and, in the next section, we see how different kinds of representations enable other operationalizations of similarity.  Finally, we see how similarity can be used to model performance in different kinds of tasks.
+
+In the examples below, to keep things concrete, let's imagine a participant is engaged in a task that involves making judgments about different concepts.  There are eight concepts, each of which is a living thing from a particular category (these concepts are the same ones used in the examples from @RogersMcClelland2004):
+
+* Pine
+* Oak
+* Rose
+* Daisy
+* Robin
+* Canary
+* Sunfish
+* Salmon
+
+You may notice that these concepts can be grouped together in different ways.  For example, we could divide them up into plants and animals; into trees, flowers, birds, and fish; into things that are red, green, or yellow; etc.  The kinds of vector representations we consider below will illustrate how these relations can be *encoded* in the vectors.
+
+### Localist representations
+
+Perhaps the simplest and most direct way to represent each of the eight concepts above is to use a *localist* representation.  The term "localist" refers to the idea that there is a one-to-one mapping between each concept and its "location" within a vector.  Specifically, with a localist representation, each vector has as many entries as there are things to be represented.  So if we have eight concepts, each of them will be represented with an eight-dimensional vector.  Each of those vectors will contain zeros *except for* a "1" in exactly one entry in the vector.  The "location" of the 1 is what determines which concept the vector represents.
+
+The matrix below gives an example of a set of *localist* representations of each of the eight concepts above.  Each row is the representation of a different concept.
+
+```{r}
+concept_names <- c("Pine", "Oak", "Rose", "Daisy", "Robin", "Canary", "Sunfish", "Salmon")
+
+rep_localist <- diag(length(concept_names))
+rownames(rep_localist) <- concept_names
+
+print(rep_localist)
+```
+
+Note that there is nothing special about having the 1's on the diagonal---or even about using 1's in the first place!  For example, the matrix below is another example of localist representations of the same set of concepts:
+
+```{r}
+alt_rep_localist <- rep_localist %*% diag(rpois(n = nrow(rep_localist), lambda = 5) + 1)
+alt_rep_localist <- alt_rep_localist[sample(nrow(alt_rep_localist)),]
+rownames(alt_rep_localist) <- concept_names
+
+print(alt_rep_localist)
+```
+
+We could even replace all the 0's with `NA`s or `-99` or any other value that we agree to interpret as a kind of "background".  Ultimately, what matters about a localist representation is that *what* a vector represents is indicated by *which entry* in the vector is "not background".
+
+### Separable distributed representations
+
+Another defining characteristic of a localist representation is that it does not allow for gradations of similarity.  Either two representations refer to the same thing or they refer to different things.  *Distributed* vector representations, like those used in the EBRW, allow for representations to be partially similar to one another.
+
+Although it is not necessarily standard terminology in the field, I think it is important to distinguish between *separable* and *integral* distributed representations.  The difference between them is that, with a separable distributed representation, it is possible to identify the elements of the vector with particular attributes/features/dimensions of the items being represented.  With an integral distributed representation, the individual elements of the vector have no interpretation on their own---instead, different items are represented by different *patterns* of values across all the elements of a vector.  This distinction probably seems pretty abstract, so let's dig into some concrete examples.
+
+Returning to the set of concepts above, one way to construct a set of separable distributed representations is to consider different attributes that each concept may or may not have.  Each element of the vectors corresponds to a different attribute.  For each concept, its representation will have a value of `1` in the entries corresponding to attributes that the concept possesses and a value of `0` in the entries corresponding to attributes that the concept lacks.  This is illustrated below:
+
+```{r}
+attribute_names <- c("can_grow", "is_living", "has_roots", "has_bark", "is_big", "has_branches", "is_green", "has_leaves", "has_petals", "is_pretty", "is_red", "is_yellow", "can_move", "has_feathers", "can_fly", "has_wings", "can_sing", "can_swim", "has_gills", "has_scales")
+
+rep_distrib_sep1 <- matrix(c(
+    1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1
+), nrow = 8, ncol = length(attribute_names), byrow = TRUE, dimnames = list(concept_names, attribute_names))
+
+knitr::kable(rep_distrib_sep1)
+```
+
+Although we will consider similarity more deeply in the next section, note that the distributed representations above make it possible to judge similarity based on the extent to which two concepts' representations do or do not share attributes.  Indeed, the different categories (plants/animals) and subcategories (trees/flowers/birds/fish) to which the concepts belong are implicit in which attributes are shared between concepts.
+
+In the example above, each entry in the vector corresponded to a distinct attribute.  It is also possible to construct separable distributed representations where attributes are encoded with *sectors* of a vector.  For example, rather than treating `is_red`, `is_yellow`, and `is_green` as different attributes, we might assign a "sector" consisting of several entries to represent the color associated with a concept.  Maybe that sector consists of three entries, for hue, chroma, and lightness, as in the example at the beginning of the EBRW chapter.
+
+Relatedly, distributed representations can use continuous values---they are not restricted to binary indicators of the presence/absence of an attribute.  For example, instead of an attribute called `is_big`, we could have a `size` attribute which corresponds to the size of the concept being represented.
+
+For example, here is how one might represent color and size for each of the concepts in our running example:
+
+```{r}
+alt_attribute_names <- c("size", "hue", "chroma", "lightness")
+
+rep_distrib_sep2 <- matrix(c(
+    50, 131, 36, 27,
+    40, 20, 60, 16,
+    0.1, 3, 58, 79,
+    0.2, 52, 100, 50,
+    0.3, 9, 63, 38,
+    0.1, 60, 100, 63,
+    0.5, 32, 100, 59,
+    1, 5, 99, 71
+), nrow = 8, ncol = length(alt_attribute_names), byrow = TRUE, dimnames = list(concept_names, alt_attribute_names))
+
+knitr::kable(rep_distrib_sep2)
+```
+
+With a separable distributed representation, we can increase the dimensionality of the vectors as much as we want.  For example, a separable distributed representation might consist of hundreds of dimensions.  However, it is unlikely that all of these dimensions would be relevant to any particular task.  There may also be capacity limits on the number of dimensions that someone could make use of at any particular time.  This highlights one final, but important, aspects of a separable distributed representation:  Because different kinds of information about an item are represented in different elements of the vector, separable distributed representations enable us to model *attention* to particular kinds of information.  Specifically, as we shall see below, we can assign *weights* to each dimension that represent the degree to which someone attends to that dimension within a given task context.  A separable distributed representation can thus support performance in many different tasks by assuming that some tasks entail attention to different elements of that representation.
+
+### Integral distributed representations
+
+The final kind of vector representation we will consider are *integral* distributed representations.  The difference between integral and separable distributed representations is that the vector elements of an integral representation cannot be identified with distinct features/attributes of the items.  Rather, an item's representation consists of the *complete pattern* of elements across the vector.  An integral representation can thus be thought of as a "holistic" or "configural" representation, because its individual elements can only be understood as part of the complete pattern of entries in the vector.
+
+An analogy may help clarify this admittedly abstract issue:  Consider baking a cake.  Before you bake the cake, its ingredients are *separable*:  You have a pile of flour, a carton of eggs, a jug of milk, etc.  One could imagine constructing a separable distributed representation of the pre-baked cake in which each element corresponded to a particular ingredient and the entries specified the quantities of each ingredient.  However, once the ingredients are mixed and the cake is baked, it is no longer reducible to its component ingredients.  Those same ingredients, in those same quantities, would not necessarily result in the same cake---it is the particular *way* in which the ingredients are combined and prepared that results in the final product.  The way any individual ingredient contributes to the baked cake depends on its relationship to all the other ingredients in the cake.  In that sense, the baked cake is best represented using an *integral* as opposed to *separable* representation.
+
+Unlike separable representations, then, integral representations make it impossible to model giving different amounts of weight/attention to different attributes of an item.  This is an important distinction, and is why I adopted the terms "integral" and "separable" to distinguish between these kinds of representations.  @GarnerFelfoldy1970 used those terms to distinguish between cases in which a participant could selectively attend to one feature while ignoring others (separable) and cases in which a participant could not ignore other features (integral).
+
+It is still possible to conceive of *similarity* between integral representations.  It is just that similarity depends not on sharing *specific* elements of a vector, but instead on having similar *patterns* of values across elements.  To visualize this, we can graph a vector representation with the index of the elements along the horizontal axis and the value on the vertical axis.  Integral representations are similar to the extent that the resulting graphs have similar shapes.  This is illustrated below.
+
+```{r}
+x <- rnorm(n = 10)
+x <- (x - mean(x)) / sd(x)
+
+s_vals <- round(seq(0, 1, length.out = 6), 2)
+
+toPlot <- c()
+
+for (s in s_vals) {
+    if (s < 1) {
+        while (TRUE) {
+            y <- rnorm(n = 10)
+            y <- (y - mean(y)) / sd(y)
+            
+            if (round(cor(x, y), 2) == s) break
+        }
+    } else {
+        y <- x
+    }
+    
+    toPlot <- rbind(
+        toPlot,
+        tibble(sim_factor = paste("Similarity =", s), rep = "A", i = 1:length(x), val = x),
+        tibble(sim_factor = paste("Similarity =", s), rep = "B", i = 1:length(y), val = y)
+    )
+}
+
+toPlot %>%
+    ggplot(aes(x = i, y = val, color = rep, linetype = rep)) +
+    geom_line() +
+    facet_wrap("sim_factor") +
+    labs(x = "Vector index", y = "Value", color = "Representation", linetype = "Representation", title = "Similarity between integral representations")
+```
+
+It will not have escaped your notice (especially if you look at the code for the above chunk) that similarity between integral representations can be modeled in terms of their *correlation*.  We will explore this more below.
+
+For now, we can return to our running example to see what integral distributed representations of our eight concepts might look like.  In fact, these representations were derived from a statistical model of word co-occurrence called Latent Semantic Analysis [@LandauerDumais1997].  As noted below, many machine learning models adopt integral distributed representations.
+
+```{r}
+load("lsa_reps_examples.rdata")
+colnames(lsa_reps_examples) <- NULL
+
+for (i in 1:nrow(lsa_reps_examples)) {
+    lsa_reps_examples[i,] <- (lsa_reps_examples[i,] - mean(lsa_reps_examples[i,])) / sd(lsa_reps_examples[i,])
+}
+
+knitr::kable(lsa_reps_examples)
+```
+
+Of course, the raw numbers alone are not especially easy to interpret.
+
+```{r}
+toPlot <- c()
+for (i in 1:nrow(lsa_reps_examples)) {
+    toPlot <- rbind(
+        toPlot,
+        tibble(item = rownames(lsa_reps_examples)[i], index = 1:ncol(lsa_reps_examples), val = lsa_reps_examples[i,])
+    )
+}
+
+toPlot %>%
+    ggplot(aes(x = index, y = val, color = item)) +
+    geom_line()
+```
+
+<!-- ## Similarity between distributed representations -->
+
+<!-- ### Transformed distance -->
+
+<!-- ### Dot product -->
+
+<!-- ### Cosine similarity -->
+
+<!-- #### Transformed dot-product (MINERVA) -->
+
+<!-- ### Likelihoods (REM) -->
+
+<!-- ### Cosine to likelihood -->
+
+<!-- ## Modeling choice (and response time) with similarity -->
+
+<!-- ### Finding representations -->
+
+<!-- #### Scaling -->
+
+<!-- #### Machine learning models -->
+
+<!-- #### Brewing your own representations -->
+
+<!-- Creating representations by distorting a prototype or by mixing together representations. -->
+
+<!-- ### Similarity as evidence -->
+
+<!-- ## Exercises -->
+
+<!-- 1. Given a set of vector representations, compute various similarity metrics and examine their correlations. -->

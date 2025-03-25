@@ -23,6 +23,7 @@ book:
     - part: "Coupling behavior to structured representations"
       chapters:
         - ebrw.qmd
+        - vector_reps.qmd
     - references.qmd
 
 bibliography: references.bib
