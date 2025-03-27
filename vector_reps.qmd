@@ -4,6 +4,7 @@
 library(tidyverse)
 library(patchwork)
 library(colorspace)
+library(khroma)
 library(mvtnorm)
 library(WienR)
 
@@ -54,6 +55,7 @@ The matrix below gives an example of a set of *localist* representations of each
 
 ```{r}
 concept_names <- c("Pine", "Oak", "Rose", "Daisy", "Robin", "Canary", "Sunfish", "Salmon")
+category_names <- rep(c("Tree", "Flower", "Bird", "Fish"), each = 2)
 
 rep_localist <- diag(length(concept_names))
 rownames(rep_localist) <- concept_names
@@ -171,50 +173,471 @@ toPlot %>%
 
 It will not have escaped your notice (especially if you look at the code for the above chunk) that similarity between integral representations can be modeled in terms of their *correlation*.  We will explore this more below.
 
-For now, we can return to our running example to see what integral distributed representations of our eight concepts might look like.  In fact, these representations were derived from a statistical model of word co-occurrence called Latent Semantic Analysis [@LandauerDumais1997].  As noted below, many machine learning models adopt integral distributed representations.
+For now, we can return to our running example to see what integral distributed representations of our eight concepts might look like.  In fact, the example representations below are based on ones derived from a statistical model of word co-occurrence called Latent Semantic Analysis [@LandauerDumais1997].  As noted below, many machine learning models make use of integral distributed representations, and some of these are even plausible cognitive models of learning, which we will explore in the next chapter.
 
 ```{r}
 load("lsa_reps_examples.rdata")
-colnames(lsa_reps_examples) <- NULL
-
-for (i in 1:nrow(lsa_reps_examples)) {
-    lsa_reps_examples[i,] <- (lsa_reps_examples[i,] - mean(lsa_reps_examples[i,])) / sd(lsa_reps_examples[i,])
-}
+rownames(lsa_reps_examples) <- concept_names
 
 knitr::kable(lsa_reps_examples)
 ```
 
-Of course, the raw numbers alone are not especially easy to interpret.
+Of course, the raw numbers alone are not especially easy to interpret.  The graph below may make it a bit easier to see how items in the same category have vector representations with similar "shapes" whereas items from different categories have different "shapes".  That said, since these vectors have 300 dimensions, I only plot the first 30 entries!
 
 ```{r}
 toPlot <- c()
 for (i in 1:nrow(lsa_reps_examples)) {
     toPlot <- rbind(
         toPlot,
-        tibble(item = rownames(lsa_reps_examples)[i], index = 1:ncol(lsa_reps_examples), val = lsa_reps_examples[i,])
+        tibble(item = rownames(lsa_reps_examples)[i], index = 1:30, val = lsa_reps_examples[i,1:30])
     )
 }
 
 toPlot %>%
+    mutate(item = factor(item, levels = concept_names)) %>%
+    mutate(category = factor(item, levels = concept_names, labels = category_names)) %>%
+    mutate(exemplar = factor(item, levels = concept_names, labels = rep(c("A", "B"), length(concept_names) / 2))) %>%
     ggplot(aes(x = index, y = val, color = item)) +
-    geom_line()
+    geom_line() +
+    facet_wrap("category")
 ```
 
-<!-- ## Similarity between distributed representations -->
+Of course, this is all just based on our visual impressions---we will now explore different ways of operationalizing similarity between representations.  We will then see how to incorporate similarity into models of behavior.
 
-<!-- ### Transformed distance -->
+## Similarity between distributed representations
 
-<!-- ### Dot product -->
+As noted earlier, different kinds of representations enable different ways of operationalizing the *similarity* between those representations.  This is important because similarity is a core construct in many cognitive models, like we saw with the EBRW.  Indeed, the EBRW's approach to similarity is the first we will consider.
 
-<!-- ### Cosine similarity -->
+### Transformed distance
 
-<!-- #### Transformed dot-product (MINERVA) -->
+Recall that the EBRW operationalized similarity as an exponential function of distance between items.  Specifically, the similarity $s_{ij}$ between representations of items $i$ and $j$ was defined as
+$$
+s_{ij} = \exp \left(-c d_{ij} \right)
+$$
+where $c$ was a sensitivity parameter and $d_{ij}$ is the distance between $\mathbf{x_i}$, the vector representing item $i$, and $\mathbf{x_j}$, the vector representing item $j$:
+$$
+d_{ij} = \left( \sum_{k = 1}^D w_k \left| x_{ik} - x_{jk} \right|^p \right)^{\frac{1}{p}}
+$$
+where $D$ is the number of dimensions in each representation, $w_k$ is the weight given to dimension $k$, and $p$ is a new parameter that we just added for this chapter.  The new parameter $p$ makes the distance formula more general.  When $p = 2$, we get the Euclidean distance we used in the last chapter.  But $p$ can, in principle, be any nonnegative number; this more general distance formula is known as a (Minkowski distance)[https://en.wikipedia.org/wiki/Minkowski_distance].
 
-<!-- ### Likelihoods (REM) -->
+The choice of $p$ reflects how differences in different dimensions contribute to the overall distance.  When $p = 2$, corresponding to Euclidean distance, the distance (and therefore similarity) between representations only depends on how far apart their vector representations are, not their *orientation* relative to the dimensions of the space.  Another common choice of $p$ in cognitive models is $p = 1$, corresponding to the "city block" or "taxicab" distance.  When $p = 1$, the distance is the sum of the absolute differences between vector representations.  As a result, distance (and therefore similarity) depends on how the two items are *oriented* with respect to the dimensions of the space.
 
-<!-- ### Cosine to likelihood -->
+We can visualize the effect of different choices of $p$ by drawing contours of equal distance.  We can imagine assigning item $i$ to have a vector representation of $(0, 0)$ and then consider the all the possible positions of item $j$ that would result in a distance $d_{ij} = 1$.  That's what is shown in the graph below:
 
-<!-- ## Modeling choice (and response time) with similarity -->
+```{r}
+expand_grid(p = c(0.25, 0.5, 1, 2, 4, 8), theta = seq(0, 2*pi, length.out = 501)) %>%
+    mutate(x = cos(theta)) %>%
+    mutate(y = sign(sin(theta)) * (1 - abs(x)^p)^(1 / p)) %>%
+    ggplot(aes(x = x, y = y, color = factor(p), group = p, linewidth = factor(p))) +
+    geom_path() +
+    coord_equal() +
+    scale_linewidth_manual(values = c("0.25" = 0.5, "0.5" = 0.5, "1" = 1.5, "2" = 1.5, "4" = 0.5, "8" = 0.5)) +
+    labs(x = expression(x[j1]), y = expression(x[j2]), color = "p", linewidth = "p")
+```
+
+When $p = 2$, the contour of equal distance is a circle---distance is irrespective of the orientation relative to the two dimensions of the space.  When $p = 1$, the contour of equal distance is a diamond---distance is the sum of the differences on each dimension.  As noted above, most cognitive models adopt either $p = 1$ or $p = 2$, but other values of $p$ are entirely possible.  When $p$ gets really big, the contour of equal distance approaches a square---distance depends on the *maximum* difference.  When $p$ gets really small, the contour of equal distance approaches a "star"---distance depends on the *minimum* difference.
+
+A major conceptual point to take from the preceding discussion about the Minkowski distance parameter $p$ is that, whenever $p \neq 2$, we need to take the dimensions of the space seriously.  When $p \neq 2$, distance depends on *which* dimensions exhibit *which* differences.  The resulting distance is only interpretable if those dimensions are interpretable, in turn.  As a result, this approach to similarity is best suited to *separable distributed representations*.
+
+For similar reasons, attention weights $w_k$ only make sense to apply to separable distributed representations.  If the elements of a distributed representation cannot be interpreted as referring to different attributes/features, as with an integral distributed representation, it makes little sense to assign those elements different attention weights.  Of course, there is nothing stopping you from building such a model---it just will not have a very clear cognitive interpretation.
+
+To give a concrete example of how the transformed distance approach to similarity can be implemented in R, we can adapt some of the code we wrote for the EBRW.  This example uses the size and color representations for the eight concepts used in the examples in the previous section.  
+
+```{r}
+#| code-fold: show
+
+# List names of items and attributes
+concept_names <- c("Pine", "Oak", "Rose", "Daisy", "Robin", "Canary", "Sunfish", "Salmon")
+sep_attribute_names <- c("size", "hue", "chroma", "lightness")
+
+# Define matrix of representations
+separable_distributed_reps <- matrix(c(
+    50, 131, 36, 27,
+    40, 20, 60, 16,
+    0.1, 3, 58, 79,
+    0.2, 52, 100, 50,
+    0.3, 9, 63, 38,
+    0.1, 60, 100, 63,
+    0.5, 32, 100, 59,
+    1, 5, 99, 71
+), nrow = 8, ncol = length(alt_attribute_names), byrow = TRUE, dimnames = list(concept_names, alt_attribute_names))
+
+# The "c" parameter representing sensitivity
+sensitivity <- 0.01
+
+# The "p" parameter representing the Minkowski parameter
+minkowski_p <- 1
+
+# These are the weights given to each of the four dimensions.
+attention_weight <- c(1, 1, 1, 1)
+# By convention, these weights are constrained to sum to 1.
+attention_weight <- attention_weight / sum(attention_weight)
+
+# First, define an empty distance matrix
+distance <- matrix(0, nrow = nrow(separable_distributed_reps), ncol = nrow(separable_distributed_reps), dimnames = list(concept_names, concept_names))
+
+# Fill in each entry in the distance matrix 
+for (i in 1:nrow(separable_distributed_reps)) {
+    for (j in 1:nrow(separable_distributed_reps)) {
+        distance[i, j] <- sum(attention_weight * abs(separable_distributed_reps[i,] - separable_distributed_reps[j,])^minkowski_p)^(1 / minkowski_p)
+    }
+}
+
+similarity <- exp(-sensitivity * distance)
+
+print(round(similarity, 2))
+```
+
+Go ahead, try it out yourself!  You may notice that the sensitivity parameter is pretty small, see what happens if you increase it.  In fact, that will be an exercise for us later!
+
+### Dot product
+
+The *dot product* or *inner product* is a way of directly computing the similarity between two vectors, without first computing a distance between them.  While transformed distance is the most common approach to modeling similarity in the GCM/EBRW, dot products have been used a lot in other models of memory, notably the Theory Of Distributed Associative Memory (TODAM; @Murdock1982).
+
+The dot product between two vectors is sum of the products of their elements.  To get formal about it, the dot product between vector representations $\mathbf{x_i}$ and $\mathbf{x_j}$ is often written as $\mathbf{x_i} \cdot \mathbf{x_j}$ (can you guess why this is called a *dot* product?).  The dot product is defined as:
+$$
+\mathbf{x_i} \cdot \mathbf{x_j} = \sum_{k = 1}^D x_{ik} x_{jk}
+$$
+
+Intuitively, the dot product quantifies the amount of *overlap* between two representations.  Any time the two vectors have elements that are both large and both of the same sign, their dot product will be larger.  That's why the dot product is a useful way to operationalize similarity.
+
+To make this concrete, let's consider a pair of two-dimensional vector representations (so $D = 2$ in this example).  We will assume that $x_{11} = x_{21} = 1$, i.e., that the first element of each vector representation equals 1.  The second elements of each representation ($x_{12}$ and $x_{22}$) will vary between -2 and 2.  The colors in the graph below indicates the value of the dot product for each combination of values of $x_{21}The chunk of code below varies the elements of these vectors so you can see how their dot product is influenced by those changes.
+
+```{r}
+expand_grid(x11 = 1, x12 = seq(-2, 2, length.out = 11), x21 = 1, x22 = seq(-2, 2, length.out = 11)) %>%
+    mutate(dot_product = x11 * x21 + x12 * x22) %>%
+    ggplot(aes(x = x12, y = x22, fill = dot_product)) +
+    geom_raster() +
+    scale_fill_gradient2() +
+    coord_equal() +
+    labs(x = expression(x[12]), y = expression(x[22]), fill = expression(bold(x[1]) %.% bold(x[2])))
+```
+
+Notice that the dot product is large and positive (i.e., very blue) whenever $x_{12}$ and $x_{22}$ are large and of the same sign, which happens in the upper right and lower left quadrants of the graph above.  To the extent that $x_{12}$ and $x_{22}$ are large but of *different* signs, the dot product becomes negative (the red regions in the upper left and lower right quadrants).  The dot product thus quantifies the degree to which the elements of each representation have the same sign, weighted by the magnitude of the elements of each representation.
+
+While dot products can be computed with continuous values, they can also be computed for binary values just as well.  For any element that contains a zero in the vectors being compared, that element will contribute zero to the dot product.  Therefore, the dot product between representations that consist of ones and zeros is *the number of elements for which both representations contain a one*.
+
+For example, using the concept features from earlier, the following is a matrix where each entry gives the dot product between the representations of the items in the corresponding rows/columns.
+
+```{r}
+#| code-fold: show
+
+concept_names <- c("Pine", "Oak", "Rose", "Daisy", "Robin", "Canary", "Sunfish", "Salmon")
+
+attribute_names <- c("can_grow", "is_living", "has_roots", "has_bark", "is_big", "has_branches", "is_green", "has_leaves", "has_petals", "is_pretty", "is_red", "is_yellow", "can_move", "has_feathers", "can_fly", "has_wings", "can_sing", "can_swim", "has_gills", "has_scales")
+
+concept_attributes <- matrix(c(
+    1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1,
+    1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1
+), nrow = 8, ncol = length(attribute_names), byrow = TRUE, dimnames = list(concept_names, attribute_names))
+
+tcrossprod(concept_attributes)
+```
+
+It is worth taking a look at the code for this one, since R makes it easy to compute the dot products between many vectors simultaneously using the `tcrossprod` function, as illustrated in the final line of the code chunk above.  R has two functions that implement particular forms of (matrix multiplication)[https://en.wikipedia.org/wiki/Matrix_multiplication], `crossprod` and `tcrossprod`.  Specifically, `tcrossprod` returns the cross-product of an $N \times M$ matrix $A$ with the *transpose* of a $K \times M$ matrix $B$.  The "transpose" of a matrix is what you get when you swap its rows and columns.  So the transpose of matrix $B$ has dimension $M \times K$.  The result is an $N \times K$ matrix where the entry in the $i$th row and $j$th column is the *dot product* of the $i$th row of $A$ and the $j$th row of $B$.  This is illustrated below.
+
+```{r}
+#| code-fold: show
+
+A <- matrix(rnorm(n = 15), nrow = 3, ncol = 5)
+B <- matrix(rnorm(n = 20), nrow = 4, ncol = 5)
+
+print(A)
+print(B)
+
+tcrossprod(A, B)
+```
+
+When you call `tcrossprod` with just a single matrix, R uses that same matrix for both $A$ and $B$.  For example:
+
+```{r}
+#| code-fold: show
+
+tcrossprod(A)
+tcrossprod(B)
+```
+
+So to get back to talking about dot products between vector representations, `tcrossprod(concept_attributes)` returns a matrix where the entry in the $i$th row and $j$th column is the *dot product* between the $i$th row of `concept_attributes` and the $j$th row of `concept_attributes`.  Convenient!
+
+As we saw, the dot product can be used to quantify similarity between separable distributed vector representations.  It can also be used to quantify similarity between integral distributed vector representations.  For example, this is the matrix of dot-product similarities between the integral representations of the concepts in our running example:
+
+```{r}
+#| code-fold: show
+
+knitr::kable(tcrossprod(lsa_reps_examples))
+```
+
+### Cosine similarity
+
+As noted above, the dot product is sensitive to the *magnitude* of the values in the vector representations.  This could be important if magnitude represents something important in the context of our model.  For example, just like the EBRW allows for a "strength" parameter that can multiplicatively scale the similarity between two representations, we could imagine that the magnitude of the entries in a vector represents the "strength" or "salience" of the item that vector represents.
+
+In some models, though, the magnitudes are irrelevant---instead an item is represented by the pattern of *relative* values in the vector.  We can still use the dot product to quantify similarity, but we will first need to *normalize* each vector representation.  Specifically, we will normalize the vectors such that their dot products with themselves are equal to 1.  Referring back to the definition of the dot product above, the dot product of a vector with itself is the sum of the squares of the entries in the vector.  So if we divide each entry in a vector by the *square root* of the sum of the squared entries, we obtain our normalized vector representation.
+
+We can see how this works by imagining that we have two integral distributed vector representations, which the code below randomly generates and then shows.
+
+```{r}
+#| code-fold: show
+
+x_1 <- rnorm(n = 10, mean = 0, sd = 1)
+x_2 <- rnorm(n = 10, mean = 0, sd = 1)
+
+knitr::kable(rbind(x_1, x_2))
+```
+
+To create normalized versions of these representations, we divide them by the square root of the sum of their squared entries:
+
+```{r}
+#| code-fold: show
+
+x_1_norm <- x_1 / sqrt(sum(x_1^2))
+x_2_norm <- x_2 / sqrt(sum(x_2^2))
+
+knitr::kable(rbind(x_1_norm, x_2_norm))
+```
+
+To see the effect of this normalization on the dot products, let's compute the dot products between the unnormalized vectors and for the normalized ones:
+
+```{r}
+#| code-fold: show
+
+# Dot product between unnormalized x_1 and itself
+sum(x_1 * x_1)
+
+# Dot product between unnormalized x_2 and itself
+sum(x_2 * x_2)
+
+# Dot product between unnormalized x_1 and x_2
+sum(x_1 * x_2)
+
+# Dot product between normalized x_1 and itself
+sum(x_1_norm * x_1_norm)
+
+# Dot product between normalized x_2 and itself
+sum(x_2_norm * x_2_norm)
+
+# Dot product between normalized x_1 and x_2
+sum(x_1_norm * x_2_norm)
+```
+
+By normalizing the vectors so that the dot product with themselves is 1, we can treat the result as a measure of *relative* similarity between vector representations.  Since similarity is greatest between a representation and itself, the dot product between *normalized* vector representations has an upper bound of 1.  The dot product also has a lower bound of -1, which is achieved when the two vectors have exactly opposite entries:
+
+```{r}
+#| code-fold: show
+
+sum(x_1_norm * (-x_1_norm))
+```
+
+Just for completeness, let's see how we can use the `tcrossprod` trick in this example:
+
+```{r}
+#| code-fold: show
+
+# Matrix of dot products for unnormalized representations
+tcrossprod(rbind(x_1, x_2))
+
+# Matrix of dot products for normalized representations
+tcrossprod(rbind(x_1_norm, x_2_norm))
+```
+
+This might remind you of something---the Pearson correlation coefficient, which also ranges between 1 and -1 and measures the degree of correspondence between two set of numbers.  Indeed, the normalized dot product can be interpreted in exactly the same way as the correlation coefficient!  They are not strictly identical, however, as the correlation coefficient involves subtracting out the mean of each set of numbers, which we do *not* do to get the normalized dot product.
+
+The normalized dot product has another, potentially even more evocative interpretation:  It is the *cosine* of the *angle* between two vector representations.  Specifically, we can treat a vector representation as specifying the *end point* of a line segment that starts at the origin (i.e., the point where all vector elements are equal to zero).  The line segment thus goes in a particular *direction* from the origin.  The normalized dot product between two vectors is the cosine of the angle *between* the directions specified by each vector.  For that reason, the normalized dot product is often called **cosine similarity**.
+
+The basic idea of cosine similarity is illustrated in the graph below.  The graph shows different vector representations $\mathbf{x_j}$ that are at different angles $\theta_{ij}$ relative to another vector representation $\mathbf{x_i}$.  When the two vectors point generally in the same direction (to the left), the cosine similarity $s_{ij} = \cos \left( \theta_{ij} \right)$ is greater than zero.  When the two vectors point generally in the opposite direction (i.e., when $\mathbf{x_j}$ points more to the right than the left), cosine similarity is less than zero.  Finally, when the two vectors are orthogonal, cosine similarity is zero.
+
+```{r}
+plot_angles <- seq(0, 2 * pi - pi / 6, by = pi / 6)
+angle_ticks <- seq(0, pi, by = pi / 4)
+angle_labels <- c(expression(0), expression(pi / 4), expression(pi / 2), expression(3 * pi / 4), expression(pi))
+
+circPlotDF <- tibble(x = 0, y = 0, xend = -cos(plot_angles), yend = sin(plot_angles), theta = acos(cos(plot_angles)))
+
+circPlot <- circPlotDF %>%
+    ggplot(aes(x = x, y = y, xend = xend, yend = yend, color = theta)) +
+    geom_segment(arrow = arrow(length = unit(0.04, "npc"))) +
+    annotate(geom = "segment", x = 0, y = 0, xend = -1, yend = 0, arrow = arrow(length = unit(0.04, "npc"), type = "closed"), color = "black", linewidth = 1) +
+    annotate(geom = "curve", x = -0.7, y = 0, xend = -0.7 * cos(plot_angles[2]), yend = 0.7 * sin(plot_angles[2]), linetype = "dashed", color = "black", curvature = -1/6) +
+    annotate(geom = "text", x = -1.05, y = 0, label = "bold(x[i])", parse = TRUE, hjust = 1, vjust = 0.5, color = "black") +
+    annotate(geom = "text", x = -1.05 * cos(plot_angles[2]), y = 1.05 * sin(plot_angles[2]), label = "bold(x[j])", parse = TRUE, hjust = 1, vjust = 0.5, color = color("sunset")(length(plot_angles))[2]) +
+    annotate(geom = "text", x = -0.75 * cos(plot_angles[2] / 2), y = 0.75 * sin(plot_angles[2] / 2), label = "theta[ij]", parse = TRUE, hjust = 1, vjust = 0.5) +
+    scale_color_sunset(range = c(0, 1), midpoint = pi / 2, guide = "none") +
+    coord_equal(xlim = c(-1.1, 1.1), ylim = c(-1.1, 1.1)) +
+    theme_void()
+
+cosPlotDF <- tibble(theta = seq(0, pi, length.out = 101), s = cos(theta))
+
+cosPlot <- cosPlotDF %>%
+    ggplot(aes(x = theta, y = s, color = theta)) +
+    geom_line() +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+    scale_color_sunset(range = c(0, 1), midpoint = pi / 2, guide = "none") +
+    labs(x = expression(theta[ij]), y = expression(s[ij] == plain(cos)*(theta[ij]))) +
+    scale_x_continuous(breaks = angle_ticks, labels = angle_labels)
+
+print(circPlot + cosPlot + plot_layout(ncol = 1))
+```
+
+Cosine similarity between vector representations $\mathbf{x_i}$ and $\mathbf{x_j}$ can be formally specified in terms of the entries in each vector, without needing to explicitly specify the angle $\theta_{ij}$:
+$$
+s_{ij} = \cos \left( \theta_{ij} \right) = \frac{\sum_{k = 1}^D x_{ik} x_{jk}}{\left( \sqrt{\sum_{k = 1}^D x_{ik}^2} \right) \left( \sqrt{\sum_{k = 1}^D x_{jk}^2} \right)}
+$$
+where the numerator is the dot product and the denominator is the result of normalizing each vector.
+
+Above, we saw how to use the `tcrossprod` trick to quickly compute the dot products between a set of vector representations that are stored in a matrix, with one row per item.  We can use the same trick to compute the cosine similarities between those vectors if we first normalize them.  One way to do that is to use a `for` loop to create a new matrix of normalized representations, like we did with `x_1` and `x_2` above.  The code below does this with `lsa_reps_examples`, the integral distributed representations for our eight living things.  It then uses `tcrossprod` with the normalized representations (`reps_normalized`) to get the cosine similarities for each pair of items.
+
+```{r}
+#| code-fold: show
+
+reps_normalized <- lsa_reps_examples
+
+for (i in 1:nrow(reps_normalized)) {
+    reps_normalized[i,] <- lsa_reps_examples[i,] / sqrt(sum(lsa_reps_examples[i,]^2))
+}
+
+knitr::kable(tcrossprod(reps_normalized))
+```
+
+We can also get a bit fancy and use some more matrix algebra to do the normalization without using a `for` loop.  Admittedly, unless you are used to linear algebra, this may not be too intuitive.  However, the main idea is to multiply the matrix of representations by a diagonal matrix that normalizes each row:
+
+```{r}
+#| code-fold: show
+
+reps_normalized <- diag(1 / sqrt(rowSums(lsa_reps_examples^2))) %*% lsa_reps_examples
+
+knitr::kable(tcrossprod(reps_normalized))
+```
+
+As you can see, the result is the same set of cosine similarities.  The linear algebra approach can be more efficient than the `for` loop if we have a large number of representations to deal with, but for the purposes of this class I recommend whichever approach you are most comfortable with.
+
+Finally, while cosine similarity can be computed using either separable or integral distributed representations, it makes a bit more sense to apply with integral distributed representations.  That's because the cosine similarity is a measure of the extent to which the entries in two vector representations exhibit the same patterns.  This is a "holistic" measure of overall similarity which does not depend on the entries in each vector having any particular interpretation.
+
+## Modeling choice and response time with similarity
+
+In the last chapter, we saw how the EBRW used similarity between representations of items to explain choice and response time in recognition tasks.  The previous application did not include attention weights and only allowed for transformed distance as a measure of similarity.  The chunk of code below shows can we can modify our EBRW code to accommodate different types of similarity and to allow for attention weights on transformed distances.  This function is embedded in a simplified working example in [this script](https://raw.githubusercontent.com/gregcox7/cogmod/refs/heads/main/ebrw_extension_example.r).  The changes are explained in comments.
+
+```{r}
+#| code-fold: show
+
+# To be more general, the function now asks for "stim_reps", which is a matrix of vector representations of each stimulus.  These could be any kind of vector representation (localist, separable, integral).
+# The type of similarity to use is specified by the `sim_type` argument.  This can be "transformed_distance", "cosine", or "dot_product".
+extended_ebrw_nll <- function(par, stim_reps, study_items, probe_item, response, rt, n_sims = 0, sim_type = "transformed_distance") {
+    if (sim_type == "transformed_distance") {
+        # If transformed distance similarity is specified, the parameter vector can also optionally specify parameters for *attention weights*.
+        # If there are D columns in stim_reps, there are D - 1 free attention weights, since they must sum to one.
+        # The attention weight parameters need only be nonnegative numbers, since they will be normalized anyway.
+        if (is.na(par["attention_weight[1]"])) {
+            attention_weight <- rep(1, ncol(stim_reps))
+        } else {
+            attention_weight <- c(par[paste0("attention_weight[", 1:(ncol(stim_reps) - 1), "]")], 1)
+        }
+        attention_weight <- attention_weight / sum(attention_weight)
+        
+        # You can also optionally specify a Minkowski parameter, but it will be assumed to be 2 if you don't
+        if (is.na(par["minkowski_p"])) {
+            minkowski_p <- 2
+        } else {
+            minkowski_p <- par["minkowski_p"]
+        }
+        
+        # Finally, compute the matrix of stimulus similarities
+        stim_sims <- diag(nrow(stim_reps))
+        
+        for (i in 2:nrow(stim_reps)) {
+            for (j in 1:(i - 1)) {
+                stim_sims[i, j] <- stim_sims[j, i] <- exp(-par["specificity"] * sum(attention_weight * abs(stim_reps[i,] - stim_reps[j,])^minkowski_p)^(1 / minkowski_p))
+            }
+        }
+    } else {
+        # If similarity is *not* transformed distance, then dot product is assumed.
+        if (sim_type == "cosine") {
+            # If cosine similarity is specified, then first normalize the representations.
+            stim_reps <- diag(1 / sqrt(rowSums(stim_reps^2))) %*% stim_reps
+        }
+        
+        # Finally, compute the matrix of stimulus similarities
+        stim_sims <- tcrossprod(stim_reps)^par["specificity"]
+    }
+    
+    evidence_mean <- rep(0, length(probe_item))
+    evidence_sd <- rep(0, length(probe_item))
+    
+    for (i in 1:length(probe_item)) {
+        summed_sim <- sum(stim_sims[probe_item[i], study_items[i,]], na.rm = TRUE)
+        p <- summed_sim / (summed_sim + par["criterion"])
+        
+        evidence_mean[i] <- par["retrieval_rate"] * (2 * p - 1)
+        evidence_sd[i] <- 2 * sqrt(par["retrieval_rate"] * p * (1 - p))
+    }
+    
+    if (is.infinite(n_sims)) {
+        # 2a. Compute predicted response probabilities and mean RT's for each trial
+        result <- c()
+        
+        evidence_var <- evidence_sd^2
+        
+        for (i in 1:length(probe_item)) {
+            trial_p_yes <- (1 - exp(-2 * par["a"] * evidence_mean[i] * par["w"] / evidence_var[i])) / (1 - exp(-2 * par["a"] * evidence_mean[i] / evidence_var[i]))
+            trial_mean_rt_yes <- par["t0"] + (par["a"] / evidence_mean[i]) * (1 / tanh(par["a"] * evidence_mean[i] / evidence_var[i]) - par["w"] / tanh(par["a"] * evidence_mean[i] * par["w"] / evidence_var[i]))
+            trial_mean_rt_no <- par["t0"] + (par["a"] / evidence_mean[i]) * (1 / tanh(par["a"] * evidence_mean[i] / evidence_var[i]) - (1 - par["w"]) / tanh(par["a"] * evidence_mean[i] * (1 - par["w"]) / evidence_var[i]))
+            
+            result <- rbind(
+                result,
+                tibble(trial = i, p_yes = trial_p_yes, mean_rt_yes = trial_mean_rt_yes, mean_rt_no = trial_mean_rt_no)
+            )
+        }
+        
+        # 3a. Return final result
+        return(result)
+    } else if (n_sims > 0) {
+        # 2b. Simulate a response for each trial
+        result <- c()
+        
+        # For each trial...
+        for (i in 1:length(probe_item)) {
+            # Simulate `n_sims` replications of this trial, using its corresponding parameters
+            trial_sim <- sampWiener(
+                N = n_sims,
+                a = par["a"] / evidence_sd[i],
+                w = par["w"],
+                v = evidence_mean[i] / evidence_sd[i],
+                t0 = par["t0"]
+            )
+            
+            # Append the new set of simulations to our `result`, including an indicator of which trial we are simulating and an index for each simulation
+            result <- rbind(
+                result,
+                tibble(trial = i, sim_index = 1:n_sims, rt = trial_sim$q, response = trial_sim$response)
+            )
+        }
+        
+        # 3b. Return final result
+        return(result)
+    } else {
+        # 2c. Calculate the log-likelihood of each observed response/RT on each trial
+        result <- try(WienerPDF(
+            t = rt,
+            response = response,
+            a = par["a"] / evidence_sd,
+            w = par["w"],
+            v = evidence_mean / evidence_sd,
+            t0 = par["t0"]
+        ))
+        
+        # 3c. Return final result
+        if (class(result) == "try-error") {
+            return(Inf)
+        } else {
+            return(-sum(result$logvalue))
+        }
+    }
+}
+```
 
 <!-- ### Finding representations -->
 
@@ -228,6 +651,6 @@ toPlot %>%
 
 <!-- ### Similarity as evidence -->
 
-<!-- ## Exercises -->
+## Exercises
 
-<!-- 1. Given a set of vector representations, compute various similarity metrics and examine their correlations. -->
+1. What kinds of items do you think are best modeled using separable representations and what kinds of items do you think are best modeled using integral representations?  Are there particular characteristics of items that make separable or integral representations more appropriate?
