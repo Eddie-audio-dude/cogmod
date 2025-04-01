@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>11&nbsp; Associative Learning – Computational Cognitive Models</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./vector_reps.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./ebrw.html">Coupling behavior to structured representations</a></li><li class="breadcrumb-item"><a href="./learning.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Associative Learning</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Computational Cognitive Models</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Background</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./r_coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Programming with R</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Modeling behavior</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./random_walk.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion_sim.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">From random walk to diffusion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion_fit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Fitting a diffusion model to data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model_comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./blast_example.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">A worked example</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./accumulator_models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Accumulator models of choice and response time</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Coupling behavior to structured representations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ebrw.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_reps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Distributed representations, similarity, and recognition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./learning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Associative Learning</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#hebbian-learning" id="toc-hebbian-learning" class="nav-link active" data-scroll-target="#hebbian-learning"><span class="header-section-number">11.1</span> Hebbian learning</a>
+  <ul class="collapse">
+  <li><a href="#representing-learning-events" id="toc-representing-learning-events" class="nav-link" data-scroll-target="#representing-learning-events"><span class="header-section-number">11.1.1</span> Representing learning events</a></li>
+  <li><a href="#updating-associative-weights" id="toc-updating-associative-weights" class="nav-link" data-scroll-target="#updating-associative-weights"><span class="header-section-number">11.1.2</span> Updating associative weights</a></li>
+  <li><a href="#using-what-youve-learned" id="toc-using-what-youve-learned" class="nav-link" data-scroll-target="#using-what-youve-learned"><span class="header-section-number">11.1.3</span> Using what you’ve learned</a></li>
+  <li><a href="#discriminative-learning" id="toc-discriminative-learning" class="nav-link" data-scroll-target="#discriminative-learning"><span class="header-section-number">11.1.4</span> Discriminative learning</a></li>
+  <li><a href="#using-multiple-cues" id="toc-using-multiple-cues" class="nav-link" data-scroll-target="#using-multiple-cues"><span class="header-section-number">11.1.5</span> Using multiple cues</a></li>
+  <li><a href="#associating-events-with-actions" id="toc-associating-events-with-actions" class="nav-link" data-scroll-target="#associating-events-with-actions"><span class="header-section-number">11.1.6</span> Associating events with actions</a></li>
+  </ul></li>
+  <li><a href="#error-driven-learning" id="toc-error-driven-learning" class="nav-link" data-scroll-target="#error-driven-learning"><span class="header-section-number">11.2</span> Error-driven learning</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./ebrw.html">Coupling behavior to structured representations</a></li><li class="breadcrumb-item"><a href="./learning.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Associative Learning</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Associative Learning</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In the previous chapter, we saw several different examples of how computational cognitive models can <em>represent</em> the sorts of things we do cognition about: words, concepts, objects, events, etc. The representations were treated as given, either from a statistical procedure like Multidimensional Scaling or machine learning or from our own knowledge/expertise regarding the physical and conceptual features of items (like color, size, shape, etc.). Although one can view storage of new exemplars in memory as a kind of learning (see the Exercises), this chapter focuses on the kind of <em>associative learning</em> that is thought to underlie a variety of phenomena in cognition. Associative learning refers to the formation of functional links/connections/associations between elements that frequently co-occur. This form of learning is important for learning how words and referents go together, what properties objects have, and how to make predictions about what may happen next.</p>
+<p>An important distinction in this form of learning is between <em>supervised</em> and <em>unsupervised</em> learning. In <em>unsupervised</em> learning, the learner does not have an explicit goal; as such, unsupervised learning often amounts to forming a representation of the patterns of correlation between elements in the learner’s environment. In <em>supervised</em> learning, the learner has a particular goal they are trying to achieve; in supervised learning, the learner gets feedback either from a “teacher” or from the environment itself about how well they achieved their goal. In supervised learning, the learner tries to form a representation that minimizes their “error”, that is, the discrepancy between the learner’s goal and the feedback they received.</p>
+<p>The <em>representations</em> we explored in the last chapter all took the form of <em>vectors</em> which characterized the properties of items that someone might encounter. Since associative learning involves learning how properties go with one another, we will introduce another type of representation in this chapter: A <em>matrix</em> of <em>associative weights</em>. All the forms of learning we will examine in this chapter amount to making adjustments to the entries in one or more of these matrices. We’ll first see how this principle plays out in the context of a simple but powerful form of unsupervised learning: Hebbian learning.</p>
+<section id="hebbian-learning" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="hebbian-learning"><span class="header-section-number">11.1</span> Hebbian learning</h2>
+<p>Although this form of learning takes its name from <span class="citation" data-cites="Hebb1949">Hebb (<a href="references.html#ref-Hebb1949" role="doc-biblioref">1949</a>)</span>, the basic idea has been around since at least the ancient Greeks. The idea is that things that are experienced at the same time become associated with one another. Eventually, experiencing one thing “activates” or “evokes” or “retrieves” other things that were frequently encountered alongside it. In more recent times, the principle has been applied to neurons, giving rise to the dictum that “neurons that fire together wire together”.</p>
+<p>To model Hebbian learning, we assume that the learner experiences discrete learning “events”. These “events” are analogous to the kinds of memory traces we used in the EBRW: each event is represented as a vector with <span class="math inline">\(D\)</span> dimensions. These representations can be localist or either separable or integral distributed. Learning is modeled by making adjustments in a <span class="math inline">\(D \times D\)</span> matrix, where the entry in the <span class="math inline">\(i\)</span>th row and <span class="math inline">\(j\)</span>th column is the <em>associative weight</em> between element <span class="math inline">\(i\)</span> and element <span class="math inline">\(j\)</span> of the event representations. These weights get updated each time an event occurs. As a result, the weights eventually come to represent the ways that different event element co-vary with one another.</p>
+<section id="representing-learning-events" class="level3" data-number="11.1.1">
+<h3 data-number="11.1.1" class="anchored" data-anchor-id="representing-learning-events"><span class="header-section-number">11.1.1</span> Representing learning events</h3>
+<p>Let’s make this concrete by thinking back to the Blast cell example. Recall that those data involved participants with varying degrees of expertise in identifying whether a cell was a potentially cancerous “blast” cell or not, just by looking at a picture of the cell. Let’s imagine a related but somewhat simpler scenario, based on those used by <span class="citation" data-cites="MedinEtAl1982">Medin et al. (<a href="references.html#ref-MedinEtAl1982" role="doc-biblioref">1982</a>)</span>, that puts us in the position of being a novice gradually learning to become an expert.</p>
+<p>Imagine that we are new doctors reading case reports that describe the presence or absence of four symptoms in each patient. For the moment, we are only interested in how these different symptoms may or may not co-vary with one another. The four symptoms are swollen eyelids, splotchy ears, discolored gums, and nosebleed. We have eight patient reports, and we can represent each report using a <em>separable distributed vector</em> with <span class="math inline">\(D = 4\)</span> dimensions. As shown below, we can represent the presence of a symptom with a <code>1</code> and its absence with a <code>0</code>.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>event <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">8</span>, <span class="at">ncol =</span> <span class="dv">4</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"EM"</span>, <span class="st">"RM"</span>, <span class="st">"JJ"</span>, <span class="st">"LF"</span>, <span class="st">"AM"</span>, <span class="st">"JS"</span>, <span class="st">"ST"</span>, <span class="st">"SE"</span>),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"swollen_eyelids"</span>, <span class="st">"splotchy_ears"</span>, <span class="st">"discolored_gums"</span>, <span class="st">"nosebleed"</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(event)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">swollen_eyelids</th>
+<th style="text-align: right;">splotchy_ears</th>
+<th style="text-align: right;">discolored_gums</th>
+<th style="text-align: right;">nosebleed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EM</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">RM</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">JJ</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">LF</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AM</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JS</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ST</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SE</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="updating-associative-weights" class="level3" data-number="11.1.2">
+<h3 data-number="11.1.2" class="anchored" data-anchor-id="updating-associative-weights"><span class="header-section-number">11.1.2</span> Updating associative weights</h3>
+<p>Before reading any of the patient reports, we are a tabula rasa, a “blank slate”. That means we don’t know anything about how any of the symptoms go together. This state of initial ignorance is represented by an associative weight matrix that is filled with zeros. This is illustrated below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="fu">ncol</span>(event), <span class="at">ncol =</span> <span class="fu">ncol</span>(event), <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">colnames</span>(event), <span class="fu">colnames</span>(event)))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(assc_weights)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 22%">
+<col style="width: 19%">
+<col style="width: 22%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">swollen_eyelids</th>
+<th style="text-align: right;">splotchy_ears</th>
+<th style="text-align: right;">discolored_gums</th>
+<th style="text-align: right;">nosebleed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">swollen_eyelids</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">splotchy_ears</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">discolored_gums</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">nosebleed</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Now we read the first patient report:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(event[<span class="dv">1</span>,])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>swollen_eyelids   splotchy_ears discolored_gums       nosebleed 
+              0               0               1               1 </code></pre>
+</div>
+</div>
+<p>How should we update our matrix of associative weights on the basis of this report? Since discolored gums and nosebleed were both present, we should increment the cells of the matrix corresponding to the combination of those symptoms. Moreover, since discolored gums and nosebleed are both present with themselves, we might as well update those cells of the matrix too. The result is that our new matrix might look something like this:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(assc_weights <span class="sc">+</span> <span class="fu">outer</span>(event[<span class="dv">1</span>,], event[<span class="dv">1</span>,]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 22%">
+<col style="width: 19%">
+<col style="width: 22%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">swollen_eyelids</th>
+<th style="text-align: right;">splotchy_ears</th>
+<th style="text-align: right;">discolored_gums</th>
+<th style="text-align: right;">nosebleed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">swollen_eyelids</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">splotchy_ears</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">discolored_gums</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">nosebleed</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>To formalize what we just did, we will draw on one concept we have already seen and another concept we’ve sort of seen, if through a glass darkly. For the concept we have seen, recall that our models of choice and response time involved <em>accumulating</em> samples of evidence, where we added the new sample to a “running total”. That’s exactly how we will be updating our matrix of associative weights, and we can write it formally like this: <span class="math display">\[
+W(t + 1) = W(t) + \Delta W(t)
+\]</span> where <span class="math inline">\(W(t)\)</span> is our matrix of associative weights at the current time (<span class="math inline">\(t\)</span>), <span class="math inline">\(W(t + 1)\)</span> is our updated matrix after experiencing the learning event that occurs at time <span class="math inline">\(t\)</span>, and <span class="math inline">\(\Delta W(t)\)</span> is how we <em>change</em> our weights on the basis of the learning event experienced at time <span class="math inline">\(t\)</span>. This is just like accumulating samples of evidence, but instead we are accumulating changes in associative weights over time.</p>
+<p>Now for the thing we haven’t exactly seen, at least not in this form: Where do we get <span class="math inline">\(\Delta W(t)\)</span>? Since we are talking about adding something to a <span class="math inline">\(D \times D\)</span> matrix, we already know that <span class="math inline">\(\Delta W(t)\)</span> must also be a <span class="math inline">\(D \times D\)</span> matrix. We also know conceptually what <span class="math inline">\(\Delta W(t)\)</span> needs to do: It needs to represent the <em>combinations</em> of features that were present in the learning event at time <span class="math inline">\(t\)</span>. Recall from last chapter that, when dealing with binary 0/1 vectors, the <em>dot product</em> between two such vectors gave us a count of the number of features that were present (i.e., coded as <code>1</code>) in each representation. This is because when <span class="math inline">\(x_{ik} = 1\)</span> and <span class="math inline">\(x_{jk} = 1\)</span>, <span class="math inline">\(x_{ik} x_{jk} = 1\)</span>, otherwise <span class="math inline">\(x_{ik} x_{jk} = 0\)</span>. This is the idea behind what we are about to do.</p>
+<p>We can get <span class="math inline">\(\Delta W(t)\)</span> by taking the <em>outer product</em> of the learning event representation <span class="math inline">\(\mathbf{x}(t)\)</span> with itself. The outer product between two vectors <span class="math inline">\(\mathbf{a}\)</span> and <span class="math inline">\(\mathbf{b}\)</span> is sometimes written <span class="math inline">\(\mathbf{a} \otimes \mathbf{b}\)</span>. If <span class="math inline">\(\mathbf{a}\)</span> has length <span class="math inline">\(N\)</span> and <span class="math inline">\(\mathbf{b}\)</span> has length <span class="math inline">\(M\)</span>, then <span class="math inline">\(\mathbf{a} \otimes \mathbf{b}\)</span> is an <span class="math inline">\(N \times M\)</span> <em>matrix</em> where the entry in the <span class="math inline">\(i\)</span>th row and <span class="math inline">\(j\)</span>th column is the <em>product</em> between the <span class="math inline">\(i\)</span>th element of <span class="math inline">\(\mathbf{a}\)</span> and the <span class="math inline">\(j\)</span>th element of <span class="math inline">\(\mathbf{b}\)</span>. This is illustrated in the example below, showing that the <code>outer</code> function in R gives us the outer product.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Outer product of a and b</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">outer</span>(a, b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3]
+[1,]    1    0    1
+[2,]    0    0    0
+[3,]    0    0    0
+[4,]    1    0    1</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Outer product of a with itself</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">outer</span>(a, a)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4]
+[1,]    1    0    0    1
+[2,]    0    0    0    0
+[3,]    0    0    0    0
+[4,]    1    0    0    1</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Outer product of b with itself</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">outer</span>(b, b)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3]
+[1,]    1    0    1
+[2,]    0    0    0
+[3,]    1    0    1</code></pre>
+</div>
+</div>
+<p>So if the vector <span class="math inline">\(\mathbf{x}(t)\)</span> represents the learning event experienced at time <span class="math inline">\(t\)</span>, then <span class="math display">\[
+\Delta W(t) = \lambda \left[ \mathbf{x}(t) \otimes \mathbf{x}(t) \right]
+\]</span> where <span class="math inline">\(\lambda\)</span> is a parameter that represents the <span class="math inline">\(learning rate\)</span>. In the present example, we will keep things simple and assume <span class="math inline">\(\lambda = 1\)</span>, but we will make use of this parameter later.</p>
+<p>Getting back to our symptom example, we can write the update procedure in R like this:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>i <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>assc_weights <span class="ot">&lt;-</span> assc_weights <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(event[i,], event[i,])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>You might already anticipate where we are going: We can use a <code>for</code> loop to update the matrix of associative weights for <em>each</em> learning “event”, i.e., for each patient record we read.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize weights to zero</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="fu">ncol</span>(event), <span class="at">ncol =</span> <span class="fu">ncol</span>(event))</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify learning rate</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Update weights for each event</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    assc_weights <span class="ot">&lt;-</span> assc_weights <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(event[i,], event[i,])</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(assc_weights)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 22%">
+<col style="width: 19%">
+<col style="width: 22%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">swollen_eyelids</th>
+<th style="text-align: right;">splotchy_ears</th>
+<th style="text-align: right;">discolored_gums</th>
+<th style="text-align: right;">nosebleed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">swollen_eyelids</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">splotchy_ears</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">discolored_gums</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">nosebleed</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="using-what-youve-learned" class="level3" data-number="11.1.3">
+<h3 data-number="11.1.3" class="anchored" data-anchor-id="using-what-youve-learned"><span class="header-section-number">11.1.3</span> Using what you’ve learned</h3>
+<p>Via Hebbian learning, we have accumulated information about the co-occurrence patterns of different features (symptoms) across a series of learning events (patient records). We can use the resulting matrix of associative weights to do something that has been labeled in a few ways, such as <em>cued recall</em>, <em>pattern completion</em>, <em>inference</em>, and <em>fill-in-the-blanks</em>. The idea is that if we know that a patient has <em>some</em> symptoms, we can use the matrix of associative weights to make a reasonable guess about whether they have <em>other</em> symptoms, based on the degree to which those other symptoms co-occurred with the ones we know about. As the various names listed above imply, this is the same kind of process that goes on when we, say, correctly infer that penguins have wings by knowing that they have beaks and webbed feet (we might also <em>incorrectly</em> infer that penguins can fly for the same reason!).</p>
+<p>Say, for example, that we know a patient has discolored gums. By looking at the corresponding row in our matrix of associative weights, we can see that this symptom co-occurs with nosebleed more often than it does with either swollen eyelids or splotchy ears, as shown below.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>assc_weights[<span class="st">"discolored_gums"</span>,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>swollen_eyelids   splotchy_ears discolored_gums       nosebleed 
+              3               3               5               5 </code></pre>
+</div>
+</div>
+<p>Of course, the entries in our associative weight matrix are just numbers, they are not behavior. We need an additional <em>process</em> that enables us to predict behavior on the basis of the knowledge represented by the associative weight matrix. The relevant behavior here is whether or not you would be willing to say that a patient had symptom <span class="math inline">\(k\)</span>—this is a <em>choice</em>. We could also model the response time associated with that choice (see the Exercises), but for now we only focus on choice behavior.</p>
+<p>Specifically, we will transform the numbers extracted from the associative weight matrix into <em>probabilities</em> using the <em>logistic function</em>. This function will be familiar if you’ve done logistic regression, since it transforms unrestricted real numbers into the range between zero and one. The formula for the logistic function is <span class="math display">\[
+f(x) = \frac{1}{1 + \exp \left(-x \right)}
+\]</span> and it looks like this:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">x =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">6</span>, <span class="dv">6</span>, <span class="at">length.out =</span> <span class="dv">501</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">y =</span> <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x))) <span class="sc">%&gt;%</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"x"</span>, <span class="at">y =</span> <span class="fu">expression</span>(<span class="fu">f</span>(x)), <span class="at">title =</span> <span class="st">"Logistic function"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="learning_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As shown above, the logistic function returns values greater than 0.5 whenever its argument <span class="math inline">\(x\)</span> is a positive number. When <span class="math inline">\(x\)</span> is negative, the logistic function returns values less than 0.5. And if <span class="math inline">\(x = 0\)</span>, the logistic function is exactly 0.5.</p>
+<p>We can apply the logistic function to the row of the associative weight matrix above:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>assc_weights[<span class="st">"discolored_gums"</span>,]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>swollen_eyelids   splotchy_ears discolored_gums       nosebleed 
+      0.9525741       0.9525741       0.9933071       0.9933071 </code></pre>
+</div>
+</div>
+<p>Of course, we can probably ignore the entry for <code>discolored_gums</code> because we already know the patient has those! Looking at the other probabilities, they are pretty big, reflecting the fact that the associative weights are also pretty large. The magnitude of the weights depends on the learning rate parameter. The chunk of code below shows what happens if we reduce the learning rate.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize weights to zero</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="fu">ncol</span>(event), <span class="at">ncol =</span> <span class="fu">ncol</span>(event))</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify learning rate</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Update weights for each event</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    assc_weights <span class="ot">&lt;-</span> assc_weights <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(event[i,], event[i,])</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(assc_weights)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 22%">
+<col style="width: 19%">
+<col style="width: 22%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">swollen_eyelids</th>
+<th style="text-align: right;">splotchy_ears</th>
+<th style="text-align: right;">discolored_gums</th>
+<th style="text-align: right;">nosebleed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">swollen_eyelids</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">0.6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">splotchy_ears</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">0.6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">discolored_gums</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">nosebleed</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">1.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>assc_weights[<span class="st">"discolored_gums"</span>,]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>swollen_eyelids   splotchy_ears discolored_gums       nosebleed 
+      0.6456563       0.6456563       0.7310586       0.7310586 </code></pre>
+</div>
+</div>
+<p>With a smaller learning rate, the probabilities are not so extreme, and there is a bigger difference between the larger probabilities and smaller probabilities. Even so, we can anticipate that more learning will cause these weights to keep increasing and the probabilities to increase along with them. How can we address this counterintuitive behavior?</p>
+</section>
+<section id="discriminative-learning" class="level3" data-number="11.1.4">
+<h3 data-number="11.1.4" class="anchored" data-anchor-id="discriminative-learning"><span class="header-section-number">11.1.4</span> Discriminative learning</h3>
+<p>The fault, as it turns out, is not in our stars but in our representations. Recall that we coded the presence/absence of symptoms as <code>1</code> or <code>0</code>. As a result, associative weights can only ever increase with learning. To avoid this, we can instead code the absence of a symptom as <code>-1</code>. By using negative values, we can represent the <em>absence</em> of a feature more explicitly, thereby allowing us to learn to <em>discriminate</em> between the presence or absence of different features.</p>
+<p>First, let’s see what our learning event representations look like now:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>event <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">1</span>,  <span class="dv">1</span>,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>,  <span class="dv">1</span>,  <span class="dv">1</span>,  <span class="dv">1</span>,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>,  <span class="dv">1</span>,  <span class="dv">1</span>,  <span class="dv">1</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">1</span>,  <span class="dv">1</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>,  <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">1</span>,  <span class="dv">1</span>,  <span class="dv">1</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">8</span>, <span class="at">ncol =</span> <span class="dv">4</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"EM"</span>, <span class="st">"RM"</span>, <span class="st">"JJ"</span>, <span class="st">"LF"</span>, <span class="st">"AM"</span>, <span class="st">"JS"</span>, <span class="st">"ST"</span>, <span class="st">"SE"</span>),</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"swollen_eyelids"</span>, <span class="st">"splotchy_ears"</span>, <span class="st">"discolored_gums"</span>, <span class="st">"nosebleed"</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(event)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">swollen_eyelids</th>
+<th style="text-align: right;">splotchy_ears</th>
+<th style="text-align: right;">discolored_gums</th>
+<th style="text-align: right;">nosebleed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EM</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">RM</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">JJ</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">LF</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AM</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JS</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ST</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SE</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">-1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Now let’s see what happens when we take the outer product of the first learning event with itself:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">outer</span>(event[<span class="dv">1</span>,], event[<span class="dv">1</span>,])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>                swollen_eyelids splotchy_ears discolored_gums nosebleed
+swollen_eyelids               1             1              -1        -1
+splotchy_ears                 1             1              -1        -1
+discolored_gums              -1            -1               1         1
+nosebleed                    -1            -1               1         1</code></pre>
+</div>
+</div>
+<p>We can see that the fact that discolored gums and nosebleed were both present while swollen eyelids and splotchy ears were not will result in a <em>lowering</em> of the associative weight between those two sets of symptoms.</p>
+<p>Now let’s see what the final set of associative weights looks like:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize weights to zero</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="fu">ncol</span>(event), <span class="at">ncol =</span> <span class="fu">ncol</span>(event))</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Specify learning rate</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Update weights for each event</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    assc_weights <span class="ot">&lt;-</span> assc_weights <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(event[i,], event[i,])</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(assc_weights)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 22%">
+<col style="width: 22%">
+<col style="width: 19%">
+<col style="width: 22%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">swollen_eyelids</th>
+<th style="text-align: right;">splotchy_ears</th>
+<th style="text-align: right;">discolored_gums</th>
+<th style="text-align: right;">nosebleed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">swollen_eyelids</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">splotchy_ears</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">discolored_gums</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">nosebleed</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Now if we know a patient has discolored gums, we are very sure that they also have nosebleed and are equivocal about whether or not they have swollen eyelids or splotchy ears, as shown below:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>assc_weights[<span class="st">"discolored_gums"</span>,]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>swollen_eyelids   splotchy_ears discolored_gums       nosebleed 
+      0.5000000       0.5000000       0.9996646       0.9996646 </code></pre>
+</div>
+</div>
+<p>On the other hand, if we know a patient has swollen eyelids, we don’t have any strong opinions about whether or not they have any other symptoms (though we think it is more likely than not). Note that this is a consequence of the fact that discolored gums and nosebleed did tend to co-occur in our training events, whereas swollen eyelids did not systematically covary with any other symptoms.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>assc_weights[<span class="st">"swollen_eyelids"</span>,]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>swollen_eyelids   splotchy_ears discolored_gums       nosebleed 
+      0.9996646       0.5000000       0.5000000       0.5000000 </code></pre>
+</div>
+</div>
+</section>
+<section id="using-multiple-cues" class="level3" data-number="11.1.5">
+<h3 data-number="11.1.5" class="anchored" data-anchor-id="using-multiple-cues"><span class="header-section-number">11.1.5</span> Using multiple cues</h3>
+<p>So far, we have only thought about situations in which a single symptom was given for a new patient. What if we know that a patient has 2 symptoms or 3? Or what if we know they do <em>not</em> have a particular symptom? To address these situations, we need to go beyond just looking at a single row at a time.</p>
+<p>To appreciate what we are about to do, imagine that we knew a patient had discolored gums and that they did <em>not</em> have swollen eyelids. In that case, the strength of support for each feature would be the row corresponding to <code>discolored_gums</code> <em>minus</em> the row corresponding to <code>swollen_eyelids</code>, as shown below:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>assc_weights[<span class="st">"discolored_gums"</span>,] <span class="sc">-</span> assc_weights[<span class="st">"swollen_eyelids"</span>,]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>swollen_eyelids   splotchy_ears discolored_gums       nosebleed 
+             -8               0               8               8 </code></pre>
+</div>
+</div>
+<p>When we apply the logistic function to the vector above, we are still equivocal about splotchy ears but we are actually <em>more</em> sure that they have nosebleed:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>(assc_weights[<span class="st">"discolored_gums"</span>,] <span class="sc">-</span> assc_weights[<span class="st">"swollen_eyelids"</span>,])))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>swollen_eyelids   splotchy_ears discolored_gums       nosebleed 
+   0.0003353501    0.5000000000    0.9996646499    0.9996646499 </code></pre>
+</div>
+</div>
+<p>We can make the logic of what we just did to obtain that prediction more general. We will again make use of some linear algebra. Specifically, we will obtain the “strength of support” for each symptom by multiplying the matrix of associative weights with a vector that encodes the presence/absence/missingness of each known symptom. This vector is called a “probe” or a “cue”, and the result will be another vector that gives the total degree of support for each symptom. In math, we can write the operation like this: <span class="math display">\[
+\mathbf{o} = \mathbf{c} W
+\]</span> where <span class="math inline">\(\mathbf{c}\)</span> is the cue (or probe) vector and <span class="math inline">\(\mathbf{o}\)</span> is the “output” vector.</p>
+<p>The example above corresponds to the following cue vector:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>cue <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(cue) <span class="ot">&lt;-</span> <span class="fu">rownames</span>(assc_weights)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(cue)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>swollen_eyelids   splotchy_ears discolored_gums       nosebleed 
+             -1               0               1               0 </code></pre>
+</div>
+</div>
+<p>Notice that we use <code>-1</code> to code for the <em>known absence</em> of a feature, <code>1</code> to code for the <em>known presence</em> of a feature, and <code>0</code> to code for “missing knowledge” about a feature.</p>
+<p>We can use the <code>cue</code> vector to “probe” the associative weight matrix. In R, matrix multiplication uses the <code>%*%</code> operator (think of it as a “fancy multiplication”). So the code below directly implements the equation listed above:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>cue <span class="sc">%*%</span> assc_weights</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     swollen_eyelids splotchy_ears discolored_gums nosebleed
+[1,]              -8             0               8         8</code></pre>
+</div>
+</div>
+<p>And as we hoped, we get the same result from our fancy linear algebra as we did when we did it by hand earlier. The point of introducing this linear algebra now is that it will generalize more readily to situations in which we have more complex event representations (e.g., integral representations).</p>
+</section>
+<section id="associating-events-with-actions" class="level3" data-number="11.1.6">
+<h3 data-number="11.1.6" class="anchored" data-anchor-id="associating-events-with-actions"><span class="header-section-number">11.1.6</span> Associating events with actions</h3>
+<p>In the preceding examples, the learner associated features of events with one another, but now we consider how to model learning the relations between features of events and <em>outcomes</em> or <em>actions</em>. In the context of our ongoing medical example, imagine that a new doctor is learning to diagnose whether or not someone has a particular disease based on the pattern of symptoms they display. Now, instead of associating symptoms with symptoms, the doctor needs to associate symptoms with the presence/absence of the disease. Modeling this form of learning will require making two changes to the Hebbian learning model we have been building so far.</p>
+<p>First, we need to redefine the associative weight matrix <span class="math inline">\(W\)</span>. Before, it was <span class="math inline">\(D \times D\)</span>, where <span class="math inline">\(D\)</span> is the number of dimensions in our learning event representations. Now, it will be <span class="math inline">\(D \times O\)</span>, where <span class="math inline">\(O\)</span> is the number of dimensions used to represent the available actions. Sometimes, as in some of the examples below, <span class="math inline">\(O\)</span> will equal 1 if the learner just needs to decide whether to take an action or not (e.g., whether or not someone has a disease). But in general, <span class="math inline">\(O\)</span> could have many dimensions if the learner can take many actions or if the actions are sufficiently complex that they require a distributed representation. The entry in the <span class="math inline">\(i\)</span>th row and <span class="math inline">\(j\)</span>th column of our new associative weight matrix will represent the strength of association between event dimension <span class="math inline">\(i\)</span> and action/outcome dimension <span class="math inline">\(j\)</span>.</p>
+<p>The other thing we need to do is define, for each learning event, the “label” or “correct answer” that is associated with it. In the model implementation below, we do this by having two matrices: an <code>event</code> matrix that stores the features of each learning event, with one row per event and one column per feature; and a <code>target</code> matrix that stores the “correct answer” for each event, with one row per event and one column per outcome dimension.</p>
+<p>The example below uses the same set of symptoms as our running example. The first four patients were diagnosed with a disease while the second four were not.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>event <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>,  <span class="dv">1</span>,  <span class="dv">1</span>,  <span class="dv">1</span>,</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">1</span>,</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">1</span>,  <span class="dv">1</span>,</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>,  <span class="dv">1</span>,</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">8</span>, <span class="at">ncol =</span> <span class="dv">4</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb38-11"><a href="#cb38-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">"T"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>), <span class="fu">paste0</span>(<span class="st">"F"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)),</span>
+<span id="cb38-12"><a href="#cb38-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"swollen_eyelids"</span>, <span class="st">"splotchy_ears"</span>, <span class="st">"discolored_gums"</span>, <span class="st">"nosebleed"</span>)</span>
+<span id="cb38-13"><a href="#cb38-13" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb38-14"><a href="#cb38-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-15"><a href="#cb38-15" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb38-16"><a href="#cb38-16" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>,</span>
+<span id="cb38-17"><a href="#cb38-17" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>,</span>
+<span id="cb38-18"><a href="#cb38-18" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>,</span>
+<span id="cb38-19"><a href="#cb38-19" aria-hidden="true" tabindex="-1"></a>     <span class="dv">1</span>,</span>
+<span id="cb38-20"><a href="#cb38-20" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb38-21"><a href="#cb38-21" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb38-22"><a href="#cb38-22" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb38-23"><a href="#cb38-23" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb38-24"><a href="#cb38-24" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">8</span>, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb38-25"><a href="#cb38-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">"T"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>), <span class="fu">paste0</span>(<span class="st">"F"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>)),</span>
+<span id="cb38-26"><a href="#cb38-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"Diagnosis"</span>)</span>
+<span id="cb38-27"><a href="#cb38-27" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb38-28"><a href="#cb38-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-29"><a href="#cb38-29" aria-hidden="true" tabindex="-1"></a>assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="fu">ncol</span>(event), <span class="at">ncol =</span> <span class="fu">ncol</span>(target))</span>
+<span id="cb38-30"><a href="#cb38-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-31"><a href="#cb38-31" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb38-32"><a href="#cb38-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-33"><a href="#cb38-33" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
+<span id="cb38-34"><a href="#cb38-34" aria-hidden="true" tabindex="-1"></a>    assc_weights <span class="ot">&lt;-</span> assc_weights <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(event[i,], target[i,])</span>
+<span id="cb38-35"><a href="#cb38-35" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb38-36"><a href="#cb38-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-37"><a href="#cb38-37" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(assc_weights)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">swollen_eyelids</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">splotchy_ears</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">discolored_gums</td>
+<td style="text-align: right;">-2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">nosebleed</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>In the end, the new doctor has learned that swollen eyelids are strongly diagnostic of the disease, splotchy ears are weakly diagnostic, discolored gums are weakly counter-indicative of the disease, and nosebleed is uninformative.</p>
+<p>Notice that all we needed to do to model this form of associative learning was to swap out <code>event</code> for <code>target</code>. Formally, we can specify the learning procedure like this: <span class="math display">\[
+\Delta W(t) = \lambda \left[ \mathbf{x}(t) \otimes \mathbf{t}(t) \right]
+\]</span> where <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\mathbf{x}(t)\)</span> are as defined above and <span class="math inline">\(\mathbf{t}(t)\)</span> is the vector representation of the <em>target</em> (“correct answer”) for the learning event experienced at time <span class="math inline">\(t\)</span>.</p>
+<!-- In the following example, the first two features are largely diagnostic of which disease it is.  However, a learner could also pick up on the higher-order regularity that terrigitis is associated with the last two features either both being present or both absent, whereas midosis is associated with those features being anti-correlated. -->
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
+<!-- event <- matrix(c( -->
+<!--      1,  1,  1,  1, -->
+<!--     -1,  1,  1,  1, -->
+<!--      1,  1, -1, -1, -->
+<!--      1, -1, -1, -1, -->
+<!--      1, -1,  1, -1, -->
+<!--     -1, -1,  1, -1, -->
+<!--     -1,  1, -1,  1, -->
+<!--     -1, -1, -1,  1 -->
+<!-- ), nrow = 8, ncol = 4, byrow = TRUE, dimnames = list( -->
+<!--     c(paste0("T", 1:4), paste0("M", 1:4)), -->
+<!--     c("swollen_eyelids", "splotchy_ears", "discolored_gums", "nosebleed") -->
+<!-- )) -->
+<!-- response <- matrix(c( -->
+<!--      1, -1, -->
+<!--      1, -1, -->
+<!--      1, -1, -->
+<!--      1, -1, -->
+<!--     -1,  1, -->
+<!--     -1,  1, -->
+<!--     -1,  1, -->
+<!--     -1,  1 -->
+<!-- ), nrow = 8, ncol = 2, byrow = TRUE, dimnames = list( -->
+<!--     c(paste0("T", 1:4), paste0("M", 1:4)), -->
+<!--     c("Terrigitis", "Midosis") -->
+<!-- )) -->
+<!-- assc_weights <- matrix(0, nrow = ncol(event), ncol = ncol(response)) -->
+<!-- learning_rate <- 1 -->
+<!-- for (i in 1:nrow(event)) { -->
+<!--     assc_weights <- assc_weights + learning_rate * outer(event[i,], response[i,]) -->
+<!-- } -->
+<!-- knitr::kable(assc_weights) -->
+<!-- transfer_event <- matrix(c( -->
+<!--     -1, -1, -1, -1, -->
+<!--     -1, -1,  1,  1, -->
+<!--     -1,  1, -1, -1, -->
+<!--      1, -1,  1,  1, -->
+<!--      1,  1,  1, -1, -->
+<!--      1,  1, -1,  1, -->
+<!--     -1,  1,  1, -1, -->
+<!--      1, -1, -1,  1 -->
+<!-- ), nrow = 8, ncol = 4, byrow = TRUE, -->
+<!-- dimnames = list( -->
+<!--     paste0("N", 1:8), -->
+<!--     c("swollen_eyelids", "splotchy_ears", "discolored_gums", "nosebleed") -->
+<!-- )) -->
+<!-- p_resp <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(response), dimnames = list(rownames(transfer_event), colnames(response))) -->
+<!-- for (i in 1:nrow(transfer_event)) { -->
+<!--     p_resp[i,] <- 1 / (1 + exp(-transfer_event[i,] %*% assc_weights)) -->
+<!-- } -->
+<!-- knitr::kable(p_resp) -->
+<!-- ``` -->
+</section>
+</section>
+<section id="error-driven-learning" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="error-driven-learning"><span class="header-section-number">11.2</span> Error-driven learning</h2>
+<p>This was a form of <em>unsupervised</em> learning, since the learner had no explicit <em>goal</em> other than to learn. In <em>supervised</em> learning, a learner associates features of events with different <em>actions</em> or <em>outcomes</em>. Each time a learning event occurs, the learner uses the features of that event to form a representation of the action/outcome they select. The learner then receives feedback telling them the correct action/outcome they <em>should</em> have chosen. The goal of the learner is to adjust their associative weights in such a way that they reduce the discrepancy between the action/outcome they pick and the one they are told is correct.</p>
+<p>The new doctor examines the symptoms of a patient report (this is the “learning event”), makes a diagnosis (this is the chosen action/outcome), and then gets told what the <em>correct</em> diagnosis would have been for that patient (this is the feedback). The new doctor then has to adjust the pattern of associations between symptoms (learning event features) and diagnoses (actions/outcomes).</p>
+<p>We can imagine the same kind of learning occurring in many situations: When you are learning language, you might choose which word to use to describe an object based on its visible features (e.g., calling a black and white creature with four legs a “zebra”) and then someone nearby would either confirm your choice or provide the correct name (e.g., “no, that’s a dalmatian”). When you are learning a skill like using a tool or playing an instrument, you take an action (e.g., pressing a key on a keyboard) and then get feedback about whether it was correct or not (e.g., you hear the correct note you should have played).</p>
+<!-- ## Learning representations by backpropagation of error -->
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
+<!-- logistic_act <- function(x) { -->
+<!--     return(1 / (1 + exp(-x))) -->
+<!-- } -->
+<!-- event <- matrix(c( -->
+<!--      1,  1, -->
+<!--      1, -1, -->
+<!--     -1,  1, -->
+<!--     -1, -1 -->
+<!-- ), nrow = 4, ncol = 2, byrow = TRUE) -->
+<!-- response <- matrix(c( -->
+<!--     0, -->
+<!--     1, -->
+<!--     1, -->
+<!--     0 -->
+<!-- ), nrow = 4, ncol = 1, byrow = TRUE) -->
+<!-- learning_rate <- 0.1 -->
+<!-- n_hidden <- 4 -->
+<!-- n_epochs <- 10000 -->
+<!-- learn_by_epoch <- TRUE -->
+<!-- i_to_h_assc_weights <- matrix(rnorm(n = ncol(event) * n_hidden, sd = 0.01), nrow = ncol(event), ncol = n_hidden) -->
+<!-- h_to_o_assc_weights <- matrix(rnorm(n = n_hidden * ncol(response), sd = 0.01), nrow = n_hidden, ncol = ncol(response)) -->
+<!-- for (epoch in 1:n_epochs) { -->
+<!--     training_order <- sample(nrow(event)) -->
+<!--     d_h_to_o <- 0 * h_to_o_assc_weights -->
+<!--     d_i_to_h <- 0 * i_to_h_assc_weights -->
+<!--     for (i in training_order) { -->
+<!--         # Forward propagation (prediction) -->
+<!--         # Note the use of `as.vector` to ensure result is a vector (not a matrix with a single row) -->
+<!--         # We also allow hidden units to have activations between -1 and 1 by scaling/shifting the logistic function. -->
+<!--         # This means we have to multiply the derivative on the error by the scaling factor (2) during back-propagation -->
+<!--         hidden_activation <- 2 * logistic_act(as.vector(event[i,] %*% i_to_h_assc_weights)) - 1 -->
+<!--         output_activation <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights)) -->
+<!--         # Compute error at output layer -->
+<!--         output_error <- output_activation - response[i,] -->
+<!--         # Back propagation (learning) -->
+<!--         # Derivative of error with respect to output unit activation -->
+<!--         d_output_error <- output_error * output_activation * (1 - output_activation) -->
+<!--         # Derivative of error with respect to hidden unit activation -->
+<!--         # Note that multiplying by 2 is a consequence of the hidden units having shifted/scaled activation that ranges between -1 and 1 rather than between 0 and 1. -->
+<!--         d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * 2 * hidden_activation * (1 - hidden_activation) -->
+<!--         if (learn_by_epoch) { -->
+<!--             # How much to adjust the associative weights between the hidden and output layers -->
+<!--             d_h_to_o <- d_h_to_o + learning_rate * outer(hidden_activation, d_output_error) -->
+<!--             # How much to adjust the associative weights between the input and hidden layers -->
+<!--             d_i_to_h <- d_i_to_h + learning_rate * outer(event[i,], d_hidden_error) -->
+<!--         } else { -->
+<!--             d_h_to_o <- learning_rate * outer(hidden_activation, d_output_error) -->
+<!--             d_i_to_h <- learning_rate * outer(event[i,], d_hidden_error) -->
+<!--             # Adjust weights -->
+<!--             i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h -->
+<!--             h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o -->
+<!--         } -->
+<!--     } -->
+<!--     if (learn_by_epoch) { -->
+<!--         # Adjust weights -->
+<!--         i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h -->
+<!--         h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o -->
+<!--     } -->
+<!-- } -->
+<!-- transfer_event <- matrix(c( -->
+<!--      1,  1, -->
+<!--      1, -1, -->
+<!--     -1,  1, -->
+<!--     -1, -1 -->
+<!-- ), nrow = 4, ncol = 2, byrow = TRUE) -->
+<!-- p_resp <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(response), dimnames = list(rownames(transfer_event), colnames(response))) -->
+<!-- for (i in 1:nrow(transfer_event)) { -->
+<!--     hidden_activation <- 2 * logistic_act(as.vector(transfer_event[i,] %*% i_to_h_assc_weights)) - 1 -->
+<!--     p_resp[i,] <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights)) -->
+<!-- } -->
+<!-- knitr::kable(p_resp) -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
+<!-- logistic_act <- function(x) { -->
+<!--     return(1 / (1 + exp(-x))) -->
+<!-- } -->
+<!-- event <- matrix(c( -->
+<!--      1,  1,  1,  1, -->
+<!--     -1,  1,  1,  1, -->
+<!--      1,  1, -1, -1, -->
+<!--      1, -1, -1, -1, -->
+<!--      1, -1,  1, -1, -->
+<!--     -1, -1,  1, -1, -->
+<!--     -1,  1, -1,  1, -->
+<!--     -1, -1, -1,  1 -->
+<!-- ), nrow = 8, ncol = 4, byrow = TRUE, dimnames = list( -->
+<!--     c(paste0("T", 1:4), paste0("M", 1:4)), -->
+<!--     c("swollen_eyelids", "splotchy_ears", "discolored_gums", "nosebleed") -->
+<!-- )) -->
+<!-- response <- matrix(c( -->
+<!--     1, 0, -->
+<!--     1, 0, -->
+<!--     1, 0, -->
+<!--     1, 0, -->
+<!--     0, 1, -->
+<!--     0, 1, -->
+<!--     0, 1, -->
+<!--     0, 1 -->
+<!-- ), nrow = 8, ncol = 2, byrow = TRUE, dimnames = list( -->
+<!--     c(paste0("T", 1:4), paste0("M", 1:4)), -->
+<!--     c("Terrigitis", "Midosis") -->
+<!-- )) -->
+<!-- response <- response[,1, drop = FALSE] -->
+<!-- learning_rate <- 0.1 -->
+<!-- n_hidden <- 3 -->
+<!-- n_epochs <- 10000 -->
+<!-- learn_by_epoch <- TRUE -->
+<!-- i_to_h_assc_weights <- matrix(rnorm(n = ncol(event) * n_hidden, sd = 0.01), nrow = ncol(event), ncol = n_hidden) -->
+<!-- h_to_o_assc_weights <- matrix(rnorm(n = n_hidden * ncol(response), sd = 0.01), nrow = n_hidden, ncol = ncol(response)) -->
+<!-- for (epoch in 1:n_epochs) { -->
+<!--     training_order <- sample(nrow(event)) -->
+<!--     d_h_to_o <- 0 * h_to_o_assc_weights -->
+<!--     d_i_to_h <- 0 * i_to_h_assc_weights -->
+<!--     for (i in training_order) { -->
+<!--         # Forward propagation (prediction) -->
+<!--         # Note the use of `as.vector` to ensure result is a vector (not a matrix with a single row) -->
+<!--         # We also allow hidden units to have activations between -1 and 1 by scaling/shifting the logistic function. -->
+<!--         # This means we have to multiply the derivative on the error by the scaling factor (2) during back-propagation -->
+<!--         hidden_activation <- logistic_act(as.vector(event[i,] %*% i_to_h_assc_weights)) -->
+<!--         output_activation <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights)) -->
+<!--         # Compute error at output layer -->
+<!--         output_error <- output_activation - response[i,] -->
+<!--         # Back propagation (learning) -->
+<!--         # Derivative of error with respect to output unit activation -->
+<!--         d_output_error <- output_error * output_activation * (1 - output_activation) -->
+<!--         # Derivative of error with respect to hidden unit activation -->
+<!--         # Note that multiplying by 2 is a consequence of the hidden units having shifted/scaled activation that ranges between -1 and 1 rather than between 0 and 1. -->
+<!--         d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * hidden_activation * (1 - hidden_activation) -->
+<!--         if (learn_by_epoch) { -->
+<!--             # How much to adjust the associative weights between the hidden and output layers -->
+<!--             d_h_to_o <- d_h_to_o + learning_rate * outer(hidden_activation, d_output_error) -->
+<!--             # How much to adjust the associative weights between the input and hidden layers -->
+<!--             d_i_to_h <- d_i_to_h + learning_rate * outer(event[i,], d_hidden_error) -->
+<!--         } else { -->
+<!--             d_h_to_o <- learning_rate * outer(hidden_activation, d_output_error) -->
+<!--             d_i_to_h <- learning_rate * outer(event[i,], d_hidden_error) -->
+<!--             # Adjust weights -->
+<!--             i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h -->
+<!--             h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o -->
+<!--         } -->
+<!--     } -->
+<!--     if (learn_by_epoch) { -->
+<!--         # Adjust weights -->
+<!--         i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h -->
+<!--         h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o -->
+<!--     } -->
+<!-- } -->
+<!-- transfer_event <- matrix(c( -->
+<!--     -1, -1, -1, -1, -->
+<!--     -1, -1,  1,  1, -->
+<!--     -1,  1, -1, -1, -->
+<!--      1, -1,  1,  1, -->
+<!--      1,  1,  1, -1, -->
+<!--      1,  1, -1,  1, -->
+<!--     -1,  1,  1, -1, -->
+<!--      1, -1, -1,  1 -->
+<!-- ), nrow = 8, ncol = 4, byrow = TRUE, -->
+<!-- dimnames = list( -->
+<!--     paste0("N", 1:8), -->
+<!--     c("swollen_eyelids", "splotchy_ears", "discolored_gums", "nosebleed") -->
+<!-- )) -->
+<!-- p_resp <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(response), dimnames = list(rownames(transfer_event), colnames(response))) -->
+<!-- for (i in 1:nrow(transfer_event)) { -->
+<!--     hidden_activation <- logistic_act(as.vector(transfer_event[i,] %*% i_to_h_assc_weights)) -->
+<!--     p_resp[i,] <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights)) -->
+<!-- } -->
+<!-- knitr::kable(p_resp) -->
+<!-- ``` -->
+<!-- ## Exercises -->
+<!-- 1. Within the context of a model like the EBRW, storing a new exemplar as a trace in memory could be considered a form of *learning*, in the sense that the performance of the model *changes* as a function of having experienced that new exemplar.  Compare and contrast this form of learning with the forms of learning we encountered in this chapter. -->
+<!-- 2. Describe how you would use the output of any of the learning models we've seen in this chapter to predict not only choice behavior, but also choice and response time. -->
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-Hebb1949" class="csl-entry" role="listitem">
+Hebb, D. O. (1949). <em>The organization of behavior: A neuropsychological theory</em>. Wiley.
+</div>
+<div id="ref-MedinEtAl1982" class="csl-entry" role="listitem">
+Medin, D. L., Altom, M. W., Edelson, S. M., &amp; Freko, D. (1982). Correlated symptoms and simulated medical classification. <em>Journal of Experimental Psychology: Learning, Memory, and Cognition</em>, <em>8</em>(1), 37–50. <a href="https://www.proquest.com/scholarly-journals/correlated-symptoms-simulated-medical/docview/614362118/se-2">https://www.proquest.com/scholarly-journals/correlated-symptoms-simulated-medical/docview/614362118/se-2</a>
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./vector_reps.html" class="pagination-link" aria-label="Distributed representations, similarity, and recognition">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Distributed representations, similarity, and recognition</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

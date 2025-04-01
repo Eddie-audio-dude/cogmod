@@ -24,6 +24,7 @@ book:
       chapters:
         - ebrw.qmd
         - vector_reps.qmd
+        - learning.qmd
     - references.qmd
 
 bibliography: references.bib
