@@ -373,73 +373,6 @@ $$
 $$
 where $\lambda$ and $\mathbf{x}(t)$ are as defined above and $\mathbf{t}(t)$ is the vector representation of the *target* ("correct answer") for the learning event experienced at time $t$.
 
-<!-- In the following example, the first two features are largely diagnostic of which disease it is.  However, a learner could also pick up on the higher-order regularity that terrigitis is associated with the last two features either both being present or both absent, whereas midosis is associated with those features being anti-correlated. -->
-
-<!-- ```{r} -->
-<!-- #| code-fold: show -->
-
-<!-- event <- matrix(c( -->
-<!--      1,  1,  1,  1, -->
-<!--     -1,  1,  1,  1, -->
-<!--      1,  1, -1, -1, -->
-<!--      1, -1, -1, -1, -->
-<!--      1, -1,  1, -1, -->
-<!--     -1, -1,  1, -1, -->
-<!--     -1,  1, -1,  1, -->
-<!--     -1, -1, -1,  1 -->
-<!-- ), nrow = 8, ncol = 4, byrow = TRUE, dimnames = list( -->
-<!--     c(paste0("T", 1:4), paste0("M", 1:4)), -->
-<!--     c("swollen_eyelids", "splotchy_ears", "discolored_gums", "nosebleed") -->
-<!-- )) -->
-
-<!-- response <- matrix(c( -->
-<!--      1, -1, -->
-<!--      1, -1, -->
-<!--      1, -1, -->
-<!--      1, -1, -->
-<!--     -1,  1, -->
-<!--     -1,  1, -->
-<!--     -1,  1, -->
-<!--     -1,  1 -->
-<!-- ), nrow = 8, ncol = 2, byrow = TRUE, dimnames = list( -->
-<!--     c(paste0("T", 1:4), paste0("M", 1:4)), -->
-<!--     c("Terrigitis", "Midosis") -->
-<!-- )) -->
-
-<!-- assc_weights <- matrix(0, nrow = ncol(event), ncol = ncol(response)) -->
-
-<!-- learning_rate <- 1 -->
-
-<!-- for (i in 1:nrow(event)) { -->
-<!--     assc_weights <- assc_weights + learning_rate * outer(event[i,], response[i,]) -->
-<!-- } -->
-
-<!-- knitr::kable(assc_weights) -->
-
-<!-- transfer_event <- matrix(c( -->
-<!--     -1, -1, -1, -1, -->
-<!--     -1, -1,  1,  1, -->
-<!--     -1,  1, -1, -1, -->
-<!--      1, -1,  1,  1, -->
-<!--      1,  1,  1, -1, -->
-<!--      1,  1, -1,  1, -->
-<!--     -1,  1,  1, -1, -->
-<!--      1, -1, -1,  1 -->
-<!-- ), nrow = 8, ncol = 4, byrow = TRUE, -->
-<!-- dimnames = list( -->
-<!--     paste0("N", 1:8), -->
-<!--     c("swollen_eyelids", "splotchy_ears", "discolored_gums", "nosebleed") -->
-<!-- )) -->
-
-<!-- p_resp <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(response), dimnames = list(rownames(transfer_event), colnames(response))) -->
-
-<!-- for (i in 1:nrow(transfer_event)) { -->
-<!--     p_resp[i,] <- 1 / (1 + exp(-transfer_event[i,] %*% assc_weights)) -->
-<!-- } -->
-
-<!-- knitr::kable(p_resp) -->
-<!-- ``` -->
-
 ## Error-driven learning
 
 As noted above, Hebbian learning---whether of associations between event features or associations between events and actions---was a form of *unsupervised* learning, since the learner had no explicit *goal* other than to learn.  In *supervised* learning, a learner again associates features of events with different *actions* or *outcomes*.  The difference between supervised and unsupervised learning is that, in supervised learning, the adjustments the learner makes to their matrix of associations depends on the *error* between the target action/outcome and the learner's *guess* or *prediction* about the action/outcome.  Each time a learning event occurs, the learner uses the features of that event to form a representation of the action/outcome they select.  The learner then receives feedback telling them the correct action/outcome they *should* have chosen.  The goal of the learner is to adjust their associative weights in such a way that they reduce the discrepancy between the action/outcome they pick and the one they are told is correct.
@@ -448,11 +381,380 @@ To return to our running example, in supervised learning, the new doctor examine
 
 We can imagine the same kind of learning occurring in many situations:  When you are learning language, you might choose which word to use to describe an object based on its visible features (e.g., calling a black and white creature with four legs a "zebra") and then someone nearby would either confirm your choice or provide the correct name (e.g., "no, that's a dalmatian").  When you are learning a skill like using a tool or playing an instrument, you take an action (e.g., pressing a key on a keyboard) and then get feedback about whether it was correct or not (e.g., you hear the correct note you should have played).
 
-Formally, error-driven learning then happens in two steps:
+Formally, error-driven learning happens in two steps:
 \begin{align*}
 \mathbf{y}(t) & = f \left[ \mathbf{x}(t) W(t) \right] & \text{Make a prediction/guess} \\
 \Delta W(t) & = \lambda \left\lbrace \mathbf{x}(t) \otimes \overbrace{\left[\mathbf{t}(t) - \mathbf{y}(t) \right]}^{\text{Error}} \right\rbrace & \text{Adjust weights in proportion to error}
 \end{align*}
+
+You may notice the mysterious function $f$ in the first line above.  This is because sometimes our prediction is a *function* of the associative weights and event features, like we saw with the logistic function above.  Indeed, the logistic function is a common choice for $f$ because we are often interested in modeling learning where the outcome is a binary decision (e.g., approach/avoid, good/bad, diagnose or not, etc.).
+
+### Of salivating dogs and doctors
+
+The error-driven learning rule written above is a kind of *Delta rule* originally proposed by @WidrowHoff1960 but applied to animal and human learning by @RescorlaWagner1972.  In particular, @RescorlaWagner1972 showed how error-driven learning could explain various phenomena in [classical conditioning](https://en.wikipedia.org/wiki/Classical_conditioning), hence the reference in the section title to Pavlov's salivating dogs.
+
+Conditioning experiments are functionally identical to the disease diagnosis example, along with many other cases in which a learner needs to form a prediction or expectation on the basis of the features of some event.
+
+The code below illustrates how error-driven learning can explain *extinction*.  We imagine that a single cue is presented for `n_early` times at the beginning of the experiment, when it is paired with the presence of some outcome.  After that, we present the same cue again for `n_late` trials, but now it is no longer paired with the outcome.  These patterns are built into the `event` and `target` matrices below.  In addition, because the prediction is about the presence/absence of the outcome, the function $f$ above is the *logistic function*.
+
+You'll notice too that this code stores the associative weights on each trial in an `array`.  We can then use the `array2DF` function to make a pretty plot of how the associative weights change from one learning event to the next.
+
+```{r}
+#| code-fold: show
+
+logistic_act <- function(x) {
+    return(1 / (1 + exp(-x)))
+}
+
+n_early <- 10
+n_late <- 10
+
+event <- matrix(c(
+    rep(c(1), n_early),
+    rep(c(1), n_late)
+), nrow = n_early + n_late, ncol = 1, byrow = TRUE)
+
+target <- matrix(c(
+    rep(c(1), n_early),
+    rep(c(0), n_late)
+), nrow = n_early + n_late, ncol = 1, byrow = TRUE)
+
+assc_weights <- array(0, dim = c(nrow(event) + 1, ncol(event), ncol(target)),
+                      dimnames = list(
+                          "t" = 1:(nrow(event) + 1),
+                          "cue" = paste("cue", LETTERS[1:ncol(event)]),
+                          "outcome" = paste("outcome", LETTERS[1:ncol(target)])
+                      ))
+
+learning_rate <- 0.5
+
+for (i in 1:nrow(event)) {
+    prediction <- as.vector(event[i,] %*% assc_weights[i, , ])
+    assc_weights[i + 1, , ] <- assc_weights[i, , ] + learning_rate * outer(event[i,], target[i,] - prediction)
+}
+
+array2DF(assc_weights, responseName = "weight") %>%
+    mutate(t = as.numeric(t)) %>%
+    ggplot(aes(x = t, y = weight)) +
+    geom_line() +
+    labs(x = "Learning event", y = "Associative weight between cue and outcome")
+```
+
+As we can see, the associative weight between the cue and outcome increases at first, eventually saturating when the presence of the outcome is correctly predicted by the presence of the cue.  When the outcome stops happening, now that prediction is wrong and the associative weight diminishes in response, eventually returning to near zero.
+
+The next example of the @RescorlaWagner1972 model in action illustrates learning two different associations, one between an *early* cue and an *early* outcome and another between a *late* cue and a *late* outcome.  Since associative weights only change in order to reduce error, the early-learned weights are preserved through the later phase of learning.
+
+```{r}
+#| code-fold: show
+
+logistic_act <- function(x) {
+    return(1 / (1 + exp(-x)))
+}
+
+n_early <- 10
+n_late <- 10
+
+event <- matrix(c(
+    rep(c(1, 0), n_early),
+    rep(c(0, 1), n_late)
+), nrow = n_early + n_late, ncol = 2, byrow = TRUE)
+
+target <- matrix(c(
+    rep(c(1, 0), n_early),
+    rep(c(0, 1), n_late)
+), nrow = n_early + n_late, ncol = 2, byrow = TRUE)
+
+assc_weights <- array(0, dim = c(nrow(event) + 1, ncol(event), ncol(target)),
+                      dimnames = list(
+                          "t" = 1:(nrow(event) + 1),
+                          "cue" = paste("cue", LETTERS[1:ncol(event)]),
+                          "outcome" = paste("outcome", LETTERS[1:ncol(target)])
+                      ))
+
+learning_rate <- 0.5
+
+for (i in 1:nrow(event)) {
+    prediction <- as.vector(event[i,] %*% assc_weights[i, , ])
+    assc_weights[i + 1, , ] <- assc_weights[i, , ] + learning_rate * outer(event[i,], target[i,] - prediction)
+}
+
+array2DF(assc_weights, responseName = "weight") %>%
+    mutate(t = as.numeric(t)) %>%
+    ggplot(aes(x = t, y = weight, color = cue, linetype = outcome)) +
+    geom_line() +
+    labs(x = "Learning event", y = "Associative weight between cue and outcome")
+```
+
+The following is a more complex learning situation known as a *blocking* paradigm [@Kruschke2011].  In the early phase, outcome A is paired with cue A and outcome B is paired with cue E.  During the later phase, outcome A is paired with *both* cue A and cue B while outcome B is paired with cues C and D.  The question is:  Does the fact that cue A and outcome A had already been paired in the early phase *block* learning of an association between cue *B* and outcome A?  That question is addressed by presenting *transfer* trials to the learner, coded below in the matrix `transfer_event`.
+
+The first *transfer* trial involves presenting cues B and D to the learner.  If cue *B* had been blocked, the learner should have a stronger expectation that outcome B would occur over outcome A.
+
+The second *transfer* trial involves presenting cues A and C to the learner.  If cue *B* had been blocked, then cue A should remain a stronger predictor of outcome A relative to how strongly cue C predicts outcome B.
+
+```{r}
+#| code-fold: show
+
+logistic_act <- function(x) {
+    return(1 / (1 + exp(-x)))
+}
+
+n_early <- 10
+n_late <- 10
+
+event <- matrix(c(
+    rep(c(1, 0, 0, 0, 0), n_early),
+    rep(c(0, 0, 0, 0, 1), n_early),
+    rep(c(1, 1, 0, 0, 0), n_late),
+    rep(c(0, 0, 1, 1, 0), n_late)
+), nrow = 2 * (n_early + n_late), ncol = 5, byrow = TRUE)
+
+target <- matrix(c(
+    rep(c(1, 0), n_early),
+    rep(c(0, 1), n_early),
+    rep(c(1, 0), n_late),
+    rep(c(0, 1), n_late)
+), nrow = 2 * (n_early + n_late), ncol = 2, byrow = TRUE)
+
+assc_weights <- array(0, dim = c(nrow(event) + 1, ncol(event), ncol(target)),
+                      dimnames = list(
+                          "t" = 1:(nrow(event) + 1),
+                          "cue" = paste("cue", LETTERS[1:ncol(event)]),
+                          "outcome" = paste("outcome", LETTERS[1:ncol(target)])
+                      ))
+
+learning_rate <- 0.2
+
+for (i in 1:nrow(event)) {
+    prediction <- as.vector(event[i,] %*% assc_weights[i, , ])
+    assc_weights[i + 1, , ] <- assc_weights[i, , ] + learning_rate * outer(event[i,], target[i,] - prediction)
+}
+
+array2DF(assc_weights, responseName = "weight") %>%
+    mutate(t = as.numeric(t)) %>%
+    ggplot(aes(x = t, y = weight, color = cue, linetype = outcome)) +
+    geom_line()
+
+transfer_event <- matrix(c(
+    0, 1, 0, 1, 0,
+    1, 0, 1, 0, 0
+), nrow = 2, ncol = 5, byrow = TRUE)
+
+transfer_prediction <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(target))
+
+for (i in 1:nrow(transfer_event)) {
+    transfer_prediction[i,] <- as.vector(transfer_event[i,] %*% assc_weights[dim(assc_weights)[1], , ])
+}
+
+transfer_prediction
+```
+
+We can see that, according to the @RescorlaWagner1972 model, learning of the association between cue B and outcome A has indeed been "blocked".  The reason is because the previously learned association between cue A and outcome A means that there is simply no need to learn a new association between cue B and outcome A---the learner is already capable of predicting the correct outcome.  The result is that, as predicted by blocking, the learner is more likely to predict outcome B in the first transfer trial and is more likely to predict outcome A in the second transfer trial.
+
+### Batch learning
+
+Applying the @RescorlaWagner1972 model to our novice doctor presents a challenge, namely, that the *order* in which events are encountered is no longer relevant to the doctor, since they can read the reports in any order.  To model this form of learning, instead of updating the matrix of associative weights after each event, we can *accumulate* the changes across all events and update them all at once.  This is called *batch learning* because the learner experiences a *batch* of events.  This is a common approach in neural network models, as we shall see below.
+
+Batch learning is implemented in the chunk of code below, which also allows for the number of batches `n_batch` to be varied.  Notice that error-driven learning can also achieve *discriminative* learning without needing to code event features as `-1` and `1`.
+
+```{r}
+#| code-fold: show
+
+event <- matrix(c(
+     1,  1,  1,  1,
+    0,  1, 0, 0,
+     1, 0, 0,  1,
+     1, 0, 0, 0,
+     1, 0,  1,  1,
+    0, 0,  1, 0,
+    0,  1, 0,  1,
+    0, 0, 0, 0
+), nrow = 8, ncol = 4, byrow = TRUE, dimnames = list(
+    c(paste0("T", 1:4), paste0("F", 1:4)),
+    c("swollen_eyelids", "splotchy_ears", "discolored_gums", "nosebleed")
+))
+
+target <- matrix(c(
+     1,
+     1,
+     1,
+     1,
+    0,
+    0,
+    0,
+    0
+), nrow = 8, ncol = 1, byrow = TRUE, dimnames = list(
+    c(paste0("T", 1:4), paste0("F", 1:4)),
+    c("Diagnosis")
+))
+
+learning_rate <- 0.1
+n_batch <- 30
+
+assc_weights <- array(0, dim = c(n_batch + 1, ncol(event), ncol(target)),
+                      dimnames = list(
+                          "batch" = 1:(n_batch + 1),
+                          "cue" = colnames(event),
+                          "outcome" = colnames(target)
+                      ))
+
+for (b in 1:n_batch) {
+    d_assc_weights <- matrix(0, nrow = dim(assc_weights)[2], ncol = dim(assc_weights)[3])
+    
+    for (i in 1:nrow(event)) {
+        prediction <- logistic_act(as.vector(event[i,] %*% assc_weights[i, , ]))
+        d_assc_weights <- d_assc_weights + learning_rate * outer(event[i,], target[i,] - prediction)
+    }
+    
+    assc_weights[b + 1, , ] <- assc_weights[b, , ] + d_assc_weights
+}
+
+array2DF(assc_weights, responseName = "weight") %>%
+    mutate(batch = as.numeric(batch)) %>%
+    ggplot(aes(x = batch, y = weight, color = cue)) +
+    geom_line() +
+    labs(x = "Batch number", y = "Associative weight")
+```
+
+### Attention and learning
+
+Since the @RescorlaWagner1972 model has been doing well so far, let's present *another* learning situation to it.  This situation is called *highlighting* [@Kruschke2009] and, like blocking, involves an early and late set of learning events.  In the early events, cues A and B are both paired with outcome A.  In the late events, cues A and C are both paired with outcome B.  The critical thing is that cue A is paired with both outcomes with equal frequency.  If a learner were only sensitive to those frequencies, then cue A would be equally associated with both outcomes.  Moreover, the learner would be ambivalent if presented with both cues B and C, since each had been paired with their respective outcomes an equal number of times.  As you might guess, those two situations constitute the `transfer_event`s in the code below.
+
+However, animals, whether human or otherwise, do *not* show the pattern of results described above.  In fact, learners tend to associate cue A with the early outcome more than the late outcome.  And when confronted with both cues B and C, learners are more likely to expect the later outcome (outcome B) over the early one.  This phenomenon is referred to as *highlighting* since the novelty of cue C, when it appears, seems to "highlight" it as the "true predictor" of outcome B.  For the same reason, learners tend not to "unlearn" the early-learned association between cue A and outcome A.
+
+Let's see whether @RescorlaWagner1972 correctly predict this outcome...
+
+```{r}
+#| code-fold: show
+
+logistic_act <- function(x) {
+    return(1 / (1 + exp(-x)))
+}
+
+n_early <- 10
+n_late <- 10
+
+event <- matrix(c(
+    rep(c(1, 1, 0), n_early),
+    rep(c(1, 0, 1), n_late)
+), nrow = n_early + n_late, ncol = 3, byrow = TRUE)
+
+target <- matrix(c(
+    rep(c(1, 0), n_early),
+    rep(c(0, 1), n_late)
+), nrow = n_early + n_late, ncol = 2, byrow = TRUE)
+
+assc_weights <- array(0, dim = c(nrow(event) + 1, ncol(event), ncol(target)),
+                      dimnames = list(
+                          "t" = 1:(nrow(event) + 1),
+                          "cue" = paste("cue", LETTERS[1:ncol(event)]),
+                          "outcome" = paste("outcome", LETTERS[1:ncol(target)])
+                      ))
+
+learning_rate <- 0.2
+
+for (i in 1:nrow(event)) {
+    prediction <- as.vector(event[i,] %*% assc_weights[i, , ])
+    assc_weights[i + 1, , ] <- assc_weights[i, , ] + learning_rate * outer(event[i,], target[i,] - prediction)
+}
+
+array2DF(assc_weights, responseName = "weight") %>%
+    mutate(t = as.numeric(t)) %>%
+    ggplot(aes(x = t, y = weight, color = cue, linetype = outcome)) +
+    geom_line()
+
+transfer_event <- matrix(c(
+    1, 0, 0,
+    0, 1, 1
+), nrow = 2, ncol = 3, byrow = TRUE)
+
+transfer_prediction <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(target))
+
+for (i in 1:nrow(transfer_event)) {
+    transfer_prediction[i,] <- as.vector(transfer_event[i,] %*% assc_weights[dim(assc_weights)[1], , ])
+}
+
+transfer_prediction
+```
+
+Unfortunately for @RescorlaWagner1972, their error-driven learning model cannot predict highlighting.  To address this, @Mackintosh1975 suggested that the *learning rates* in the model may depend on the *relative predictive strength* of the available cues on each trial.  This is a form of *selective attention*, in that it predicts that attention will be drawn to cues that do not yet have any strong associations.  In other words, when the second learning phase begins, attention is *drawn* to cue C because it has no strong associations whereas attention is drawn *away* from cue A, since it is already strongly associated with outcome A.
+
+Formally, incorporating attention into error-driven learning involves introducing an *associative weight* on each cue which determines the *learning rate* on each event.  In the code below, the associative weight for each cue is the *sum* of the corresponding row in the associative weight matrix.  The attention weight on each cue is adjusted in proportion to the difference between its associative weight and the sum of the associative weights for the other cues present in the current event.  Note that, in the model below, the `learning_rate` parameter refers to the rate at which *attention weights* are adjusted from one event to the next.  These attention weights are, in turn, the degree to which *associative weights* are adjusted from one event to the next.
+
+```{r}
+#| code-fold: show
+
+logistic_act <- function(x) {
+    return(1 / (1 + exp(-x)))
+}
+
+n_early <- 10
+n_late <- 10
+
+event <- matrix(c(
+    rep(c(1, 1, 0), n_early),
+    rep(c(1, 0, 1), n_late)
+), nrow = n_early + n_late, ncol = 3, byrow = TRUE)
+
+target <- matrix(c(
+    rep(c(1, 0), n_early),
+    rep(c(0, 1), n_late)
+), nrow = n_early + n_late, ncol = 2, byrow = TRUE)
+
+assc_weights <- array(0, dim = c(nrow(event) + 1, ncol(event), ncol(target)),
+                      dimnames = list(
+                          "t" = 1:(nrow(event) + 1),
+                          "cue" = paste("cue", LETTERS[1:ncol(event)]),
+                          "outcome" = paste("outcome", LETTERS[1:ncol(target)])
+                      ))
+
+attn_weights <- matrix(0.2, nrow = nrow(event) + 1, ncol = ncol(event),
+                       dimnames = list(
+                           "t" = 1:(nrow(event) + 1),
+                           "cue" = paste("cue", LETTERS[1:ncol(event)])
+                       ))
+
+learning_rate <- 0.2
+
+for (i in 1:nrow(event)) {
+    prediction <- as.vector(event[i,] %*% assc_weights[i, , ])
+    
+    self_prediction_strength <- rep(0, ncol(event))
+    other_prediction_strength <- rep(0, ncol(event))
+    
+    for (j in 1:ncol(event)) {
+        self_prediction_strength[j] <- sum(assc_weights[i, j, ])
+        other_prediction_strength[j] <- sum(event[i, -j] * assc_weights[i, -j, ])
+    }
+    
+    attn_weights[i + 1, ] <- pmax(0, attn_weights[i, ] + learning_rate * event[i,] * (other_prediction_strength - self_prediction_strength))
+    assc_weights[i + 1, , ] <- assc_weights[i, , ] + outer(attn_weights[i, ] * event[i,], target[i,] - prediction)
+}
+
+array2DF(assc_weights, responseName = "weight") %>%
+    mutate(t = as.numeric(t)) %>%
+    ggplot(aes(x = t, y = weight, color = cue, linetype = outcome)) +
+    geom_line()
+
+array2DF(attn_weights, responseName = "attention") %>%
+    mutate(t = as.numeric(t)) %>%
+    ggplot(aes(x = t, y = attention, color = cue)) +
+    geom_line()
+
+transfer_event <- matrix(c(
+    1, 0, 0,
+    0, 1, 1
+), nrow = 2, ncol = 3, byrow = TRUE)
+
+transfer_prediction <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(target))
+
+for (i in 1:nrow(transfer_event)) {
+    transfer_prediction[i,] <- as.vector(transfer_event[i,] %*% assc_weights[dim(assc_weights)[1], , ])
+}
+
+transfer_prediction
+```
+
+As we can see, incorporating a role for attention produces the highlighting effect.  When cue C appears, the attention weight on cue A rapidly diminishes, such that its association with outcome A is preserved through the second half of learning.  On the other hand, the extra attention devoted to the novel cue C means that its association with outcome B is stronger than the association between cue B and outcome A.
 
 <!-- ## Learning representations by backpropagation of error -->
 
@@ -464,10 +766,10 @@ Formally, error-driven learning then happens in two steps:
 <!-- } -->
 
 <!-- event <- matrix(c( -->
-<!--      1,  1, -->
-<!--      1, -1, -->
-<!--     -1,  1, -->
-<!--     -1, -1 -->
+<!--     1, 1, -->
+<!--     1, 0, -->
+<!--     0, 1, -->
+<!--     0, 0 -->
 <!-- ), nrow = 4, ncol = 2, byrow = TRUE) -->
 
 <!-- response <- matrix(c( -->
@@ -477,7 +779,7 @@ Formally, error-driven learning then happens in two steps:
 <!--     0 -->
 <!-- ), nrow = 4, ncol = 1, byrow = TRUE) -->
 
-<!-- learning_rate <- 0.1 -->
+<!-- learning_rate <- 0.01 -->
 <!-- n_hidden <- 4 -->
 <!-- n_epochs <- 10000 -->
 <!-- learn_by_epoch <- TRUE -->
@@ -495,13 +797,11 @@ Formally, error-driven learning then happens in two steps:
 <!--         # Forward propagation (prediction) -->
 
 <!--         # Note the use of `as.vector` to ensure result is a vector (not a matrix with a single row) -->
-<!--         # We also allow hidden units to have activations between -1 and 1 by scaling/shifting the logistic function. -->
-<!--         # This means we have to multiply the derivative on the error by the scaling factor (2) during back-propagation -->
-<!--         hidden_activation <- 2 * logistic_act(as.vector(event[i,] %*% i_to_h_assc_weights)) - 1 -->
+<!--         hidden_activation <- logistic_act(as.vector(event[i,] %*% i_to_h_assc_weights)) -->
 <!--         output_activation <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights)) -->
 
 <!--         # Compute error at output layer -->
-<!--         output_error <- output_activation - response[i,] -->
+<!--         output_error <- response[i,] - output_activation -->
 
 <!--         # Back propagation (learning) -->
 
@@ -509,22 +809,22 @@ Formally, error-driven learning then happens in two steps:
 <!--         d_output_error <- output_error * output_activation * (1 - output_activation) -->
 
 <!--         # Derivative of error with respect to hidden unit activation -->
-<!--         # Note that multiplying by 2 is a consequence of the hidden units having shifted/scaled activation that ranges between -1 and 1 rather than between 0 and 1. -->
-<!--         d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * 2 * hidden_activation * (1 - hidden_activation) -->
+<!--         d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * hidden_activation * (1 - hidden_activation) -->
 
-<!--         if (learn_by_epoch) { -->
-<!--             # How much to adjust the associative weights between the hidden and output layers -->
-<!--             d_h_to_o <- d_h_to_o + learning_rate * outer(hidden_activation, d_output_error) -->
+<!--         # How much to adjust the associative weights between the hidden and output layers -->
+<!--         d_h_to_o <- d_h_to_o + learning_rate * outer(hidden_activation, d_output_error) -->
 
-<!--             # How much to adjust the associative weights between the input and hidden layers -->
-<!--             d_i_to_h <- d_i_to_h + learning_rate * outer(event[i,], d_hidden_error) -->
-<!--         } else { -->
-<!--             d_h_to_o <- learning_rate * outer(hidden_activation, d_output_error) -->
-<!--             d_i_to_h <- learning_rate * outer(event[i,], d_hidden_error) -->
+<!--         # How much to adjust the associative weights between the input and hidden layers -->
+<!--         d_i_to_h <- d_i_to_h + learning_rate * outer(event[i,], d_hidden_error) -->
 
+<!--         if (!learn_by_epoch) { -->
 <!--             # Adjust weights -->
 <!--             i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h -->
 <!--             h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o -->
+
+<!--             # Reset adjustment to zero -->
+<!--             d_h_to_o <- 0 * h_to_o_assc_weights -->
+<!--             d_i_to_h <- 0 * i_to_h_assc_weights -->
 <!--         } -->
 <!--     } -->
 
@@ -536,16 +836,16 @@ Formally, error-driven learning then happens in two steps:
 <!-- } -->
 
 <!-- transfer_event <- matrix(c( -->
-<!--      1,  1, -->
-<!--      1, -1, -->
-<!--     -1,  1, -->
-<!--     -1, -1 -->
+<!--     1, 1, -->
+<!--     1, 0, -->
+<!--     0, 1, -->
+<!--     0, 0 -->
 <!-- ), nrow = 4, ncol = 2, byrow = TRUE) -->
 
 <!-- p_resp <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(response), dimnames = list(rownames(transfer_event), colnames(response))) -->
 
 <!-- for (i in 1:nrow(transfer_event)) { -->
-<!--     hidden_activation <- 2 * logistic_act(as.vector(transfer_event[i,] %*% i_to_h_assc_weights)) - 1 -->
+<!--     hidden_activation <- logistic_act(as.vector(transfer_event[i,] %*% i_to_h_assc_weights)) -->
 <!--     p_resp[i,] <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights)) -->
 <!-- } -->
 
@@ -574,28 +874,26 @@ Formally, error-driven learning then happens in two steps:
 <!-- )) -->
 
 <!-- response <- matrix(c( -->
-<!--     1, 0, -->
-<!--     1, 0, -->
-<!--     1, 0, -->
-<!--     1, 0, -->
-<!--     0, 1, -->
-<!--     0, 1, -->
-<!--     0, 1, -->
-<!--     0, 1 -->
-<!-- ), nrow = 8, ncol = 2, byrow = TRUE, dimnames = list( -->
+<!--     1, -->
+<!--     1, -->
+<!--     1, -->
+<!--     1, -->
+<!--     0, -->
+<!--     0, -->
+<!--     0, -->
+<!--     0 -->
+<!-- ), nrow = 8, ncol = 1, byrow = TRUE, dimnames = list( -->
 <!--     c(paste0("T", 1:4), paste0("M", 1:4)), -->
-<!--     c("Terrigitis", "Midosis") -->
+<!--     c("Disease") -->
 <!-- )) -->
 
-<!-- response <- response[,1, drop = FALSE] -->
-
-<!-- learning_rate <- 0.1 -->
-<!-- n_hidden <- 3 -->
-<!-- n_epochs <- 10000 -->
+<!-- learning_rate <- 0.001 -->
+<!-- n_hidden <- 2 -->
+<!-- n_epochs <- 1000 -->
 <!-- learn_by_epoch <- TRUE -->
 
-<!-- i_to_h_assc_weights <- matrix(rnorm(n = ncol(event) * n_hidden, sd = 0.01), nrow = ncol(event), ncol = n_hidden) -->
-<!-- h_to_o_assc_weights <- matrix(rnorm(n = n_hidden * ncol(response), sd = 0.01), nrow = n_hidden, ncol = ncol(response)) -->
+<!-- i_to_h_assc_weights <- matrix(rnorm(n = (ncol(event) + 1) * n_hidden, sd = 0.01), nrow = ncol(event) + 1, ncol = n_hidden) -->
+<!-- h_to_o_assc_weights <- matrix(rnorm(n = (n_hidden + 1) * ncol(response), sd = 0.01), nrow = n_hidden + 1, ncol = ncol(response)) -->
 
 <!-- for (epoch in 1:n_epochs) { -->
 <!--     training_order <- sample(nrow(event)) -->
@@ -607,10 +905,8 @@ Formally, error-driven learning then happens in two steps:
 <!--         # Forward propagation (prediction) -->
 
 <!--         # Note the use of `as.vector` to ensure result is a vector (not a matrix with a single row) -->
-<!--         # We also allow hidden units to have activations between -1 and 1 by scaling/shifting the logistic function. -->
-<!--         # This means we have to multiply the derivative on the error by the scaling factor (2) during back-propagation -->
-<!--         hidden_activation <- logistic_act(as.vector(event[i,] %*% i_to_h_assc_weights)) -->
-<!--         output_activation <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights)) -->
+<!--         hidden_activation <- logistic_act(as.vector(c(event[i,], 1) %*% i_to_h_assc_weights)) -->
+<!--         output_activation <- logistic_act(as.vector(c(hidden_activation, 1) %*% h_to_o_assc_weights)) -->
 
 <!--         # Compute error at output layer -->
 <!--         output_error <- output_activation - response[i,] -->
@@ -621,18 +917,17 @@ Formally, error-driven learning then happens in two steps:
 <!--         d_output_error <- output_error * output_activation * (1 - output_activation) -->
 
 <!--         # Derivative of error with respect to hidden unit activation -->
-<!--         # Note that multiplying by 2 is a consequence of the hidden units having shifted/scaled activation that ranges between -1 and 1 rather than between 0 and 1. -->
-<!--         d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * hidden_activation * (1 - hidden_activation) -->
+<!--         d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * c(hidden_activation * (1 - hidden_activation), 1) -->
 
 <!--         if (learn_by_epoch) { -->
 <!--             # How much to adjust the associative weights between the hidden and output layers -->
-<!--             d_h_to_o <- d_h_to_o + learning_rate * outer(hidden_activation, d_output_error) -->
+<!--             d_h_to_o <- d_h_to_o + learning_rate * outer(c(hidden_activation, 1), d_output_error) -->
 
 <!--             # How much to adjust the associative weights between the input and hidden layers -->
-<!--             d_i_to_h <- d_i_to_h + learning_rate * outer(event[i,], d_hidden_error) -->
+<!--             d_i_to_h <- d_i_to_h + learning_rate * outer(c(event[i,], 1), d_hidden_error[1:n_hidden]) -->
 <!--         } else { -->
-<!--             d_h_to_o <- learning_rate * outer(hidden_activation, d_output_error) -->
-<!--             d_i_to_h <- learning_rate * outer(event[i,], d_hidden_error) -->
+<!--             d_h_to_o <- learning_rate * outer(c(hidden_activation, 1), d_output_error) -->
+<!--             d_i_to_h <- learning_rate * outer(c(event[i,], 1), d_hidden_error[1:n_hidden]) -->
 
 <!--             # Adjust weights -->
 <!--             i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h -->
@@ -665,14 +960,16 @@ Formally, error-driven learning then happens in two steps:
 <!-- p_resp <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(response), dimnames = list(rownames(transfer_event), colnames(response))) -->
 
 <!-- for (i in 1:nrow(transfer_event)) { -->
-<!--     hidden_activation <- logistic_act(as.vector(transfer_event[i,] %*% i_to_h_assc_weights)) -->
-<!--     p_resp[i,] <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights)) -->
+<!--     hidden_activation <- logistic_act(as.vector(c(transfer_event[i,], 1) %*% i_to_h_assc_weights)) -->
+<!--     p_resp[i,] <- logistic_act(as.vector(c(hidden_activation, 1) %*% h_to_o_assc_weights)) -->
 <!-- } -->
 
 <!-- knitr::kable(p_resp) -->
 <!-- ``` -->
 
-<!-- ## Exercises -->
+## Exercises
 
-<!-- 1. Within the context of a model like the EBRW, storing a new exemplar as a trace in memory could be considered a form of *learning*, in the sense that the performance of the model *changes* as a function of having experienced that new exemplar.  Compare and contrast this form of learning with the forms of learning we encountered in this chapter. -->
-<!-- 2. Describe how you would use the output of any of the learning models we've seen in this chapter to predict not only choice behavior, but also choice and response time. -->
+1. Within the context of a model like the EBRW, storing a new exemplar as a trace in memory could be considered a form of *learning*, in the sense that the performance of the model *changes* as a function of having experienced that new exemplar.  Compare and contrast this form of learning with the forms of learning we encountered in this chapter.
+2. Describe how you would use the output of any of the learning models we've seen in this chapter to predict not only choice behavior, but also choice and response time.
+3. Try running the two-cue-two-outcome Rescorla-Wagner model from earlier in the chapter, but instead of coding the events as `c(1, 0)` for the early cues and `c(0, 1)` for the later cues, try using `c(-1, 1)` for the later cues.  Describe what happens to the associative weight between cue A and outcome B.  Describe a situation that might produce similar learning trajectories.
+4. In the chapter, we saw that one way to allocate attention to cues during learning is based on the idea that attention is attracted to cues which are not yet strongly associated to anything else.  What other principles could govern how attention is allocated to different cues during learning?
