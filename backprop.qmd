@@ -1,0 +1,720 @@
+# Learning useful representations
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(patchwork)
+library(colorspace)
+library(khroma)
+library(mvtnorm)
+
+set.seed(12222)
+```
+
+In the previous chapter, we looked at models that *learned* by adjusting a matrix of *associative weights* between two sets of nodes.  In those models, knowledge was *represented* by the entries in that matrix, reflecting the degree to which event features would "activate" other nodes.  We saw that one powerful form of learning was *error-driven learning* where weight adjustments were made explicitly for the purpose of reducing the error between the learner's predictions/expectations and what actually transpired.
+
+The models in this chapter also learn by attempting to minimize error and they also do so by adjusting entries in associative weight matrices.  However, these models add a so-called "hidden layer" that intervenes between the event features that act as "input" and the predictions/expectations that act as "output".  This category of model was the core of the **connectionist** or **parallel distributed processing (PDP)** framework.
+
+These models learn via an extended form of error-driven learning called **backpropagation of error** [@RumelhartHintonWilliams1986].  This learning procedure enables a model to learn how to form an *internal representation* of the events it encounters, in the form of a *pattern of activation* across the nodes of its "hidden layer".  Such representations are a form of integral distributed vector representation.  The purpose of these representations is to re-encode the features of an event into a form that enables the model to make more correct predictions/actions.
+
+The kinds of models we will see in this chapter can thus be viewed as psychological theories of *how* distributed vector representations are acquired via experience.  As we have already seen these representations are themselves essential for understanding performance (choice and RT) in different cognitive tasks.  So these models "peel back" one more layer of the cognitive onion to help us understand where those representations may have come from.
+
+Unfortunately, as we shall see (and as was explicitly stated by the developers of these models), learning by backpropagation of error is not very biologically plausible.  So while these models are often called "artificial neural networks", the resemblance between them and real neurons should be viewed in only an abstract sense.
+
+Another drawback with these models is that learning requires extensive experience before the associative weights in the network stabilize and stop getting adjusted.  As a result, this form of learning should not be thought of as something that happens on short timescales.  Indeed, it has been proposed by several authors that biological brains have two *complementary learning systems* [@McClellandEtAl1995].  There is a "fast" learning system---typically thought to depend on the hippocampus and other medial temporal lobe structures---that encodes distinct events as separate traces, like we saw with the EBRW.  Meanwhile, there is also a "slow" learning system---typically thought to depend on cortical areas---that does the kind of gradual weight adjustment we will see in the models in this chapter.  The fast learning system encodes separate traces for distinct events using distributed representations learned by the slow learning system.
+
+## Backpropagation of error
+
+The models we will examine in this chapter all have the basic structure depicted in the graph below:
+
+```{dot}
+digraph G {
+    fontname="Helvetica,Arial,sans-serif"
+	node [fontname="Helvetica,Arial,sans-serif"]
+	edge [fontname="Helvetica,Arial,sans-serif"]
+	
+	i1 -> h1;
+	i1 -> h2;
+	i1 -> h3;
+	
+    i2 -> h1;
+	i2 -> h2;
+	i2 -> h3;
+	
+	i3 -> h1;
+	i3 -> h2;
+	i3 -> h3;
+	
+	i4 -> h1;
+	i4 -> h2;
+	i4 -> h3;
+	
+	h1 -> o1;
+	h1 -> o2;
+	
+	h2 -> o1;
+	h2 -> o2;
+	
+	h3 -> o1;
+	h3 -> o2;
+}
+```
+
+The circles represent the elements of different vector representations; each representation is referred to as a *layer*.  The "i" nodes are elements of a vector that represents the "input"---this is a representation of a *learning event*, just like in the last chapter.  The "o" nodes are elements of a vector that represents the action/prediction/expectation that the learner takes, again like we saw in the last chapter.  The new thing are the "h" nodes, which represent the network's *internal (hidden) representation* of the learning event.
+
+The links between the nodes depict associative weights between them.  In the previous chapter, we only had associative weights between "input" and "output".  In the models in this chapter, we consider two sets of associations represented by two matrices of associative weights.  If there are $D$ input dimensions, $H$ hidden dimensions, and $O$ output dimensions, we can write the matrix of weights from input to hidden as $W_{ih}$ and the matrix of weights from hidden to output as $W_{ho}$.
+
+### Forward propagation
+
+Just like in the last chapter, we treat the pattern of activation on the output vector as a representation of what the learner expects or plans to do.  The learner forms this representation by "propagating" the activity from the input layer to the hidden layer and then from the hidden layer to the output layer.  Like last time, we can write that propagation process using some linear algebra:
+\begin{align}
+\mathbf{h} & = f_h \left( \mathbf{x} W_{ih} \right) & \text{Input to hidden} \\
+\mathbf{o} & = f_o \left( \mathbf{h} W_{ho} \right) & \text{Hidden to output}
+\end{align}
+where $\mathbf{x}$ is the vector representing the learning event, $\mathbf{h}$ is the vector representing the pattern of activation at the hidden layer, and $\mathbf{o}$ is the vector representing the pattern of activation at the output layer.  Notice that we allow for the activity at the hidden and output layers to be *functions* of their corresponding "inputs", indicated by $f_h \left( \cdot \right)$ and $f_o \left( \cdot \right)$.  In this chapter, we will only look at models where both $f_h$ and $f_o$ are the *logistic function* we used last chapter, i.e.,
+$$
+f_h(a) = f_o(a) = \frac{1}{1 + \exp \left(-a \right)}
+$$
+
+### Backward propagation
+
+The procedure above describes how the model forms an expectation $\mathbf{o}$ on the basis of the event features $\mathbf{x}$.  As we saw last time, the vector $\mathbf{o}$ can be treated as a vector of probabilities with which each output feature is expected to be present or not (since we are using the logistic function).
+
+The model *learns* by first computing the error between its expectation and a "target" representation and then *propagating that error signal backwards along the associative weights*.  That's why this learning procedure is called "backward propagation", or "backprop" for short (not to be confused with a lumbar support pillow).
+
+To be more mathy about it, backprop essentially adds one step to the error-driven learning procedure we saw last time.  The additional step is because we have to adjust *two* sets of associative weights, $W_{ho}$ and $W_{ih}$.  The equations below spell out the process:
+\begin{align*}
+\mathbf{e_o} & = \mathbf{t} - \mathbf{o} & \text{Error between target and output} \\
+\mathbf{d_o} & = \mathbf{e_o} \mathbf{o} \left(1 - \mathbf{o} \right) & \text{Derivative of error with respect to output activation} \\
+\Delta W_{ho} & = \lambda_{ho} \left( \mathbf{h} \otimes \mathbf{d_o} \right) & \text{How much to adjust hidden to output weights} \\
+\mathbf{d_h} & = W_{ho} \mathbf{e_o} \mathbf{h} \left(1 - \mathbf{h} \right) & \text{Derivative of error with respect to hidden activation} \\
+\Delta W_{ih} & = \lambda_{ih} \left( \mathbf{x} \otimes \mathbf{d_h} \right) & \text{How much to adjust input to hidden weights}
+\end{align*}
+You may notice above some stuff about "derivatives", but this is not so mysterious as at may first appear.  We were able to avoid mentioning derivatives in the last chapter because we only needed to worry about how to adjust a single set of weights.  But really what we were doing was computing *how much the error would change if we adjusted each associative weight*.  That's a derivative!  Now that we have two sets of weights to learn, we need to consider how much *each* weight contributes to the total error at the output layer.  Backprop just expands this concept of the derivative so that it can assign "blame" for the error to each weight.
+
+You may notice the terms $\mathbf{o} \left(1 - \mathbf{o} \right)$ and $\mathbf{h} \left(1 - \mathbf{h} \right)$ in the derivative formulae above.  That's because we also need to consider the derivative of the *link function* for each layer.  The derivative of the logistic function $f \left( a \right)$, which we are using for both the hidden and output layers, is just $f \left(a \right) \left[1 - f \left(a \right) \right]$, hence the appearance of those terms in the formulae above.
+
+Finally, although we could use different learning rates for input-to-hidden and hidden-to-output weights, denoted $\lambda_{ih}$ and $\lambda_{ho}$ respectively, in the models below we will just use a single learning rate $\lambda$ that applies to all weights.
+
+### Baseline activations
+
+We will introduce one more aspect to these models that we did not employ earlier, which is the use of a "baseline" activity level for both the hidden and output layers.  We can think of this baseline as like an intercept term in linear regression.  And just like in linear regression, the intercept can be thought of as an "input" that has a constant value.  These baseline levels will be learned just like the weights are, i.e., they will be adjusted so as to minimize error.  Specifically, the learning rule is:
+\begin{align*}
+\Delta \mathbf{b_h} & = \lambda \mathbf{d_h} \\
+\Delta \mathbf{b_o} & = \lambda \mathbf{d_o}
+\end{align*}
+where $\mathbf{b_h}$ and $\mathbf{b_o}$ are the baselines for the hidden and output units, respectively, and $\mathbf{d_h}$ and $\mathbf{d_o}$ are the vectors of error derivatives defined above.
+
+## Learning concept representations from properties
+
+Now let's see how one of these models works in a setting we have already seen.  The example below shows how a simple backprop network can learn to represent the different concepts we saw in some of our preceding examples.  Specifically, we will train the network to learn the features of different concepts.  Each learning event will be represented with a localist vector representation of a concept.  The output that the network will be trained to produce is a separable vector representation of the *features* of that concept.  Thus, the network will learn to report the features of a concept, given the concept as a "cue".  We can think of this as like learning to provide a dictionary definition of a term.
+
+What we are particularly interested in is the *dynamics* by which the network learns representations for the eight concepts.  As we shall see, the representation that the network learns in its hidden layer will distinguish between broad categories early on and later come to make more fine-grained distinctions.  This gradual differentiation over the course of learning is a natural consequence of error-driven learning:  Since the biggest errors are due to the biggest confusions, those will be learned first.
+
+```{r}
+#| code-fold: show
+
+logistic_act <- function(x) {
+    return(1 / (1 + exp(-x)))
+}
+
+# Localist representations of eight concepts
+event <- matrix(c(
+     1, 0, 0, 0, 0, 0, 0, 0,
+     0, 1, 0, 0, 0, 0, 0, 0,
+     0, 0, 1, 0, 0, 0, 0, 0,
+     0, 0, 0, 1, 0, 0, 0, 0,
+     0, 0, 0, 0, 1, 0, 0, 0,
+     0, 0, 0, 0, 0, 1, 0, 0,
+     0, 0, 0, 0, 0, 0, 1, 0,
+     0, 0, 0, 0, 0, 0, 0, 1
+), nrow = 8, ncol = 8, byrow = TRUE, dimnames = list(
+    c("pine", "oak", "rose", "daisy", "robin", "canary", "sunfish", "salmon"),
+    c("pine", "oak", "rose", "daisy", "robin", "canary", "sunfish", "salmon")
+))
+
+# Separable representations of concept features
+target <- matrix(c(
+     1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1,
+     0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1,
+     0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1,
+     0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1,
+     0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1,
+     0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1,
+     0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1,
+     0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1
+), nrow = 8, ncol = 22, byrow = TRUE, dimnames = list(
+    c("pine", "oak", "rose", "daisy", "robin", "canary", "sunfish", "salmon"),
+    c("is_green", "has_leaves", "is_red", "is_yellow", "can_sing", "has_bark", "is_big", "has_branches", "has_leaves", "has_petals", "is_pretty", "has_feathers", "can_fly", "has_wings", "has_scales", "can_swim", "has_gills", "has_roots", "can_move", "has_skin", "can_grow", "is_living")
+))
+
+learning_rate <- 0.05
+n_hidden <- 6
+n_epochs <- 5000
+learn_by_epoch <- TRUE
+
+n_hidden_snapshots <- 9
+epoch_to_snap <- round(exp(seq(0, log(n_epochs), length.out = n_hidden_snapshots)))
+snapshot_hidden_activation <- array(0, dim = c(n_hidden_snapshots, nrow(event), n_hidden), dimnames = list("epoch" = epoch_to_snap, "item" = rownames(event), "hidden_unit" = 1:n_hidden))
+
+i_to_h_assc_weights <- matrix(rnorm(n = ncol(event) * n_hidden), nrow = ncol(event), ncol = n_hidden) * 0.01
+h_to_o_assc_weights <- matrix(rnorm(n = n_hidden * ncol(target)), nrow = n_hidden, ncol = ncol(target)) * 0.01
+
+hidden_baseline <- rnorm(n = n_hidden) * 0.01
+output_baseline <- rnorm(n = ncol(target)) * 0.01
+
+for (epoch in 1:n_epochs) {
+    training_order <- sample(nrow(event))
+
+    d_h_to_o <- 0 * h_to_o_assc_weights
+    d_i_to_h <- 0 * i_to_h_assc_weights
+    
+    d_h_baseline <- 0 * hidden_baseline
+    d_o_baseline <- 0 * output_baseline
+
+    for (i in training_order) {
+        # Forward propagation (prediction)
+
+        # Note the use of `as.vector` to ensure result is a vector (not a matrix with a single row)
+        hidden_activation <- logistic_act(as.vector(event[i,] %*% i_to_h_assc_weights) + hidden_baseline)
+        output_activation <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights) + output_baseline)
+
+        # Compute error at output layer
+        output_error <- target[i,] - output_activation
+
+        # Back propagation (learning)
+
+        # Derivative of error with respect to output unit activation
+        d_output_error <- output_error * output_activation * (1 - output_activation)
+
+        # Derivative of error with respect to hidden unit activation
+        d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * hidden_activation * (1 - hidden_activation)
+
+        # How much to adjust the associative weights between the hidden and output layers
+        d_h_to_o <- d_h_to_o + learning_rate * outer(hidden_activation, d_output_error)
+
+        # How much to adjust the associative weights between the input and hidden layers
+        d_i_to_h <- d_i_to_h + learning_rate * outer(event[i,], d_hidden_error)
+        
+        # How much to adjust the baseline of the output units
+        d_o_baseline <- learning_rate * d_output_error
+        
+        # How much to adjust the baseline of the hidden units
+        d_h_baseline <- learning_rate * d_hidden_error
+
+        if (!learn_by_epoch) {
+            # Adjust weights
+            i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h
+            h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o
+            
+            hidden_baseline <- hidden_baseline + d_h_baseline
+            output_baseline <- output_baseline + d_o_baseline
+
+            # Reset adjustment to zero
+            d_h_to_o <- 0 * h_to_o_assc_weights
+            d_i_to_h <- 0 * i_to_h_assc_weights
+            
+            d_h_baseline <- 0 * hidden_baseline
+            d_o_baseline <- 0 * output_baseline
+        }
+    }
+
+    if (learn_by_epoch) {
+        # Adjust weights
+        i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h
+        h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o
+        
+        hidden_baseline <- hidden_baseline + d_h_baseline
+        output_baseline <- output_baseline + d_o_baseline
+    }
+    
+    if (epoch %in% as.numeric(dimnames(snapshot_hidden_activation)[[1]])) {
+        for (i in 1:nrow(event)) {
+            snapshot_hidden_activation[as.character(epoch), i, ] <- logistic_act(as.vector(event[i,] %*% i_to_h_assc_weights) + hidden_baseline)
+        }
+    }
+}
+
+array2DF(snapshot_hidden_activation) %>%
+    mutate(item = factor(item, levels = rownames(event))) %>%
+    mutate(hidden_unit = as.numeric(hidden_unit)) %>%
+    mutate(epoch = factor(epoch, levels = as.character(sort(unique(as.numeric(epoch)))))) %>%
+    ggplot(aes(x = hidden_unit, y = Value, color = item)) +
+    geom_line() +
+    scale_color_brewer(palette = "Paired") +
+    facet_wrap("epoch", labeller = label_both)
+
+item_mds <- array(0, dim = c(n_hidden_snapshots, nrow(event), 2), dimnames = list("epoch" = epoch_to_snap, "item" = rownames(event), "dim" = paste0("dim", 1:2)))
+
+for (epoch in dimnames(snapshot_hidden_activation)[[1]]) {
+    item_mds[epoch, , ] <- cmdscale(d = dist(snapshot_hidden_activation[epoch,,]), k = 2)
+}
+
+array2DF(item_mds) %>%
+    pivot_wider(id_cols = c(epoch, item), names_from = dim, values_from = Value) %>%
+    mutate(item = factor(item, levels = rownames(event))) %>%
+    mutate(epoch = factor(epoch, levels = as.character(sort(unique(as.numeric(epoch)))))) %>%
+    ggplot(aes(x = dim1, y = dim2, color = item)) +
+    geom_path() +
+    coord_equal() +
+    scale_color_brewer(palette = "Paired") +
+    labs(title = "Evolution of internal representations with learning", x = "Dimension 1", y = "Dimension 2", caption = "Visualization by multidimensional scaling")
+```
+
+The model was trained in "batches", like we saw last time, only those batches are referred to as "epochs", following some rather grandiose terminology from the early days of such models.  The code above takes "snapshots" of the hidden unit activations at various epochs during learning so we can examine gradual differentiation of the eight concepts.  To get these snapshots, we cue the network with the vector representation of a concept and forward-propagate that activation into the hidden layer.  The vector of activation values among the hidden units, $\mathbf{h}$, is treated as a vector representation of that concept.
+
+A common visualization technique in this domain is to use multidimensional scaling to plot the vector representations derived from the hidden layer in two dimensions.  As you can see, the model learns first to distinguish animals and plants, then the subcategories of animals and plants, and finally individual animals within each subcategory.  Again, this is a natural consequence of error-driven learning, but also mirrors the developmental trajectories by which many human learners acquire concepts [@RogersMcClelland2004].
+
+```{r}
+#| code-fold: show
+
+transfer_event <- event
+
+transfer_hidden_activation <- matrix(0, nrow = nrow(transfer_event), ncol = n_hidden, dimnames = list(rownames(transfer_event), 1:n_hidden))
+p_resp <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(target), dimnames = list(rownames(transfer_event), colnames(target)))
+
+for (i in 1:nrow(transfer_event)) {
+    transfer_hidden_activation[i,] <- logistic_act(as.vector(transfer_event[i,] %*% i_to_h_assc_weights) + hidden_baseline)
+    p_resp[i,] <- logistic_act(as.vector(transfer_hidden_activation[i,] %*% h_to_o_assc_weights) + output_baseline)
+}
+
+knitr::kable(p_resp)
+```
+
+Finally, the code above verifies that the model has, indeed, learned to correctly predict the features of each concept.
+
+## Autoencoders for learning co-occurrence patterns
+
+Just like in the last chapter, backprop networks can learn to reproduce patterns.  Such networks are called *autoencoders*.  The only difference between the following example and the one above is that the target output is the same vector as the input.  The value of backprop in this instance is that the network can learn a *reduced* representation that takes advantage of redundancies or patterns within the input vectors.  This is conceptually similar to how principal components analysis works!
+
+The example below uses the disease symptoms from last chapter.  Notice that the last two symptoms, discolored gums and nosebleed, are correlated---they are either both present or both absent.  Thus, even though the hidden layer only has 3 dimensions instead of 4, the model can correctly reproduce the pattern of symptoms for each patient.
+
+```{r}
+#| code-fold: show
+
+logistic_act <- function(x) {
+    return(1 / (1 + exp(-x)))
+}
+
+event <- matrix(c(
+    0, 0, 1, 1,
+    1, 1, 1, 1,
+    0, 1, 0, 0,
+    1, 1, 1, 1,
+    1, 0, 1, 1,
+    1, 1, 0, 0,
+    0, 1, 1, 1,
+    1, 0, 0, 0
+), nrow = 8, ncol = 4, byrow = TRUE,
+dimnames = list(
+    c("EM", "RM", "JJ", "LF", "AM", "JS", "ST", "SE"),
+    c("swollen_eyelids", "splotchy_ears", "discolored_gums", "nosebleed")
+))
+
+target <- event
+
+learning_rate <- 0.05
+n_hidden <- 3
+n_epochs <- 5000
+learn_by_epoch <- TRUE
+
+n_hidden_snapshots <- 9
+epoch_to_snap <- round(exp(seq(0, log(n_epochs), length.out = n_hidden_snapshots)))
+snapshot_hidden_activation <- array(0, dim = c(n_hidden_snapshots, nrow(event), n_hidden), dimnames = list("epoch" = epoch_to_snap, "item" = rownames(event), "hidden_unit" = 1:n_hidden))
+
+i_to_h_assc_weights <- matrix(rnorm(n = ncol(event) * n_hidden), nrow = ncol(event), ncol = n_hidden) * 0.01
+h_to_o_assc_weights <- matrix(rnorm(n = n_hidden * ncol(target)), nrow = n_hidden, ncol = ncol(target)) * 0.01
+
+hidden_baseline <- rnorm(n = n_hidden) * 0.01
+output_baseline <- rnorm(n = ncol(target)) * 0.01
+
+for (epoch in 1:n_epochs) {
+    training_order <- sample(nrow(event))
+
+    d_h_to_o <- 0 * h_to_o_assc_weights
+    d_i_to_h <- 0 * i_to_h_assc_weights
+    
+    d_h_baseline <- 0 * hidden_baseline
+    d_o_baseline <- 0 * output_baseline
+
+    for (i in training_order) {
+        # Forward propagation (prediction)
+
+        # Note the use of `as.vector` to ensure result is a vector (not a matrix with a single row)
+        hidden_activation <- logistic_act(as.vector(event[i,] %*% i_to_h_assc_weights) + hidden_baseline)
+        output_activation <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights) + output_baseline)
+
+        # Compute error at output layer
+        output_error <- target[i,] - output_activation
+
+        # Back propagation (learning)
+
+        # Derivative of error with respect to output unit activation
+        d_output_error <- output_error * output_activation * (1 - output_activation)
+
+        # Derivative of error with respect to hidden unit activation
+        d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * hidden_activation * (1 - hidden_activation)
+
+        # How much to adjust the associative weights between the hidden and output layers
+        d_h_to_o <- d_h_to_o + learning_rate * outer(hidden_activation, d_output_error)
+
+        # How much to adjust the associative weights between the input and hidden layers
+        d_i_to_h <- d_i_to_h + learning_rate * outer(event[i,], d_hidden_error)
+        
+        # How much to adjust the baseline of the output units
+        d_o_baseline <- learning_rate * d_output_error
+        
+        # How much to adjust the baseline of the hidden units
+        d_h_baseline <- learning_rate * d_hidden_error
+
+        if (!learn_by_epoch) {
+            # Adjust weights
+            i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h
+            h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o
+            
+            hidden_baseline <- hidden_baseline + d_h_baseline
+            output_baseline <- output_baseline + d_o_baseline
+
+            # Reset adjustment to zero
+            d_h_to_o <- 0 * h_to_o_assc_weights
+            d_i_to_h <- 0 * i_to_h_assc_weights
+            
+            d_h_baseline <- 0 * hidden_baseline
+            d_o_baseline <- 0 * output_baseline
+        }
+    }
+
+    if (learn_by_epoch) {
+        # Adjust weights
+        i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h
+        h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o
+        
+        hidden_baseline <- hidden_baseline + d_h_baseline
+        output_baseline <- output_baseline + d_o_baseline
+    }
+    
+    if (epoch %in% as.numeric(dimnames(snapshot_hidden_activation)[[1]])) {
+        for (i in 1:nrow(event)) {
+            snapshot_hidden_activation[as.character(epoch), i, ] <- logistic_act(as.vector(event[i,] %*% i_to_h_assc_weights) + hidden_baseline)
+        }
+    }
+}
+
+array2DF(snapshot_hidden_activation) %>%
+    mutate(item = factor(item, levels = rownames(event))) %>%
+    mutate(hidden_unit = as.numeric(hidden_unit)) %>%
+    mutate(epoch = factor(epoch, levels = as.character(sort(unique(as.numeric(epoch)))))) %>%
+    ggplot(aes(x = hidden_unit, y = Value, color = item)) +
+    geom_line() +
+    scale_color_okabeito() +
+    facet_wrap("epoch", labeller = label_both)
+
+item_mds <- array(0, dim = c(n_hidden_snapshots, nrow(event), 2), dimnames = list("epoch" = epoch_to_snap, "item" = rownames(event), "dim" = paste0("dim", 1:2)))
+
+for (epoch in dimnames(snapshot_hidden_activation)[[1]]) {
+    item_mds[epoch, , ] <- cmdscale(d = dist(snapshot_hidden_activation[epoch,,]), k = 2)
+}
+
+array2DF(item_mds) %>%
+    pivot_wider(id_cols = c(epoch, item), names_from = dim, values_from = Value) %>%
+    mutate(item = factor(item, levels = rownames(event))) %>%
+    mutate(epoch = factor(epoch, levels = as.character(sort(unique(as.numeric(epoch)))))) %>%
+    ggplot(aes(x = dim1, y = dim2, color = item)) +
+    geom_path() +
+    coord_equal() +
+    scale_color_okabeito() +
+    labs(title = "Evolution of internal representations with learning", x = "Dimension 1", y = "Dimension 2", caption = "Visualization by multidimensional scaling")
+
+transfer_event <- diag(ncol(event))
+colnames(transfer_event) <- rownames(transfer_event) <- colnames(event)
+
+transfer_hidden_activation <- matrix(0, nrow = nrow(transfer_event), ncol = n_hidden, dimnames = list(rownames(transfer_event), 1:n_hidden))
+p_resp <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(target), dimnames = list(rownames(transfer_event), colnames(target)))
+
+for (i in 1:nrow(transfer_event)) {
+    transfer_hidden_activation[i,] <- logistic_act(as.vector(transfer_event[i,] %*% i_to_h_assc_weights) + hidden_baseline)
+    p_resp[i,] <- logistic_act(as.vector(transfer_hidden_activation[i,] %*% h_to_o_assc_weights) + output_baseline)
+}
+
+knitr::kable(p_resp)
+
+knitr::kable(transfer_hidden_activation)
+```
+
+By cuing the hidden layer with a single symptom at a time, we can obtain what is, in essence, a "factor loading matrix".  Specifically, by examining how each hidden unit is activated by each feature, we see how strongly that feature is associated with each hidden unit.  Each hidden unit can then be thought of as analogous to a "latent factor" that the network has learned, which enables it to correctly reproduce the input.  This feature of autoencoders makes them robust to noise in the input.
+
+## Simple recurrent networks: Learning patterns in time
+
+One of the most interesting (in my opinion) applications of backprop networks comes in the form of *simple recurrent networks (SRN)*.  These were described by @Elman1990, who showed that they could learn **structure in time**.  These models are applied to *sequences*, where the current event in the sequence is treated as "input" and the next event is the target at the output layer.  Thus, these networks are explicitly trained to predict the future.
+
+In principle, the same model structure we've seen so far could work here too.  But @Elman1990 proposed an interesting change:  The input on each step of the sequence isn't *just* the current event---it is also the vector of hidden unit activation from the *previous* step of the sequence.  Thus, the networks own prior state is treated as input for the purpose of making a prediction.  This means that the hidden unit representations learned by the network must pull "double duty"---they need to learn, in essence, how to serve as useful memory representations.
+
+### Learning to have memory
+
+@Elman gave a simple illustration of an SRN learning to have memory.  In the following example, each event has just a single dimension---it can be `0` or `1`.  Sequences are comprised of three-element subsequences.  Within each subsequence, the final element is the "exclusive-or" (XOR) of the previous two elements.  Specifically, the final element is `1` if the previous two elements are different and it is `0` if the previous two elements are the same.  These three-element subsequences are randomly concatenated to form a long exposure sequence.
+
+This is a challenging pattern to learn!  In many cases, it will be impossible to predict the next element.  Imagine that the sequence `0, 1, 1` occurs.  When the first element occurs, it is not possible to predict what the second one will be.  However, once the second element occurs, it *is* possible to predict the third element, since it follows the XOR rule.  But once the third element occurs, it is again impossible to predict the next element, since the next element is the start of the next sequence.  Only for the second element of a sequence is it possible to make a reasonable prediction about the next element.  And that's only if you (a) can remember far enough back; and (b) have learned the XOR rule.
+
+This learning situation can be thought of as a microcosm for learning the structure of events more generally.  For example, if a pitcher throws a ball, we cannot predict whether the batter will hit it.  But once we know whether the batter has hit the ball or not, we can form some expectation about what will happen next.  But then the next pitch is unpredictable once again.
+
+The code below implements a version of Elman's XOR sequence task.  The network only has 2 hidden units.  It learns in batches, where each batch is a long sequence built by concatenating many 3-element subsequences, each of which follow the XOR rule.
+
+```{r}
+#| code-fold: show
+
+logistic_act <- function(x) {
+    return(1 / (1 + exp(-x)))
+}
+
+# Each row is a subsequence from which the whole training sequence will be built.
+# The number refer to the rows in the "representations" matrix below.
+subsequences <- matrix(c(
+    1, 1, 2,
+    1, 2, 1,
+    2, 1, 1,
+    2, 2, 2
+), nrow = 4, ncol = 3, byrow = TRUE)
+
+representations <- matrix(c(
+    1,
+    0
+), nrow = 2, ncol = 1, byrow = TRUE)
+
+# On each epoch, the model learns on a new randomly generated training sequence
+n_epochs <- 5000
+# This is the number of times each subsequence will occur in each training sequence
+n_per_subsequence <- 100
+
+learning_rate <- 0.1
+n_hidden <- 2
+
+i_to_h_assc_weights <- matrix(rnorm(n = (ncol(representations) + n_hidden) * n_hidden), nrow = ncol(representations) + n_hidden, ncol = n_hidden) * 0.01
+h_to_o_assc_weights <- matrix(rnorm(n = n_hidden * ncol(representations)), nrow = n_hidden, ncol = ncol(representations)) * 0.01
+
+hidden_baseline <- rnorm(n = n_hidden) * 0.01
+output_baseline <- rnorm(n = ncol(representations)) * 0.01
+
+for (epoch in 1:n_epochs) {
+    training_sequence <- c(t(subsequences[sample(rep(1:nrow(subsequences), each = n_per_subsequence)),]))
+    
+    event <- representations[training_sequence[1:(length(training_sequence) - 1)], , drop = FALSE]
+    
+    target <- representations[training_sequence[2:length(training_sequence)], , drop = FALSE]
+    
+    d_h_to_o <- 0 * h_to_o_assc_weights
+    d_i_to_h <- 0 * i_to_h_assc_weights
+    
+    d_h_baseline <- 0 * hidden_baseline
+    d_o_baseline <- 0 * output_baseline
+    
+    prev_hidden_activation <- rep(0, n_hidden)
+    
+    for (i in 1:nrow(event)) {
+        # Forward propagation (prediction)
+        this_input <- c(event[i,], prev_hidden_activation)
+        hidden_activation <- logistic_act(as.vector(this_input %*% i_to_h_assc_weights) + hidden_baseline)
+        output_activation <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights) + output_baseline)
+    
+        # Compute error at output layer
+        output_error <- target[i,] - output_activation
+    
+        # Back propagation (learning)
+    
+        # Derivative of error with respect to output unit activation
+        d_output_error <- output_error * output_activation * (1 - output_activation)
+    
+        # Derivative of error with respect to hidden unit activation
+        d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * hidden_activation * (1 - hidden_activation)
+    
+        # How much to adjust the associative weights between the hidden and output layers
+        d_h_to_o <- d_h_to_o + learning_rate * outer(hidden_activation, d_output_error)
+    
+        # How much to adjust the associative weights between the input and hidden layers
+        d_i_to_h <- d_i_to_h + learning_rate * outer(this_input, d_hidden_error)
+        
+        # How much to adjust the baseline of the output units
+        d_o_baseline <- learning_rate * d_output_error
+        
+        # How much to adjust the baseline of the hidden units
+        d_h_baseline <- learning_rate * d_hidden_error
+    
+        # Copy hidden unit activation
+        prev_hidden_activation <- hidden_activation
+    }
+    
+    # Adjust weights
+    i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h
+    h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o
+    
+    hidden_baseline <- hidden_baseline + d_h_baseline
+    output_baseline <- output_baseline + d_o_baseline
+}
+
+transfer_sequence <- c(t(subsequences[sample(rep(1:nrow(subsequences), each = n_per_subsequence)),]))
+
+event <- representations[transfer_sequence[1:(length(transfer_sequence) - 1)], , drop = FALSE]
+
+target <- representations[transfer_sequence[2:length(transfer_sequence)], , drop = FALSE]
+
+transfer_error <- rep(0, nrow(event))
+
+prev_hidden_activation <- rep(0, n_hidden)
+
+for (i in 1:nrow(event)) {
+    this_input <- c(event[i,], prev_hidden_activation)
+    hidden_activation <- logistic_act(as.vector(this_input %*% i_to_h_assc_weights) + hidden_baseline)
+    output_activation <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights) + output_baseline)
+    transfer_error[i] <- sqrt(mean((target[i,] - output_activation)^2))
+    prev_hidden_activation <- hidden_activation
+}
+
+tibble(step = 1:nrow(event), error = transfer_error) %>%
+    mutate(sub_step = ((step - 1) %% ncol(subsequences)) + 1) %>%
+    ggplot(aes(x = sub_step, y = error)) +
+    stat_summary(fun = mean, geom = "line", group = 1) +
+    stat_summary(fun.data = mean_cl_normal) +
+    labs(x = "Position within subsequence", y = "Root mean squared prediction error")
+```
+
+As we can see, once trained, the network shows exactly the "dip" in prediction error that we would expect if the network (a) could use its hidden layer to retain memory sufficient for the task; and (b) had learned the XOR pattern.
+
+### Learning concept representations by prediction
+
+The following illustrates how the same SRN model structure can learn to distinguish between more complex concepts based on how they occur within "sentences" of a "language".  Specifically, the network will be presented with a sequence consisting of concatenated subsequences, each of which is three elements long.  These elements comprise "sentences" following a "subject-verb-object" frame.  Only some items can serve as each category, some subjects can engage in different verbs, and some objects can only receive certain verbs.
+
+```{r}
+#| code-fold: show
+
+logistic_act <- function(x) {
+    return(1 / (1 + exp(-x)))
+}
+
+# Each row is a subsequence from which the whole training sequence will
+# be built.
+subsequences <- matrix(c(
+    1, 5, 2,
+    1, 5, 3,
+    1, 5, 4,
+    1, 6, 2,
+    1, 6, 3,
+    1, 7, 3,
+    1, 8, 4,
+    2, 5, 1,
+    2, 5, 3,
+    2, 5, 4,
+    2, 6, 1,
+    2, 6, 3,
+    2, 7, 3,
+    2, 8, 3, # (only the dog can throw the door)
+    2, 8, 4 
+), nrow = 15, ncol = 3, byrow = TRUE)
+
+representations <- diag(8)
+rownames(representations) <- colnames(representations) <- c("cat", "dog", "door", "rock", "see", "hear", "use", "throw")
+
+# On each epoch, the model learns on a new randomly generated training sequence
+n_epochs <- 10000
+# This is the number of times each subsequence will occur in each training sequence
+n_per_subsequence <- 10
+
+learning_rate <- 0.1
+n_hidden <- 7
+
+n_hidden_snapshots <- 9
+epoch_to_snap <- round(exp(seq(0, log(n_epochs), length.out = n_hidden_snapshots)))
+snapshot_hidden_activation <- array(0, dim = c(n_hidden_snapshots, nrow(representations), n_hidden), dimnames = list("epoch" = epoch_to_snap, "item" = rownames(representations), "hidden_unit" = 1:n_hidden))
+
+i_to_h_assc_weights <- matrix(rnorm(n = (ncol(representations) + n_hidden) * n_hidden), nrow = ncol(representations) + n_hidden, ncol = n_hidden) * 0.01
+h_to_o_assc_weights <- matrix(rnorm(n = n_hidden * ncol(representations)), nrow = n_hidden, ncol = ncol(representations)) * 0.01
+
+hidden_baseline <- rnorm(n = n_hidden) * 0.01
+output_baseline <- rnorm(n = ncol(representations)) * 0.01
+
+for (epoch in 1:n_epochs) {
+    training_sequence <- c(t(subsequences[sample(rep(1:nrow(subsequences), each = n_per_subsequence)),]))
+    
+    event <- representations[training_sequence[1:(length(training_sequence) - 1)], , drop = FALSE]
+    
+    target <- representations[training_sequence[2:length(training_sequence)], , drop = FALSE]
+    
+    d_h_to_o <- 0 * h_to_o_assc_weights
+    d_i_to_h <- 0 * i_to_h_assc_weights
+    
+    d_h_baseline <- 0 * hidden_baseline
+    d_o_baseline <- 0 * output_baseline
+    
+    prev_hidden_activation <- rep(0, n_hidden)
+    
+    for (i in 1:nrow(event)) {
+        # Forward propagation (prediction)
+        this_input <- c(event[i,], prev_hidden_activation)
+        hidden_activation <- logistic_act(as.vector(this_input %*% i_to_h_assc_weights) + hidden_baseline)
+        output_activation <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights) + output_baseline)
+    
+        # Compute error at output layer
+        output_error <- target[i,] - output_activation
+    
+        # Back propagation (learning)
+    
+        # Derivative of error with respect to output unit activation
+        d_output_error <- output_error * output_activation * (1 - output_activation)
+    
+        # Derivative of error with respect to hidden unit activation
+        d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * hidden_activation * (1 - hidden_activation)
+    
+        # How much to adjust the associative weights between the hidden and output layers
+        d_h_to_o <- d_h_to_o + learning_rate * outer(hidden_activation, d_output_error)
+    
+        # How much to adjust the associative weights between the input and hidden layers
+        d_i_to_h <- d_i_to_h + learning_rate * outer(this_input, d_hidden_error)
+        
+        # How much to adjust the baseline of the output units
+        d_o_baseline <- learning_rate * d_output_error
+        
+        # How much to adjust the baseline of the hidden units
+        d_h_baseline <- learning_rate * d_hidden_error
+    
+        # Copy hidden unit activation
+        prev_hidden_activation <- hidden_activation
+    }
+    
+    # Adjust weights
+    i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h
+    h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o
+    
+    hidden_baseline <- hidden_baseline + d_h_baseline
+    output_baseline <- output_baseline + d_o_baseline
+    
+    if (epoch %in% as.numeric(dimnames(snapshot_hidden_activation)[[1]])) {
+        prev_hidden_activation <- rep(0, n_hidden)
+        
+        for (i in 1:nrow(representations)) {
+            snapshot_hidden_activation[as.character(epoch), i, ] <- logistic_act(as.vector(c(representations[i,], prev_hidden_activation) %*% i_to_h_assc_weights) + hidden_baseline)
+        }
+    }
+}
+
+array2DF(snapshot_hidden_activation) %>%
+    mutate(item = factor(item, levels = rownames(representations))) %>%
+    mutate(hidden_unit = as.numeric(hidden_unit)) %>%
+    mutate(epoch = factor(epoch, levels = as.character(sort(unique(as.numeric(epoch)))))) %>%
+    ggplot(aes(x = hidden_unit, y = Value, color = item)) +
+    geom_line() +
+    scale_color_brewer(palette = "Paired") +
+    facet_wrap("epoch", labeller = label_both)
+
+item_mds <- array(0, dim = c(n_hidden_snapshots, nrow(representations), 2), dimnames = list("epoch" = epoch_to_snap, "item" = rownames(representations), "dim" = paste0("dim", 1:2)))
+
+for (epoch in dimnames(snapshot_hidden_activation)[[1]]) {
+    item_mds[epoch, , ] <- cmdscale(d = dist(snapshot_hidden_activation[epoch,,]), k = 2)
+}
+
+array2DF(item_mds) %>%
+    pivot_wider(id_cols = c(epoch, item), names_from = dim, values_from = Value) %>%
+    mutate(item = factor(item, levels = rownames(representations))) %>%
+    mutate(epoch = factor(epoch, levels = as.character(sort(unique(as.numeric(epoch)))))) %>%
+    ggplot(aes(x = dim1, y = dim2, color = item)) +
+    geom_path() +
+    coord_equal() +
+    scale_color_brewer(palette = "Paired") +
+    labs(title = "Evolution of internal representations with learning", x = "Dimension 1", y = "Dimension 2", caption = "Visualization by multidimensional scaling")
+```

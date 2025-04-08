@@ -1,0 +1,38 @@
+# Agent-Based Models
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(patchwork)
+library(colorspace)
+library(khroma)
+library(mvtnorm)
+
+set.seed(12222)
+```
+
+The models we have built so far have been models of how individuals perform a task or learn a representation.  The environments with which these models have been engaged---the trials in an experiment or the materials in a domain to be learned---were provided to the model.  This mimics the typical laboratory scenario where an experimenter defines the goals and givens for a participant and the job of the participant is to figure out how to achieve the goal with what they are given.
+
+However, in many real-world settings, the environment that people engage in is itself comprised of other people!  (Okay, experimenters are people too, but the interactions between experimenters and participants are, by design, tightly constrained.)  Each person has some characteristics, shaped by their genetic heritage, development, culture, prior life experiences, etc., that ultimately inform what actions they will take at any given moment.  Those actions---and their consequences---then become part of the environment for everyone else around them, providing them information that may get encoded in memory and used to guide their decisions.  Those other people will then take their own actions, which will also be shaped by their own motivations, preferences, beliefs, knowledge, etc.  In turn, those actions and their consequences contribute to the environment with which everyone interacts.  As we have seen, building computational cognitive models even of single individuals in a tightly-constrained environment is far from trivial.  Modeling an entire group of people mutually interacting with one another is thus a daunting task!
+
+Of course, intrepid scientists find a way.  The field of *agent-based modeling* helps us to understand how the interactions between cognitively sophisticated individuals---called "agents"---produces phenomena at the level of entire groups, communities, and populations.  Thus, agent-based modeling acts as a bridge between computational cognitive models of individuals and theories of groups.
+
+It will probably not be surprising to you that the inherent complexity of modeling groups of people means that the models for individual agents will tend to be much simpler than the individual-focused cognitive models we have built so far.  In addition, agent-based models are primarily used for *simulation* purposes, to demonstrate the predictions of a theory, rather than for parameter estimation.  This second property is due to a couple of factors:  First, it is rarely possible to compute the likelihood (or other measure of goodness-of-fit) for agent-based models.  Second, it is not always practical or sensible to define goodness-of-fit for many of the phenomena that agent-based models are designed to explain.  When modeling individuals, we can rely on our ability to recruit many participants into a study and for each individual to engage in many trials of a task, thus allowing us identify systematic features of behavior that are the explanatory targets of our model.  When modeling groups, unless they are very small, we cannot typically "replicate" the conditions under which the group is acting, making it difficult to quantify the degree to which groups systematically exhibit some quantifiable characteristic.  Nonetheless, agent-based models are a powerful theoretical tool for understanding how *qualitative* group phenomena arise from interactions between individuals [@SmithConrey2007].
+
+The material in this chapter owes a lot to [this fantastic resource on agent-based modeling in R](https://acerbialberto.com/IBM-cultevo/).  I encourage anyone interested to check it out!
+
+## Cultural evolution
+
+The models below are focused on what can broadly be called *cultural evolution*, in that the models focus on the decisions by individuals to adopt (or not) a particular characteristic.
+
+In biological evolution, we would consider how traits encoded by genes do or do not get passed on from one generation to the next, depending on whether or not those traits were beneficial to the organism's reproductive success in its environment.  By building models that allow for different selection mechanisms, different mating assortments, and different forms of mutation, we can examine those choices influence how the traits of a population will change over many generations.
+
+Cultural evolution, on the other hand, does not require births and deaths to occur.  Instead of a population changing as a function of organisms either surviving to reproduce or not, we will be modeling how populations change as a function of the choices made by the individual members of those populations.  The kinds of choices we will consider could be concrete things like whether to support a political candidate, buy a product, use a service, etc.  They could also represent more abstract choices, like the choice to like a particular style of music or a type of diet or a strategy for performing some task.  To that last point, the choices made by the agents in our models need not be discrete---they may instead be choices to adjust a *parameter* with a particular meaning within the scope of the model.
+
+The evidence that agents use for making these choices comes from their observations of other members of the population.  
+
+## Copying your neighbors
+
+To 
+
+## 
+

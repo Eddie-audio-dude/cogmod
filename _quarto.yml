@@ -25,6 +25,7 @@ book:
         - ebrw.qmd
         - vector_reps.qmd
         - learning.qmd
+        - backprop.qmd
     - references.qmd
 
 bibliography: references.bib
