@@ -323,12 +323,16 @@ window.Quarto = {
   <li><a href="#baseline-activations" id="toc-baseline-activations" class="nav-link" data-scroll-target="#baseline-activations"><span class="header-section-number">12.1.3</span> Baseline activations</a></li>
   </ul></li>
   <li><a href="#learning-concept-representations-from-properties" id="toc-learning-concept-representations-from-properties" class="nav-link" data-scroll-target="#learning-concept-representations-from-properties"><span class="header-section-number">12.2</span> Learning concept representations from properties</a></li>
-  <li><a href="#autoencoders-for-learning-co-occurrence-patterns" id="toc-autoencoders-for-learning-co-occurrence-patterns" class="nav-link" data-scroll-target="#autoencoders-for-learning-co-occurrence-patterns"><span class="header-section-number">12.3</span> Autoencoders for learning co-occurrence patterns</a></li>
+  <li><a href="#autoencoders-for-learning-co-occurrence-patterns" id="toc-autoencoders-for-learning-co-occurrence-patterns" class="nav-link" data-scroll-target="#autoencoders-for-learning-co-occurrence-patterns"><span class="header-section-number">12.3</span> Autoencoders for learning co-occurrence patterns</a>
+  <ul class="collapse">
+  <li><a href="#learning-and-distinguishing-category-prototypes" id="toc-learning-and-distinguishing-category-prototypes" class="nav-link" data-scroll-target="#learning-and-distinguishing-category-prototypes"><span class="header-section-number">12.3.1</span> Learning and distinguishing category prototypes</a></li>
+  </ul></li>
   <li><a href="#simple-recurrent-networks-learning-patterns-in-time" id="toc-simple-recurrent-networks-learning-patterns-in-time" class="nav-link" data-scroll-target="#simple-recurrent-networks-learning-patterns-in-time"><span class="header-section-number">12.4</span> Simple recurrent networks: Learning patterns in time</a>
   <ul class="collapse">
   <li><a href="#learning-to-have-memory" id="toc-learning-to-have-memory" class="nav-link" data-scroll-target="#learning-to-have-memory"><span class="header-section-number">12.4.1</span> Learning to have memory</a></li>
   <li><a href="#learning-concept-representations-by-prediction" id="toc-learning-concept-representations-by-prediction" class="nav-link" data-scroll-target="#learning-concept-representations-by-prediction"><span class="header-section-number">12.4.2</span> Learning concept representations by prediction</a></li>
   </ul></li>
+  <li><a href="#exercises" id="toc-exercises" class="nav-link" data-scroll-target="#exercises"><span class="header-section-number">12.5</span> Exercises</a></li>
   </ul>
 </nav>
     </div>
@@ -1286,138 +1290,946 @@ f_h(a) = f_o(a) = \frac{1}{1 + \exp \left(-a \right)}
 </table>
 </div>
 </div>
-<p>By cuing the hidden layer with a single symptom at a time, we can obtain what is, in essence, a “factor loading matrix”. Specifically, by examining how each hidden unit is activated by each feature, we see how strongly that feature is associated with each hidden unit. Each hidden unit can then be thought of as analogous to a “latent factor” that the network has learned, which enables it to correctly reproduce the input. This feature of autoencoders makes them robust to noise in the input.</p>
+<p>By cuing the hidden layer with a single symptom at a time, we can obtain what is, in essence, a “factor loading matrix”. Specifically, by examining how each hidden unit is activated by each feature, we see how strongly that feature is associated with each hidden unit. Each hidden unit can then be thought of as analogous to a “latent factor” that the network has learned, which enables it to correctly reproduce the input.</p>
+<section id="learning-and-distinguishing-category-prototypes" class="level3" data-number="12.3.1">
+<h3 data-number="12.3.1" class="anchored" data-anchor-id="learning-and-distinguishing-category-prototypes"><span class="header-section-number">12.3.1</span> Learning and distinguishing category prototypes</h3>
+<p>The ability of autoencoders to infer latent factors even in the presence of variation in the input suggests how they might serve as models for how participants learn category prototypes. Consider, for example, the category of “dog”. No two dogs are exactly alike (though all dogs go to heaven). Nonetheless, despite the considerable variability between individual dogs, there are shared characteristics that most dogs possess that enable us to form a representation of a prototypical “dog”. Those same regularities enable us to “fill in the blanks”, just like we did with Hebbian learning earlier. For example, if we only see two oThis feature of autoencoders makes them robust to noise in the input.</p>
+<p>This latter property is illustrated in the example below, which is a simplified version of a classic set of studies by <span class="citation" data-cites="PosnerKeele1968">Posner &amp; Keele (<a href="references.html#ref-PosnerKeele1968" role="doc-biblioref">1968</a>)</span>. In these studies, participants viewed images comprised of random dot patterns, like those shown below.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>prototype <span class="ot">&lt;-</span> <span class="fu">scale</span>(<span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">7</span> <span class="sc">*</span> <span class="dv">2</span>), <span class="at">nrow =</span> <span class="dv">7</span>, <span class="at">ncol =</span> <span class="dv">2</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(prototype) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"y"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>n_examples <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>low_sd <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>high_sd <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>examples <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_examples) {</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    examples <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>        examples,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">type =</span> <span class="st">"Low distortion"</span>, <span class="at">item =</span> <span class="fu">paste</span>(<span class="st">"Example"</span>, i), <span class="fu">as_tibble</span>(prototype <span class="sc">+</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">7</span> <span class="sc">*</span> <span class="dv">2</span>, <span class="at">sd =</span> low_sd), <span class="at">nrow =</span> <span class="dv">7</span>, <span class="at">ncol =</span> <span class="dv">2</span>))),</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">type =</span> <span class="st">"High distortion"</span>, <span class="at">item =</span> <span class="fu">paste</span>(<span class="st">"Example"</span>, i), <span class="fu">as_tibble</span>(prototype <span class="sc">+</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> <span class="dv">7</span> <span class="sc">*</span> <span class="dv">2</span>, <span class="at">sd =</span> high_sd), <span class="at">nrow =</span> <span class="dv">7</span>, <span class="at">ncol =</span> <span class="dv">2</span>)))</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>scale_lim <span class="ot">&lt;-</span> <span class="fu">range</span>(<span class="fu">c</span>(prototype, examples<span class="sc">$</span>x, examples<span class="sc">$</span>y))</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>prototype_plot <span class="ot">&lt;-</span> <span class="fu">cbind</span>(<span class="at">type =</span> <span class="st">"Prototype"</span>, <span class="fu">as_tibble</span>(prototype)) <span class="sc">%&gt;%</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">xlim =</span> scale_lim, <span class="at">ylim =</span> scale_lim) <span class="sc">+</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">panel.border =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">linetype =</span> <span class="st">"solid"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"type"</span>) <span class="sc">+</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>example_plot <span class="ot">&lt;-</span> examples <span class="sc">%&gt;%</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">xlim =</span> scale_lim, <span class="at">ylim =</span> scale_lim) <span class="sc">+</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">panel.border =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">linetype =</span> <span class="st">"solid"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(type <span class="sc">~</span> item, <span class="at">switch =</span> <span class="st">"y"</span>, <span class="at">as.table =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(prototype_plot <span class="sc">+</span> example_plot <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">heights =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="backprop_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Each dot pattern was a distortion of a “prototype” dot pattern. As shown above, there could be “low distortions” which differ only a little from the prototype as well as “high distortions” which differ more strongly from the prototype. Collectively, the various distortions from a prototype share a “family resemblance” to one another. In that sense, they mimic the “dog” example from earlier, where even though all dogs look different, they can be understood as “variations on a theme”. The “theme” is a prototype, and we will now see that an autoencoder can learn a representation of the regularities that define such a prototype.</p>
+<p>The example below uses a simplified version of the <span class="citation" data-cites="PosnerKeele1968">Posner &amp; Keele (<a href="references.html#ref-PosnerKeele1968" role="doc-biblioref">1968</a>)</span> paradigm. Each prototype is a sequence of binary symbols, which we might think of as indicating the presence or absence of different features. In the example below, there are two prototypes, perhaps representing two different diseases or two different concepts. The two prototypes differ on the first six features but match on the final two, perhaps like two different diseases with shared symptoms or two concepts with shared features.</p>
+<p>On each epoch of training, the network is presented with a number of exemplars of each prototype. Each exemplar consists of a set of features, and there is a variable <code>p_change</code> that indicates the probability that any given feature of an exemplar will be “flipped” relative to its value in the prototype. For example, if the prototype is <code>c(1, 1, 1, 0, 0, 0, 0, 1)</code>, then an exemplar is initially created that is an exact copy of that prototype. If <code>p_change</code> is greater than zero, then there is a chance that any one of the features of the exemplar could be flipped. For example, if the third feature is flipped, the resulting exemplar would be <code>c(1, 1, 0, 0, 0, 0, 0, 1)</code>.</p>
+<p>To begin, let’s see what happens if we only give the network 2 hidden units to work with. This is essentially forcing the model to “make do” with an internal representation of with only two dimensions. If the network is able to pick up on the patterns of family resemblance, then the activation of the two hidden units should reflect which of the two prototypes most likely generated any given exemplar. Below, <code>p_change</code> is set to 0.1. Let’s see how well the model does!</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>logistic_act <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x)))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>prototypes <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">8</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"P1"</span>, <span class="st">"P2"</span>)</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"># On each epoch, the model sees a new randomly generated set of exemplars generated from each prototype</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>n_epochs <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co"># This is the number of exemplars of each prototype per epoch</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>n_per_prototype <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co"># This is what proportion of features, on average, will differ between the exemplars and their prototype</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>p_change <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>n_hidden <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>i_to_h_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">ncol</span>(prototypes) <span class="sc">*</span> n_hidden), <span class="at">nrow =</span> <span class="fu">ncol</span>(prototypes), <span class="at">ncol =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>h_to_o_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden <span class="sc">*</span> <span class="fu">ncol</span>(prototypes)), <span class="at">nrow =</span> n_hidden, <span class="at">ncol =</span> <span class="fu">ncol</span>(prototypes)) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>hidden_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>output_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">ncol</span>(prototypes)) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_epochs) {</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    event <span class="ot">&lt;-</span> prototypes[<span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(prototypes), <span class="at">each =</span> n_per_prototype)), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    to_change <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">nrow</span>(event) <span class="sc">*</span> <span class="fu">ncol</span>(event), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">p =</span> p_change), <span class="at">nrow =</span> <span class="fu">nrow</span>(event), <span class="at">ncol =</span> <span class="fu">ncol</span>(event))</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    event[to_change] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> event[to_change]</span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>    target <span class="ot">&lt;-</span> event</span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>    d_h_to_o <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> h_to_o_assc_weights</span>
+<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>    d_i_to_h <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> i_to_h_assc_weights</span>
+<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a>    d_h_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> hidden_baseline</span>
+<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>    d_o_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> output_baseline</span>
+<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>    prev_hidden_activation <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_hidden)</span>
+<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
+<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Forward propagation (prediction)</span></span>
+<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a>        hidden_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(event[i,] <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
+<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>        output_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(hidden_activation <span class="sc">%*%</span> h_to_o_assc_weights) <span class="sc">+</span> output_baseline)</span>
+<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute error at output layer</span></span>
+<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>        output_error <span class="ot">&lt;-</span> target[i,] <span class="sc">-</span> output_activation</span>
+<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Back propagation (learning)</span></span>
+<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to output unit activation</span></span>
+<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>        d_output_error <span class="ot">&lt;-</span> output_error <span class="sc">*</span> output_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> output_activation)</span>
+<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to hidden unit activation</span></span>
+<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>        d_hidden_error <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(h_to_o_assc_weights <span class="sc">%*%</span> d_output_error) <span class="sc">*</span> hidden_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> hidden_activation)</span>
+<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the hidden and output layers</span></span>
+<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>        d_h_to_o <span class="ot">&lt;-</span> d_h_to_o <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(hidden_activation, d_output_error)</span>
+<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the input and hidden layers</span></span>
+<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>        d_i_to_h <span class="ot">&lt;-</span> d_i_to_h <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(event[i,], d_hidden_error)</span>
+<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the output units</span></span>
+<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>        d_o_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_output_error</span>
+<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the hidden units</span></span>
+<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>        d_h_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_hidden_error</span>
+<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Adjust weights</span></span>
+<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>    i_to_h_assc_weights <span class="ot">&lt;-</span> i_to_h_assc_weights <span class="sc">+</span> d_i_to_h</span>
+<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>    h_to_o_assc_weights <span class="ot">&lt;-</span> h_to_o_assc_weights <span class="sc">+</span> d_h_to_o</span>
+<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>    hidden_baseline <span class="ot">&lt;-</span> hidden_baseline <span class="sc">+</span> d_h_baseline</span>
+<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>    output_baseline <span class="ot">&lt;-</span> output_baseline <span class="sc">+</span> d_o_baseline</span>
+<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a>transfer_event <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">ncol</span>(prototypes))</span>
+<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(transfer_event) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(transfer_event) <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Feature"</span>, <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(transfer_event))</span>
+<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a>transfer_hidden_activation <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(transfer_event), <span class="at">ncol =</span> n_hidden, <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">rownames</span>(transfer_event), <span class="dv">1</span><span class="sc">:</span>n_hidden))</span>
+<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>p_resp <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(transfer_event), <span class="at">ncol =</span> <span class="fu">ncol</span>(target), <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">rownames</span>(transfer_event), <span class="fu">colnames</span>(target)))</span>
+<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(transfer_event)) {</span>
+<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a>    transfer_hidden_activation[i,] <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(transfer_event[i,] <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
+<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>    p_resp[i,] <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(transfer_hidden_activation[i,] <span class="sc">%*%</span> h_to_o_assc_weights) <span class="sc">+</span> output_baseline)</span>
+<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>At the end of the chunk above, we probe what the model has learned by presenting it with eight “transfer” events each consisting of one of the eight features being set to <code>1</code> while the others are set to <code>0</code>:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(transfer_event)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Feature 1</th>
+<th style="text-align: right;">Feature 2</th>
+<th style="text-align: right;">Feature 3</th>
+<th style="text-align: right;">Feature 4</th>
+<th style="text-align: right;">Feature 5</th>
+<th style="text-align: right;">Feature 6</th>
+<th style="text-align: right;">Feature 7</th>
+<th style="text-align: right;">Feature 8</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Feature 1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The table below indicates the activation at the model’s “output” layer for each of the transfer events above, representing its expectations for the other feature values:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(p_resp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Feature 1</td>
+<td style="text-align: right;">0.9997033</td>
+<td style="text-align: right;">0.9893001</td>
+<td style="text-align: right;">0.9893061</td>
+<td style="text-align: right;">0.0106886</td>
+<td style="text-align: right;">0.0107070</td>
+<td style="text-align: right;">0.0106903</td>
+<td style="text-align: right;">0.0018336</td>
+<td style="text-align: right;">0.9981642</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 2</td>
+<td style="text-align: right;">0.9987015</td>
+<td style="text-align: right;">0.9682807</td>
+<td style="text-align: right;">0.9683123</td>
+<td style="text-align: right;">0.0316595</td>
+<td style="text-align: right;">0.0317569</td>
+<td style="text-align: right;">0.0316688</td>
+<td style="text-align: right;">0.0029465</td>
+<td style="text-align: right;">0.9970532</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 3</td>
+<td style="text-align: right;">0.9987136</td>
+<td style="text-align: right;">0.9685302</td>
+<td style="text-align: right;">0.9685615</td>
+<td style="text-align: right;">0.0314105</td>
+<td style="text-align: right;">0.0315071</td>
+<td style="text-align: right;">0.0314198</td>
+<td style="text-align: right;">0.0029452</td>
+<td style="text-align: right;">0.9970544</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 4</td>
+<td style="text-align: right;">0.0774881</td>
+<td style="text-align: right;">0.0077560</td>
+<td style="text-align: right;">0.0077707</td>
+<td style="text-align: right;">0.9922162</td>
+<td style="text-align: right;">0.9922614</td>
+<td style="text-align: right;">0.9922206</td>
+<td style="text-align: right;">0.0021182</td>
+<td style="text-align: right;">0.9978799</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 5</td>
+<td style="text-align: right;">0.0765345</td>
+<td style="text-align: right;">0.0077274</td>
+<td style="text-align: right;">0.0077421</td>
+<td style="text-align: right;">0.9922447</td>
+<td style="text-align: right;">0.9922901</td>
+<td style="text-align: right;">0.9922491</td>
+<td style="text-align: right;">0.0021584</td>
+<td style="text-align: right;">0.9978398</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 6</td>
+<td style="text-align: right;">0.0790053</td>
+<td style="text-align: right;">0.0079269</td>
+<td style="text-align: right;">0.0079419</td>
+<td style="text-align: right;">0.9920447</td>
+<td style="text-align: right;">0.9920909</td>
+<td style="text-align: right;">0.9920491</td>
+<td style="text-align: right;">0.0021339</td>
+<td style="text-align: right;">0.9978642</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 7</td>
+<td style="text-align: right;">0.8709508</td>
+<td style="text-align: right;">0.3250548</td>
+<td style="text-align: right;">0.3254244</td>
+<td style="text-align: right;">0.6742455</td>
+<td style="text-align: right;">0.6753852</td>
+<td style="text-align: right;">0.6743548</td>
+<td style="text-align: right;">0.0034501</td>
+<td style="text-align: right;">0.9965506</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 8</td>
+<td style="text-align: right;">0.9168317</td>
+<td style="text-align: right;">0.3092547</td>
+<td style="text-align: right;">0.3094502</td>
+<td style="text-align: right;">0.6903754</td>
+<td style="text-align: right;">0.6909781</td>
+<td style="text-align: right;">0.6904331</td>
+<td style="text-align: right;">0.0010764</td>
+<td style="text-align: right;">0.9989210</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>We can see that the network has largely learned to expect feature values consistent with the prototype that is most closely associated with the activated feature. Of course, for the final two features which have the same value in both prototypes, the model’s expectations are more equivocal.</p>
+<p>It is intriguing to note that, for the transfer pattern in which Feature 7 is “turned on”, the model still expects this feature to have a very low value! This feature had the value “0” in both prototypes, so the model would have only experienced a value of <code>1</code> for Feature 7 if it happened to be “flipped” by chance in one of the training examples. So in a sense, by expecting Feature 7 to have a value of 0 even when the model is “told” that it has a value of <code>1</code>, the model is “discounting” the evidence of its “senses”!</p>
+<p>By examining the patterns of hidden unit activation for each transfer pattern, we can see the source of the model’s expectations:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(transfer_hidden_activation)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Feature 1</td>
+<td style="text-align: right;">0.9908998</td>
+<td style="text-align: right;">0.1121541</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 2</td>
+<td style="text-align: right;">0.8531575</td>
+<td style="text-align: right;">0.1670194</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 3</td>
+<td style="text-align: right;">0.8538664</td>
+<td style="text-align: right;">0.1663734</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 4</td>
+<td style="text-align: right;">0.2083492</td>
+<td style="text-align: right;">0.8811281</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 5</td>
+<td style="text-align: right;">0.2061844</td>
+<td style="text-align: right;">0.8799589</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 6</td>
+<td style="text-align: right;">0.2094186</td>
+<td style="text-align: right;">0.8787193</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 7</td>
+<td style="text-align: right;">0.4976117</td>
+<td style="text-align: right;">0.4998254</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 8</td>
+<td style="text-align: right;">0.6069245</td>
+<td style="text-align: right;">0.5975704</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>As we might have hoped, the model has learned to use its two hidden units to indicate which of the two prototypes is most consistent with the features in each transfer event. Once again, the final two (ambiguous) features also result in close-to-equal activation of each hidden unit.</p>
+<p>That said, it might be more fair to judge the model if we don’t “give it the answer” by only equipping it with two hidden units. Let’s instead give it eight hidden units—the same number as there are features—and see if it can still discover the regularities consistent with each prototype.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>logistic_act <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x)))</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>prototypes <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">8</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">c</span>(<span class="st">"P1"</span>, <span class="st">"P2"</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="co"># On each epoch, the model sees a new randomly generated set of exemplars generated from each prototype</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>n_epochs <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a><span class="co"># This is the number of exemplars of each prototype per epoch</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>n_per_prototype <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="co"># This is what proportion of features, on average, will differ between the exemplars and their prototype</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>p_change <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>n_hidden <span class="ot">&lt;-</span> <span class="dv">8</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>i_to_h_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">ncol</span>(prototypes) <span class="sc">*</span> n_hidden), <span class="at">nrow =</span> <span class="fu">ncol</span>(prototypes), <span class="at">ncol =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>h_to_o_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden <span class="sc">*</span> <span class="fu">ncol</span>(prototypes)), <span class="at">nrow =</span> n_hidden, <span class="at">ncol =</span> <span class="fu">ncol</span>(prototypes)) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>hidden_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>output_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">ncol</span>(prototypes)) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_epochs) {</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    event <span class="ot">&lt;-</span> prototypes[<span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(prototypes), <span class="at">each =</span> n_per_prototype)), , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    to_change <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">nrow</span>(event) <span class="sc">*</span> <span class="fu">ncol</span>(event), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">p =</span> p_change), <span class="at">nrow =</span> <span class="fu">nrow</span>(event), <span class="at">ncol =</span> <span class="fu">ncol</span>(event))</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>    event[to_change] <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> event[to_change]</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    target <span class="ot">&lt;-</span> event</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>    d_h_to_o <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> h_to_o_assc_weights</span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>    d_i_to_h <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> i_to_h_assc_weights</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>    d_h_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> hidden_baseline</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>    d_o_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> output_baseline</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>    prev_hidden_activation <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_hidden)</span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Forward propagation (prediction)</span></span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>        hidden_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(event[i,] <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>        output_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(hidden_activation <span class="sc">%*%</span> h_to_o_assc_weights) <span class="sc">+</span> output_baseline)</span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute error at output layer</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>        output_error <span class="ot">&lt;-</span> target[i,] <span class="sc">-</span> output_activation</span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Back propagation (learning)</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to output unit activation</span></span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>        d_output_error <span class="ot">&lt;-</span> output_error <span class="sc">*</span> output_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> output_activation)</span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to hidden unit activation</span></span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>        d_hidden_error <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(h_to_o_assc_weights <span class="sc">%*%</span> d_output_error) <span class="sc">*</span> hidden_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> hidden_activation)</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the hidden and output layers</span></span>
+<span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a>        d_h_to_o <span class="ot">&lt;-</span> d_h_to_o <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(hidden_activation, d_output_error)</span>
+<span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the input and hidden layers</span></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>        d_i_to_h <span class="ot">&lt;-</span> d_i_to_h <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(event[i,], d_hidden_error)</span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the output units</span></span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>        d_o_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_output_error</span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the hidden units</span></span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>        d_h_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_hidden_error</span>
+<span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Adjust weights</span></span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>    i_to_h_assc_weights <span class="ot">&lt;-</span> i_to_h_assc_weights <span class="sc">+</span> d_i_to_h</span>
+<span id="cb13-75"><a href="#cb13-75" aria-hidden="true" tabindex="-1"></a>    h_to_o_assc_weights <span class="ot">&lt;-</span> h_to_o_assc_weights <span class="sc">+</span> d_h_to_o</span>
+<span id="cb13-76"><a href="#cb13-76" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-77"><a href="#cb13-77" aria-hidden="true" tabindex="-1"></a>    hidden_baseline <span class="ot">&lt;-</span> hidden_baseline <span class="sc">+</span> d_h_baseline</span>
+<span id="cb13-78"><a href="#cb13-78" aria-hidden="true" tabindex="-1"></a>    output_baseline <span class="ot">&lt;-</span> output_baseline <span class="sc">+</span> d_o_baseline</span>
+<span id="cb13-79"><a href="#cb13-79" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-80"><a href="#cb13-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-81"><a href="#cb13-81" aria-hidden="true" tabindex="-1"></a>transfer_event <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">ncol</span>(prototypes))</span>
+<span id="cb13-82"><a href="#cb13-82" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(transfer_event) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(transfer_event) <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Feature"</span>, <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(transfer_event))</span>
+<span id="cb13-83"><a href="#cb13-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-84"><a href="#cb13-84" aria-hidden="true" tabindex="-1"></a>transfer_hidden_activation <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(transfer_event), <span class="at">ncol =</span> n_hidden, <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">rownames</span>(transfer_event), <span class="dv">1</span><span class="sc">:</span>n_hidden))</span>
+<span id="cb13-85"><a href="#cb13-85" aria-hidden="true" tabindex="-1"></a>p_resp <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="fu">nrow</span>(transfer_event), <span class="at">ncol =</span> <span class="fu">ncol</span>(target), <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="fu">rownames</span>(transfer_event), <span class="fu">colnames</span>(target)))</span>
+<span id="cb13-86"><a href="#cb13-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-87"><a href="#cb13-87" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(transfer_event)) {</span>
+<span id="cb13-88"><a href="#cb13-88" aria-hidden="true" tabindex="-1"></a>    transfer_hidden_activation[i,] <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(transfer_event[i,] <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
+<span id="cb13-89"><a href="#cb13-89" aria-hidden="true" tabindex="-1"></a>    p_resp[i,] <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(transfer_hidden_activation[i,] <span class="sc">%*%</span> h_to_o_assc_weights) <span class="sc">+</span> output_baseline)</span>
+<span id="cb13-90"><a href="#cb13-90" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(p_resp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+</colgroup>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Feature 1</td>
+<td style="text-align: right;">0.9999629</td>
+<td style="text-align: right;">0.9873418</td>
+<td style="text-align: right;">0.9873510</td>
+<td style="text-align: right;">0.0126542</td>
+<td style="text-align: right;">0.0126575</td>
+<td style="text-align: right;">0.0126505</td>
+<td style="text-align: right;">0.0008719</td>
+<td style="text-align: right;">0.9991304</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 2</td>
+<td style="text-align: right;">0.9993704</td>
+<td style="text-align: right;">0.9234755</td>
+<td style="text-align: right;">0.9237602</td>
+<td style="text-align: right;">0.0763888</td>
+<td style="text-align: right;">0.0764785</td>
+<td style="text-align: right;">0.0763762</td>
+<td style="text-align: right;">0.0018163</td>
+<td style="text-align: right;">0.9981896</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 3</td>
+<td style="text-align: right;">0.9993676</td>
+<td style="text-align: right;">0.9230696</td>
+<td style="text-align: right;">0.9233528</td>
+<td style="text-align: right;">0.0768033</td>
+<td style="text-align: right;">0.0768983</td>
+<td style="text-align: right;">0.0768017</td>
+<td style="text-align: right;">0.0018001</td>
+<td style="text-align: right;">0.9982057</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 4</td>
+<td style="text-align: right;">0.1704360</td>
+<td style="text-align: right;">0.0068217</td>
+<td style="text-align: right;">0.0068725</td>
+<td style="text-align: right;">0.9931383</td>
+<td style="text-align: right;">0.9931712</td>
+<td style="text-align: right;">0.9931460</td>
+<td style="text-align: right;">0.0010124</td>
+<td style="text-align: right;">0.9989944</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 5</td>
+<td style="text-align: right;">0.1709796</td>
+<td style="text-align: right;">0.0068199</td>
+<td style="text-align: right;">0.0068703</td>
+<td style="text-align: right;">0.9931409</td>
+<td style="text-align: right;">0.9931733</td>
+<td style="text-align: right;">0.9931486</td>
+<td style="text-align: right;">0.0010069</td>
+<td style="text-align: right;">0.9989999</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 6</td>
+<td style="text-align: right;">0.1688919</td>
+<td style="text-align: right;">0.0067943</td>
+<td style="text-align: right;">0.0068453</td>
+<td style="text-align: right;">0.9931664</td>
+<td style="text-align: right;">0.9931986</td>
+<td style="text-align: right;">0.9931735</td>
+<td style="text-align: right;">0.0010205</td>
+<td style="text-align: right;">0.9989865</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 7</td>
+<td style="text-align: right;">0.9243916</td>
+<td style="text-align: right;">0.1953597</td>
+<td style="text-align: right;">0.1963633</td>
+<td style="text-align: right;">0.8039330</td>
+<td style="text-align: right;">0.8044775</td>
+<td style="text-align: right;">0.8040272</td>
+<td style="text-align: right;">0.0017631</td>
+<td style="text-align: right;">0.9982449</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 8</td>
+<td style="text-align: right;">0.9688339</td>
+<td style="text-align: right;">0.2665740</td>
+<td style="text-align: right;">0.2675084</td>
+<td style="text-align: right;">0.7328589</td>
+<td style="text-align: right;">0.7333190</td>
+<td style="text-align: right;">0.7329245</td>
+<td style="text-align: right;">0.0009362</td>
+<td style="text-align: right;">0.9990692</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Even without encouraging the model to find the “right” answer, it still looks like it is able to form reasonable expectations for the feature values that are consistent with the prototypes that originally generated the training exemplars.</p>
+<p>However, since there are now 8 hidden units, its a bit hard to see how the pattern of activation among the hidden units represents each potential prototype:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(transfer_hidden_activation)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">1</th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">3</th>
+<th style="text-align: right;">4</th>
+<th style="text-align: right;">5</th>
+<th style="text-align: right;">6</th>
+<th style="text-align: right;">7</th>
+<th style="text-align: right;">8</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Feature 1</td>
+<td style="text-align: right;">0.1528907</td>
+<td style="text-align: right;">0.4344921</td>
+<td style="text-align: right;">0.1661314</td>
+<td style="text-align: right;">0.1710326</td>
+<td style="text-align: right;">0.9538300</td>
+<td style="text-align: right;">0.9649348</td>
+<td style="text-align: right;">0.9494558</td>
+<td style="text-align: right;">0.1816092</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 2</td>
+<td style="text-align: right;">0.2329792</td>
+<td style="text-align: right;">0.4075160</td>
+<td style="text-align: right;">0.2372756</td>
+<td style="text-align: right;">0.2541759</td>
+<td style="text-align: right;">0.7525858</td>
+<td style="text-align: right;">0.7815335</td>
+<td style="text-align: right;">0.7455288</td>
+<td style="text-align: right;">0.2541011</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 3</td>
+<td style="text-align: right;">0.2375500</td>
+<td style="text-align: right;">0.4140858</td>
+<td style="text-align: right;">0.2341705</td>
+<td style="text-align: right;">0.2548858</td>
+<td style="text-align: right;">0.7512986</td>
+<td style="text-align: right;">0.7846717</td>
+<td style="text-align: right;">0.7425981</td>
+<td style="text-align: right;">0.2524576</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 4</td>
+<td style="text-align: right;">0.7721480</td>
+<td style="text-align: right;">0.6340845</td>
+<td style="text-align: right;">0.7706312</td>
+<td style="text-align: right;">0.7539505</td>
+<td style="text-align: right;">0.3059169</td>
+<td style="text-align: right;">0.2862130</td>
+<td style="text-align: right;">0.3127077</td>
+<td style="text-align: right;">0.7517998</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 5</td>
+<td style="text-align: right;">0.7744988</td>
+<td style="text-align: right;">0.6328773</td>
+<td style="text-align: right;">0.7695565</td>
+<td style="text-align: right;">0.7554082</td>
+<td style="text-align: right;">0.3045691</td>
+<td style="text-align: right;">0.2868571</td>
+<td style="text-align: right;">0.3155504</td>
+<td style="text-align: right;">0.7514157</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 6</td>
+<td style="text-align: right;">0.7715945</td>
+<td style="text-align: right;">0.6332336</td>
+<td style="text-align: right;">0.7680214</td>
+<td style="text-align: right;">0.7554003</td>
+<td style="text-align: right;">0.3055191</td>
+<td style="text-align: right;">0.2870289</td>
+<td style="text-align: right;">0.3088729</td>
+<td style="text-align: right;">0.7534171</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Feature 7</td>
+<td style="text-align: right;">0.4976473</td>
+<td style="text-align: right;">0.5002462</td>
+<td style="text-align: right;">0.5005177</td>
+<td style="text-align: right;">0.5032810</td>
+<td style="text-align: right;">0.4940626</td>
+<td style="text-align: right;">0.4956329</td>
+<td style="text-align: right;">0.4955740</td>
+<td style="text-align: right;">0.4910196</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feature 8</td>
+<td style="text-align: right;">0.5082826</td>
+<td style="text-align: right;">0.5433736</td>
+<td style="text-align: right;">0.5123282</td>
+<td style="text-align: right;">0.5144572</td>
+<td style="text-align: right;">0.5748479</td>
+<td style="text-align: right;">0.5941206</td>
+<td style="text-align: right;">0.5741431</td>
+<td style="text-align: right;">0.5155124</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>So let’s make a plot instead:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">array2DF</span>(transfer_hidden_activation) <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">transfer_event =</span> <span class="fu">factor</span>(Var1)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">hidden_unit_index =</span> <span class="fu">as.numeric</span>(Var2)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> hidden_unit_index, <span class="at">y =</span> Value, <span class="at">color =</span> transfer_event)) <span class="sc">+</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_okabeito</span>() <span class="sc">+</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Hidden unit index"</span>, <span class="at">y =</span> <span class="st">"Activation"</span>, <span class="at">color =</span> <span class="st">"Active feature"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="backprop_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The visualization makes it easier to see that the pattern of hidden unit activation is essentially “mirrored” between features 1–3 and features 4–6, and flat for the ambiguous features 7 and 8. Once again, the network has learned to form a distributed representation of its input that captures the regularities of the events that it has experienced.</p>
+</section>
 </section>
 <section id="simple-recurrent-networks-learning-patterns-in-time" class="level2" data-number="12.4">
 <h2 data-number="12.4" class="anchored" data-anchor-id="simple-recurrent-networks-learning-patterns-in-time"><span class="header-section-number">12.4</span> Simple recurrent networks: Learning patterns in time</h2>
-<p>One of the most interesting (in my opinion) applications of backprop networks comes in the form of <em>simple recurrent networks (SRN)</em>. These were described by <span class="citation" data-cites="Elman1990">(<a href="references.html#ref-Elman1990" role="doc-biblioref"><strong>Elman1990?</strong></a>)</span>, who showed that they could learn <strong>structure in time</strong>. These models are applied to <em>sequences</em>, where the current event in the sequence is treated as “input” and the next event is the target at the output layer. Thus, these networks are explicitly trained to predict the future.</p>
-<p>In principle, the same model structure we’ve seen so far could work here too. But <span class="citation" data-cites="Elman1990">(<a href="references.html#ref-Elman1990" role="doc-biblioref"><strong>Elman1990?</strong></a>)</span> proposed an interesting change: The input on each step of the sequence isn’t <em>just</em> the current event—it is also the vector of hidden unit activation from the <em>previous</em> step of the sequence. Thus, the networks own prior state is treated as input for the purpose of making a prediction. This means that the hidden unit representations learned by the network must pull “double duty”—they need to learn, in essence, how to serve as useful memory representations.</p>
+<p>One of the most interesting (in my opinion) applications of backprop networks comes in the form of <em>simple recurrent networks (SRN)</em>. These were described by <span class="citation" data-cites="Elman1990">Elman (<a href="references.html#ref-Elman1990" role="doc-biblioref">1990</a>)</span>, who showed that they could learn <strong>structure in time</strong>. These models are applied to <em>sequences</em>, where the current event in the sequence is treated as “input” and the next event is the target at the output layer. Thus, these networks are explicitly trained to predict the future.</p>
+<p>In principle, the same model structure we’ve seen so far could work here too. But <span class="citation" data-cites="Elman1990">Elman (<a href="references.html#ref-Elman1990" role="doc-biblioref">1990</a>)</span> proposed an interesting change: The input on each step of the sequence isn’t <em>just</em> the current event—it is also the vector of hidden unit activation from the <em>previous</em> step of the sequence. Thus, the networks own prior state is treated as input for the purpose of making a prediction. This means that the hidden unit representations learned by the network must pull “double duty”—they need to learn, in essence, how to serve as useful memory representations.</p>
 <section id="learning-to-have-memory" class="level3" data-number="12.4.1">
 <h3 data-number="12.4.1" class="anchored" data-anchor-id="learning-to-have-memory"><span class="header-section-number">12.4.1</span> Learning to have memory</h3>
-<p><span class="citation" data-cites="Elman">(<a href="references.html#ref-Elman" role="doc-biblioref"><strong>Elman?</strong></a>)</span> gave a simple illustration of an SRN learning to have memory. In the following example, each event has just a single dimension—it can be <code>0</code> or <code>1</code>. Sequences are comprised of three-element subsequences. Within each subsequence, the final element is the “exclusive-or” (XOR) of the previous two elements. Specifically, the final element is <code>1</code> if the previous two elements are different and it is <code>0</code> if the previous two elements are the same. These three-element subsequences are randomly concatenated to form a long exposure sequence.</p>
+<p><span class="citation" data-cites="Elman1990">Elman (<a href="references.html#ref-Elman1990" role="doc-biblioref">1990</a>)</span> gave a simple illustration of an SRN learning to have memory. In the following example, each event has just a single dimension—it can be <code>0</code> or <code>1</code>. Sequences are comprised of three-element subsequences. Within each subsequence, the final element is the “exclusive-or” (XOR) of the previous two elements. Specifically, the final element is <code>1</code> if the previous two elements are different and it is <code>0</code> if the previous two elements are the same. These three-element subsequences are randomly concatenated to form a long exposure sequence.</p>
 <p>This is a challenging pattern to learn! In many cases, it will be impossible to predict the next element. Imagine that the sequence <code>0, 1, 1</code> occurs. When the first element occurs, it is not possible to predict what the second one will be. However, once the second element occurs, it <em>is</em> possible to predict the third element, since it follows the XOR rule. But once the third element occurs, it is again impossible to predict the next element, since the next element is the start of the next sequence. Only for the second element of a sequence is it possible to make a reasonable prediction about the next element. And that’s only if you (a) can remember far enough back; and (b) have learned the XOR rule.</p>
 <p>This learning situation can be thought of as a microcosm for learning the structure of events more generally. For example, if a pitcher throws a ball, we cannot predict whether the batter will hit it. But once we know whether the batter has hit the ball or not, we can form some expectation about what will happen next. But then the next pitch is unpredictable once again.</p>
 <p>The code below implements a version of Elman’s XOR sequence task. The network only has 2 hidden units. It learns in batches, where each batch is a long sequence built by concatenating many 3-element subsequences, each of which follow the XOR rule.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>logistic_act <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x)))</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Each row is a subsequence from which the whole training sequence will be built.</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># The number refer to the rows in the "representations" matrix below.</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>subsequences <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>,</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>,</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>,</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">4</span>, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>representations <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>,</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co"># On each epoch, the model learns on a new randomly generated training sequence</span></span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>n_epochs <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="co"># This is the number of times each subsequence will occur in each training sequence</span></span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>n_per_subsequence <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>n_hidden <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>i_to_h_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> (<span class="fu">ncol</span>(representations) <span class="sc">+</span> n_hidden) <span class="sc">*</span> n_hidden), <span class="at">nrow =</span> <span class="fu">ncol</span>(representations) <span class="sc">+</span> n_hidden, <span class="at">ncol =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>h_to_o_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden <span class="sc">*</span> <span class="fu">ncol</span>(representations)), <span class="at">nrow =</span> n_hidden, <span class="at">ncol =</span> <span class="fu">ncol</span>(representations)) <span class="sc">*</span> <span class="fl">0.01</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>hidden_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
-<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>output_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">ncol</span>(representations)) <span class="sc">*</span> <span class="fl">0.01</span></span>
-<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_epochs) {</span>
-<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>    training_sequence <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">t</span>(subsequences[<span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(subsequences), <span class="at">each =</span> n_per_subsequence)),]))</span>
-<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    event <span class="ot">&lt;-</span> representations[training_sequence[<span class="dv">1</span><span class="sc">:</span>(<span class="fu">length</span>(training_sequence) <span class="sc">-</span> <span class="dv">1</span>)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    target <span class="ot">&lt;-</span> representations[training_sequence[<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(training_sequence)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    d_h_to_o <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> h_to_o_assc_weights</span>
-<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    d_i_to_h <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> i_to_h_assc_weights</span>
-<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    d_h_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> hidden_baseline</span>
-<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>    d_o_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> output_baseline</span>
-<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>    prev_hidden_activation <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_hidden)</span>
-<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
-<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Forward propagation (prediction)</span></span>
-<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>        this_input <span class="ot">&lt;-</span> <span class="fu">c</span>(event[i,], prev_hidden_activation)</span>
-<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>        hidden_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(this_input <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
-<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>        output_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(hidden_activation <span class="sc">%*%</span> h_to_o_assc_weights) <span class="sc">+</span> output_baseline)</span>
-<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute error at output layer</span></span>
-<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>        output_error <span class="ot">&lt;-</span> target[i,] <span class="sc">-</span> output_activation</span>
-<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Back propagation (learning)</span></span>
-<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to output unit activation</span></span>
-<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>        d_output_error <span class="ot">&lt;-</span> output_error <span class="sc">*</span> output_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> output_activation)</span>
-<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to hidden unit activation</span></span>
-<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>        d_hidden_error <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(h_to_o_assc_weights <span class="sc">%*%</span> d_output_error) <span class="sc">*</span> hidden_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> hidden_activation)</span>
-<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the hidden and output layers</span></span>
-<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>        d_h_to_o <span class="ot">&lt;-</span> d_h_to_o <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(hidden_activation, d_output_error)</span>
-<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the input and hidden layers</span></span>
-<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>        d_i_to_h <span class="ot">&lt;-</span> d_i_to_h <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(this_input, d_hidden_error)</span>
-<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the output units</span></span>
-<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>        d_o_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_output_error</span>
-<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the hidden units</span></span>
-<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>        d_h_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_hidden_error</span>
-<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Copy hidden unit activation</span></span>
-<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>        prev_hidden_activation <span class="ot">&lt;-</span> hidden_activation</span>
-<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Adjust weights</span></span>
-<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>    i_to_h_assc_weights <span class="ot">&lt;-</span> i_to_h_assc_weights <span class="sc">+</span> d_i_to_h</span>
-<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>    h_to_o_assc_weights <span class="ot">&lt;-</span> h_to_o_assc_weights <span class="sc">+</span> d_h_to_o</span>
-<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>    hidden_baseline <span class="ot">&lt;-</span> hidden_baseline <span class="sc">+</span> d_h_baseline</span>
-<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a>    output_baseline <span class="ot">&lt;-</span> output_baseline <span class="sc">+</span> d_o_baseline</span>
-<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>transfer_sequence <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">t</span>(subsequences[<span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(subsequences), <span class="at">each =</span> n_per_subsequence)),]))</span>
-<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>event <span class="ot">&lt;-</span> representations[transfer_sequence[<span class="dv">1</span><span class="sc">:</span>(<span class="fu">length</span>(transfer_sequence) <span class="sc">-</span> <span class="dv">1</span>)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> representations[transfer_sequence[<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(transfer_sequence)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a>transfer_error <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">nrow</span>(event))</span>
-<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>prev_hidden_activation <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_hidden)</span>
-<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
-<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a>    this_input <span class="ot">&lt;-</span> <span class="fu">c</span>(event[i,], prev_hidden_activation)</span>
-<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a>    hidden_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(this_input <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
-<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a>    output_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(hidden_activation <span class="sc">%*%</span> h_to_o_assc_weights) <span class="sc">+</span> output_baseline)</span>
-<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a>    transfer_error[i] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((target[i,] <span class="sc">-</span> output_activation)<span class="sc">^</span><span class="dv">2</span>))</span>
-<span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a>    prev_hidden_activation <span class="ot">&lt;-</span> hidden_activation</span>
-<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">step =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event), <span class="at">error =</span> transfer_error) <span class="sc">%&gt;%</span></span>
-<span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">sub_step =</span> ((step <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">%%</span> <span class="fu">ncol</span>(subsequences)) <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sub_step, <span class="at">y =</span> error)) <span class="sc">+</span></span>
-<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>, <span class="at">group =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb8-111"><a href="#cb8-111" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun.data =</span> mean_cl_normal) <span class="sc">+</span></span>
-<span id="cb8-112"><a href="#cb8-112" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Position within subsequence"</span>, <span class="at">y =</span> <span class="st">"Root mean squared prediction error"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>logistic_act <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x)))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Each row is a subsequence from which the whole training sequence will be built.</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="co"># The number refer to the rows in the "representations" matrix below.</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>subsequences <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">2</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">1</span>,</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">2</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">4</span>, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>representations <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>,</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">2</span>, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a><span class="co"># On each epoch, the model learns on a new randomly generated training sequence</span></span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>n_epochs <span class="ot">&lt;-</span> <span class="dv">5000</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="co"># This is the number of times each subsequence will occur in each training sequence</span></span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>n_per_subsequence <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>n_hidden <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>i_to_h_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> (<span class="fu">ncol</span>(representations) <span class="sc">+</span> n_hidden) <span class="sc">*</span> n_hidden), <span class="at">nrow =</span> <span class="fu">ncol</span>(representations) <span class="sc">+</span> n_hidden, <span class="at">ncol =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>h_to_o_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden <span class="sc">*</span> <span class="fu">ncol</span>(representations)), <span class="at">nrow =</span> n_hidden, <span class="at">ncol =</span> <span class="fu">ncol</span>(representations)) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>hidden_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a>output_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">ncol</span>(representations)) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_epochs) {</span>
+<span id="cb17-34"><a href="#cb17-34" aria-hidden="true" tabindex="-1"></a>    training_sequence <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">t</span>(subsequences[<span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(subsequences), <span class="at">each =</span> n_per_subsequence)),]))</span>
+<span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>    event <span class="ot">&lt;-</span> representations[training_sequence[<span class="dv">1</span><span class="sc">:</span>(<span class="fu">length</span>(training_sequence) <span class="sc">-</span> <span class="dv">1</span>)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>    target <span class="ot">&lt;-</span> representations[training_sequence[<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(training_sequence)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>    d_h_to_o <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> h_to_o_assc_weights</span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a>    d_i_to_h <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> i_to_h_assc_weights</span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>    d_h_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> hidden_baseline</span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>    d_o_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> output_baseline</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>    prev_hidden_activation <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_hidden)</span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Forward propagation (prediction)</span></span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>        this_input <span class="ot">&lt;-</span> <span class="fu">c</span>(event[i,], prev_hidden_activation)</span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a>        hidden_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(this_input <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a>        output_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(hidden_activation <span class="sc">%*%</span> h_to_o_assc_weights) <span class="sc">+</span> output_baseline)</span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute error at output layer</span></span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a>        output_error <span class="ot">&lt;-</span> target[i,] <span class="sc">-</span> output_activation</span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Back propagation (learning)</span></span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to output unit activation</span></span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a>        d_output_error <span class="ot">&lt;-</span> output_error <span class="sc">*</span> output_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> output_activation)</span>
+<span id="cb17-61"><a href="#cb17-61" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-62"><a href="#cb17-62" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to hidden unit activation</span></span>
+<span id="cb17-63"><a href="#cb17-63" aria-hidden="true" tabindex="-1"></a>        d_hidden_error <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(h_to_o_assc_weights <span class="sc">%*%</span> d_output_error) <span class="sc">*</span> hidden_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> hidden_activation)</span>
+<span id="cb17-64"><a href="#cb17-64" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-65"><a href="#cb17-65" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the hidden and output layers</span></span>
+<span id="cb17-66"><a href="#cb17-66" aria-hidden="true" tabindex="-1"></a>        d_h_to_o <span class="ot">&lt;-</span> d_h_to_o <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(hidden_activation, d_output_error)</span>
+<span id="cb17-67"><a href="#cb17-67" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-68"><a href="#cb17-68" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the input and hidden layers</span></span>
+<span id="cb17-69"><a href="#cb17-69" aria-hidden="true" tabindex="-1"></a>        d_i_to_h <span class="ot">&lt;-</span> d_i_to_h <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(this_input, d_hidden_error)</span>
+<span id="cb17-70"><a href="#cb17-70" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb17-71"><a href="#cb17-71" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the output units</span></span>
+<span id="cb17-72"><a href="#cb17-72" aria-hidden="true" tabindex="-1"></a>        d_o_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_output_error</span>
+<span id="cb17-73"><a href="#cb17-73" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb17-74"><a href="#cb17-74" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the hidden units</span></span>
+<span id="cb17-75"><a href="#cb17-75" aria-hidden="true" tabindex="-1"></a>        d_h_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_hidden_error</span>
+<span id="cb17-76"><a href="#cb17-76" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-77"><a href="#cb17-77" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Copy hidden unit activation</span></span>
+<span id="cb17-78"><a href="#cb17-78" aria-hidden="true" tabindex="-1"></a>        prev_hidden_activation <span class="ot">&lt;-</span> hidden_activation</span>
+<span id="cb17-79"><a href="#cb17-79" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb17-80"><a href="#cb17-80" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-81"><a href="#cb17-81" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Adjust weights</span></span>
+<span id="cb17-82"><a href="#cb17-82" aria-hidden="true" tabindex="-1"></a>    i_to_h_assc_weights <span class="ot">&lt;-</span> i_to_h_assc_weights <span class="sc">+</span> d_i_to_h</span>
+<span id="cb17-83"><a href="#cb17-83" aria-hidden="true" tabindex="-1"></a>    h_to_o_assc_weights <span class="ot">&lt;-</span> h_to_o_assc_weights <span class="sc">+</span> d_h_to_o</span>
+<span id="cb17-84"><a href="#cb17-84" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-85"><a href="#cb17-85" aria-hidden="true" tabindex="-1"></a>    hidden_baseline <span class="ot">&lt;-</span> hidden_baseline <span class="sc">+</span> d_h_baseline</span>
+<span id="cb17-86"><a href="#cb17-86" aria-hidden="true" tabindex="-1"></a>    output_baseline <span class="ot">&lt;-</span> output_baseline <span class="sc">+</span> d_o_baseline</span>
+<span id="cb17-87"><a href="#cb17-87" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-88"><a href="#cb17-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-89"><a href="#cb17-89" aria-hidden="true" tabindex="-1"></a>transfer_sequence <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">t</span>(subsequences[<span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(subsequences), <span class="at">each =</span> n_per_subsequence)),]))</span>
+<span id="cb17-90"><a href="#cb17-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-91"><a href="#cb17-91" aria-hidden="true" tabindex="-1"></a>event <span class="ot">&lt;-</span> representations[transfer_sequence[<span class="dv">1</span><span class="sc">:</span>(<span class="fu">length</span>(transfer_sequence) <span class="sc">-</span> <span class="dv">1</span>)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb17-92"><a href="#cb17-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-93"><a href="#cb17-93" aria-hidden="true" tabindex="-1"></a>target <span class="ot">&lt;-</span> representations[transfer_sequence[<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(transfer_sequence)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb17-94"><a href="#cb17-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-95"><a href="#cb17-95" aria-hidden="true" tabindex="-1"></a>transfer_error <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="fu">nrow</span>(event))</span>
+<span id="cb17-96"><a href="#cb17-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-97"><a href="#cb17-97" aria-hidden="true" tabindex="-1"></a>prev_hidden_activation <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_hidden)</span>
+<span id="cb17-98"><a href="#cb17-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-99"><a href="#cb17-99" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
+<span id="cb17-100"><a href="#cb17-100" aria-hidden="true" tabindex="-1"></a>    this_input <span class="ot">&lt;-</span> <span class="fu">c</span>(event[i,], prev_hidden_activation)</span>
+<span id="cb17-101"><a href="#cb17-101" aria-hidden="true" tabindex="-1"></a>    hidden_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(this_input <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
+<span id="cb17-102"><a href="#cb17-102" aria-hidden="true" tabindex="-1"></a>    output_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(hidden_activation <span class="sc">%*%</span> h_to_o_assc_weights) <span class="sc">+</span> output_baseline)</span>
+<span id="cb17-103"><a href="#cb17-103" aria-hidden="true" tabindex="-1"></a>    transfer_error[i] <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((target[i,] <span class="sc">-</span> output_activation)<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb17-104"><a href="#cb17-104" aria-hidden="true" tabindex="-1"></a>    prev_hidden_activation <span class="ot">&lt;-</span> hidden_activation</span>
+<span id="cb17-105"><a href="#cb17-105" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-106"><a href="#cb17-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-107"><a href="#cb17-107" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">step =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event), <span class="at">error =</span> transfer_error) <span class="sc">%&gt;%</span></span>
+<span id="cb17-108"><a href="#cb17-108" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">sub_step =</span> ((step <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">%%</span> <span class="fu">ncol</span>(subsequences)) <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-109"><a href="#cb17-109" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sub_step, <span class="at">y =</span> error)) <span class="sc">+</span></span>
+<span id="cb17-110"><a href="#cb17-110" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>, <span class="at">group =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb17-111"><a href="#cb17-111" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun.data =</span> mean_cl_normal) <span class="sc">+</span></span>
+<span id="cb17-112"><a href="#cb17-112" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Position within subsequence"</span>, <span class="at">y =</span> <span class="st">"Root mean squared prediction error"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="backprop_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="backprop_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1430,162 +2242,178 @@ f_h(a) = f_o(a) = \frac{1}{1 + \exp \left(-a \right)}
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>logistic_act <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x)))</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Each row is a subsequence from which the whole training sequence will</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># be built.</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>subsequences <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">2</span>,</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">3</span>,</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">4</span>,</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">6</span>, <span class="dv">2</span>,</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">6</span>, <span class="dv">3</span>,</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">3</span>,</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">8</span>, <span class="dv">4</span>,</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">1</span>,</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>,</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">4</span>,</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">1</span>,</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">3</span>,</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">7</span>, <span class="dv">3</span>,</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">8</span>, <span class="dv">3</span>, <span class="co"># (only the dog can throw the door)</span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">8</span>, <span class="dv">4</span> </span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">15</span>, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>representations <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="dv">8</span>)</span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(representations) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(representations) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"cat"</span>, <span class="st">"dog"</span>, <span class="st">"door"</span>, <span class="st">"rock"</span>, <span class="st">"see"</span>, <span class="st">"hear"</span>, <span class="st">"use"</span>, <span class="st">"throw"</span>)</span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a><span class="co"># On each epoch, the model learns on a new randomly generated training sequence</span></span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>n_epochs <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="co"># This is the number of times each subsequence will occur in each training sequence</span></span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>n_per_subsequence <span class="ot">&lt;-</span> <span class="dv">10</span></span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
-<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>n_hidden <span class="ot">&lt;-</span> <span class="dv">7</span></span>
-<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>n_hidden_snapshots <span class="ot">&lt;-</span> <span class="dv">9</span></span>
-<span id="cb9-37"><a href="#cb9-37" aria-hidden="true" tabindex="-1"></a>epoch_to_snap <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">exp</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="fu">log</span>(n_epochs), <span class="at">length.out =</span> n_hidden_snapshots)))</span>
-<span id="cb9-38"><a href="#cb9-38" aria-hidden="true" tabindex="-1"></a>snapshot_hidden_activation <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(n_hidden_snapshots, <span class="fu">nrow</span>(representations), n_hidden), <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"epoch"</span> <span class="ot">=</span> epoch_to_snap, <span class="st">"item"</span> <span class="ot">=</span> <span class="fu">rownames</span>(representations), <span class="st">"hidden_unit"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_hidden))</span>
-<span id="cb9-39"><a href="#cb9-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-40"><a href="#cb9-40" aria-hidden="true" tabindex="-1"></a>i_to_h_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> (<span class="fu">ncol</span>(representations) <span class="sc">+</span> n_hidden) <span class="sc">*</span> n_hidden), <span class="at">nrow =</span> <span class="fu">ncol</span>(representations) <span class="sc">+</span> n_hidden, <span class="at">ncol =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
-<span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>h_to_o_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden <span class="sc">*</span> <span class="fu">ncol</span>(representations)), <span class="at">nrow =</span> n_hidden, <span class="at">ncol =</span> <span class="fu">ncol</span>(representations)) <span class="sc">*</span> <span class="fl">0.01</span></span>
-<span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>hidden_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
-<span id="cb9-44"><a href="#cb9-44" aria-hidden="true" tabindex="-1"></a>output_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">ncol</span>(representations)) <span class="sc">*</span> <span class="fl">0.01</span></span>
-<span id="cb9-45"><a href="#cb9-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-46"><a href="#cb9-46" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_epochs) {</span>
-<span id="cb9-47"><a href="#cb9-47" aria-hidden="true" tabindex="-1"></a>    training_sequence <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">t</span>(subsequences[<span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(subsequences), <span class="at">each =</span> n_per_subsequence)),]))</span>
-<span id="cb9-48"><a href="#cb9-48" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-49"><a href="#cb9-49" aria-hidden="true" tabindex="-1"></a>    event <span class="ot">&lt;-</span> representations[training_sequence[<span class="dv">1</span><span class="sc">:</span>(<span class="fu">length</span>(training_sequence) <span class="sc">-</span> <span class="dv">1</span>)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb9-50"><a href="#cb9-50" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-51"><a href="#cb9-51" aria-hidden="true" tabindex="-1"></a>    target <span class="ot">&lt;-</span> representations[training_sequence[<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(training_sequence)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
-<span id="cb9-52"><a href="#cb9-52" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-53"><a href="#cb9-53" aria-hidden="true" tabindex="-1"></a>    d_h_to_o <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> h_to_o_assc_weights</span>
-<span id="cb9-54"><a href="#cb9-54" aria-hidden="true" tabindex="-1"></a>    d_i_to_h <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> i_to_h_assc_weights</span>
-<span id="cb9-55"><a href="#cb9-55" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-56"><a href="#cb9-56" aria-hidden="true" tabindex="-1"></a>    d_h_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> hidden_baseline</span>
-<span id="cb9-57"><a href="#cb9-57" aria-hidden="true" tabindex="-1"></a>    d_o_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> output_baseline</span>
-<span id="cb9-58"><a href="#cb9-58" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-59"><a href="#cb9-59" aria-hidden="true" tabindex="-1"></a>    prev_hidden_activation <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_hidden)</span>
-<span id="cb9-60"><a href="#cb9-60" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-61"><a href="#cb9-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
-<span id="cb9-62"><a href="#cb9-62" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Forward propagation (prediction)</span></span>
-<span id="cb9-63"><a href="#cb9-63" aria-hidden="true" tabindex="-1"></a>        this_input <span class="ot">&lt;-</span> <span class="fu">c</span>(event[i,], prev_hidden_activation)</span>
-<span id="cb9-64"><a href="#cb9-64" aria-hidden="true" tabindex="-1"></a>        hidden_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(this_input <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
-<span id="cb9-65"><a href="#cb9-65" aria-hidden="true" tabindex="-1"></a>        output_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(hidden_activation <span class="sc">%*%</span> h_to_o_assc_weights) <span class="sc">+</span> output_baseline)</span>
-<span id="cb9-66"><a href="#cb9-66" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-67"><a href="#cb9-67" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute error at output layer</span></span>
-<span id="cb9-68"><a href="#cb9-68" aria-hidden="true" tabindex="-1"></a>        output_error <span class="ot">&lt;-</span> target[i,] <span class="sc">-</span> output_activation</span>
-<span id="cb9-69"><a href="#cb9-69" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-70"><a href="#cb9-70" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Back propagation (learning)</span></span>
-<span id="cb9-71"><a href="#cb9-71" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-72"><a href="#cb9-72" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to output unit activation</span></span>
-<span id="cb9-73"><a href="#cb9-73" aria-hidden="true" tabindex="-1"></a>        d_output_error <span class="ot">&lt;-</span> output_error <span class="sc">*</span> output_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> output_activation)</span>
-<span id="cb9-74"><a href="#cb9-74" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-75"><a href="#cb9-75" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to hidden unit activation</span></span>
-<span id="cb9-76"><a href="#cb9-76" aria-hidden="true" tabindex="-1"></a>        d_hidden_error <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(h_to_o_assc_weights <span class="sc">%*%</span> d_output_error) <span class="sc">*</span> hidden_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> hidden_activation)</span>
-<span id="cb9-77"><a href="#cb9-77" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-78"><a href="#cb9-78" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the hidden and output layers</span></span>
-<span id="cb9-79"><a href="#cb9-79" aria-hidden="true" tabindex="-1"></a>        d_h_to_o <span class="ot">&lt;-</span> d_h_to_o <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(hidden_activation, d_output_error)</span>
-<span id="cb9-80"><a href="#cb9-80" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-81"><a href="#cb9-81" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the input and hidden layers</span></span>
-<span id="cb9-82"><a href="#cb9-82" aria-hidden="true" tabindex="-1"></a>        d_i_to_h <span class="ot">&lt;-</span> d_i_to_h <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(this_input, d_hidden_error)</span>
-<span id="cb9-83"><a href="#cb9-83" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb9-84"><a href="#cb9-84" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the output units</span></span>
-<span id="cb9-85"><a href="#cb9-85" aria-hidden="true" tabindex="-1"></a>        d_o_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_output_error</span>
-<span id="cb9-86"><a href="#cb9-86" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb9-87"><a href="#cb9-87" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the hidden units</span></span>
-<span id="cb9-88"><a href="#cb9-88" aria-hidden="true" tabindex="-1"></a>        d_h_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_hidden_error</span>
-<span id="cb9-89"><a href="#cb9-89" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-90"><a href="#cb9-90" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Copy hidden unit activation</span></span>
-<span id="cb9-91"><a href="#cb9-91" aria-hidden="true" tabindex="-1"></a>        prev_hidden_activation <span class="ot">&lt;-</span> hidden_activation</span>
-<span id="cb9-92"><a href="#cb9-92" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb9-93"><a href="#cb9-93" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-94"><a href="#cb9-94" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Adjust weights</span></span>
-<span id="cb9-95"><a href="#cb9-95" aria-hidden="true" tabindex="-1"></a>    i_to_h_assc_weights <span class="ot">&lt;-</span> i_to_h_assc_weights <span class="sc">+</span> d_i_to_h</span>
-<span id="cb9-96"><a href="#cb9-96" aria-hidden="true" tabindex="-1"></a>    h_to_o_assc_weights <span class="ot">&lt;-</span> h_to_o_assc_weights <span class="sc">+</span> d_h_to_o</span>
-<span id="cb9-97"><a href="#cb9-97" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-98"><a href="#cb9-98" aria-hidden="true" tabindex="-1"></a>    hidden_baseline <span class="ot">&lt;-</span> hidden_baseline <span class="sc">+</span> d_h_baseline</span>
-<span id="cb9-99"><a href="#cb9-99" aria-hidden="true" tabindex="-1"></a>    output_baseline <span class="ot">&lt;-</span> output_baseline <span class="sc">+</span> d_o_baseline</span>
-<span id="cb9-100"><a href="#cb9-100" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb9-101"><a href="#cb9-101" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (epoch <span class="sc">%in%</span> <span class="fu">as.numeric</span>(<span class="fu">dimnames</span>(snapshot_hidden_activation)[[<span class="dv">1</span>]])) {</span>
-<span id="cb9-102"><a href="#cb9-102" aria-hidden="true" tabindex="-1"></a>        prev_hidden_activation <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_hidden)</span>
-<span id="cb9-103"><a href="#cb9-103" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb9-104"><a href="#cb9-104" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(representations)) {</span>
-<span id="cb9-105"><a href="#cb9-105" aria-hidden="true" tabindex="-1"></a>            snapshot_hidden_activation[<span class="fu">as.character</span>(epoch), i, ] <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(<span class="fu">c</span>(representations[i,], prev_hidden_activation) <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
-<span id="cb9-106"><a href="#cb9-106" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb9-107"><a href="#cb9-107" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb9-108"><a href="#cb9-108" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb9-109"><a href="#cb9-109" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-110"><a href="#cb9-110" aria-hidden="true" tabindex="-1"></a><span class="fu">array2DF</span>(snapshot_hidden_activation) <span class="sc">%&gt;%</span></span>
-<span id="cb9-111"><a href="#cb9-111" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">item =</span> <span class="fu">factor</span>(item, <span class="at">levels =</span> <span class="fu">rownames</span>(representations))) <span class="sc">%&gt;%</span></span>
-<span id="cb9-112"><a href="#cb9-112" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">hidden_unit =</span> <span class="fu">as.numeric</span>(hidden_unit)) <span class="sc">%&gt;%</span></span>
-<span id="cb9-113"><a href="#cb9-113" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">epoch =</span> <span class="fu">factor</span>(epoch, <span class="at">levels =</span> <span class="fu">as.character</span>(<span class="fu">sort</span>(<span class="fu">unique</span>(<span class="fu">as.numeric</span>(epoch)))))) <span class="sc">%&gt;%</span></span>
-<span id="cb9-114"><a href="#cb9-114" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> hidden_unit, <span class="at">y =</span> Value, <span class="at">color =</span> item)) <span class="sc">+</span></span>
-<span id="cb9-115"><a href="#cb9-115" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb9-116"><a href="#cb9-116" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Paired"</span>) <span class="sc">+</span></span>
-<span id="cb9-117"><a href="#cb9-117" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"epoch"</span>, <span class="at">labeller =</span> label_both)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>logistic_act <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span>x)))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Each row is a subsequence from which the whole training sequence will</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="co"># be built.</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>subsequences <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">2</span>,</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">3</span>,</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">4</span>,</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">6</span>, <span class="dv">2</span>,</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">6</span>, <span class="dv">3</span>,</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">7</span>, <span class="dv">3</span>,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">8</span>, <span class="dv">4</span>,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">1</span>,</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">3</span>,</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">4</span>,</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">1</span>,</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">3</span>,</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">7</span>, <span class="dv">3</span>,</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">8</span>, <span class="dv">3</span>, <span class="co"># (only the dog can throw the door)</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>, <span class="dv">8</span>, <span class="dv">4</span> </span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">15</span>, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>representations <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="dv">8</span>)</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(representations) <span class="ot">&lt;-</span> <span class="fu">colnames</span>(representations) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"cat"</span>, <span class="st">"dog"</span>, <span class="st">"door"</span>, <span class="st">"rock"</span>, <span class="st">"see"</span>, <span class="st">"hear"</span>, <span class="st">"use"</span>, <span class="st">"throw"</span>)</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a><span class="co"># On each epoch, the model learns on a new randomly generated training sequence</span></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>n_epochs <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a><span class="co"># This is the number of times each subsequence will occur in each training sequence</span></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>n_per_subsequence <span class="ot">&lt;-</span> <span class="dv">10</span></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>learning_rate <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>n_hidden <span class="ot">&lt;-</span> <span class="dv">7</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>n_hidden_snapshots <span class="ot">&lt;-</span> <span class="dv">9</span></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>epoch_to_snap <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">exp</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="fu">log</span>(n_epochs), <span class="at">length.out =</span> n_hidden_snapshots)))</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>snapshot_hidden_activation <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(n_hidden_snapshots, <span class="fu">nrow</span>(representations), n_hidden), <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"epoch"</span> <span class="ot">=</span> epoch_to_snap, <span class="st">"item"</span> <span class="ot">=</span> <span class="fu">rownames</span>(representations), <span class="st">"hidden_unit"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_hidden))</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>i_to_h_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> (<span class="fu">ncol</span>(representations) <span class="sc">+</span> n_hidden) <span class="sc">*</span> n_hidden), <span class="at">nrow =</span> <span class="fu">ncol</span>(representations) <span class="sc">+</span> n_hidden, <span class="at">ncol =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>h_to_o_assc_weights <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden <span class="sc">*</span> <span class="fu">ncol</span>(representations)), <span class="at">nrow =</span> n_hidden, <span class="at">ncol =</span> <span class="fu">ncol</span>(representations)) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>hidden_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> n_hidden) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>output_baseline <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">ncol</span>(representations)) <span class="sc">*</span> <span class="fl">0.01</span></span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_epochs) {</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>    training_sequence <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">t</span>(subsequences[<span class="fu">sample</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(subsequences), <span class="at">each =</span> n_per_subsequence)),]))</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>    event <span class="ot">&lt;-</span> representations[training_sequence[<span class="dv">1</span><span class="sc">:</span>(<span class="fu">length</span>(training_sequence) <span class="sc">-</span> <span class="dv">1</span>)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>    target <span class="ot">&lt;-</span> representations[training_sequence[<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(training_sequence)], , drop <span class="ot">=</span> <span class="cn">FALSE</span>]</span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>    d_h_to_o <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> h_to_o_assc_weights</span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>    d_i_to_h <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> i_to_h_assc_weights</span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a>    d_h_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> hidden_baseline</span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a>    d_o_baseline <span class="ot">&lt;-</span> <span class="dv">0</span> <span class="sc">*</span> output_baseline</span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a>    prev_hidden_activation <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_hidden)</span>
+<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(event)) {</span>
+<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Forward propagation (prediction)</span></span>
+<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a>        this_input <span class="ot">&lt;-</span> <span class="fu">c</span>(event[i,], prev_hidden_activation)</span>
+<span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a>        hidden_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(this_input <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
+<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a>        output_activation <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(hidden_activation <span class="sc">%*%</span> h_to_o_assc_weights) <span class="sc">+</span> output_baseline)</span>
+<span id="cb18-66"><a href="#cb18-66" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-67"><a href="#cb18-67" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute error at output layer</span></span>
+<span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a>        output_error <span class="ot">&lt;-</span> target[i,] <span class="sc">-</span> output_activation</span>
+<span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-70"><a href="#cb18-70" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Back propagation (learning)</span></span>
+<span id="cb18-71"><a href="#cb18-71" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-72"><a href="#cb18-72" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to output unit activation</span></span>
+<span id="cb18-73"><a href="#cb18-73" aria-hidden="true" tabindex="-1"></a>        d_output_error <span class="ot">&lt;-</span> output_error <span class="sc">*</span> output_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> output_activation)</span>
+<span id="cb18-74"><a href="#cb18-74" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-75"><a href="#cb18-75" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Derivative of error with respect to hidden unit activation</span></span>
+<span id="cb18-76"><a href="#cb18-76" aria-hidden="true" tabindex="-1"></a>        d_hidden_error <span class="ot">&lt;-</span> <span class="fu">as.vector</span>(h_to_o_assc_weights <span class="sc">%*%</span> d_output_error) <span class="sc">*</span> hidden_activation <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> hidden_activation)</span>
+<span id="cb18-77"><a href="#cb18-77" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the hidden and output layers</span></span>
+<span id="cb18-79"><a href="#cb18-79" aria-hidden="true" tabindex="-1"></a>        d_h_to_o <span class="ot">&lt;-</span> d_h_to_o <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(hidden_activation, d_output_error)</span>
+<span id="cb18-80"><a href="#cb18-80" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-81"><a href="#cb18-81" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the associative weights between the input and hidden layers</span></span>
+<span id="cb18-82"><a href="#cb18-82" aria-hidden="true" tabindex="-1"></a>        d_i_to_h <span class="ot">&lt;-</span> d_i_to_h <span class="sc">+</span> learning_rate <span class="sc">*</span> <span class="fu">outer</span>(this_input, d_hidden_error)</span>
+<span id="cb18-83"><a href="#cb18-83" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-84"><a href="#cb18-84" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the output units</span></span>
+<span id="cb18-85"><a href="#cb18-85" aria-hidden="true" tabindex="-1"></a>        d_o_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_output_error</span>
+<span id="cb18-86"><a href="#cb18-86" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-87"><a href="#cb18-87" aria-hidden="true" tabindex="-1"></a>        <span class="co"># How much to adjust the baseline of the hidden units</span></span>
+<span id="cb18-88"><a href="#cb18-88" aria-hidden="true" tabindex="-1"></a>        d_h_baseline <span class="ot">&lt;-</span> learning_rate <span class="sc">*</span> d_hidden_error</span>
+<span id="cb18-89"><a href="#cb18-89" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-90"><a href="#cb18-90" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Copy hidden unit activation</span></span>
+<span id="cb18-91"><a href="#cb18-91" aria-hidden="true" tabindex="-1"></a>        prev_hidden_activation <span class="ot">&lt;-</span> hidden_activation</span>
+<span id="cb18-92"><a href="#cb18-92" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb18-93"><a href="#cb18-93" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-94"><a href="#cb18-94" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Adjust weights</span></span>
+<span id="cb18-95"><a href="#cb18-95" aria-hidden="true" tabindex="-1"></a>    i_to_h_assc_weights <span class="ot">&lt;-</span> i_to_h_assc_weights <span class="sc">+</span> d_i_to_h</span>
+<span id="cb18-96"><a href="#cb18-96" aria-hidden="true" tabindex="-1"></a>    h_to_o_assc_weights <span class="ot">&lt;-</span> h_to_o_assc_weights <span class="sc">+</span> d_h_to_o</span>
+<span id="cb18-97"><a href="#cb18-97" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-98"><a href="#cb18-98" aria-hidden="true" tabindex="-1"></a>    hidden_baseline <span class="ot">&lt;-</span> hidden_baseline <span class="sc">+</span> d_h_baseline</span>
+<span id="cb18-99"><a href="#cb18-99" aria-hidden="true" tabindex="-1"></a>    output_baseline <span class="ot">&lt;-</span> output_baseline <span class="sc">+</span> d_o_baseline</span>
+<span id="cb18-100"><a href="#cb18-100" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-101"><a href="#cb18-101" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (epoch <span class="sc">%in%</span> <span class="fu">as.numeric</span>(<span class="fu">dimnames</span>(snapshot_hidden_activation)[[<span class="dv">1</span>]])) {</span>
+<span id="cb18-102"><a href="#cb18-102" aria-hidden="true" tabindex="-1"></a>        prev_hidden_activation <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_hidden)</span>
+<span id="cb18-103"><a href="#cb18-103" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-104"><a href="#cb18-104" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(representations)) {</span>
+<span id="cb18-105"><a href="#cb18-105" aria-hidden="true" tabindex="-1"></a>            snapshot_hidden_activation[<span class="fu">as.character</span>(epoch), i, ] <span class="ot">&lt;-</span> <span class="fu">logistic_act</span>(<span class="fu">as.vector</span>(<span class="fu">c</span>(representations[i,], prev_hidden_activation) <span class="sc">%*%</span> i_to_h_assc_weights) <span class="sc">+</span> hidden_baseline)</span>
+<span id="cb18-106"><a href="#cb18-106" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb18-107"><a href="#cb18-107" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb18-108"><a href="#cb18-108" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb18-109"><a href="#cb18-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-110"><a href="#cb18-110" aria-hidden="true" tabindex="-1"></a><span class="fu">array2DF</span>(snapshot_hidden_activation) <span class="sc">%&gt;%</span></span>
+<span id="cb18-111"><a href="#cb18-111" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">item =</span> <span class="fu">factor</span>(item, <span class="at">levels =</span> <span class="fu">rownames</span>(representations))) <span class="sc">%&gt;%</span></span>
+<span id="cb18-112"><a href="#cb18-112" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">hidden_unit =</span> <span class="fu">as.numeric</span>(hidden_unit)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-113"><a href="#cb18-113" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">epoch =</span> <span class="fu">factor</span>(epoch, <span class="at">levels =</span> <span class="fu">as.character</span>(<span class="fu">sort</span>(<span class="fu">unique</span>(<span class="fu">as.numeric</span>(epoch)))))) <span class="sc">%&gt;%</span></span>
+<span id="cb18-114"><a href="#cb18-114" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> hidden_unit, <span class="at">y =</span> Value, <span class="at">color =</span> item)) <span class="sc">+</span></span>
+<span id="cb18-115"><a href="#cb18-115" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb18-116"><a href="#cb18-116" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Paired"</span>) <span class="sc">+</span></span>
+<span id="cb18-117"><a href="#cb18-117" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"epoch"</span>, <span class="at">labeller =</span> label_both)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="backprop_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="backprop_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>item_mds <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(n_hidden_snapshots, <span class="fu">nrow</span>(representations), <span class="dv">2</span>), <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"epoch"</span> <span class="ot">=</span> epoch_to_snap, <span class="st">"item"</span> <span class="ot">=</span> <span class="fu">rownames</span>(representations), <span class="st">"dim"</span> <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"dim"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)))</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="fu">dimnames</span>(snapshot_hidden_activation)[[<span class="dv">1</span>]]) {</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    item_mds[epoch, , ] <span class="ot">&lt;-</span> <span class="fu">cmdscale</span>(<span class="at">d =</span> <span class="fu">dist</span>(snapshot_hidden_activation[epoch,,]), <span class="at">k =</span> <span class="dv">2</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">array2DF</span>(item_mds) <span class="sc">%&gt;%</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> <span class="fu">c</span>(epoch, item), <span class="at">names_from =</span> dim, <span class="at">values_from =</span> Value) <span class="sc">%&gt;%</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">item =</span> <span class="fu">factor</span>(item, <span class="at">levels =</span> <span class="fu">rownames</span>(representations))) <span class="sc">%&gt;%</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">epoch =</span> <span class="fu">factor</span>(epoch, <span class="at">levels =</span> <span class="fu">as.character</span>(<span class="fu">sort</span>(<span class="fu">unique</span>(<span class="fu">as.numeric</span>(epoch)))))) <span class="sc">%&gt;%</span></span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> dim1, <span class="at">y =</span> dim2, <span class="at">color =</span> item)) <span class="sc">+</span></span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_path</span>() <span class="sc">+</span></span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Paired"</span>) <span class="sc">+</span></span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Evolution of internal representations with learning"</span>, <span class="at">x =</span> <span class="st">"Dimension 1"</span>, <span class="at">y =</span> <span class="st">"Dimension 2"</span>, <span class="at">caption =</span> <span class="st">"Visualization by multidimensional scaling"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>item_mds <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(n_hidden_snapshots, <span class="fu">nrow</span>(representations), <span class="dv">2</span>), <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"epoch"</span> <span class="ot">=</span> epoch_to_snap, <span class="st">"item"</span> <span class="ot">=</span> <span class="fu">rownames</span>(representations), <span class="st">"dim"</span> <span class="ot">=</span> <span class="fu">paste0</span>(<span class="st">"dim"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (epoch <span class="cf">in</span> <span class="fu">dimnames</span>(snapshot_hidden_activation)[[<span class="dv">1</span>]]) {</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    item_mds[epoch, , ] <span class="ot">&lt;-</span> <span class="fu">cmdscale</span>(<span class="at">d =</span> <span class="fu">dist</span>(snapshot_hidden_activation[epoch,,]), <span class="at">k =</span> <span class="dv">2</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="fu">array2DF</span>(item_mds) <span class="sc">%&gt;%</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_wider</span>(<span class="at">id_cols =</span> <span class="fu">c</span>(epoch, item), <span class="at">names_from =</span> dim, <span class="at">values_from =</span> Value) <span class="sc">%&gt;%</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">item =</span> <span class="fu">factor</span>(item, <span class="at">levels =</span> <span class="fu">rownames</span>(representations))) <span class="sc">%&gt;%</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">epoch =</span> <span class="fu">factor</span>(epoch, <span class="at">levels =</span> <span class="fu">as.character</span>(<span class="fu">sort</span>(<span class="fu">unique</span>(<span class="fu">as.numeric</span>(epoch)))))) <span class="sc">%&gt;%</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> dim1, <span class="at">y =</span> dim2, <span class="at">color =</span> item)) <span class="sc">+</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_path</span>() <span class="sc">+</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>() <span class="sc">+</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Paired"</span>) <span class="sc">+</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Evolution of internal representations with learning"</span>, <span class="at">x =</span> <span class="st">"Dimension 1"</span>, <span class="at">y =</span> <span class="st">"Dimension 2"</span>, <span class="at">caption =</span> <span class="st">"Visualization by multidimensional scaling"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="backprop_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="backprop_files/figure-html/unnamed-chunk-15-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>As we can see, the model learns to distinguish between nouns and verbs fairly quickly. Same goes for subjects (cat, dog) and objects (door, rock). Eventually, the individual items get differentiated, like we saw with the concepts at the beginning of the chapter. The key difference is that the SRN has learned these concept representations by virtue of how they enable it to <em>predict</em> the next items in the sequence, not in terms of clearly labeled features.</p>
+</section>
+</section>
+<section id="exercises" class="level2" data-number="12.5">
+<h2 data-number="12.5" class="anchored" data-anchor-id="exercises"><span class="header-section-number">12.5</span> Exercises</h2>
+<ol type="1">
+<li>Adapt the concept-feature learning model so that it operates “in reverse”. In other words, swap the <code>target</code> and <code>event</code> matrices. The resulting model will thus learn to assign a concept name (oak, pine, etc.) to a set of features. Leaving everything else the same, run the model and comment on the nature of the representations it learns within its hidden units and compare them to the representations learned by the model in the chapter.</li>
+<li>Try running the prototype-learning autoencoder model with different values of the <code>p_change</code> variable, leaving <code>n_hidden</code> set to 8. See if you can find a value of <code>p_change</code> at which the model no longer shows any evidence of learning the two prototypes. Comment on what sorts of representations the model has learned, if indeed it has learned any structure at all!</li>
+<li>Devise a learning situation that is relevant to your research and adapt one of the models from this chapter to apply it to that scenario. You will need to think about how you want to represent the features of each learning event and what the “target” is for the learner (e.g., are they learning to categorize events or choose an action, are they an “autoencoder”, are they learning to predict like an SRN?). You will also need to explore different values for the number of hidden units in the model, the learning rate, as well as the number of epochs and the number of learning events per epoch. In the end, describe the learning situation you devised and the settings required for your model to succeed in your learning task. Describe the nature of the hidden-layer representations the model seems to have learned as well as the trajectory (over epochs) by which the model appears to have learned those trajectories (e.g., did some distinctions get learned earlier than others?).</li>
+</ol>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-Elman1990" class="csl-entry" role="listitem">
+Elman, J. L. (1990). Finding structure in time. <em>Cognitive Science</em>, <em>14</em>(2), 179–211. <a href="https://doi.org/10.1207/s15516709cog1402_1">https://doi.org/10.1207/s15516709cog1402_1</a>
+</div>
 <div id="ref-McClellandEtAl1995" class="csl-entry" role="listitem">
 McClelland, J. L., McNaughton, B. L., &amp; O’Reilly, R. C. (1995). Why there are complementary learning systems in the hippocampus and neocortex: Insights from the successes and failures of connectionist models of learning and memory. <em>Psychological Review</em>, <em>102</em>(3), 419–457.
+</div>
+<div id="ref-PosnerKeele1968" class="csl-entry" role="listitem">
+Posner, M. I., &amp; Keele, S. W. (1968). On the genesis of abstract ideas. <em>Journal of Experimental Psychology</em>, <em>77</em>, 353–363. <a href="https://doi.org/10.1037/h0025953">https://doi.org/10.1037/h0025953</a>
 </div>
 <div id="ref-RogersMcClelland2004" class="csl-entry" role="listitem">
 Rogers, T. T., &amp; McClelland, J. L. (2004). <em>Semantic cognition: A parallel distributed processing approach</em>. MIT Press.
@@ -1594,7 +2422,6 @@ Rogers, T. T., &amp; McClelland, J. L. (2004). <em>Semantic cognition: A paralle
 Rumelhart, D. E., Hinton, G. E., &amp; Williams, R. J. (1986). Learning internal representations by error propagation. In D. E. Rumelhart &amp; J. L. McClelland (Eds.), <em>Parallel distributed processing: Vol. I</em>. The MIT Press.
 </div>
 </div>
-</section>
 </section>
 
 </main> <!-- /main -->

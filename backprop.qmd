@@ -440,7 +440,303 @@ knitr::kable(p_resp)
 knitr::kable(transfer_hidden_activation)
 ```
 
-By cuing the hidden layer with a single symptom at a time, we can obtain what is, in essence, a "factor loading matrix".  Specifically, by examining how each hidden unit is activated by each feature, we see how strongly that feature is associated with each hidden unit.  Each hidden unit can then be thought of as analogous to a "latent factor" that the network has learned, which enables it to correctly reproduce the input.  This feature of autoencoders makes them robust to noise in the input.
+By cuing the hidden layer with a single symptom at a time, we can obtain what is, in essence, a "factor loading matrix".  Specifically, by examining how each hidden unit is activated by each feature, we see how strongly that feature is associated with each hidden unit.  Each hidden unit can then be thought of as analogous to a "latent factor" that the network has learned, which enables it to correctly reproduce the input.
+
+### Learning and distinguishing category prototypes
+
+The ability of autoencoders to infer latent factors even in the presence of variation in the input suggests how they might serve as models for how participants learn category prototypes.  Consider, for example, the category of "dog".  No two dogs are exactly alike (though all dogs go to heaven).  Nonetheless, despite the considerable variability between individual dogs, there are shared characteristics that most dogs possess that enable us to form a representation of a prototypical "dog".  Those same regularities enable us to "fill in the blanks", just like we did with Hebbian learning earlier.  For example, if we only see two oThis feature of autoencoders makes them robust to noise in the input.
+
+This latter property is illustrated in the example below, which is a simplified version of a classic set of studies by @PosnerKeele1968.  In these studies, participants viewed images comprised of random dot patterns, like those shown below.
+
+```{r}
+prototype <- scale(matrix(rnorm(n = 7 * 2), nrow = 7, ncol = 2))
+colnames(prototype) <- c("x", "y")
+
+n_examples <- 4
+low_sd <- 0.1
+high_sd <- 0.2
+
+examples <- c()
+
+for (i in 1:n_examples) {
+    examples <- rbind(
+        examples,
+        cbind(type = "Low distortion", item = paste("Example", i), as_tibble(prototype + matrix(rnorm(n = 7 * 2, sd = low_sd), nrow = 7, ncol = 2))),
+        cbind(type = "High distortion", item = paste("Example", i), as_tibble(prototype + matrix(rnorm(n = 7 * 2, sd = high_sd), nrow = 7, ncol = 2)))
+    )
+}
+
+scale_lim <- range(c(prototype, examples$x, examples$y))
+
+prototype_plot <- cbind(type = "Prototype", as_tibble(prototype)) %>%
+    ggplot(aes(x = x, y = y)) +
+    geom_point() +
+    coord_equal(xlim = scale_lim, ylim = scale_lim) +
+    theme_void() +
+    theme(panel.border = element_rect(fill = NA, color = "black", linetype = "solid", linewidth = 1)) +
+    facet_wrap("type") +
+    labs(x = NULL, y = NULL)
+
+example_plot <- examples %>%
+    ggplot(aes(x = x, y = y)) +
+    geom_point() +
+    coord_equal(xlim = scale_lim, ylim = scale_lim) +
+    theme_void() +
+    theme(panel.border = element_rect(fill = NA, color = "black", linetype = "solid", linewidth = 1)) +
+    facet_grid(type ~ item, switch = "y", as.table = FALSE) +
+    labs(x = NULL, y = NULL)
+
+print(prototype_plot + example_plot + plot_layout(ncol = 1, heights = c(1, 2)))
+```
+
+Each dot pattern was a distortion of a "prototype" dot pattern.  As shown above, there could be "low distortions" which differ only a little from the prototype as well as "high distortions" which differ more strongly from the prototype.  Collectively, the various distortions from a prototype share a "family resemblance" to one another.  In that sense, they mimic the "dog" example from earlier, where even though all dogs look different, they can be understood as "variations on a theme".  The "theme" is a prototype, and we will now see that an autoencoder can learn a representation of the regularities that define such a prototype.
+
+The example below uses a simplified version of the @PosnerKeele1968 paradigm.  Each prototype is a sequence of binary symbols, which we might think of as indicating the presence or absence of different features.  In the example below, there are two prototypes, perhaps representing two different diseases or two different concepts.  The two prototypes differ on the first six features but match on the final two, perhaps like two different diseases with shared symptoms or two concepts with shared features.
+
+On each epoch of training, the network is presented with a number of exemplars of each prototype.  Each exemplar consists of a set of features, and there is a variable `p_change` that indicates the probability that any given feature of an exemplar will be "flipped" relative to its value in the prototype.  For example, if the prototype is `c(1, 1, 1, 0, 0, 0, 0, 1)`, then an exemplar is initially created that is an exact copy of that prototype.  If `p_change` is greater than zero, then there is a chance that any one of the features of the exemplar could be flipped.  For example, if the third feature is flipped, the resulting exemplar would be `c(1, 1, 0, 0, 0, 0, 0, 1)`.
+
+To begin, let's see what happens if we only give the network 2 hidden units to work with.  This is essentially forcing the model to "make do" with an internal representation of with only two dimensions.  If the network is able to pick up on the patterns of family resemblance, then the activation of the two hidden units should reflect which of the two prototypes most likely generated any given exemplar.  Below, `p_change` is set to 0.1.  Let's see how well the model does!
+
+```{r}
+#| code-fold: show
+
+logistic_act <- function(x) {
+    return(1 / (1 + exp(-x)))
+}
+
+prototypes <- matrix(c(
+    1, 1, 1, 0, 0, 0, 0, 1,
+    0, 0, 0, 1, 1, 1, 0, 1
+), nrow = 2, ncol = 8, byrow = TRUE,
+dimnames = list(
+    c("P1", "P2")
+))
+
+# On each epoch, the model sees a new randomly generated set of exemplars generated from each prototype
+n_epochs <- 5000
+# This is the number of exemplars of each prototype per epoch
+n_per_prototype <- 100
+# This is what proportion of features, on average, will differ between the exemplars and their prototype
+p_change <- 0.1
+
+learning_rate <- 0.1
+n_hidden <- 2
+
+i_to_h_assc_weights <- matrix(rnorm(n = ncol(prototypes) * n_hidden), nrow = ncol(prototypes), ncol = n_hidden) * 0.01
+h_to_o_assc_weights <- matrix(rnorm(n = n_hidden * ncol(prototypes)), nrow = n_hidden, ncol = ncol(prototypes)) * 0.01
+
+hidden_baseline <- rnorm(n = n_hidden) * 0.01
+output_baseline <- rnorm(n = ncol(prototypes)) * 0.01
+
+for (epoch in 1:n_epochs) {
+    event <- prototypes[sample(rep(1:nrow(prototypes), each = n_per_prototype)), , drop = FALSE]
+    to_change <- matrix(rbinom(n = nrow(event) * ncol(event), size = 1, p = p_change), nrow = nrow(event), ncol = ncol(event))
+    event[to_change] <- 1 - event[to_change]
+    
+    target <- event
+    
+    d_h_to_o <- 0 * h_to_o_assc_weights
+    d_i_to_h <- 0 * i_to_h_assc_weights
+    
+    d_h_baseline <- 0 * hidden_baseline
+    d_o_baseline <- 0 * output_baseline
+    
+    prev_hidden_activation <- rep(0, n_hidden)
+    
+    for (i in 1:nrow(event)) {
+        # Forward propagation (prediction)
+        hidden_activation <- logistic_act(as.vector(event[i,] %*% i_to_h_assc_weights) + hidden_baseline)
+        output_activation <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights) + output_baseline)
+    
+        # Compute error at output layer
+        output_error <- target[i,] - output_activation
+    
+        # Back propagation (learning)
+    
+        # Derivative of error with respect to output unit activation
+        d_output_error <- output_error * output_activation * (1 - output_activation)
+    
+        # Derivative of error with respect to hidden unit activation
+        d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * hidden_activation * (1 - hidden_activation)
+    
+        # How much to adjust the associative weights between the hidden and output layers
+        d_h_to_o <- d_h_to_o + learning_rate * outer(hidden_activation, d_output_error)
+    
+        # How much to adjust the associative weights between the input and hidden layers
+        d_i_to_h <- d_i_to_h + learning_rate * outer(event[i,], d_hidden_error)
+        
+        # How much to adjust the baseline of the output units
+        d_o_baseline <- learning_rate * d_output_error
+        
+        # How much to adjust the baseline of the hidden units
+        d_h_baseline <- learning_rate * d_hidden_error
+    }
+    
+    # Adjust weights
+    i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h
+    h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o
+    
+    hidden_baseline <- hidden_baseline + d_h_baseline
+    output_baseline <- output_baseline + d_o_baseline
+}
+
+transfer_event <- diag(ncol(prototypes))
+rownames(transfer_event) <- colnames(transfer_event) <- paste("Feature", 1:nrow(transfer_event))
+
+transfer_hidden_activation <- matrix(0, nrow = nrow(transfer_event), ncol = n_hidden, dimnames = list(rownames(transfer_event), 1:n_hidden))
+p_resp <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(target), dimnames = list(rownames(transfer_event), colnames(target)))
+
+for (i in 1:nrow(transfer_event)) {
+    transfer_hidden_activation[i,] <- logistic_act(as.vector(transfer_event[i,] %*% i_to_h_assc_weights) + hidden_baseline)
+    p_resp[i,] <- logistic_act(as.vector(transfer_hidden_activation[i,] %*% h_to_o_assc_weights) + output_baseline)
+}
+```
+
+At the end of the chunk above, we probe what the model has learned by presenting it with eight "transfer" events each consisting of one of the eight features being set to `1` while the others are set to `0`:
+
+```{r}
+knitr::kable(transfer_event)
+```
+
+The table below indicates the activation at the model's "output" layer for each of the transfer events above, representing its expectations for the other feature values:
+
+```{r}
+knitr::kable(p_resp)
+```
+
+We can see that the network has largely learned to expect feature values consistent with the prototype that is most closely associated with the activated feature.  Of course, for the final two features which have the same value in both prototypes, the model's expectations are more equivocal.
+
+It is intriguing to note that, for the transfer pattern in which Feature 7 is "turned on", the model still expects this feature to have a very low value!  This feature had the value "0" in both prototypes, so the model would have only experienced a value of `1` for Feature 7 if it happened to be "flipped" by chance in one of the training examples.  So in a sense, by expecting Feature 7 to have a value of 0 even when the model is "told" that it has a value of `1`, the model is "discounting" the evidence of its "senses"!
+
+By examining the patterns of hidden unit activation for each transfer pattern, we can see the source of the model's expectations:
+
+```{r}
+knitr::kable(transfer_hidden_activation)
+```
+
+As we might have hoped, the model has learned to use its two hidden units to indicate which of the two prototypes is most consistent with the features in each transfer event.  Once again, the final two (ambiguous) features also result in close-to-equal activation of each hidden unit.
+
+That said, it might be more fair to judge the model if we don't "give it the answer" by only equipping it with two hidden units.  Let's instead give it eight hidden units---the same number as there are features---and see if it can still discover the regularities consistent with each prototype.
+
+```{r}
+#| code-fold: show
+
+logistic_act <- function(x) {
+    return(1 / (1 + exp(-x)))
+}
+
+prototypes <- matrix(c(
+    1, 1, 1, 0, 0, 0, 0, 1,
+    0, 0, 0, 1, 1, 1, 0, 1
+), nrow = 2, ncol = 8, byrow = TRUE,
+dimnames = list(
+    c("P1", "P2")
+))
+
+# On each epoch, the model sees a new randomly generated set of exemplars generated from each prototype
+n_epochs <- 5000
+# This is the number of exemplars of each prototype per epoch
+n_per_prototype <- 100
+# This is what proportion of features, on average, will differ between the exemplars and their prototype
+p_change <- 0.1
+
+learning_rate <- 0.1
+n_hidden <- 8
+
+i_to_h_assc_weights <- matrix(rnorm(n = ncol(prototypes) * n_hidden), nrow = ncol(prototypes), ncol = n_hidden) * 0.01
+h_to_o_assc_weights <- matrix(rnorm(n = n_hidden * ncol(prototypes)), nrow = n_hidden, ncol = ncol(prototypes)) * 0.01
+
+hidden_baseline <- rnorm(n = n_hidden) * 0.01
+output_baseline <- rnorm(n = ncol(prototypes)) * 0.01
+
+for (epoch in 1:n_epochs) {
+    event <- prototypes[sample(rep(1:nrow(prototypes), each = n_per_prototype)), , drop = FALSE]
+    to_change <- matrix(rbinom(n = nrow(event) * ncol(event), size = 1, p = p_change), nrow = nrow(event), ncol = ncol(event))
+    event[to_change] <- 1 - event[to_change]
+    
+    target <- event
+    
+    d_h_to_o <- 0 * h_to_o_assc_weights
+    d_i_to_h <- 0 * i_to_h_assc_weights
+    
+    d_h_baseline <- 0 * hidden_baseline
+    d_o_baseline <- 0 * output_baseline
+    
+    prev_hidden_activation <- rep(0, n_hidden)
+    
+    for (i in 1:nrow(event)) {
+        # Forward propagation (prediction)
+        hidden_activation <- logistic_act(as.vector(event[i,] %*% i_to_h_assc_weights) + hidden_baseline)
+        output_activation <- logistic_act(as.vector(hidden_activation %*% h_to_o_assc_weights) + output_baseline)
+    
+        # Compute error at output layer
+        output_error <- target[i,] - output_activation
+    
+        # Back propagation (learning)
+    
+        # Derivative of error with respect to output unit activation
+        d_output_error <- output_error * output_activation * (1 - output_activation)
+    
+        # Derivative of error with respect to hidden unit activation
+        d_hidden_error <- as.vector(h_to_o_assc_weights %*% d_output_error) * hidden_activation * (1 - hidden_activation)
+    
+        # How much to adjust the associative weights between the hidden and output layers
+        d_h_to_o <- d_h_to_o + learning_rate * outer(hidden_activation, d_output_error)
+    
+        # How much to adjust the associative weights between the input and hidden layers
+        d_i_to_h <- d_i_to_h + learning_rate * outer(event[i,], d_hidden_error)
+        
+        # How much to adjust the baseline of the output units
+        d_o_baseline <- learning_rate * d_output_error
+        
+        # How much to adjust the baseline of the hidden units
+        d_h_baseline <- learning_rate * d_hidden_error
+    }
+    
+    # Adjust weights
+    i_to_h_assc_weights <- i_to_h_assc_weights + d_i_to_h
+    h_to_o_assc_weights <- h_to_o_assc_weights + d_h_to_o
+    
+    hidden_baseline <- hidden_baseline + d_h_baseline
+    output_baseline <- output_baseline + d_o_baseline
+}
+
+transfer_event <- diag(ncol(prototypes))
+rownames(transfer_event) <- colnames(transfer_event) <- paste("Feature", 1:nrow(transfer_event))
+
+transfer_hidden_activation <- matrix(0, nrow = nrow(transfer_event), ncol = n_hidden, dimnames = list(rownames(transfer_event), 1:n_hidden))
+p_resp <- matrix(0, nrow = nrow(transfer_event), ncol = ncol(target), dimnames = list(rownames(transfer_event), colnames(target)))
+
+for (i in 1:nrow(transfer_event)) {
+    transfer_hidden_activation[i,] <- logistic_act(as.vector(transfer_event[i,] %*% i_to_h_assc_weights) + hidden_baseline)
+    p_resp[i,] <- logistic_act(as.vector(transfer_hidden_activation[i,] %*% h_to_o_assc_weights) + output_baseline)
+}
+```
+
+```{r}
+knitr::kable(p_resp)
+```
+Even without encouraging the model to find the "right" answer, it still looks like it is able to form reasonable expectations for the feature values that are consistent with the prototypes that originally generated the training exemplars.
+
+However, since there are now 8 hidden units, its a bit hard to see how the pattern of activation among the hidden units represents each potential prototype:
+
+```{r}
+knitr::kable(transfer_hidden_activation)
+```
+
+So let's make a plot instead:
+
+```{r}
+array2DF(transfer_hidden_activation) %>%
+    mutate(transfer_event = factor(Var1)) %>%
+    mutate(hidden_unit_index = as.numeric(Var2)) %>%
+    ggplot(aes(x = hidden_unit_index, y = Value, color = transfer_event)) +
+    geom_line() +
+    scale_color_okabeito() +
+    labs(x = "Hidden unit index", y = "Activation", color = "Active feature")
+```
+
+The visualization makes it easier to see that the pattern of hidden unit activation is essentially "mirrored" between features 1--3 and features 4--6, and flat for the ambiguous features 7 and 8.  Once again, the network has learned to form a distributed representation of its input that captures the regularities of the events that it has experienced.
 
 ## Simple recurrent networks: Learning patterns in time
 
@@ -450,7 +746,7 @@ In principle, the same model structure we've seen so far could work here too.  B
 
 ### Learning to have memory
 
-@Elman gave a simple illustration of an SRN learning to have memory.  In the following example, each event has just a single dimension---it can be `0` or `1`.  Sequences are comprised of three-element subsequences.  Within each subsequence, the final element is the "exclusive-or" (XOR) of the previous two elements.  Specifically, the final element is `1` if the previous two elements are different and it is `0` if the previous two elements are the same.  These three-element subsequences are randomly concatenated to form a long exposure sequence.
+@Elman1990 gave a simple illustration of an SRN learning to have memory.  In the following example, each event has just a single dimension---it can be `0` or `1`.  Sequences are comprised of three-element subsequences.  Within each subsequence, the final element is the "exclusive-or" (XOR) of the previous two elements.  Specifically, the final element is `1` if the previous two elements are different and it is `0` if the previous two elements are the same.  These three-element subsequences are randomly concatenated to form a long exposure sequence.
 
 This is a challenging pattern to learn!  In many cases, it will be impossible to predict the next element.  Imagine that the sequence `0, 1, 1` occurs.  When the first element occurs, it is not possible to predict what the second one will be.  However, once the second element occurs, it *is* possible to predict the third element, since it follows the XOR rule.  But once the third element occurs, it is again impossible to predict the next element, since the next element is the start of the next sequence.  Only for the second element of a sequence is it possible to make a reasonable prediction about the next element.  And that's only if you (a) can remember far enough back; and (b) have learned the XOR rule.
 
@@ -718,3 +1014,11 @@ array2DF(item_mds) %>%
     scale_color_brewer(palette = "Paired") +
     labs(title = "Evolution of internal representations with learning", x = "Dimension 1", y = "Dimension 2", caption = "Visualization by multidimensional scaling")
 ```
+
+As we can see, the model learns to distinguish between nouns and verbs fairly quickly.  Same goes for subjects (cat, dog) and objects (door, rock).  Eventually, the individual items get differentiated, like we saw with the concepts at the beginning of the chapter.  The key difference is that the SRN has learned these concept representations by virtue of how they enable it to *predict* the next items in the sequence, not in terms of clearly labeled features.
+
+## Exercises
+
+1. Adapt the concept-feature learning model so that it operates "in reverse".  In other words, swap the `target` and `event` matrices.  The resulting model will thus learn to assign a concept name (oak, pine, etc.) to a set of features.  Leaving everything else the same, run the model and comment on the nature of the representations it learns within its hidden units and compare them to the representations learned by the model in the chapter.
+1. Try running the prototype-learning autoencoder model with different values of the `p_change` variable, leaving `n_hidden` set to 8.  See if you can find a value of `p_change` at which the model no longer shows any evidence of learning the two prototypes.  Comment on what sorts of representations the model has learned, if indeed it has learned any structure at all!
+1. Devise a learning situation that is relevant to your research and adapt one of the models from this chapter to apply it to that scenario.  You will need to think about how you want to represent the features of each learning event and what the "target" is for the learner (e.g., are they learning to categorize events or choose an action, are they an "autoencoder", are they learning to predict like an SRN?).  You will also need to explore different values for the number of hidden units in the model, the learning rate, as well as the number of epochs and the number of learning events per epoch.  In the end, describe the learning situation you devised and the settings required for your model to succeed in your learning task.  Describe the nature of the hidden-layer representations the model seems to have learned as well as the trajectory (over epochs) by which the model appears to have learned those trajectories (e.g., did some distinctions get learned earlier than others?).
