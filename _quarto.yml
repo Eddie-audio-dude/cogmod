@@ -5,7 +5,7 @@ project:
 book:
   title: "Computational Cognitive Models"
   author: "Gregory E. Cox"
-  date: "3/4/2025"
+  # date: "3/4/2025"
   chapters:
     - index.qmd
     - part: "Background"
@@ -26,6 +26,9 @@ book:
         - vector_reps.qmd
         - learning.qmd
         - backprop.qmd
+    - part: "Cognitive models at larger and smaller scales"
+      chapters:
+        - agent_based_models.qmd
     - references.qmd
 
 bibliography: references.bib

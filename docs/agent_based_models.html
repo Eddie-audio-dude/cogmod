@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.39">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>13&nbsp; Agent-Based Models – Computational Cognitive Models</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./backprop.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-03787a5611acd63027d79b3f02190e6e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./agent_based_models.html">Cognitive models at larger and smaller scales</a></li><li class="breadcrumb-item"><a href="./agent_based_models.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Agent-Based Models</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Computational Cognitive Models</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Background</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./r_coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Programming with R</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Modeling behavior</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./random_walk.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion_sim.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">From random walk to diffusion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion_fit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Fitting a diffusion model to data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model_comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./blast_example.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">A worked example</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./accumulator_models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Accumulator models of choice and response time</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Coupling behavior to structured representations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ebrw.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_reps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Distributed representations, similarity, and recognition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Associative Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./backprop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Learning useful representations</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Cognitive models at larger and smaller scales</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./agent_based_models.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Agent-Based Models</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#cultural-evolution" id="toc-cultural-evolution" class="nav-link active" data-scroll-target="#cultural-evolution"><span class="header-section-number">13.1</span> Cultural evolution</a></li>
+  <li><a href="#copying-your-neighbors" id="toc-copying-your-neighbors" class="nav-link" data-scroll-target="#copying-your-neighbors"><span class="header-section-number">13.2</span> Copying your neighbors</a>
+  <ul class="collapse">
+  <li><a href="#representing-a-population" id="toc-representing-a-population" class="nav-link" data-scroll-target="#representing-a-population"><span class="header-section-number">13.2.1</span> Representing a population</a></li>
+  <li><a href="#initializing-the-population" id="toc-initializing-the-population" class="nav-link" data-scroll-target="#initializing-the-population"><span class="header-section-number">13.2.2</span> Initializing the population</a></li>
+  <li><a href="#specifying-interaction-and-updating-processes" id="toc-specifying-interaction-and-updating-processes" class="nav-link" data-scroll-target="#specifying-interaction-and-updating-processes"><span class="header-section-number">13.2.3</span> Specifying interaction and updating processes</a></li>
+  <li><a href="#the-final-function" id="toc-the-final-function" class="nav-link" data-scroll-target="#the-final-function"><span class="header-section-number">13.2.4</span> The final function</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples"><span class="header-section-number">13.2.5</span> Examples</a></li>
+  </ul></li>
+  <li><a href="#more-complex-interactions" id="toc-more-complex-interactions" class="nav-link" data-scroll-target="#more-complex-interactions"><span class="header-section-number">13.3</span> More complex interactions</a>
+  <ul class="collapse">
+  <li><a href="#varying-probability-of-adopting-a-trait" id="toc-varying-probability-of-adopting-a-trait" class="nav-link" data-scroll-target="#varying-probability-of-adopting-a-trait"><span class="header-section-number">13.3.1</span> Varying probability of adopting a trait</a></li>
+  <li><a href="#multiple-demonstrators-and-conformity" id="toc-multiple-demonstrators-and-conformity" class="nav-link" data-scroll-target="#multiple-demonstrators-and-conformity"><span class="header-section-number">13.3.2</span> Multiple demonstrators and conformity</a></li>
+  <li><a href="#demonstrators-of-varying-status" id="toc-demonstrators-of-varying-status" class="nav-link" data-scroll-target="#demonstrators-of-varying-status"><span class="header-section-number">13.3.3</span> Demonstrators of varying status</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./agent_based_models.html">Cognitive models at larger and smaller scales</a></li><li class="breadcrumb-item"><a href="./agent_based_models.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Agent-Based Models</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Agent-Based Models</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The models we have built so far have been models of how individuals perform a task or learn a representation. The environments with which these models have been engaged—the trials in an experiment or the materials in a domain to be learned—were provided to the model. This mimics the typical laboratory scenario where an experimenter defines the goals and givens for a participant and the job of the participant is to figure out how to achieve the goal with what they are given.</p>
+<p>However, in many real-world settings, the environment that people engage in is itself comprised of other people! (Okay, experimenters are people too, but the interactions between experimenters and participants are, by design, tightly constrained.) Each person has some characteristics, shaped by their genetic heritage, development, culture, prior life experiences, etc., that ultimately inform what actions they will take at any given moment. Those actions—and their consequences—then become part of the environment for everyone else around them, providing them information that may get encoded in memory and used to guide their decisions. Those other people will then take their own actions, which will also be shaped by their own motivations, preferences, beliefs, knowledge, etc. In turn, those actions and their consequences contribute to the environment with which everyone interacts. As we have seen, building computational cognitive models even of single individuals in a tightly-constrained environment is far from trivial. Modeling an entire group of people mutually interacting with one another is thus a daunting task!</p>
+<p>Of course, intrepid scientists find a way. The field of <em>agent-based modeling</em> helps us to understand how the interactions between cognitively sophisticated individuals—called “agents”—produces phenomena at the level of entire groups, communities, and populations. Thus, agent-based modeling acts as a bridge between computational cognitive models of individuals and theories of groups.</p>
+<p>It will probably not be surprising to you that the inherent complexity of modeling groups of people means that the models for individual agents will tend to be much simpler than the individual-focused cognitive models we have built so far. In addition, agent-based models are primarily used for <em>simulation</em> purposes, to demonstrate the predictions of a theory, rather than for parameter estimation. This second property is due to a couple of factors: First, it is rarely possible to compute the likelihood (or other measure of goodness-of-fit) for agent-based models. Second, it is not always practical or sensible to define goodness-of-fit for many of the phenomena that agent-based models are designed to explain. When modeling individuals, we can rely on our ability to recruit many participants into a study and for each individual to engage in many trials of a task, thus allowing us identify systematic features of behavior that are the explanatory targets of our model. When modeling groups, unless they are very small, we cannot typically “replicate” the conditions under which the group is acting, making it difficult to quantify the degree to which groups systematically exhibit some quantifiable characteristic. Nonetheless, agent-based models are a powerful theoretical tool for understanding how <em>qualitative</em> group phenomena arise from interactions between individuals <span class="citation" data-cites="SmithConrey2007">(<a href="references.html#ref-SmithConrey2007" role="doc-biblioref">Smith &amp; Conrey, 2007</a>)</span>.</p>
+<p>The material in this chapter owes a lot to <a href="https://acerbialberto.com/IBM-cultevo/">this fantastic resource on agent-based modeling in R</a>. I encourage anyone interested to check it out!</p>
+<section id="cultural-evolution" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="cultural-evolution"><span class="header-section-number">13.1</span> Cultural evolution</h2>
+<p>The models below are focused on what can broadly be called <em>cultural evolution</em>, in that the models focus on the decisions by individuals to adopt (or not) a particular characteristic.</p>
+<p>In biological evolution, we would consider how traits encoded by genes do or do not get passed on from one generation to the next, depending on whether or not those traits were beneficial to the organism’s reproductive success in its environment. By building models that allow for different selection mechanisms, different mating assortments, and different forms of mutation, we can examine those choices influence how the traits of a population will change over many generations.</p>
+<p>Cultural evolution, on the other hand, does not require births and deaths to occur. Instead of a population changing as a function of organisms either surviving to reproduce or not, we will be modeling how populations change as a function of the choices made by the individual members of those populations. The kinds of choices we will consider could be concrete things like whether to support a political candidate, buy a product, use a service, etc. They could also represent more abstract choices, like the choice to like a particular style of music or a type of diet or a strategy for performing some task. To that last point, the choices made by the agents in our models need not be discrete—they may instead be choices to adjust a <em>parameter</em> with a particular meaning within the scope of the model.</p>
+<p>The outcome of each choice amounts to a decision by the agent about whether to adopt a certain <em>value</em> for a <em>trait</em>. The evidence that agents use for making these choices comes from their interactions with other members of the population. In all of the models below, we imagine that each agent interacts with one or more other agents in discrete <em>time-steps</em>. At the end of each time step, each agent decides what value to take for its trait.</p>
+<p>We will first explore models with discrete-valued traits and then models with continuous-valued traits. Conceptually, there is not much difference between these two types of traits, but there are both conceptual and technical differences in terms of how we model different mechanisms of social cognition with regard to these traits.</p>
+</section>
+<section id="copying-your-neighbors" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="copying-your-neighbors"><span class="header-section-number">13.2</span> Copying your neighbors</h2>
+<p>We will begin by constructing a very simple model of a population of agents interacting with one another. Each agent has a single trait that can take one of two values, A or B. In each time step, an agent picks at random another member of the population and adopts whatever value of the trait they have. We can think of this population as sort of like “myopic lemmings”. The point of this is not necessarily to be a realistic model of any interesting social process. But constructing this model will introduce us to the basic components of an agent-based model.</p>
+<section id="representing-a-population" class="level3" data-number="13.2.1">
+<h3 data-number="13.2.1" class="anchored" data-anchor-id="representing-a-population"><span class="header-section-number">13.2.1</span> Representing a population</h3>
+<p>To begin, we will need a data structure to store the trait values for each agent on each time step. Also, since this will be a <em>simulation</em> model, we will want to run the simulation several times to get a sense of the kinds of populations that are produced by each of the mechanisms we will explore. Thus, our data structure should have three dimensions: one to index each simulation, one to index each time-step, and one to index each agent in the population. Thus, a 3D <code>array</code> is called for, as illustrated below (where I also give the array and traits some handy names).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>n_pop <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>max_t <span class="ot">&lt;-</span> <span class="dv">100</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>n_traits <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>trait_names <span class="ot">&lt;-</span> LETTERS[<span class="dv">1</span><span class="sc">:</span>n_traits]</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>population <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                    <span class="at">dim =</span> <span class="fu">c</span>(n_sims, max_t, n_pop),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>                    <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"sim_index"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_sims,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>                                    <span class="st">"t"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>max_t,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                                    <span class="st">"member"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_pop)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="initializing-the-population" class="level3" data-number="13.2.2">
+<h3 data-number="13.2.2" class="anchored" data-anchor-id="initializing-the-population"><span class="header-section-number">13.2.2</span> Initializing the population</h3>
+<p>At the moment, the <code>population</code> array is full of <code>NA</code>s. We need to <em>initialize</em> the population by assigning trait values to each agent on the first time step. These initial values will be random. We will want the flexibility to specify the probability that any agent is initialized with each possible value of the trait. For example, we could use the variable specification <code>p0 &lt;- c(0.5, 0.5)</code> to specify that, in a model with 2 <code>n_traits</code>, each member of the initial population has an equal chance of adopting either value. This is illustrated in a more general form below which refers to the <code>n_traits</code> variable.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>p0 <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">1</span> <span class="sc">/</span> n_traits, n_traits)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># sim_index is a variable that indicates which simulation we are currently running</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>population[sim_index, <span class="dv">1</span>, ] <span class="ot">&lt;-</span> <span class="fu">sample</span>(trait_names, <span class="at">size =</span> n_pop, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> p0)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="specifying-interaction-and-updating-processes" class="level3" data-number="13.2.3">
+<h3 data-number="13.2.3" class="anchored" data-anchor-id="specifying-interaction-and-updating-processes"><span class="header-section-number">13.2.3</span> Specifying interaction and updating processes</h3>
+<p>For each agent-based model we build, we need to specify (a) how the agents interact; and (b) how those interactions result in adopting a potentially updated trait value on the next time-step. For our first model, these two processes are very simple, as illustrated in the code below. Note that the code is wrapped in a <code>for</code> loop so that these processes recur on each time-step.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>max_t) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># For each member of the population, sample a "demonstrator" at random</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    demonstrator <span class="ot">&lt;-</span> <span class="fu">sample</span>(n_pop, <span class="at">size =</span> n_pop, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Each population member at time `t` adopts the trait from their `demonstrator`</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># on the previous time-step `t - 1`</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    population[sim_index, t, ] <span class="ot">&lt;-</span> population[sim_index, t <span class="sc">-</span> <span class="dv">1</span>, demonstrator]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="the-final-function" class="level3" data-number="13.2.4">
+<h3 data-number="13.2.4" class="anchored" data-anchor-id="the-final-function"><span class="header-section-number">13.2.4</span> The final function</h3>
+<p>Finally, let’s put all the steps above into a function that we can call with different parameter values, as shown below. We will continue to add to this function and make alternate versions as we go. Note the use of the <code>array2DF</code> function at the end which converts our <code>population</code> array into a form that will be easier for us to visualize afterwards.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>discrete_trait_evolution <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n_pop =</span> <span class="dv">1000</span>, <span class="at">max_t =</span> <span class="dv">100</span>, <span class="at">n_sims =</span> <span class="dv">10</span>, <span class="at">n_traits =</span> <span class="dv">2</span>, <span class="at">p0 =</span> <span class="fu">rep</span>(<span class="dv">1</span> <span class="sc">/</span> n_traits, n_traits), <span class="at">trait_names =</span> LETTERS[<span class="dv">1</span><span class="sc">:</span>n_traits]) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    population <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">dim =</span> <span class="fu">c</span>(n_sims, max_t, n_pop),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"sim_index"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_sims,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"t"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>max_t,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"member"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_pop)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                        )</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (sim_index <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims) {</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        population[sim_index, <span class="dv">1</span>, ] <span class="ot">&lt;-</span> <span class="fu">sample</span>(trait_names, <span class="at">size =</span> n_pop, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> p0)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>max_t) {</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            demonstrator <span class="ot">&lt;-</span> <span class="fu">sample</span>(n_pop, <span class="at">size =</span> n_pop, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>            population[sim_index, t, ] <span class="ot">&lt;-</span> population[sim_index, t <span class="sc">-</span> <span class="dv">1</span>, demonstrator]</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="fu">as_tibble</span>(<span class="fu">array2DF</span>(population, <span class="at">responseName =</span> <span class="st">"trait"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(<span class="at">sim_index =</span> <span class="fu">as.numeric</span>(sim_index), <span class="at">t =</span> <span class="fu">as.numeric</span>(t), <span class="at">member =</span> <span class="fu">as.numeric</span>(member))</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="examples" class="level3" data-number="13.2.5">
+<h3 data-number="13.2.5" class="anchored" data-anchor-id="examples"><span class="header-section-number">13.2.5</span> Examples</h3>
+<p>The chunk of code below gives an example of running our <code>discrete_trait_evolution</code> function. After running the function, we create a <em>summary</em> data frame that, for each simulation run and each time-step, gives the proportion of the population with trait <code>"A"</code>. This summary is then used to plot how this proportion evolves over time as a result of the simple interaction/updating processes we specified in our model.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">discrete_trait_evolution</span>(<span class="at">max_t =</span> <span class="dv">1000</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sim_index, t) <span class="sc">%&gt;%</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">p_A =</span> <span class="fu">mean</span>(trait <span class="sc">==</span> <span class="st">"A"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'sim_index'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="sc">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p_A, <span class="at">color =</span> <span class="fu">factor</span>(sim_index))) <span class="sc">+</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> sim_index), <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_discreterainbow</span>() <span class="sc">+</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Proportion with trait A"</span>, <span class="at">color =</span> <span class="st">"Sim."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="agent_based_models_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Each colored line represents a different simulation and the thick black line is the mean over all 10 simulations. We can see that the proportion of the population with trait A evolves according to basically a random walk until, at some point, every agent in the population has the same trait, either A (proportion 1) or B (proportion 0). At that point, no more cultural evolution can occur because each agent will only ever copy another agent with the same trait.</p>
+<p>Just like when we used a random walk to model deliberation during decision making, if we initialize the population to be <em>biased</em> toward one trait or another, the population is more likely to evolve to a point where the initially more common trait becomes dominant. This is shown in the simulations below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">discrete_trait_evolution</span>(<span class="at">max_t =</span> <span class="dv">1000</span>, <span class="at">p0 =</span> <span class="fu">c</span>(<span class="fl">0.2</span>, <span class="fl">0.8</span>))</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sim_index, t) <span class="sc">%&gt;%</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">p_A =</span> <span class="fu">mean</span>(trait <span class="sc">==</span> <span class="st">"A"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'sim_index'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p_A, <span class="at">color =</span> <span class="fu">factor</span>(sim_index))) <span class="sc">+</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> sim_index), <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_discreterainbow</span>() <span class="sc">+</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Proportion with trait A"</span>, <span class="at">color =</span> <span class="st">"Sim."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="agent_based_models_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="more-complex-interactions" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="more-complex-interactions"><span class="header-section-number">13.3</span> More complex interactions</h2>
+<p>With the basic model framework established, we can flesh out the model with some more sophisticated mechanisms for interaction and updating. This will enable us to model more interesting kinds of processes that can lead to some more interesting kinds of phenomena.</p>
+<section id="varying-probability-of-adopting-a-trait" class="level3" data-number="13.3.1">
+<h3 data-number="13.3.1" class="anchored" data-anchor-id="varying-probability-of-adopting-a-trait"><span class="header-section-number">13.3.1</span> Varying probability of adopting a trait</h3>
+<p>The first thing we can try is to imagine that different trait values are more likely to be adopted than others. This might occur, for example, if the decision about whether to adopt the trait were based on its utility, ease, or some other reward. For example, if there may be two candidate strategies for performing a task—a slow and laborious method adopted by those with trait B and a faster and easier method adopted by those with trait A. If the agents can be assumed to be aware of this distinction, then an agent would be more likely to adopt a trait from a demonstrator with trait A than with trait B.</p>
+<p>The code below amends our earlier function to include a new argument, <code>p_adopt</code>. By default, this argument is set to <code>rep(1, n_traits)</code> which reproduces the model we just built where an agent <em>always</em> adopts whatever trait their demonstrator has. The key changes are labeled with comments below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>discrete_trait_evolution <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n_pop =</span> <span class="dv">1000</span>, <span class="at">max_t =</span> <span class="dv">100</span>, <span class="at">n_sims =</span> <span class="dv">10</span>, <span class="at">n_traits =</span> <span class="dv">2</span>, <span class="at">p0 =</span> <span class="fu">rep</span>(<span class="dv">1</span> <span class="sc">/</span> n_traits, n_traits), <span class="at">trait_names =</span> LETTERS[<span class="dv">1</span><span class="sc">:</span>n_traits], <span class="at">p_adopt =</span> <span class="fu">rep</span>(<span class="dv">1</span>, n_traits)) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    population <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">dim =</span> <span class="fu">c</span>(n_sims, max_t, n_pop),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"sim_index"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_sims,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"t"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>max_t,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"member"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_pop)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                        )</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Make sure `p_adopt` is a named vector so we can use those names later as indices</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(p_adopt) <span class="ot">&lt;-</span> trait_names</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (sim_index <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims) {</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        population[sim_index, <span class="dv">1</span>, ] <span class="ot">&lt;-</span> <span class="fu">sample</span>(trait_names, <span class="at">size =</span> n_pop, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> p0)</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>max_t) {</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>            demonstrator <span class="ot">&lt;-</span> <span class="fu">sample</span>(n_pop, <span class="at">size =</span> n_pop, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>            demonstrator_trait <span class="ot">&lt;-</span> population[sim_index, t <span class="sc">-</span> <span class="dv">1</span>, demonstrator]</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>            <span class="co"># For each member of the population, we use the `runif` trick to</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>            <span class="co"># decide whether they should adopt the demonstrators trait or keep</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>            <span class="co"># their old one.</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>            population[sim_index, t, ] <span class="ot">&lt;-</span> <span class="fu">if_else</span>(</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>                <span class="co"># This condition is TRUE with probability `p_adopt[demonstrator_trait]`</span></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>                <span class="fu">runif</span>(<span class="at">n =</span> n_pop) <span class="sc">&lt;</span> p_adopt[demonstrator_trait],</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>                <span class="co"># If true, adopt the demonstrator's trait</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>                population[sim_index, t <span class="sc">-</span> <span class="dv">1</span>, demonstrator],</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>                <span class="co"># Else, keep the old trait</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>                population[sim_index, t <span class="sc">-</span> <span class="dv">1</span>, ]</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>        <span class="fu">as_tibble</span>(<span class="fu">array2DF</span>(population, <span class="at">responseName =</span> <span class="st">"trait"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(<span class="at">sim_index =</span> <span class="fu">as.numeric</span>(sim_index), <span class="at">t =</span> <span class="fu">as.numeric</span>(t), <span class="at">member =</span> <span class="fu">as.numeric</span>(member))</span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Let’s see what happens if people have a higher chance of adopting trait A than trait B. Specifically, we will set <code>p_adopt = c(0.7, 0.5)</code> so the probability of adopting trait A is 0.7 and is 0.5 for trait B. Note that these numbers <em>don’t</em> have to add up to one!</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">discrete_trait_evolution</span>(<span class="at">max_t =</span> <span class="dv">50</span>, <span class="at">p_adopt =</span> <span class="fu">c</span>(<span class="fl">0.7</span>, <span class="fl">0.5</span>))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sim_index, t) <span class="sc">%&gt;%</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">p_A =</span> <span class="fu">mean</span>(trait <span class="sc">==</span> <span class="st">"A"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'sim_index'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p_A, <span class="at">color =</span> <span class="fu">factor</span>(sim_index))) <span class="sc">+</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> sim_index), <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_discreterainbow</span>() <span class="sc">+</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Proportion with trait A"</span>, <span class="at">color =</span> <span class="st">"Sim."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="agent_based_models_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As we can see above, the population quickly evolves so that the “better” trait (A) dominates. This is true even if trait A is rare in the initial population, as shown below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">discrete_trait_evolution</span>(<span class="at">max_t =</span> <span class="dv">50</span>, <span class="at">p_adopt =</span> <span class="fu">c</span>(<span class="fl">0.7</span>, <span class="fl">0.5</span>), <span class="at">p0 =</span> <span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sim_index, t) <span class="sc">%&gt;%</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">p_A =</span> <span class="fu">mean</span>(trait <span class="sc">==</span> <span class="st">"A"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'sim_index'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p_A, <span class="at">color =</span> <span class="fu">factor</span>(sim_index))) <span class="sc">+</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> sim_index), <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_discreterainbow</span>() <span class="sc">+</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Proportion with trait A"</span>, <span class="at">color =</span> <span class="st">"Sim."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="agent_based_models_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="multiple-demonstrators-and-conformity" class="level3" data-number="13.3.2">
+<h3 data-number="13.3.2" class="anchored" data-anchor-id="multiple-demonstrators-and-conformity"><span class="header-section-number">13.3.2</span> Multiple demonstrators and conformity</h3>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>discrete_trait_evolution <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n_pop =</span> <span class="dv">1000</span>, <span class="at">max_t =</span> <span class="dv">100</span>, <span class="at">n_sims =</span> <span class="dv">10</span>, <span class="at">n_traits =</span> <span class="dv">2</span>, <span class="at">p0 =</span> <span class="fu">rep</span>(<span class="dv">1</span> <span class="sc">/</span> n_traits, n_traits), <span class="at">trait_names =</span> LETTERS[<span class="dv">1</span><span class="sc">:</span>n_traits], <span class="at">p_adopt =</span> <span class="fu">rep</span>(<span class="dv">1</span>, n_traits), <span class="at">n_demonstrators =</span> <span class="dv">3</span>, <span class="at">conformity =</span> <span class="dv">1</span>) {</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    population <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">dim =</span> <span class="fu">c</span>(n_sims, max_t, n_pop),</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"sim_index"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_sims,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"t"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>max_t,</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"member"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_pop)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>                        )</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(p_adopt) <span class="ot">&lt;-</span> trait_names</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    p_adopt_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(p_adopt, <span class="at">nrow =</span> n_pop, <span class="at">ncol =</span> n_traits, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (sim_index <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims) {</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>        population[sim_index, <span class="dv">1</span>, ] <span class="ot">&lt;-</span> <span class="fu">sample</span>(trait_names, <span class="at">size =</span> n_pop, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> p0)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>max_t) {</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>            demonstrators <span class="ot">&lt;-</span> <span class="fu">sample</span>(n_pop, <span class="at">size =</span> n_pop <span class="sc">*</span> n_demonstrators, <span class="at">replace =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>            demonstrator_trait <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>                population[sim_index, t <span class="sc">-</span> <span class="dv">1</span>, demonstrators],</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>                <span class="at">nrow =</span> n_pop, <span class="at">ncol =</span> n_demonstrators</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>            demo_counts <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">apply</span>(demonstrator_trait, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> <span class="cf">function</span>(traits) <span class="fu">table</span>(<span class="fu">factor</span>(traits, <span class="at">levels =</span> trait_names)))) <span class="sc">*</span> p_adopt_mat</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>            p_demo <span class="ot">&lt;-</span> demo_counts<span class="sc">^</span>conformity <span class="sc">/</span> <span class="fu">rowSums</span>(demo_counts<span class="sc">^</span>conformity)</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>            population[sim_index, t, ] <span class="ot">&lt;-</span> <span class="fu">apply</span>(p_demo, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> <span class="cf">function</span>(p) <span class="fu">sample</span>(trait_names, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> p))</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>        <span class="fu">as_tibble</span>(<span class="fu">array2DF</span>(population, <span class="at">responseName =</span> <span class="st">"trait"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(<span class="at">sim_index =</span> <span class="fu">as.numeric</span>(sim_index), <span class="at">t =</span> <span class="fu">as.numeric</span>(t), <span class="at">member =</span> <span class="fu">as.numeric</span>(member))</span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>When the <code>conformity</code> parameter is set to 1, then we just replicate the first model we built. In that case, the probability of adopting a trait is directly proportional to its prevalence. This unbiased meandering is shown in the simulations below.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">discrete_trait_evolution</span>(<span class="at">max_t =</span> <span class="dv">50</span>, <span class="at">n_demonstrators =</span> <span class="dv">3</span>, <span class="at">conformity =</span> <span class="dv">1</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sim_index, t) <span class="sc">%&gt;%</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">p_A =</span> <span class="fu">mean</span>(trait <span class="sc">==</span> <span class="st">"A"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'sim_index'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="sc">%&gt;%</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p_A, <span class="at">color =</span> <span class="fu">factor</span>(sim_index))) <span class="sc">+</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> sim_index), <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_discreterainbow</span>() <span class="sc">+</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Proportion with trait A"</span>, <span class="at">color =</span> <span class="st">"Sim."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="agent_based_models_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>On the other hand, when <code>conformity</code> is greater than one, the population tends to evolve to have one dominant trait, but it is effectively random which trait wins out each time, as shown below.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">discrete_trait_evolution</span>(<span class="at">max_t =</span> <span class="dv">50</span>, <span class="at">n_demonstrators =</span> <span class="dv">3</span>, <span class="at">conformity =</span> <span class="dv">2</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sim_index, t) <span class="sc">%&gt;%</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">p_A =</span> <span class="fu">mean</span>(trait <span class="sc">==</span> <span class="st">"A"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'sim_index'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="sc">%&gt;%</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p_A, <span class="at">color =</span> <span class="fu">factor</span>(sim_index))) <span class="sc">+</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> sim_index), <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_discreterainbow</span>() <span class="sc">+</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Proportion with trait A"</span>, <span class="at">color =</span> <span class="st">"Sim."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="agent_based_models_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Whichever trait manages to become more common will then tend to be adopted more, resulting in a “rich-get-richer” feedback cycle. These dynamics are even more apparent if we bias the initial population so that one trait tends to be more common than the other, as illustrated below.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">discrete_trait_evolution</span>(<span class="at">max_t =</span> <span class="dv">50</span>, <span class="at">n_demonstrators =</span> <span class="dv">3</span>, <span class="at">conformity =</span> <span class="dv">2</span>, <span class="at">p0 =</span> <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">0.6</span>))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sim_index, t) <span class="sc">%&gt;%</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">p_A =</span> <span class="fu">mean</span>(trait <span class="sc">==</span> <span class="st">"A"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'sim_index'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>sim_summary <span class="sc">%&gt;%</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p_A, <span class="at">color =</span> <span class="fu">factor</span>(sim_index))) <span class="sc">+</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">group =</span> sim_index), <span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>, <span class="at">linewidth =</span> <span class="fl">1.5</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_discreterainbow</span>() <span class="sc">+</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Proportion with trait A"</span>, <span class="at">color =</span> <span class="st">"Sim."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="agent_based_models_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="demonstrators-of-varying-status" class="level3" data-number="13.3.3">
+<h3 data-number="13.3.3" class="anchored" data-anchor-id="demonstrators-of-varying-status"><span class="header-section-number">13.3.3</span> Demonstrators of varying status</h3>
+<p>In the models we’ve built so far, we’ve assumed that every member of the population has an equal chance of being picked as one of the demonstrators picked by an agent. Often, though, it would be better to think that demonstrators are selected on the basis of some characteristic that makes them more “prominent” than others. For example, some agents might be more sociable, interacting with more agents. Or some agents may have more resources to send messages to other agents (e.g., if someone is a popular influencer). Or some agents might be more successful or attractive than others, causing other agents to pay more attention to them. The point is that some agents may be more “prominent” than others, though the reason why will depend on the particular scenario we are modeling.</p>
+<p>For the purposes of our model, we will now add a property to each agent called <strong>status</strong>. This will be a number between zero and one that represents the <em>relative</em> likelihood that an agent gets picked as a demonstrator on each time-step. There are many other ways we could operationalize this construct, of course. For example, we could treat status as discrete (e.g., high vs.&nbsp;low status) or we could treat status as unbounded rather than capped at one. The approach here is just one option!</p>
+<section id="representing-status" class="level4" data-number="13.3.3.1">
+<h4 data-number="13.3.3.1" class="anchored" data-anchor-id="representing-status"><span class="header-section-number">13.3.3.1</span> Representing status</h4>
+<p>To model varying status, we will use a second array to keep track of the status of each agent on each time-step of each simulation run. This array has exactly the same structure as the <code>population</code> array we’ve been using so far to keep track of each agent’s trait value, as shown below:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>status <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>,</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">dim =</span> <span class="fu">c</span>(n_sims, max_t, n_pop),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"sim_index"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_sims,</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"t"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>max_t,</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"member"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_pop)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>                )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>In our initial set of simulations, we will assume that each agent’s status is fixed over time, so technically the above is “overkill”. However, later on we will look at models that allow status to vary over time, so adopting this “over-powered” approach saves us some work down the line.</p>
+</section>
+<section id="initializing-status" class="level4" data-number="13.3.3.2">
+<h4 data-number="13.3.3.2" class="anchored" data-anchor-id="initializing-status"><span class="header-section-number">13.3.3.2</span> Initializing status</h4>
+<p>There are many ways we could assign initial status values to each agent, but we take the following approach. We will introduce a parameter <code>mean_init_status</code> that varies between 0 and 1. We will use this parameter to define the parameters of a Beta distribution from which we will sample the initial status values, as shown in the code below which will appear at the beginning of each simulation run. We also do a correction to ensure that there is at least one agent with the maximum status value of 1, so that we don’t accidentally have simulations where all agents have low status values.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># First, sample initial status values from Beta distribution</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>status[sim_index, <span class="dv">1</span>, ] <span class="ot">&lt;-</span> <span class="fu">rbeta</span>(<span class="at">n =</span> n_pop, <span class="at">shape1 =</span> mean_init_status, <span class="at">shape2 =</span> <span class="dv">1</span> <span class="sc">-</span> mean_init_status)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Then divide by the maximum sampled value so that there is at least one agent with a status of 1</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>status[sim_index, <span class="dv">1</span>, ] <span class="ot">&lt;-</span> status[sim_index, <span class="dv">1</span>, ] <span class="sc">/</span> <span class="fu">max</span>(status[sim_index, <span class="dv">1</span>, ])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The plot below shows how the <code>mean_init_status</code> parameter affects the distribution of status across the population. Note that there are always modes at 0 and 1, so we will expect so find “clusters” of high and low status agents as well as a smattering of agents with moderate status between 0 and 1. When <code>mean_init_status</code> is less than 0.5, more agents will fall on the low end than the high end, modeling a situation where there are comparatively few high status agents. The opposite occurs when <code>mean_init_status</code> is greater than 0.5.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">expand_grid</span>(<span class="at">status =</span> <span class="fu">seq</span>(<span class="fl">0.01</span>, <span class="fl">0.99</span>, <span class="at">length.out =</span> <span class="dv">101</span>), <span class="at">mean_init_status =</span> <span class="fu">seq</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="at">length.out =</span> <span class="dv">5</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">d =</span> <span class="fu">dbeta</span>(status, mean_init_status, <span class="dv">1</span> <span class="sc">-</span> mean_init_status)) <span class="sc">%&gt;%</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> status, <span class="at">y =</span> d, <span class="at">color =</span> mean_init_status, <span class="at">group =</span> mean_init_status)) <span class="sc">+</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Status"</span>, <span class="at">y =</span> <span class="st">"Density"</span>, <span class="at">color =</span> <span class="st">"Mean initial</span><span class="sc">\n</span><span class="st">status"</span>, <span class="at">title =</span> <span class="st">"Distribution of initial status across population"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="agent_based_models_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Finally, if we set <code>mean_init_status</code> to 1, the resulting distribution is a “spike” at 1. In that circumstance, all agents will get a status of 1, effectively eliminating any effect of status.</p>
+</section>
+<section id="examples-1" class="level4" data-number="13.3.3.3">
+<h4 data-number="13.3.3.3" class="anchored" data-anchor-id="examples-1"><span class="header-section-number">13.3.3.3</span> Examples</h4>
+<p>The code below is our updated simulation function. The role of an agent’s status is indicated by the comment, where <code>status[sim_index, t - 1, ]</code> is used to define the <code>prob</code>ability with which an agent is <code>sample</code>d as a demonstrator. Note that the <code>sample</code> function automatically normalizes the <code>prob</code> argument to sum to one, so we don’t need to do that ourselves.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>discrete_trait_evolution <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">n_pop =</span> <span class="dv">1000</span>, <span class="at">max_t =</span> <span class="dv">100</span>, <span class="at">n_sims =</span> <span class="dv">10</span>, <span class="at">n_traits =</span> <span class="dv">2</span>, <span class="at">p0 =</span> <span class="fu">rep</span>(<span class="dv">1</span> <span class="sc">/</span> n_traits, n_traits), <span class="at">trait_names =</span> LETTERS[<span class="dv">1</span><span class="sc">:</span>n_traits], <span class="at">p_adopt =</span> <span class="fu">rep</span>(<span class="dv">1</span>, n_traits), <span class="at">n_demonstrators =</span> <span class="dv">1</span>, <span class="at">conformity =</span> <span class="dv">1</span>, <span class="at">mean_init_status =</span> <span class="dv">1</span>) {</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    population <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">dim =</span> <span class="fu">c</span>(n_sims, max_t, n_pop),</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"sim_index"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_sims,</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"t"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>max_t,</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"member"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_pop)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>                        )</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    status <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>,</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>                        <span class="at">dim =</span> <span class="fu">c</span>(n_sims, max_t, n_pop),</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>                        <span class="at">dimnames =</span> <span class="fu">list</span>(<span class="st">"sim_index"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_sims,</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"t"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>max_t,</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"member"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>n_pop)</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>                        )</span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(p_adopt) <span class="ot">&lt;-</span> trait_names</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>    p_adopt_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(p_adopt, <span class="at">nrow =</span> n_pop, <span class="at">ncol =</span> n_traits, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (sim_index <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_sims) {</span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>        population[sim_index, <span class="dv">1</span>, ] <span class="ot">&lt;-</span> <span class="fu">sample</span>(trait_names, <span class="at">size =</span> n_pop, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> p0)</span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>        status[sim_index, <span class="dv">1</span>, ] <span class="ot">&lt;-</span> <span class="fu">rbeta</span>(<span class="at">n =</span> n_pop, <span class="at">shape1 =</span> mean_init_status, <span class="at">shape2 =</span> <span class="dv">1</span> <span class="sc">-</span> mean_init_status)</span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>        status[sim_index, <span class="dv">1</span>, ] <span class="ot">&lt;-</span> status[sim_index, <span class="dv">1</span>, ] <span class="sc">/</span> <span class="fu">max</span>(status[sim_index, <span class="dv">1</span>, ])</span>
+<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>max_t) {</span>
+<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Probability of sampling is proportional to status</span></span>
+<span id="cb31-28"><a href="#cb31-28" aria-hidden="true" tabindex="-1"></a>            demonstrators <span class="ot">&lt;-</span> <span class="fu">sample</span>(n_pop, <span class="at">size =</span> n_pop <span class="sc">*</span> n_demonstrators, <span class="at">replace =</span> <span class="cn">TRUE</span>, <span class="at">prob =</span> status[sim_index, t <span class="sc">-</span> <span class="dv">1</span>, ])</span>
+<span id="cb31-29"><a href="#cb31-29" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb31-30"><a href="#cb31-30" aria-hidden="true" tabindex="-1"></a>            demonstrator_trait <span class="ot">&lt;-</span> <span class="fu">matrix</span>(</span>
+<span id="cb31-31"><a href="#cb31-31" aria-hidden="true" tabindex="-1"></a>                population[sim_index, t <span class="sc">-</span> <span class="dv">1</span>, demonstrators],</span>
+<span id="cb31-32"><a href="#cb31-32" aria-hidden="true" tabindex="-1"></a>                <span class="at">nrow =</span> n_pop, <span class="at">ncol =</span> n_demonstrators</span>
+<span id="cb31-33"><a href="#cb31-33" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb31-34"><a href="#cb31-34" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb31-35"><a href="#cb31-35" aria-hidden="true" tabindex="-1"></a>            demo_counts <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">apply</span>(demonstrator_trait, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> <span class="cf">function</span>(traits) <span class="fu">table</span>(<span class="fu">factor</span>(traits, <span class="at">levels =</span> trait_names)))) <span class="sc">*</span> p_adopt_mat</span>
+<span id="cb31-36"><a href="#cb31-36" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb31-37"><a href="#cb31-37" aria-hidden="true" tabindex="-1"></a>            p_demo <span class="ot">&lt;-</span> demo_counts<span class="sc">^</span>conformity <span class="sc">/</span> <span class="fu">rowSums</span>(demo_counts<span class="sc">^</span>conformity)</span>
+<span id="cb31-38"><a href="#cb31-38" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb31-39"><a href="#cb31-39" aria-hidden="true" tabindex="-1"></a>            population[sim_index, t, ] <span class="ot">&lt;-</span> <span class="fu">apply</span>(p_demo, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="at">FUN =</span> <span class="cf">function</span>(p) <span class="fu">sample</span>(trait_names, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> p))</span>
+<span id="cb31-40"><a href="#cb31-40" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb31-41"><a href="#cb31-41" aria-hidden="true" tabindex="-1"></a>            status[sim_index, t, ] <span class="ot">&lt;-</span> status[sim_index, t <span class="sc">-</span> <span class="dv">1</span>, ]</span>
+<span id="cb31-42"><a href="#cb31-42" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb31-43"><a href="#cb31-43" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb31-44"><a href="#cb31-44" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb31-45"><a href="#cb31-45" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(</span>
+<span id="cb31-46"><a href="#cb31-46" aria-hidden="true" tabindex="-1"></a>        <span class="fu">full_join</span>(</span>
+<span id="cb31-47"><a href="#cb31-47" aria-hidden="true" tabindex="-1"></a>            <span class="fu">as_tibble</span>(<span class="fu">array2DF</span>(population, <span class="at">responseName =</span> <span class="st">"trait"</span>)),</span>
+<span id="cb31-48"><a href="#cb31-48" aria-hidden="true" tabindex="-1"></a>            <span class="fu">as_tibble</span>(<span class="fu">array2DF</span>(status, <span class="at">responseName =</span> <span class="st">"status"</span>)),</span>
+<span id="cb31-49"><a href="#cb31-49" aria-hidden="true" tabindex="-1"></a>            <span class="at">by =</span> <span class="fu">join_by</span>(sim_index, t, member)</span>
+<span id="cb31-50"><a href="#cb31-50" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">%&gt;%</span></span>
+<span id="cb31-51"><a href="#cb31-51" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(<span class="at">sim_index =</span> <span class="fu">as.numeric</span>(sim_index), <span class="at">t =</span> <span class="fu">as.numeric</span>(t), <span class="at">member =</span> <span class="fu">as.numeric</span>(member))</span>
+<span id="cb31-52"><a href="#cb31-52" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb31-53"><a href="#cb31-53" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now let’s see what happens to a population when people tend to adopt the traits of high-status agents more than low-status agents. In the following simulation, we assume only a single demonstrator per agent and equal base rates for each of two traits in the initial population. To produce a large disparity in status, we set <code>mean_init_status</code> to 0.05, so that most agents have low status and only a few have high status.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">discrete_trait_evolution</span>(<span class="at">n_pop =</span> <span class="dv">1000</span>, <span class="at">max_t =</span> <span class="dv">200</span>, <span class="at">mean_init_status =</span> <span class="fl">0.05</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>trait_summary <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sim_index, t) <span class="sc">%&gt;%</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">p_A =</span> <span class="fu">mean</span>(trait <span class="sc">==</span> <span class="st">"A"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'sim_index'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>p_plot <span class="ot">&lt;-</span> trait_summary <span class="sc">%&gt;%</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p_A, <span class="at">color =</span> <span class="fu">factor</span>(sim_index))) <span class="sc">+</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>(<span class="at">linewidth =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_summary</span>(<span class="at">fun =</span> mean, <span class="at">geom =</span> <span class="st">"line"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_discreterainbow</span>() <span class="sc">+</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylim</span>(<span class="dv">0</span>, <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Proportion with trait A"</span>, <span class="at">color =</span> <span class="st">"Sim."</span>)</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>init_plot <span class="ot">&lt;-</span> sim <span class="sc">%&gt;%</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(t <span class="sc">==</span> <span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(sim_index, trait) <span class="sc">%&gt;%</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_status =</span> <span class="fu">mean</span>(status)) <span class="sc">%&gt;%</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(sim_index), <span class="at">y =</span> mean_status, <span class="at">color =</span> <span class="fu">factor</span>(sim_index), <span class="at">shape =</span> trait)) <span class="sc">+</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">fill =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_discreterainbow</span>(<span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_shape_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"A"</span> <span class="ot">=</span> <span class="dv">19</span>, <span class="st">"B"</span> <span class="ot">=</span> <span class="dv">21</span>)) <span class="sc">+</span></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Simulation"</span>, <span class="at">y =</span> <span class="st">"Mean status"</span>, <span class="at">color =</span> <span class="st">"Sim."</span>, <span class="at">shape =</span> <span class="st">"Trait"</span>, <span class="at">subtitle =</span> <span class="st">"Mean status as a function of initial trait"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'sim_index'. You can override using the
+`.groups` argument.</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(p_plot <span class="sc">+</span> init_plot <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">widths =</span> <span class="fu">c</span>(<span class="fl">1.5</span>, <span class="dv">1</span>), <span class="at">guides =</span> <span class="st">"collect"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="agent_based_models_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As you can see, we’ve made two plots to visualize our results for reasons that will become clear shortly. The left plot shows that, as in the first set of simulations we ran, the population will tend to evolve until one trait becomes dominant. The right plot shows the mean status among agents grouped by their <em>initial</em> trait values. The right plot helps explain which of the two traits eventually becomes dominant. If one trait is more closely associated with high-status individuals at the beginning of the simulation, then that trait is the one that is most likely to dominate. This is because agents will tend to emulate high-status agents.</p>
+<!-- ## Continuous-valued traits -->
+<!-- As noted earlier, we can also build agent-based models where the agents' traits take *continuous* values instead of discrete values.  Continuous traits might represent the degree of belief in a theory or cultural tenet, degree of preference for a political candidate or work of art, or even a parameter in a cognitive model. -->
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
+<!-- continuous_transmission <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, demonstrator_influence = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1) { -->
+<!--     population <- array(NA, -->
+<!--                         dim = c(n_sims, max_t, n_pop), -->
+<!--                         dimnames = list("sim_index" = 1:n_sims, -->
+<!--                                         "t" = 1:max_t, -->
+<!--                                         "member" = 1:n_pop) -->
+<!--                         ) -->
+<!--     status <- array(NA, -->
+<!--                         dim = c(n_sims, max_t, n_pop), -->
+<!--                         dimnames = list("sim_index" = 1:n_sims, -->
+<!--                                         "t" = 1:max_t, -->
+<!--                                         "member" = 1:n_pop) -->
+<!--                         ) -->
+<!--     for (sim_index in 1:n_sims) { -->
+<!--         population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd) -->
+<!--         status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status) -->
+<!--         status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ]) -->
+<!--         for (t in 2:max_t) { -->
+<!--             demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ]) -->
+<!--             demonstrator_trait <- matrix( -->
+<!--                 population[sim_index, t - 1, demonstrators], -->
+<!--                 nrow = n_pop, ncol = n_demonstrators -->
+<!--             ) -->
+<!--             demo_weight <- 1 / ((demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
+<!--             demo_weighted_avg <- rowSums(demonstrator_trait * demo_weight) / rowSums(demo_weight) -->
+<!--             population[sim_index, t, ] <- demonstrator_influence * demo_weighted_avg + (1 - demonstrator_influence) * population[sim_index, t - 1, ] -->
+<!--             status[sim_index, t, ] <- status[sim_index, t - 1, ] -->
+<!--         } -->
+<!--     } -->
+<!--     return( -->
+<!--         full_join( -->
+<!--             as_tibble(array2DF(population, responseName = "trait")), -->
+<!--             as_tibble(array2DF(status, responseName = "status")), -->
+<!--             by = join_by(sim_index, t, member) -->
+<!--         ) %>% -->
+<!--             mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member)) -->
+<!--     ) -->
+<!-- } -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- sim <- continuous_transmission(n_pop = 1000, max_t = 200) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- sim <- continuous_transmission(n_pop = 1000, max_t = 200, mean_init_status = 0.1) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- sim %>% -->
+<!--     filter(t == 1) %>% -->
+<!--     group_by(sim_index) %>% -->
+<!--     summarize(weighted_mean_trait = sum(trait * status) / sum(status)) %>% -->
+<!--     ggplot(aes(x = factor(sim_index), y = weighted_mean_trait, color = factor(sim_index))) + -->
+<!--     geom_point() + -->
+<!--     scale_color_discreterainbow(guide = "none") + -->
+<!--     labs(x = "Simulation index", y = "Status-weighted mean initial trait value") -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- sim <- continuous_transmission(n_pop = 1000, max_t = 100, n_demonstrators = 3, conformity = 1) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- ``` -->
+<!-- ## Popularity of the fittest -->
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
+<!-- continuous_transmission <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, demonstrator_influence = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1, ideal_trait_value = NA) { -->
+<!--     population <- array(NA, -->
+<!--                         dim = c(n_sims, max_t, n_pop), -->
+<!--                         dimnames = list("sim_index" = 1:n_sims, -->
+<!--                                         "t" = 1:max_t, -->
+<!--                                         "member" = 1:n_pop) -->
+<!--                         ) -->
+<!--     status <- array(NA, -->
+<!--                         dim = c(n_sims, max_t, n_pop), -->
+<!--                         dimnames = list("sim_index" = 1:n_sims, -->
+<!--                                         "t" = 1:max_t, -->
+<!--                                         "member" = 1:n_pop) -->
+<!--                         ) -->
+<!--     for (sim_index in 1:n_sims) { -->
+<!--         population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd) -->
+<!--         if (is.na(ideal_trait_value)) { -->
+<!--             status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status) -->
+<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ]) -->
+<!--         } else { -->
+<!--             status[sim_index, 1, ] <- 1 / ((population[sim_index, 1, ] - ideal_trait_value)^2 + 1E-12) -->
+<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / sum(status[sim_index, 1, ]) -->
+<!--         } -->
+<!--         for (t in 2:max_t) { -->
+<!--             demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ]) -->
+<!--             demonstrator_trait <- matrix( -->
+<!--                 population[sim_index, t - 1, demonstrators], -->
+<!--                 nrow = n_pop, ncol = n_demonstrators -->
+<!--             ) -->
+<!--             demo_weight <- 1 / ((demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
+<!--             demo_weighted_avg <- rowSums(demonstrator_trait * demo_weight) / rowSums(demo_weight) -->
+<!--             population[sim_index, t, ] <- demonstrator_influence * demo_weighted_avg + (1 - demonstrator_influence) * population[sim_index, t - 1, ] -->
+<!--             if (is.na(ideal_trait_value)) { -->
+<!--                 status[sim_index, t, ] <- status[sim_index, t - 1, ] -->
+<!--             } else { -->
+<!--                 status[sim_index, t, ] <- 1 / ((population[sim_index, t, ] - ideal_trait_value)^2 + 1E-12) -->
+<!--                 status[sim_index, t, ] <- status[sim_index, t, ] / sum(status[sim_index, t, ]) -->
+<!--             } -->
+<!--         } -->
+<!--     } -->
+<!--     return( -->
+<!--         full_join( -->
+<!--             as_tibble(array2DF(population, responseName = "trait")), -->
+<!--             as_tibble(array2DF(status, responseName = "status")), -->
+<!--             by = join_by(sim_index, t, member) -->
+<!--         ) %>% -->
+<!--             mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member)) -->
+<!--     ) -->
+<!-- } -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- sim <- continuous_transmission(n_pop = 1000, max_t = 100, ideal_trait_value = 4) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- ``` -->
+<!-- ### Innovation -->
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
+<!-- continuous_transmission <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, demonstrator_influence = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1, ideal_trait_value = NA, innovation = 0) { -->
+<!--     population <- array(NA, -->
+<!--                         dim = c(n_sims, max_t, n_pop), -->
+<!--                         dimnames = list("sim_index" = 1:n_sims, -->
+<!--                                         "t" = 1:max_t, -->
+<!--                                         "member" = 1:n_pop) -->
+<!--                         ) -->
+<!--     status <- array(NA, -->
+<!--                         dim = c(n_sims, max_t, n_pop), -->
+<!--                         dimnames = list("sim_index" = 1:n_sims, -->
+<!--                                         "t" = 1:max_t, -->
+<!--                                         "member" = 1:n_pop) -->
+<!--                         ) -->
+<!--     for (sim_index in 1:n_sims) { -->
+<!--         population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd) -->
+<!--         if (is.na(ideal_trait_value)) { -->
+<!--             status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status) -->
+<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ]) -->
+<!--         } else { -->
+<!--             status[sim_index, 1, ] <- 1 / ((population[sim_index, 1, ] - ideal_trait_value)^2 + 1E-12) -->
+<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / sum(status[sim_index, 1, ]) -->
+<!--         } -->
+<!--         for (t in 2:max_t) { -->
+<!--             demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ]) -->
+<!--             demonstrator_trait <- matrix( -->
+<!--                 population[sim_index, t - 1, demonstrators], -->
+<!--                 nrow = n_pop, ncol = n_demonstrators -->
+<!--             ) -->
+<!--             demo_weight <- 1 / ((demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
+<!--             demo_weighted_avg <- rowSums(demonstrator_trait * demo_weight) / rowSums(demo_weight) -->
+<!--             population[sim_index, t, ] <- demonstrator_influence * demo_weighted_avg + (1 - demonstrator_influence) * population[sim_index, t - 1, ] + rnorm(n = n_pop, mean = 0, sd = innovation) -->
+<!--             if (is.na(ideal_trait_value)) { -->
+<!--                 status[sim_index, t, ] <- status[sim_index, t - 1, ] -->
+<!--             } else { -->
+<!--                 status[sim_index, t, ] <- 1 / ((population[sim_index, t, ] - ideal_trait_value)^2 + 1E-12) -->
+<!--                 status[sim_index, t, ] <- status[sim_index, t, ] / sum(status[sim_index, t, ]) -->
+<!--             } -->
+<!--         } -->
+<!--     } -->
+<!--     return( -->
+<!--         full_join( -->
+<!--             as_tibble(array2DF(population, responseName = "trait")), -->
+<!--             as_tibble(array2DF(status, responseName = "status")), -->
+<!--             by = join_by(sim_index, t, member) -->
+<!--         ) %>% -->
+<!--             mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member)) -->
+<!--     ) -->
+<!-- } -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- sim <- continuous_transmission(n_pop = 1000, max_t = 50, ideal_trait_value = 4, innovation = 0.1) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- ``` -->
+<!-- ## Emergence of belief polarization -->
+<!-- Agents are more strongly influenced by demonstrators who have similar traits and can be repelled by demonstrators with sufficiently dissimilar traits. -->
+<!-- ```{r} -->
+<!-- #| code-fold: show -->
+<!-- polarization_model <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1, ideal_trait_value = NA, innovation = 0, self_influence = 1, dissimilar_influence = 1, similarity_range = 1) { -->
+<!--     population <- array(NA, -->
+<!--                         dim = c(n_sims, max_t, n_pop), -->
+<!--                         dimnames = list("sim_index" = 1:n_sims, -->
+<!--                                         "t" = 1:max_t, -->
+<!--                                         "member" = 1:n_pop) -->
+<!--                         ) -->
+<!--     status <- array(NA, -->
+<!--                         dim = c(n_sims, max_t, n_pop), -->
+<!--                         dimnames = list("sim_index" = 1:n_sims, -->
+<!--                                         "t" = 1:max_t, -->
+<!--                                         "member" = 1:n_pop) -->
+<!--                         ) -->
+<!--     for (sim_index in 1:n_sims) { -->
+<!--         population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd) -->
+<!--         if (is.na(ideal_trait_value)) { -->
+<!--             status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status) -->
+<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ]) -->
+<!--         } else { -->
+<!--             status[sim_index, 1, ] <- 1 / ((population[sim_index, 1, ] - ideal_trait_value)^2 + 1E-12) -->
+<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / sum(status[sim_index, 1, ]) -->
+<!--         } -->
+<!--         for (t in 2:max_t) { -->
+<!--             demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ]) -->
+<!--             demonstrator_trait <- matrix( -->
+<!--                 population[sim_index, t - 1, demonstrators], -->
+<!--                 nrow = n_pop, ncol = n_demonstrators -->
+<!--             ) -->
+<!--             demo_sq_diff <- (matrix(population[sim_index, t - 1, ], nrow = n_pop, ncol = n_demonstrators, byrow = FALSE) - demonstrator_trait)^2 -->
+<!--             demo_weight <- (dissimilar_influence + (1 - dissimilar_influence) * exp(-demo_sq_diff / (2 * similarity_range^2))) / ((demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
+<!--             population[sim_index, t, ] <- (self_influence * population[sim_index, t - 1, ] + rowSums(demonstrator_trait * demo_weight)) / (self_influence + rowSums(abs(demo_weight))) + rnorm(n = n_pop, mean = 0, sd = innovation) -->
+<!--             if (is.na(ideal_trait_value)) { -->
+<!--                 status[sim_index, t, ] <- status[sim_index, t - 1, ] -->
+<!--             } else { -->
+<!--                 status[sim_index, t, ] <- 1 / ((population[sim_index, t, ] - ideal_trait_value)^2 + 1E-12) -->
+<!--                 status[sim_index, t, ] <- status[sim_index, t, ] / sum(status[sim_index, t, ]) -->
+<!--             } -->
+<!--         } -->
+<!--     } -->
+<!--     return( -->
+<!--         full_join( -->
+<!--             as_tibble(array2DF(population, responseName = "trait")), -->
+<!--             as_tibble(array2DF(status, responseName = "status")), -->
+<!--             by = join_by(sim_index, t, member) -->
+<!--         ) %>% -->
+<!--             mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member)) -->
+<!--     ) -->
+<!-- } -->
+<!-- ``` -->
+<!-- ### Conformity from mutual influence -->
+<!-- ```{r} -->
+<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 1, self_influence = 1, similarity_range = 0.5) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- sim %>% -->
+<!--     filter(t == max(t)) %>% -->
+<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
+<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
+<!-- ``` -->
+<!-- ### Clusters from preference for similarity -->
+<!-- ```{r} -->
+<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 0, self_influence = 1, similarity_range = 0.5) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- sim %>% -->
+<!--     filter(t == max(t)) %>% -->
+<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
+<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
+<!-- ``` -->
+<!-- ### Distrust leads to extreme polarization -->
+<!-- ```{r} -->
+<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = -1, self_influence = 1, similarity_range = 0.5) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- sim %>% -->
+<!--     filter(t == max(t)) %>% -->
+<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
+<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
+<!-- ``` -->
+<!-- ### When can a distrustful society arrive at a mutually agreed solution? -->
+<!-- When the ideal is within the range of the initial values, the population converges to the ideal trait even in an atmosphere of distrust.  Specifically, it needs to be within the "trust radius" (similarity range) of the initial population mean. -->
+<!-- ```{r} -->
+<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = -1, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 0) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- sim %>% -->
+<!--     filter(t == max(t)) %>% -->
+<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
+<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
+<!-- ``` -->
+<!-- But when the ideal value is on the cusp of the trust radius, the result is polarization with one group achieving the optimal and another group diametrically opposed. -->
+<!-- ```{r} -->
+<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = -1, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 0.5) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- sim %>% -->
+<!--     filter(t == max(t)) %>% -->
+<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
+<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
+<!-- ``` -->
+<!-- When the ideal is sufficiently far from the initial beliefs of the population, distrust often results in *no* groups achieving the optimal value. -->
+<!-- ```{r} -->
+<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = -1, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 3) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- sim %>% -->
+<!--     filter(t == max(t)) %>% -->
+<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
+<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
+<!-- ``` -->
+<!-- When you just ignore people who are outside the trust radius, it is possible for some segment of the population to achieve the optimal, but there are often large clusters who fail to do so. -->
+<!-- ```{r} -->
+<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 0, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 3) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- sim %>% -->
+<!--     filter(t == max(t)) %>% -->
+<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
+<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
+<!-- ``` -->
+<!-- Even if you are equally influenced by everyone, the population can often converge on a sub-optimal trait value.  This was already demonstrated above. -->
+<!-- ```{r} -->
+<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 1, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 3) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- sim %>% -->
+<!--     filter(t == max(t)) %>% -->
+<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
+<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
+<!-- ``` -->
+<!-- Innovation is not necessarily sufficient for an ignorant population to converge on an optimal solution.  This is unlike the previous simulations where innovation was sufficient to get the population "out of its rut". -->
+<!-- ```{r} -->
+<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 0, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 3, innovation = 0.1) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- sim %>% -->
+<!--     filter(t == max(t)) %>% -->
+<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
+<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
+<!-- ``` -->
+<!-- Even a little bit of knowledge goes a long way.  If you prioritize, but do not outright dismiss, dissimilar agents, an innovative population can converge on the optimum. -->
+<!-- ```{r} -->
+<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 0.1, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 3, innovation = 0.1) -->
+<!-- trait_summary <- sim %>% -->
+<!--     group_by(sim_index, t) %>% -->
+<!--     summarize(mean_trait = mean(trait)) -->
+<!-- trait_summary %>% -->
+<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
+<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
+<!--     geom_line(linewidth = 0.5) + -->
+<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
+<!-- sim %>% -->
+<!--     filter(t == max(t)) %>% -->
+<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
+<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
+<!--     scale_color_discreterainbow() + -->
+<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
+<!-- ``` -->
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-SmithConrey2007" class="csl-entry" role="listitem">
+Smith, E. R., &amp; Conrey, F. R. (2007). Agent-based modeling: A new approach for theory building in social psychology. <em>Personality and Social Psychology Review</em>, <em>11</em>(1), 87–104. <a href="https://doi.org/10.1177/1088868306294789">https://doi.org/10.1177/1088868306294789</a>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./backprop.html" class="pagination-link" aria-label="Learning useful representations">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Learning useful representations</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
