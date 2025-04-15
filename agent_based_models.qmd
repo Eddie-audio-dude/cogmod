@@ -502,81 +502,220 @@ print(p_plot + init_plot + plot_layout(nrow = 1, widths = c(1.5, 1), guides = "c
 
 As you can see, we've made two plots to visualize our results for reasons that will become clear shortly.  The left plot shows that, as in the first set of simulations we ran, the population will tend to evolve until one trait becomes dominant.  The right plot shows the mean status among agents grouped by their *initial* trait values.  The right plot helps explain which of the two traits eventually becomes dominant.  If one trait is more closely associated with high-status individuals at the beginning of the simulation, then that trait is the one that is most likely to dominate.  This is because agents will tend to emulate high-status agents.
 
-<!-- ## Continuous-valued traits -->
+## Continuous-valued traits
 
-<!-- As noted earlier, we can also build agent-based models where the agents' traits take *continuous* values instead of discrete values.  Continuous traits might represent the degree of belief in a theory or cultural tenet, degree of preference for a political candidate or work of art, or even a parameter in a cognitive model. -->
+As noted earlier, we can also build agent-based models where the agents' traits take *continuous* values instead of discrete values.  Continuous traits might represent the degree of belief in a theory or cultural tenet, degree of preference for a political candidate or work of art, or even a parameter in a cognitive model.  Modeling the evolution of continuous traits involves making some changes to our simulation code, although we will see that many of the same concepts apply.  The main difference between continuous and discrete traits is that, with continuous traits, we can model phenomena that depend on *similarity* between agents, as measured by how different their traits are.
+
+### Initializing the population
+
+With discrete traits, we assigned initial values to agents using the `sample` function.  In the following model, we will instead assume that initial trait values are sampled from a *normal* distribution.  For simplicity we will assume that the mean of this normal distribution is zero and introduce an (optional) parameter `init_trait_sd` with a default value of 1 that represents the standard deviation of the initial trait distribution.  Of course, we could choose different distributions like a uniform or a Beta distribution or a Gamma distribution depending on what the trait was intended to represent.  And we could add additional parameters if we wanted, too.  Again, what we are doing here is just one of many viable approaches.  Nonetheless, here's how we will initialize the trait values on the first time-step of the simulation indexed by `sim_index`:
+
+```{r}
+#| code-fold: show
+#| eval: false
+
+population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd)
+```
+
+### Multiple demonstrators and conformity
+
+Our model will still allow us to simulate agents who sample *multiple* demonstrators, rather than just one.  To model conformity in this situation, we can't just look at the proportion of demonstrators with each trait.  Instead, we will model conformity by assigning a *weight* to each demonstrator that is proportional to how far their trait value is from the *mean* of the demonstrators.
+
+In the code snippet below, `demonstrator_trait` is a matrix with one row per agent and one column per demonstrator.  Therefore, `rowMeans(demonstrator_trait)` gives a vector of the average trait value for each agent's sampled demonstrators.  We can then find each demonstrators *squared deviation* from their mean by writing `(demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^2`.  Finally, since we want to give more weight to demonstrators *close* to the mean, we will use a similar exponential transformation to the one we used with the EBRW.
+
+Mathematically, if $\bar{x}_{\mathcal{D}}$ is the mean trait value among the set of demonstrators $\mathcal{D}$, then the weight for demonstrator $j$ is:
+$$
+w_j = \exp \left[ -k \frac{\left(x_j - \bar{x}_{\mathcal{D}} \right)^2}{2} \right]
+$$
+where the parameter $k$ is a nonnegative number representing a preference for conformity and the division by 2 is to maintain convention with how the Gaussian distribution is defined.  The graph below illustrates how the weight changes as a function of distance from the mean demonstrator trait and conformity parameter $k$.
+
+```{r}
+expand_grid(d = seq(0, 5, length.out = 101), k = seq(0, 5)) %>%
+    mutate(w = exp(-k * d^2 / 2)) %>%
+    ggplot(aes(x = d, y = w, color = k, group = k)) +
+    geom_line() +
+    scale_color_viridis_c() +
+    labs(x = expression(x[j] - bar(x)[D]), y = expression(w[j]), color = "k")
+```
+
+When $k = 0$, all demonstrators get equal weight.  The larger $k$ gets, the less weight is given to demonstrators that are farther from the mean.  Note that this means that, if none of the demonstrators are close to the mean, they will all be given comparatively little weight.  A preference for conformity means that an agent will only give weight to demonstrators who tend to cluster around a common value.
+
+In code, we write the weighting function like so (where `conformity` is the code equivalent of $k$):
+
+```{r}
+#| code-fold: show
+#| eval: false
+
+demo_weight <- exp(-conformity * (demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^2 / 2)
+```
+
+### Updating traits
+
+The final change to our model is in how agents update their traits.  Instead of simply copying a value from a demonstrator, an agent will be *nudged toward* the value of the demonstrators.  Specifically, the new trait value will be a *weighted average* of their previous value and those of the demonstrator(s).  Mathematically, we can write this as
+$$
+x_{i}(t) = \frac{w_{\text{Self}} x_{i}(t - 1) + \sum_{j \in \mathcal{D}} w_j x_j(t - 1)}{w_{\text{Self}} + \sum_{j \in D} w_j}
+$$
+where $x_i(t - 1)$ is agent $i$'s trait value at time-step $t - 1$, $w_{text{Self}}$ is the weight given to the agent's own previous trait value, $\mathcal{D}$ is the set of demonstrators for agent $i$, and each $w_j$ is the weight given to that demonstrator according to the "conformity" rule described above.
+
+In code, we write this updating process like so, where `self_weight` is code for $w_{\text{Self}}$ above.
+
+```{r}
+#| code-fold: show
+#| eval: false
+
+population[sim_index, t, ] <- (self_weight * population[sim_index, t - 1, ] + rowSums(demo_weight * demonstrator_trait)) / (self_weight + rowSums(demo_weight))
+```
+
+### The final function
+
+The code below illustrates our final simulation function for dealing with continuous-valued traits.  You'll notice that much of it is the same as our `discrete_trait_evolution` function except for the changes noted earlier in this section.
+
+```{r}
+#| code-fold: show
+
+continuous_trait_evolution <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, self_weight = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1) {
+    population <- array(NA,
+                        dim = c(n_sims, max_t, n_pop),
+                        dimnames = list("sim_index" = 1:n_sims,
+                                        "t" = 1:max_t,
+                                        "member" = 1:n_pop)
+                        )
+
+    status <- array(NA,
+                    dim = c(n_sims, max_t, n_pop),
+                    dimnames = list("sim_index" = 1:n_sims,
+                                    "t" = 1:max_t,
+                                    "member" = 1:n_pop)
+                    )
+
+    for (sim_index in 1:n_sims) {
+        population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd)
+        status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status)
+
+        status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ])
+
+        for (t in 2:max_t) {
+            demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ])
+
+            demonstrator_trait <- matrix(
+                population[sim_index, t - 1, demonstrators],
+                nrow = n_pop, ncol = n_demonstrators
+            )
+            
+            demo_weight <- exp(-conformity * (demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^2 / 2)
+            
+            population[sim_index, t, ] <- (self_weight * population[sim_index, t - 1, ] + rowSums(demo_weight * demonstrator_trait)) / (self_weight + rowSums(demo_weight))
+
+            status[sim_index, t, ] <- status[sim_index, t - 1, ]
+        }
+    }
+
+    return(
+        full_join(
+            as_tibble(array2DF(population, responseName = "trait")),
+            as_tibble(array2DF(status, responseName = "status")),
+            by = join_by(sim_index, t, member)
+        ) %>%
+            mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member))
+    )
+}
+```
+
+### Examples
+
+We can largely replicate the discrete trait-copying model we used earlier if we set the `self_weight` parameter to 0, so that agents just adopt the trait value of whatever demonstrator they happen to select.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 1000, self_weight = 0)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait), sd_trait = sd(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+sd_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = sd_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    expand_limits(y = 0) +
+    labs(x = "Time", y = "Trait value standard deviation", color = "Sim.")
+
+mean_plot + sd_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+The graphs above show both the mean (left) and standard deviation (right) of the trait values in the population over time.  Although the mean trait values meander around, there is a tendency for the standard deviation to diminish over time.  This is because the copying process causes certain trait values to drop out of the population over time, until eventually all agents adopt the same trait.  This mimics the same convergence behavior that we saw with the discrete trait models above.
+
+One might naively assume that if we set the `self_weight` to 1, so that agents effectively adopt a "compromise" between their trait values and those of their demonstrators, that this would slow convergence.  In fact, just the opposite!  As shown below, populations quickly converge on a "consensus" value that is close to the population average of zero.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 1000, self_weight = 1)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait), sd_trait = sd(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+sd_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = sd_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    expand_limits(y = 0) +
+    labs(x = "Time", y = "Trait value standard deviation", color = "Sim.")
+
+mean_plot + sd_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+Finally, a preference for conformity among demonstrators also leads to a rapid convergence of the population onto a single consensus value, as shown below.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 50, n_demonstrators = 3, conformity = 2)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait), sd_trait = sd(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+sd_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = sd_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    expand_limits(y = 0) +
+    labs(x = "Time", y = "Trait value standard deviation", color = "Sim.")
+
+mean_plot + sd_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+<!-- ## Popularity of the fittest -->
 
 <!-- ```{r} -->
-<!-- #| code-fold: show -->
-
-<!-- continuous_transmission <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, demonstrator_influence = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1) { -->
-<!--     population <- array(NA, -->
-<!--                         dim = c(n_sims, max_t, n_pop), -->
-<!--                         dimnames = list("sim_index" = 1:n_sims, -->
-<!--                                         "t" = 1:max_t, -->
-<!--                                         "member" = 1:n_pop) -->
-<!--                         ) -->
-
-<!--     status <- array(NA, -->
-<!--                         dim = c(n_sims, max_t, n_pop), -->
-<!--                         dimnames = list("sim_index" = 1:n_sims, -->
-<!--                                         "t" = 1:max_t, -->
-<!--                                         "member" = 1:n_pop) -->
-<!--                         ) -->
-
-<!--     for (sim_index in 1:n_sims) { -->
-<!--         population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd) -->
-<!--         status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status) -->
-
-<!--         status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ]) -->
-
-<!--         for (t in 2:max_t) { -->
-<!--             demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ]) -->
-
-<!--             demonstrator_trait <- matrix( -->
-<!--                 population[sim_index, t - 1, demonstrators], -->
-<!--                 nrow = n_pop, ncol = n_demonstrators -->
-<!--             ) -->
-
-<!--             demo_weight <- 1 / ((demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
-
-<!--             demo_weighted_avg <- rowSums(demonstrator_trait * demo_weight) / rowSums(demo_weight) -->
-
-<!--             population[sim_index, t, ] <- demonstrator_influence * demo_weighted_avg + (1 - demonstrator_influence) * population[sim_index, t - 1, ] -->
-
-<!--             status[sim_index, t, ] <- status[sim_index, t - 1, ] -->
-<!--         } -->
-<!--     } -->
-
-<!--     return( -->
-<!--         full_join( -->
-<!--             as_tibble(array2DF(population, responseName = "trait")), -->
-<!--             as_tibble(array2DF(status, responseName = "status")), -->
-<!--             by = join_by(sim_index, t, member) -->
-<!--         ) %>% -->
-<!--             mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member)) -->
-<!--     ) -->
-<!-- } -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- sim <- continuous_transmission(n_pop = 1000, max_t = 200) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- sim <- continuous_transmission(n_pop = 1000, max_t = 200, mean_init_status = 0.1) -->
+<!-- sim <- continuous_trait_evolution(n_pop = 1000, max_t = 200, mean_init_status = 0.05) -->
 
 <!-- trait_summary <- sim %>% -->
 <!--     group_by(sim_index, t) %>% -->
@@ -599,24 +738,6 @@ As you can see, we've made two plots to visualize our results for reasons that w
 <!--     scale_color_discreterainbow(guide = "none") + -->
 <!--     labs(x = "Simulation index", y = "Status-weighted mean initial trait value") -->
 <!-- ``` -->
-
-<!-- ```{r} -->
-<!-- sim <- continuous_transmission(n_pop = 1000, max_t = 100, n_demonstrators = 3, conformity = 1) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- ## Popularity of the fittest -->
 
 <!-- ```{r} -->
 <!-- #| code-fold: show -->
@@ -656,7 +777,7 @@ As you can see, we've made two plots to visualize our results for reasons that w
 <!--                 nrow = n_pop, ncol = n_demonstrators -->
 <!--             ) -->
 
-<!--             demo_weight <- 1 / ((demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
+<!--             demo_weight <- 1 / (abs(demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
 
 <!--             demo_weighted_avg <- rowSums(demonstrator_trait * demo_weight) / rowSums(demo_weight) -->
 
@@ -738,7 +859,7 @@ As you can see, we've made two plots to visualize our results for reasons that w
 <!--                 nrow = n_pop, ncol = n_demonstrators -->
 <!--             ) -->
 
-<!--             demo_weight <- 1 / ((demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
+<!--             demo_weight <- 1 / (abs(demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
 
 <!--             demo_weighted_avg <- rowSums(demonstrator_trait * demo_weight) / rowSums(demo_weight) -->
 
