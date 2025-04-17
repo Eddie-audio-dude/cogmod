@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 book:
-  title: "Computational Cognitive Models"
+  title: "Computational Cognitive Modeling"
   author: "Gregory E. Cox"
   # date: "3/4/2025"
   chapters:

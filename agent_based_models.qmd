@@ -260,10 +260,35 @@ sim_summary %>%
 
 ### Multiple demonstrators and conformity
 
+There's no reason why each agent has to only pick one demonstrator with which to interact!  Our next amendment to the model is thus to allow for more than one demonstrator per time-step.  We will add an argument `n_demonstrators` to specify how many demonstrators each agent picks on each time-step.
+
+Having multiple demonstrators opens the possibility that they do not all share the same trait---so how should we adjust our updating process to accommodate this?  First, each agent will need to add up the number of their demonstrators that exhibit each trait.  Then, the agent will adopt a trait *in proportion to* its frequency among those demonstrators.
+
+We will take this opportunity to introduce a new parameter to the model, using $k$ to represent it in math and `conformity` to represent it in code.  This parameter will represent the tendency for each agent in the population to prefer to adopt traits that are more common among their demonstrators.  Specifically, if $n_v$ is the number of demonstrators with trait $v$, the probability of adopting that trait will be
+$$
+p_v = \frac{n_v^k}{\sum_{u = 1}^{N_T} n_u^k}
+$$
+where $N_T$ is the total number of possible trait values.
+
+To see the effect of the $k$ parameter, the graph below illustrates the probability of adopting trait $v$ in a situation where there are two possible traits and there are 10 demonstrators.
+
+```{r}
+expand_grid(n_v = seq(0, 10), k = seq(0, 5)) %>%
+    mutate(p_v = n_v^k / (n_v^k + (10 - n_v)^k)) %>%
+    ggplot(aes(x = n_v, y = p_v, color = k, group = k)) +
+    geom_line() +
+    scale_color_viridis_c() +
+    labs(x = expression(n[v]), y = expression(p[v]), color = "k")
+```
+
+If $k = 0$, then the agent totally ignores the frequency of the traits among the demonstrators.  If $k = 1$, the probability of adopting the trait is simply the prevalence of the trait among the demonstrators.  As $k$ increases above 1, the probability of adopting the more common trait increases when there is a mixture of traits among the demonstrators (e.g., when only 6 out of 10 exhibit trait $v$).
+
+This updating process is implemented in the code below---note the comments explaining what each line does.  Some of these are a bit ugly, but serve the purpose of making the model run much faster!
+
 ```{r}
 #| code-fold: show
 
-discrete_trait_evolution <- function(n_pop = 1000, max_t = 100, n_sims = 10, n_traits = 2, p0 = rep(1 / n_traits, n_traits), trait_names = LETTERS[1:n_traits], p_adopt = rep(1, n_traits), n_demonstrators = 3, conformity = 1) {
+discrete_trait_evolution <- function(n_pop = 1000, max_t = 100, n_sims = 10, n_traits = 2, p0 = rep(1 / n_traits, n_traits), trait_names = LETTERS[1:n_traits], p_adopt = rep(1, n_traits), n_demonstrators = 1, conformity = 1) {
     population <- array(NA,
                         dim = c(n_sims, max_t, n_pop),
                         dimnames = list("sim_index" = 1:n_sims,
@@ -286,10 +311,13 @@ discrete_trait_evolution <- function(n_pop = 1000, max_t = 100, n_sims = 10, n_t
                 nrow = n_pop, ncol = n_demonstrators
             )
             
+            # Count the number of times each trait appears among the demonstrators for each agent, weighted by the probability of adoption (p_adopt_mat)
             demo_counts <- t(apply(demonstrator_trait, MARGIN = 1, FUN = function(traits) table(factor(traits, levels = trait_names)))) * p_adopt_mat
             
+            # Apply the conformity transformation to find the probability of choosing
             p_demo <- demo_counts^conformity / rowSums(demo_counts^conformity)
             
+            # For each agent, pick a new trait in proportion to p_demo
             population[sim_index, t, ] <- apply(p_demo, MARGIN = 1, FUN = function(p) sample(trait_names, size = 1, prob = p))
         }
     }
@@ -712,511 +740,797 @@ sd_plot <- trait_summary %>%
 mean_plot + sd_plot + plot_layout(nrow = 1, guides = "collect")
 ```
 
-<!-- ## Popularity of the fittest -->
-
-<!-- ```{r} -->
-<!-- sim <- continuous_trait_evolution(n_pop = 1000, max_t = 200, mean_init_status = 0.05) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-
-<!-- sim %>% -->
-<!--     filter(t == 1) %>% -->
-<!--     group_by(sim_index) %>% -->
-<!--     summarize(weighted_mean_trait = sum(trait * status) / sum(status)) %>% -->
-<!--     ggplot(aes(x = factor(sim_index), y = weighted_mean_trait, color = factor(sim_index))) + -->
-<!--     geom_point() + -->
-<!--     scale_color_discreterainbow(guide = "none") + -->
-<!--     labs(x = "Simulation index", y = "Status-weighted mean initial trait value") -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- #| code-fold: show -->
-
-<!-- continuous_transmission <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, demonstrator_influence = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1, ideal_trait_value = NA) { -->
-<!--     population <- array(NA, -->
-<!--                         dim = c(n_sims, max_t, n_pop), -->
-<!--                         dimnames = list("sim_index" = 1:n_sims, -->
-<!--                                         "t" = 1:max_t, -->
-<!--                                         "member" = 1:n_pop) -->
-<!--                         ) -->
-
-<!--     status <- array(NA, -->
-<!--                         dim = c(n_sims, max_t, n_pop), -->
-<!--                         dimnames = list("sim_index" = 1:n_sims, -->
-<!--                                         "t" = 1:max_t, -->
-<!--                                         "member" = 1:n_pop) -->
-<!--                         ) -->
-
-<!--     for (sim_index in 1:n_sims) { -->
-<!--         population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd) -->
-
-<!--         if (is.na(ideal_trait_value)) { -->
-<!--             status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status) -->
-
-<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ]) -->
-<!--         } else { -->
-<!--             status[sim_index, 1, ] <- 1 / ((population[sim_index, 1, ] - ideal_trait_value)^2 + 1E-12) -->
-<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / sum(status[sim_index, 1, ]) -->
-<!--         } -->
-
-<!--         for (t in 2:max_t) { -->
-<!--             demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ]) -->
-
-<!--             demonstrator_trait <- matrix( -->
-<!--                 population[sim_index, t - 1, demonstrators], -->
-<!--                 nrow = n_pop, ncol = n_demonstrators -->
-<!--             ) -->
-
-<!--             demo_weight <- 1 / (abs(demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
-
-<!--             demo_weighted_avg <- rowSums(demonstrator_trait * demo_weight) / rowSums(demo_weight) -->
-
-<!--             population[sim_index, t, ] <- demonstrator_influence * demo_weighted_avg + (1 - demonstrator_influence) * population[sim_index, t - 1, ] -->
-
-<!--             if (is.na(ideal_trait_value)) { -->
-<!--                 status[sim_index, t, ] <- status[sim_index, t - 1, ] -->
-<!--             } else { -->
-<!--                 status[sim_index, t, ] <- 1 / ((population[sim_index, t, ] - ideal_trait_value)^2 + 1E-12) -->
-<!--                 status[sim_index, t, ] <- status[sim_index, t, ] / sum(status[sim_index, t, ]) -->
-<!--             } -->
-<!--         } -->
-<!--     } -->
-
-<!--     return( -->
-<!--         full_join( -->
-<!--             as_tibble(array2DF(population, responseName = "trait")), -->
-<!--             as_tibble(array2DF(status, responseName = "status")), -->
-<!--             by = join_by(sim_index, t, member) -->
-<!--         ) %>% -->
-<!--             mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member)) -->
-<!--     ) -->
-<!-- } -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- sim <- continuous_transmission(n_pop = 1000, max_t = 100, ideal_trait_value = 4) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- ### Innovation -->
-
-<!-- ```{r} -->
-<!-- #| code-fold: show -->
-
-<!-- continuous_transmission <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, demonstrator_influence = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1, ideal_trait_value = NA, innovation = 0) { -->
-<!--     population <- array(NA, -->
-<!--                         dim = c(n_sims, max_t, n_pop), -->
-<!--                         dimnames = list("sim_index" = 1:n_sims, -->
-<!--                                         "t" = 1:max_t, -->
-<!--                                         "member" = 1:n_pop) -->
-<!--                         ) -->
-
-<!--     status <- array(NA, -->
-<!--                         dim = c(n_sims, max_t, n_pop), -->
-<!--                         dimnames = list("sim_index" = 1:n_sims, -->
-<!--                                         "t" = 1:max_t, -->
-<!--                                         "member" = 1:n_pop) -->
-<!--                         ) -->
-
-<!--     for (sim_index in 1:n_sims) { -->
-<!--         population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd) -->
-
-<!--         if (is.na(ideal_trait_value)) { -->
-<!--             status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status) -->
-
-<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ]) -->
-<!--         } else { -->
-<!--             status[sim_index, 1, ] <- 1 / ((population[sim_index, 1, ] - ideal_trait_value)^2 + 1E-12) -->
-<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / sum(status[sim_index, 1, ]) -->
-<!--         } -->
-
-<!--         for (t in 2:max_t) { -->
-<!--             demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ]) -->
-
-<!--             demonstrator_trait <- matrix( -->
-<!--                 population[sim_index, t - 1, demonstrators], -->
-<!--                 nrow = n_pop, ncol = n_demonstrators -->
-<!--             ) -->
-
-<!--             demo_weight <- 1 / (abs(demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
-
-<!--             demo_weighted_avg <- rowSums(demonstrator_trait * demo_weight) / rowSums(demo_weight) -->
-
-<!--             population[sim_index, t, ] <- demonstrator_influence * demo_weighted_avg + (1 - demonstrator_influence) * population[sim_index, t - 1, ] + rnorm(n = n_pop, mean = 0, sd = innovation) -->
-
-<!--             if (is.na(ideal_trait_value)) { -->
-<!--                 status[sim_index, t, ] <- status[sim_index, t - 1, ] -->
-<!--             } else { -->
-<!--                 status[sim_index, t, ] <- 1 / ((population[sim_index, t, ] - ideal_trait_value)^2 + 1E-12) -->
-<!--                 status[sim_index, t, ] <- status[sim_index, t, ] / sum(status[sim_index, t, ]) -->
-<!--             } -->
-<!--         } -->
-<!--     } -->
-
-<!--     return( -->
-<!--         full_join( -->
-<!--             as_tibble(array2DF(population, responseName = "trait")), -->
-<!--             as_tibble(array2DF(status, responseName = "status")), -->
-<!--             by = join_by(sim_index, t, member) -->
-<!--         ) %>% -->
-<!--             mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member)) -->
-<!--     ) -->
-<!-- } -->
-<!-- ``` -->
-
-<!-- ```{r} -->
-<!-- sim <- continuous_transmission(n_pop = 1000, max_t = 50, ideal_trait_value = 4, innovation = 0.1) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- ## Emergence of belief polarization -->
-
-<!-- Agents are more strongly influenced by demonstrators who have similar traits and can be repelled by demonstrators with sufficiently dissimilar traits. -->
-
-<!-- ```{r} -->
-<!-- #| code-fold: show -->
-
-<!-- polarization_model <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1, ideal_trait_value = NA, innovation = 0, self_influence = 1, dissimilar_influence = 1, similarity_range = 1) { -->
-<!--     population <- array(NA, -->
-<!--                         dim = c(n_sims, max_t, n_pop), -->
-<!--                         dimnames = list("sim_index" = 1:n_sims, -->
-<!--                                         "t" = 1:max_t, -->
-<!--                                         "member" = 1:n_pop) -->
-<!--                         ) -->
-
-<!--     status <- array(NA, -->
-<!--                         dim = c(n_sims, max_t, n_pop), -->
-<!--                         dimnames = list("sim_index" = 1:n_sims, -->
-<!--                                         "t" = 1:max_t, -->
-<!--                                         "member" = 1:n_pop) -->
-<!--                         ) -->
-
-<!--     for (sim_index in 1:n_sims) { -->
-<!--         population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd) -->
-
-<!--         if (is.na(ideal_trait_value)) { -->
-<!--             status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status) -->
-
-<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ]) -->
-<!--         } else { -->
-<!--             status[sim_index, 1, ] <- 1 / ((population[sim_index, 1, ] - ideal_trait_value)^2 + 1E-12) -->
-<!--             status[sim_index, 1, ] <- status[sim_index, 1, ] / sum(status[sim_index, 1, ]) -->
-<!--         } -->
-
-<!--         for (t in 2:max_t) { -->
-<!--             demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ]) -->
-
-<!--             demonstrator_trait <- matrix( -->
-<!--                 population[sim_index, t - 1, demonstrators], -->
-<!--                 nrow = n_pop, ncol = n_demonstrators -->
-<!--             ) -->
-
-<!--             demo_sq_diff <- (matrix(population[sim_index, t - 1, ], nrow = n_pop, ncol = n_demonstrators, byrow = FALSE) - demonstrator_trait)^2 -->
-
-<!--             demo_weight <- (dissimilar_influence + (1 - dissimilar_influence) * exp(-demo_sq_diff / (2 * similarity_range^2))) / ((demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^(2 * conformity) + 1E-12) -->
-
-<!--             population[sim_index, t, ] <- (self_influence * population[sim_index, t - 1, ] + rowSums(demonstrator_trait * demo_weight)) / (self_influence + rowSums(abs(demo_weight))) + rnorm(n = n_pop, mean = 0, sd = innovation) -->
-
-<!--             if (is.na(ideal_trait_value)) { -->
-<!--                 status[sim_index, t, ] <- status[sim_index, t - 1, ] -->
-<!--             } else { -->
-<!--                 status[sim_index, t, ] <- 1 / ((population[sim_index, t, ] - ideal_trait_value)^2 + 1E-12) -->
-<!--                 status[sim_index, t, ] <- status[sim_index, t, ] / sum(status[sim_index, t, ]) -->
-<!--             } -->
-<!--         } -->
-<!--     } -->
-
-<!--     return( -->
-<!--         full_join( -->
-<!--             as_tibble(array2DF(population, responseName = "trait")), -->
-<!--             as_tibble(array2DF(status, responseName = "status")), -->
-<!--             by = join_by(sim_index, t, member) -->
-<!--         ) %>% -->
-<!--             mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member)) -->
-<!--     ) -->
-<!-- } -->
-<!-- ``` -->
-
-<!-- ### Conformity from mutual influence -->
-
-<!-- ```{r} -->
-<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 1, self_influence = 1, similarity_range = 0.5) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-
-<!-- sim %>% -->
-<!--     filter(t == max(t)) %>% -->
-<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
-<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- ### Clusters from preference for similarity -->
-
-<!-- ```{r} -->
-<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 0, self_influence = 1, similarity_range = 0.5) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-
-<!-- sim %>% -->
-<!--     filter(t == max(t)) %>% -->
-<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
-<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- ### Distrust leads to extreme polarization -->
-
-<!-- ```{r} -->
-<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = -1, self_influence = 1, similarity_range = 0.5) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-
-<!-- sim %>% -->
-<!--     filter(t == max(t)) %>% -->
-<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
-<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- ### When can a distrustful society arrive at a mutually agreed solution? -->
-
-<!-- When the ideal is within the range of the initial values, the population converges to the ideal trait even in an atmosphere of distrust.  Specifically, it needs to be within the "trust radius" (similarity range) of the initial population mean. -->
-
-<!-- ```{r} -->
-<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = -1, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 0) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-
-<!-- sim %>% -->
-<!--     filter(t == max(t)) %>% -->
-<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
-<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- But when the ideal value is on the cusp of the trust radius, the result is polarization with one group achieving the optimal and another group diametrically opposed. -->
-
-<!-- ```{r} -->
-<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = -1, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 0.5) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-
-<!-- sim %>% -->
-<!--     filter(t == max(t)) %>% -->
-<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
-<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- When the ideal is sufficiently far from the initial beliefs of the population, distrust often results in *no* groups achieving the optimal value. -->
-
-<!-- ```{r} -->
-<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = -1, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 3) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-
-<!-- sim %>% -->
-<!--     filter(t == max(t)) %>% -->
-<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
-<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- When you just ignore people who are outside the trust radius, it is possible for some segment of the population to achieve the optimal, but there are often large clusters who fail to do so. -->
-
-<!-- ```{r} -->
-<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 0, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 3) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-
-<!-- sim %>% -->
-<!--     filter(t == max(t)) %>% -->
-<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
-<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- Even if you are equally influenced by everyone, the population can often converge on a sub-optimal trait value.  This was already demonstrated above. -->
-
-<!-- ```{r} -->
-<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 1, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 3) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-
-<!-- sim %>% -->
-<!--     filter(t == max(t)) %>% -->
-<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
-<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- Innovation is not necessarily sufficient for an ignorant population to converge on an optimal solution.  This is unlike the previous simulations where innovation was sufficient to get the population "out of its rut". -->
-
-<!-- ```{r} -->
-<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 0, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 3, innovation = 0.1) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-
-<!-- sim %>% -->
-<!--     filter(t == max(t)) %>% -->
-<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
-<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
-<!-- ``` -->
-
-<!-- Even a little bit of knowledge goes a long way.  If you prioritize, but do not outright dismiss, dissimilar agents, an innovative population can converge on the optimum. -->
-
-<!-- ```{r} -->
-<!-- sim <- polarization_model(n_pop = 1000, max_t = 100, dissimilar_influence = 0.1, self_influence = 1, similarity_range = 0.5, ideal_trait_value = 3, innovation = 0.1) -->
-
-<!-- trait_summary <- sim %>% -->
-<!--     group_by(sim_index, t) %>% -->
-<!--     summarize(mean_trait = mean(trait)) -->
-
-<!-- trait_summary %>% -->
-<!--     ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) + -->
-<!--     geom_hline(yintercept = 0, linetype = "dashed", color = "black") + -->
-<!--     geom_line(linewidth = 0.5) + -->
-<!--     stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Time", y = "Mean trait value", color = "Sim.") -->
-
-<!-- sim %>% -->
-<!--     filter(t == max(t)) %>% -->
-<!--     ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) + -->
-<!--     geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) + -->
-<!--     scale_color_discreterainbow() + -->
-<!--     labs(x = "Trait value", y = "Density", color = "Sim.") -->
-<!-- ``` -->
+## Popularity of the fittest
+
+Earlier, we modeled situations in which agents were more likely to pick high-status as opposed to low-status agents as demonstrators.  So far, we have treated status as something that each agent simply possessed and which did not change over time.  Modeling continuous-valued traits gives us a natural way to allow status to vary as a function of the *relative fitness* that an agent is able to achieve.  "Fitness" could mean various things---it might reflect an objective increase in the agent's success, like being happier, or achieving more, or being able to do something better, or having more stuff.  It might also reflect a latent preference among members of the population for some property, like an aesthetic preference that is somehow inherent in each agent's beliefs.  Regardless of the cause, if an agent's status is related to its trait value, then it would make sense for agents to prefer to choose high-status agents as demonstrators.  That way, an agent will be more likely to improve their own status.
+
+After seeing an example of how status-based selection works with continuous traits, we will build in one way to implement the idea that there is an "ideal" trait value that agents seek to adopt.  We will then build into the model a form of "innovation" that enables the population to converge toward this ideal more consistently.
+
+### Convergence to high-status trait values
+
+Like we saw with discrete-valued traits, continuous-valued traits in a population tend to converge on trait values that are more common among high-status individuals.  This is illustrated in the example below, where we set `mean_init_status` to 0.05, so that most individuals have low status and only a few have high status.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 50, mean_init_status = 0.05)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait), sd_trait = sd(trait))
+
+mean_trait_range <- range(trait_summary$mean_trait)
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    coord_cartesian(ylim = mean_trait_range) +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+sd_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = sd_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    expand_limits(y = 0) +
+    labs(x = "Time", y = "Trait value standard deviation", color = "Sim.")
+
+init_trait_plot <- sim %>%
+    filter(t == 1) %>%
+    group_by(sim_index) %>%
+    summarize(weighted_mean_trait = sum(trait * status) / sum(status)) %>%
+    ggplot(aes(x = factor(sim_index), y = weighted_mean_trait, color = factor(sim_index))) +
+    geom_point() +
+    scale_color_discreterainbow(guide = "none") +
+    coord_cartesian(ylim = mean_trait_range) +
+    labs(x = "Simulation index", y = "Status-weighted mean initial trait value")
+
+mean_plot + init_trait_plot + sd_plot + plot_layout(nrow = 1, widths = c(1.5, 1, 1), guides = "collect")
+```
+
+As shown in the left and right graphs, the trait values in the population tend to "collapse" to a single value fairly quickly.  The middle graph shows the average trait value in the initial population, weighted by the status of each agent (which again does not change over time).  Similar to what we saw with discrete-valued traits, it looks like the value that the population converges on is biased in the direction of the values that were more common among high-status individuals.  This behavior is a bit easier to see if we make the initial trait values more variable, so that there is a larger difference between them.  In the simulation below, we do this by setting `init_trait_sd` to a value larger than the default value of 1.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 50, mean_init_status = 0.05, init_trait_sd = 5)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait), sd_trait = sd(trait))
+
+mean_trait_range <- range(trait_summary$mean_trait)
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    coord_cartesian(ylim = mean_trait_range) +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+sd_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = sd_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    expand_limits(y = 0) +
+    labs(x = "Time", y = "Trait value standard deviation", color = "Sim.")
+
+init_trait_plot <- sim %>%
+    filter(t == 1) %>%
+    group_by(sim_index) %>%
+    summarize(weighted_mean_trait = sum(trait * status) / sum(status)) %>%
+    ggplot(aes(x = factor(sim_index), y = weighted_mean_trait, color = factor(sim_index))) +
+    geom_point() +
+    scale_color_discreterainbow(guide = "none") +
+    coord_cartesian(ylim = mean_trait_range) +
+    labs(x = "Simulation index", y = "Status-weighted mean initial trait value")
+
+mean_plot + init_trait_plot + sd_plot + plot_layout(nrow = 1, widths = c(1.5, 1, 1), guides = "collect")
+```
+
+The main thing to take away from these examples is that, when demonstrators are selected in proportion to their status, agents are more likely to adopt the traits of high-status individuals.  This leads to the population converging on a trait value that is biased toward whatever values happened to be held by the high-status individuals initially.  This is just like what we saw with discrete-valued traits.
+
+### Defining an "ideal" trait value
+
+Now we introduce the idea that status is not merely random, but is instead a function of how close someone's trait is to an "ideal" value.  As noted above, a value might be "ideal" because it has some objectively good consequences (like doing something more easily or more successfully) or because there is some latent preference among agents for a particular value.
+
+To model this idea, we will set the status of each individual to be *inversely proportional* to the squared difference between their trait value and the ideal trait value.  In math, if $x_i(t)$ is the trait value of agent $i$ at time $t$ and $\tilde{x}$ is the ideal trait value, then the status of agent $i$ at time $t$ is
+$$
+s_i(t) = \exp \left[-\phi \frac{\left(x_i(t) - \tilde{x} \right)^2}{2} \right]
+$$
+where $\phi$ is a parameter representing how quickly status drops off as a function of distance from the ideal trait value.  Basically, this is the same functional form we used to define conformity earlier!
+
+This is implemented in the expanded function below, where the ideal trait value $\tilde{x}$ is called `ideal_trait_value` and $\phi$ is called `ideal_strength`.  Note that, by default, the ideal trait value is `NA`---if this is the case, the function will revert to simulating status as a static random property like it was earlier.
+
+```{r}
+#| code-fold: show
+
+continuous_trait_evolution <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, self_weight = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1, ideal_trait_value = NA, ideal_strength = 1) {
+    population <- array(NA,
+                        dim = c(n_sims, max_t, n_pop),
+                        dimnames = list("sim_index" = 1:n_sims,
+                                        "t" = 1:max_t,
+                                        "member" = 1:n_pop)
+                        )
+
+    status <- array(NA,
+                    dim = c(n_sims, max_t, n_pop),
+                    dimnames = list("sim_index" = 1:n_sims,
+                                    "t" = 1:max_t,
+                                    "member" = 1:n_pop)
+                    )
+
+    for (sim_index in 1:n_sims) {
+        population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd)
+        
+        if (is.na(ideal_trait_value)) {
+            status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status)
+    
+            status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ])
+        } else {
+            status[sim_index, 1, ] <- exp(-ideal_strength * (population[sim_index, 1, ] - ideal_trait_value)^2 / 2)
+        }
+
+        for (t in 2:max_t) {
+            demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ])
+
+            demonstrator_trait <- matrix(
+                population[sim_index, t - 1, demonstrators],
+                nrow = n_pop, ncol = n_demonstrators
+            )
+            
+            demo_weight <- exp(-conformity * (demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^2 / 2)
+            
+            population[sim_index, t, ] <- (self_weight * population[sim_index, t - 1, ] + rowSums(demo_weight * demonstrator_trait)) / (self_weight + rowSums(demo_weight))
+            
+            if (is.na(ideal_trait_value)) {
+                status[sim_index, t, ] <- status[sim_index, t - 1, ]
+            } else {
+                status[sim_index, t, ] <- exp(-ideal_strength * (population[sim_index, t, ] - ideal_trait_value)^2 / 2)
+            }
+        }
+    }
+
+    return(
+        full_join(
+            as_tibble(array2DF(population, responseName = "trait")),
+            as_tibble(array2DF(status, responseName = "status")),
+            by = join_by(sim_index, t, member)
+        ) %>%
+            mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member))
+    )
+}
+```
+
+To see how this works, let's run a set of simulations setting the `ideal_trait_value` to 2.  Recall that the initial trait values are sampled from a normal distribution with a mean of 0 and (by default) a standard deviation of 1.  Therefore, this situation models what might happen if most agents are initially pretty far from the ideal trait, but a few happen to be nearby.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 50, ideal_trait_value = 2)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait), sd_trait = sd(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+sd_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = sd_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    expand_limits(y = 0) +
+    labs(x = "Time", y = "Trait value standard deviation", color = "Sim.")
+
+mean_plot + sd_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+As we can see, the population tends to converge on a single value pretty quickly, but far short of the ideal value!  Can increasing the strength of the ideal help?  Let's see.  In the simulation below, we set `ideal_strength` to 10, which is considerably higher than its default value of 1.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 50, ideal_trait_value = 2, ideal_strength = 10)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait), sd_trait = sd(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+sd_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = sd_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    expand_limits(y = 0) +
+    labs(x = "Time", y = "Trait value standard deviation", color = "Sim.")
+
+mean_plot + sd_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+Even when there is a very strong pull to select demonstrators close to the ideal, the population still falls short.  The problem is that agents can never adopt a trait that is outside the range of values currently in the population.  As the population grows more homogeneous, even though they get closer to the ideal, the lack of diversity in trait values means that the population will never achieve the ideal.
+
+### Innovation
+
+One solution to the problem above is to allow for some additional random variability in trait values from one time-step to the next.  In evolutionary biology, we might call this random variability "mutation" but since we are talking about *ideas* not genes, we will call it **innovation**.  As shown in the code below, we will simply add a value sampled from a normal distribution with mean 0 and a standard deviation set by the `innovation` parameter to each agent's trait value on each time-step.  Everything else about the function is unchanged from before.
+
+```{r}
+#| code-fold: show
+
+continuous_trait_evolution <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, self_weight = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1, ideal_trait_value = NA, ideal_strength = 1, innovation = 0) {
+    population <- array(NA,
+                        dim = c(n_sims, max_t, n_pop),
+                        dimnames = list("sim_index" = 1:n_sims,
+                                        "t" = 1:max_t,
+                                        "member" = 1:n_pop)
+                        )
+
+    status <- array(NA,
+                    dim = c(n_sims, max_t, n_pop),
+                    dimnames = list("sim_index" = 1:n_sims,
+                                    "t" = 1:max_t,
+                                    "member" = 1:n_pop)
+                    )
+
+    for (sim_index in 1:n_sims) {
+        population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd)
+        
+        if (is.na(ideal_trait_value)) {
+            status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status)
+    
+            status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ])
+        } else {
+            status[sim_index, 1, ] <- exp(-ideal_strength * (population[sim_index, 1, ] - ideal_trait_value)^2 / 2)
+        }
+
+        for (t in 2:max_t) {
+            demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ])
+
+            demonstrator_trait <- matrix(
+                population[sim_index, t - 1, demonstrators],
+                nrow = n_pop, ncol = n_demonstrators
+            )
+            
+            demo_weight <- exp(-conformity * (demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^2 / 2)
+            
+            population[sim_index, t, ] <- (self_weight * population[sim_index, t - 1, ] + rowSums(demo_weight * demonstrator_trait)) / (self_weight + rowSums(demo_weight)) + rnorm(n = n_pop, mean = 0, sd = innovation)
+            
+            if (is.na(ideal_trait_value)) {
+                status[sim_index, t, ] <- status[sim_index, t - 1, ]
+            } else {
+                status[sim_index, t, ] <- exp(-ideal_strength * (population[sim_index, t, ] - ideal_trait_value)^2 / 2)
+            }
+        }
+    }
+
+    return(
+        full_join(
+            as_tibble(array2DF(population, responseName = "trait")),
+            as_tibble(array2DF(status, responseName = "status")),
+            by = join_by(sim_index, t, member)
+        ) %>%
+            mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member))
+    )
+}
+```
+
+As shown in the example below, when we allow for a decent amount of random variation by setting `innovation` to 0.5, the population average is able to reach the ideal trait value of 2, even without increasing the strength of the ideal value.
+
+```{r}
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 50, ideal_trait_value = 2, innovation = 0.5)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait), sd_trait = sd(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+sd_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = sd_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    expand_limits(y = 0) +
+    labs(x = "Time", y = "Trait value standard deviation", color = "Sim.")
+
+mean_plot + sd_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+The right graph illustrates that even though the *mean* trait value in the population is the ideal, there is still considerable variability among the agents in the population.  Of course, this is to be expected, given that the model now ensures random variation in trait values will always be present.  But it's worth asking whether the population can still achieve the ideal with a smaller amount of random variability.  The simulation below sets `innovation` to 0.1 to see.
+
+```{r}
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 500, ideal_trait_value = 2, innovation = 0.1)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait), sd_trait = sd(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+sd_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = sd_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    expand_limits(y = 0) +
+    labs(x = "Time", y = "Trait value standard deviation", color = "Sim.")
+
+mean_plot + sd_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+As we can see, it takes longer for the population average to converge on the ideal (note the scale of the $x$ axes in the above graphs), but they all make it eventually.  Even a small amount of diversity can help a population get out of a rut.
+
+## Emergence of belief polarization
+
+We have now seen a number of examples of how agent-based models can help us understand the emergence of a number of interesting social phenomena, like the tendency to evolve toward a single dominant trait, how this is influenced by a preference for conformity, and how innovation can help a population to reach an "ideal" trait value.  In this section, we extend our model one last time to address the phenomenon of *polarization*.  Using our continuous-trait model, polarization occurs whenever the population evolves to a point where there are distinct groups of individuals who cluster around different trait values.
+
+Polarization notably occurs in politics, but it also occurs in other domains like the arts (e.g., representational vs. abstract visual art or "uptown" vs. "downtown" styles of musical innovation, etc.) or the sciences (e.g., single- vs. dual-process theories, nature vs. nurture, etc.).  Of particular interest is when polarization occurs *despite* some objective evaluation of the quality of a particular belief.  This kind of polarization occurs in fields like climate science, where theories, models, and observations that support the presence of mechanisms that produce climate change are nonetheless disregarded.  It also occurs in fields like medicine, where despite extensive disconfirmatory research, people who claim to be scientists (or to lead scientific agencies) nonetheless claim that vaccines cause autism.
+
+These kinds of polarization were studied using agent-based models by @OConnorWeatherall2018.  Although the model we develop here is different in its technical assumptions, we will implement the same basic interaction and updating processes that they did.  In particular, we will see how giving increased weight to demonstrators with similar traits can result in polarization that is shockingly difficult to avoid.  However, to presage the moral of the story, we will see that so long as agents give at least *some* credence to demonstrators who are dissimilar from them, a society can avoid destructive polarization.
+
+### Attraction and repulsion
+
+The key idea explored in the models by @OConnorWeatherall2018 is this: When an agent picks one or more demonstrators, they give more weight to demonstrators who have similar trait values to them than to demonstrators with dissimilar trait values.  Conceptually, it is easy to imagine situations where this occurs:  If someone shares your beliefs, you might be more likely to trust that their opinions are sound and to therefore adjust your beliefs to better match those of your interlocutor.  On the other hand, if someone espouses a belief that is very different from yours, you might be inclined to disregard them.  You may even be *repelled* by their beliefs and adopt a trait that moves *away* from theirs!  The point is that people may be more inclined to trust people who already hold similar beliefs.
+
+We can build this into our model by changing how agents assign weight to demonstrators.  We will measure the similarity between an agent $i$ and its demonstrators $j$ using the same exponentially-transformed squared distance measure we've been using so far.  The rate at which similarity falls off with the squared difference in trait values is governed by a parameter $\rho$, called `similarity_range` in our function below.  There's also a parameter for the weight given to a demonstrator with zero similarity, $\zeta$, called `dissimilar_influence` in the function below.  The weight given to demonstrator $j$ as a function of its similarity to agent $i$ is
+$$
+\psi_j = \zeta + \left(1 - \zeta \right) \exp \left[ -\frac{\left( x_i(t) - x_j(t) \right)^2}{2 \rho^2} \right]
+$$
+
+This weighting factor is implemented in the commented lines in the revised model code below.
+
+```{r}
+#| code-fold: show
+
+continuous_trait_evolution <- function(n_pop = 1000, max_t = 100, n_sims = 10, init_trait_sd = 1, self_weight = 1, n_demonstrators = 1, conformity = 0, mean_init_status = 1, ideal_trait_value = NA, ideal_strength = 1, innovation = 0, dissimilar_influence = 1, similarity_range = 1) {
+    population <- array(NA,
+                        dim = c(n_sims, max_t, n_pop),
+                        dimnames = list("sim_index" = 1:n_sims,
+                                        "t" = 1:max_t,
+                                        "member" = 1:n_pop)
+                        )
+
+    status <- array(NA,
+                    dim = c(n_sims, max_t, n_pop),
+                    dimnames = list("sim_index" = 1:n_sims,
+                                    "t" = 1:max_t,
+                                    "member" = 1:n_pop)
+                    )
+
+    for (sim_index in 1:n_sims) {
+        population[sim_index, 1, ] <- rnorm(n = n_pop, mean = 0, sd = init_trait_sd)
+        
+        if (is.na(ideal_trait_value)) {
+            status[sim_index, 1, ] <- rbeta(n = n_pop, shape1 = mean_init_status, shape2 = 1 - mean_init_status)
+    
+            status[sim_index, 1, ] <- status[sim_index, 1, ] / max(status[sim_index, 1, ])
+        } else {
+            status[sim_index, 1, ] <- exp(-ideal_strength * (population[sim_index, 1, ] - ideal_trait_value)^2 / 2)
+        }
+
+        for (t in 2:max_t) {
+            demonstrators <- sample(n_pop, size = n_pop * n_demonstrators, replace = TRUE, prob = status[sim_index, t - 1, ])
+
+            demonstrator_trait <- matrix(
+                population[sim_index, t - 1, demonstrators],
+                nrow = n_pop, ncol = n_demonstrators
+            )
+            
+            agent_demo_sq_diff <- (matrix(population[sim_index, t - 1, ], nrow = n_pop, ncol = n_demonstrators, byrow = FALSE) - demonstrator_trait)^2
+            
+            # Weight is the product of the similarity-based weight and the conformity-based weight
+            demo_weight <- (dissimilar_influence + (1 - dissimilar_influence) * exp(-agent_demo_sq_diff / (2 * similarity_range^2))) * exp(-conformity * (demonstrator_trait - matrix(rowMeans(demonstrator_trait), nrow = n_pop, ncol = n_demonstrators, byrow = FALSE))^2 / 2)
+            
+            population[sim_index, t, ] <- (self_weight * population[sim_index, t - 1, ] + rowSums(demo_weight * demonstrator_trait)) / (self_weight + rowSums(abs(demo_weight))) + rnorm(n = n_pop, mean = 0, sd = innovation)
+            
+            if (is.na(ideal_trait_value)) {
+                status[sim_index, t, ] <- status[sim_index, t - 1, ]
+            } else {
+                status[sim_index, t, ] <- exp(-ideal_strength * (population[sim_index, t, ] - ideal_trait_value)^2 / 2)
+            }
+        }
+    }
+
+    return(
+        full_join(
+            as_tibble(array2DF(population, responseName = "trait")),
+            as_tibble(array2DF(status, responseName = "status")),
+            by = join_by(sim_index, t, member)
+        ) %>%
+            mutate(sim_index = as.numeric(sim_index), t = as.numeric(t), member = as.numeric(member))
+    )
+}
+```
+
+Before we get to running some simulations, it may be useful to visualize how the similarity weight varies as a function of distance and the two parameters just described; see below.  When $\zeta = 1$, similarity doesn't contribute at all to the weight of a demonstrator.  When $\zeta = 0$, dissimilar demonstrators are given no weight at all.  Finally, we $\zeta < 0$, dissimilar demonstrators are given *negative* weight, such that the agent updates their trait value *away* from the demonstrator.  This situation will be used below to model *distrust* of a demonstrator.
+
+```{r}
+expand_grid(d = seq(0, 5, length.out = 101), similarity_range = c(0.5, 1, 1.5, 2, 2.5), dissimilar_influence = seq(-1, 1, length.out = 3)) %>%
+    mutate(weight = dissimilar_influence + (1 - dissimilar_influence) * exp(-d^2 / (2 * similarity_range^2))) %>%
+    ggplot(aes(x = d, y = weight, color = similarity_range, linetype = factor(dissimilar_influence), group = interaction(similarity_range, dissimilar_influence))) +
+    geom_line() +
+    scale_color_viridis_c() +
+    labs(x = expression(x[i](t) - x[j](t)), y = expression(psi[j]), linetype = expression(zeta), color = expression(rho))
+```
+
+### Clusters from preference for similarity
+
+The simulation below shows that, when people are *only* influenced by those who are similar to them, clusters of traits emerge.  One cluster is centered around the mean of the initial population (0), but there are also clusters that form on the extremes.
+
+```{r}
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 200, dissimilar_influence = 0, similarity_range = 0.5)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+As shown below, the narrower the `similarity_range` is, the more clusters tend to form.
+
+```{r}
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 200, dissimilar_influence = 0, similarity_range = 0.2)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+On the other hand, when `similarity_range` is large enough, the entire population comes to adopt the same consensus trait value.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 100, dissimilar_influence = 0, similarity_range = 1)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+### Distrust leads to extreme polarization
+
+Now let's see what happens when agents do not merely ignore dissimilar demonstrators (`dissimilar_influence = 0`), but instead *distrust* dissimilar demonstrators.  As noted above, distrust in our model amounts to giving a demonstrator *negative* weight as similarity diminishes.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 100, dissimilar_influence = -1, similarity_range = 0.5)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+As shown above, with distrust, there are no longer any clusters in the middle---the population evolves into two sets of diametrically opposed traits.  This results from the combined influence of agents being pulled *toward* agents with similar traits and *away* from agents with dissimilar traits.
+
+That said, if the similarity range is sufficiently large, as in the simulations below, the entire population can again converge on a consensus value.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 100, dissimilar_influence = -1, similarity_range = 1)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+### When can a distrustful society arrive at a mutually agreed solution?
+
+The preceding simulations assumed that there was no inherent fitness or value associated with a trait.  What happens if there *is* an ideal trait value?  Will this counteract the tendency to polarize?  First, let's simulate a situation where the ideal trait value is 0, which is the mean of the initial trait values for each population.
+
+```{r}
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 100, dissimilar_influence = -1, similarity_range = 0.5, ideal_trait_value = 0, ideal_strength = 1)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+Huh!  Even in this simple scenario, polarization arises.  Perhaps if we increase the pull of the ideal value?
+
+```{r}
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 100, dissimilar_influence = -1, similarity_range = 0.5, ideal_trait_value = 0, ideal_strength = 5)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+As we can see above, a stronger pull toward the ideal gives the population a chance to avoid falling into the polarization trap.  Still, that was only for a population where the ideal value was already close to the average.  What happens if the ideal value is not close to the initial mean value of the population?  As shown below, even with a strong pull toward an ideal value of 2, polarization occurs.  In essence, there is one group who gets close to optimal and another that is diametrically opposed.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 100, dissimilar_influence = -1, similarity_range = 0.5, ideal_trait_value = 2, ideal_strength = 5)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+In fact, looking at the mean trait values, it's clear that *most* population members fall on the opposite side of the "ideal" value!  Why is this?  Recall that being close to the ideal increases your status, thus making it more likely that you'll be chosen as a demonstrator.  An agent who has a trait value very different from the ideal will therefore be *repelled* by most of the demonstrators they select!
+
+Even without distrust---when you just ignore people who are dissimilar---it is possible for some segment of the population to achieve the optimal, but there are often large segments of the population who fail to do so, at least at first.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 100, dissimilar_influence = 0, similarity_range = 0.5, ideal_trait_value = 2, ideal_strength = 5)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+Of course, it is worth remembering what we saw above---that even if you are equally influenced by everyone, the population can often converge on a sub-optimal trait value.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 100, dissimilar_influence = 1, similarity_range = 0.5, ideal_trait_value = 2, ideal_strength = 5)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+Innovation is not necessarily sufficient for an ignorant population to converge on an optimal solution.  This is unlike the previous simulations where innovation was sufficient to get the population "out of its rut".
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 100, dissimilar_influence = 0, similarity_range = 0.5, ideal_trait_value = 2, ideal_strength = 5, innovation = 0.1)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
+
+Even a little bit of knowledge goes a long way.  If you prioritize, but do not outright dismiss, dissimilar agents, an innovative population can converge on the optimum.
+
+```{r}
+#| code-fold: show
+
+sim <- continuous_trait_evolution(n_pop = 1000, max_t = 100, dissimilar_influence = 0.1, similarity_range = 0.5, ideal_trait_value = 2, ideal_strength = 5, innovation = 0.1)
+
+trait_summary <- sim %>%
+    group_by(sim_index, t) %>%
+    summarize(mean_trait = mean(trait))
+
+mean_plot <- trait_summary %>%
+    ggplot(aes(x = t, y = mean_trait, color = factor(sim_index))) +
+    geom_line(linewidth = 0.5) +
+    stat_summary(fun = mean, geom = "line", linewidth = 1, color = "black") +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow() +
+    labs(x = "Time", y = "Mean trait value", color = "Sim.")
+
+final_plot <- sim %>%
+    filter(t == max(t)) %>%
+    ggplot(aes(x = factor(sim_index), y = trait, color = factor(sim_index))) +
+    geom_point(position = position_jitter(width = 0.2, height = 0), alpha = 0.5) +
+    geom_hline(yintercept = 2, linetype = "dashed", color = "black") +
+    scale_color_discreterainbow(guide = "none") +
+    labs(x = "Simulation index", y = "Final trait value", color = "Sim.")
+
+mean_plot + final_plot + plot_layout(nrow = 1, guides = "collect")
+```
