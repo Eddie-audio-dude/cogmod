@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>14&nbsp; Model-based cognitive neuroscience – Computational Cognitive Modeling</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./references.html" rel="next">
+<link href="./agent_based_models.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./agent_based_models.html">Cognitive models at larger and smaller scales</a></li><li class="breadcrumb-item"><a href="./mbcn.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Model-based cognitive neuroscience</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Computational Cognitive Modeling</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Background</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./r_coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Programming with R</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Modeling behavior</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./random_walk.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Building a random walk model to simulate choice and RT</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion_sim.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">From random walk to diffusion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./diffusion_fit.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Fitting a diffusion model to data</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model_comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Model complexity and model comparison</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./blast_example.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">A worked example</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./accumulator_models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Accumulator models of choice and response time</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Coupling behavior to structured representations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./ebrw.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Exemplar of the Exemplar Based Random Walk</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./vector_reps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Distributed representations, similarity, and recognition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Associative Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./backprop.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Learning useful representations</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Cognitive models at larger and smaller scales</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./agent_based_models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Agent-Based Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mbcn.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Model-based cognitive neuroscience</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#salience-by-competitive-and-recurrent-interactions" id="toc-salience-by-competitive-and-recurrent-interactions" class="nav-link active" data-scroll-target="#salience-by-competitive-and-recurrent-interactions"><span class="header-section-number">14.1</span> Salience by Competitive and Recurrent Interactions</a>
+  <ul class="collapse">
+  <li><a href="#fef-visual-neuron-dynamics" id="toc-fef-visual-neuron-dynamics" class="nav-link" data-scroll-target="#fef-visual-neuron-dynamics"><span class="header-section-number">14.1.1</span> FEF visual neuron dynamics</a></li>
+  <li><a href="#scri-the-diagram" id="toc-scri-the-diagram" class="nav-link" data-scroll-target="#scri-the-diagram"><span class="header-section-number">14.1.2</span> SCRI: The diagram</a></li>
+  </ul></li>
+  <li><a href="#dynamical-systems" id="toc-dynamical-systems" class="nav-link" data-scroll-target="#dynamical-systems"><span class="header-section-number">14.2</span> Dynamical systems</a>
+  <ul class="collapse">
+  <li><a href="#time-may-change-me-state-as-a-function-of-time-only" id="toc-time-may-change-me-state-as-a-function-of-time-only" class="nav-link" data-scroll-target="#time-may-change-me-state-as-a-function-of-time-only"><span class="header-section-number">14.2.1</span> Time may change me: State as a function of time only</a></li>
+  <li><a href="#never-leave-the-stream-shunting-dynamics" id="toc-never-leave-the-stream-shunting-dynamics" class="nav-link" data-scroll-target="#never-leave-the-stream-shunting-dynamics"><span class="header-section-number">14.2.2</span> Never leave the stream: Shunting dynamics</a></li>
+  <li><a href="#but-you-can-trace-time-numerical-integration" id="toc-but-you-can-trace-time-numerical-integration" class="nav-link" data-scroll-target="#but-you-can-trace-time-numerical-integration"><span class="header-section-number">14.2.3</span> But you <em>can</em> trace time: Numerical integration</a></li>
+  <li><a href="#a-glimpse-of-how-others-see-the-faker-sources-of-excitation-and-inhibition" id="toc-a-glimpse-of-how-others-see-the-faker-sources-of-excitation-and-inhibition" class="nav-link" data-scroll-target="#a-glimpse-of-how-others-see-the-faker-sources-of-excitation-and-inhibition"><span class="header-section-number">14.2.4</span> A glimpse of how others see the faker: Sources of excitation and inhibition</a></li>
+  </ul></li>
+  <li><a href="#the-days-float-through-my-eyes-salience-by-competitive-and-recurrent-interactions" id="toc-the-days-float-through-my-eyes-salience-by-competitive-and-recurrent-interactions" class="nav-link" data-scroll-target="#the-days-float-through-my-eyes-salience-by-competitive-and-recurrent-interactions"><span class="header-section-number">14.3</span> The days float through my eyes: Salience by Competitive and Recurrent Interactions</a>
+  <ul class="collapse">
+  <li><a href="#scri-equations-and-function" id="toc-scri-equations-and-function" class="nav-link" data-scroll-target="#scri-equations-and-function"><span class="header-section-number">14.3.1</span> SCRI equations and function</a></li>
+  <li><a href="#initial-activation-levels" id="toc-initial-activation-levels" class="nav-link" data-scroll-target="#initial-activation-levels"><span class="header-section-number">14.3.2</span> Initial activation levels</a></li>
+  <li><a href="#the-final-function" id="toc-the-final-function" class="nav-link" data-scroll-target="#the-final-function"><span class="header-section-number">14.3.3</span> The final function</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./agent_based_models.html">Cognitive models at larger and smaller scales</a></li><li class="breadcrumb-item"><a href="./mbcn.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Model-based cognitive neuroscience</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Model-based cognitive neuroscience</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>These notes are a companion to <a href="https://drive.google.com/file/d/1N5h4XsUny5h09XNR6Og0dV_MW0LjHvk0/view?usp=sharing">this chapter</a> in the 2nd edition of <em>An Introduction to Model-Based Cognitive Neuroscience</em> <span class="citation" data-cites="CoxEtAlMBCN2024">(<a href="references.html#ref-CoxEtAlMBCN2024" role="doc-biblioref">Cox et al., 2024</a>)</span>. That chapter—like the rest in that book—covers the burgeoning field of model-based cognitive neuroscience. This field seeks to use cognitive models like those we’ve developed throughout this course to help understand how brains implement the representations and processes posited by models. In this way, cognitive models act as a “bridge” between different levels of explanation, helping us understand not merely <em>how</em> the brain does something, but <em>why</em>. In this chapter, we closely examine one model in this field, Salience by Competitive and Recurrent Interactions (SCRI, pronounced “scry” like the mystical art; <span class="citation" data-cites="CoxEtAl2022">Cox et al. (<a href="references.html#ref-CoxEtAl2022" role="doc-biblioref">2022</a>)</span>).</p>
+<section id="salience-by-competitive-and-recurrent-interactions" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="salience-by-competitive-and-recurrent-interactions"><span class="header-section-number">14.1</span> Salience by Competitive and Recurrent Interactions</h2>
+<p>SCRI was developed to explain how individual visually-responsive neurons in the Frontal Eye Fields (FEF) select the locations of potential target items in visual search. According to SCRI, these neurons use their <em>firing rate</em> to signal when a location in the visual field contains an object that is likely to be a search target. In other words, these neurons produce more <em>spikes</em> or <em>action potentials</em> when there is a target (or target-like) object in their receptive fields than when there is a distractor (or nothing) in their receptive fields. In that sense, these neurons signal the relative <em>salience</em> of different parts of the visual field based on how likely they are to contain a target.</p>
+<p>Neurophysiological studies have suggested that the signals produced by FEF visual neurons act as <em>evidence</em> that is used to decide where to move the eyes <span class="citation" data-cites="HanesSchall1996">(<a href="references.html#ref-HanesSchall1996" role="doc-biblioref">Hanes &amp; Schall, 1996</a>)</span>. Subsequently, <span class="citation" data-cites="PurcellEtAl2010">Purcell et al. (<a href="references.html#ref-PurcellEtAl2010" role="doc-biblioref">2010</a>)</span> and <span class="citation" data-cites="PurcellEtAl2012">Purcell et al. (<a href="references.html#ref-PurcellEtAl2012" role="doc-biblioref">2012</a>)</span> used recorded activity from these neurons as input to an accumulator model of decision making and showed that, in doing so, they could account for the timing and end-points of saccades (eye movements) that monkeys made in visual search tasks. Thus, in explaining how these FEF visual neurons operate, SCRI is ultimately a theory of <em>evidence generation</em>—where an accumulator’s samples of evidence come from.</p>
+<p>What sets SCRI apart from other neurophysiologically-informed cognitive models is that it explains the moment-by-moment spiking activity of individual neurons not in physiological terms (e.g., ion channels and membrane conductance) but in <em>cognitive</em> terms. This is possible because SCRI assumes a very simple and transparent <em>linking proposition</em> <span class="citation" data-cites="Schall2004 Teller1984">(<a href="references.html#ref-Schall2004" role="doc-biblioref">Schall, 2004</a>; <a href="references.html#ref-Teller1984" role="doc-biblioref">Teller, 1984</a>)</span>: that FEF visual neuron spike rates are <em>directly</em> related to the <em>relative salience</em> of that neuron’s receptive field.</p>
+<section id="fef-visual-neuron-dynamics" class="level3" data-number="14.1.1">
+<h3 data-number="14.1.1" class="anchored" data-anchor-id="fef-visual-neuron-dynamics"><span class="header-section-number">14.1.1</span> FEF visual neuron dynamics</h3>
+<div class="cell" data-caption="Example of FEF visual neuron dynamics.">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"img/ex_vn+array.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="img/ex_vn+array.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The figure above shows (a) a typical example of a visual search task and (b) an example of how a typical FEF visual neuron responds in this kind of visual search task.</p>
+<p>In the visual search tasks to which SCRI has been applied, each trial presents an array of items. The items are presented at equidistant points on an imaginary circle centered on a fixation square that the monkey must fixate before the trial can start. Each array contains exactly one <em>target</em> item, which remains the same throughout a block of trials (so the monkey knows what they are looking for). The other items in the array are <em>distractors</em>. The monkey’s job is to make a <em>saccade</em> from the central fixation square to wherever they think the target is in the display (they’re really good at this, as you might imagine).</p>
+<p>Displays can vary in <em>set size</em>, the number of items in the array. They can also vary in how <em>similar</em> the distractors are to the target. Sometimes, the target item is defined by its <em>form</em>, as in the above example where the target is a “T” shape and the distractors are “L” shaped. In other conditions, the target is defined by its <em>color</em> or by its prevailing <em>motion</em> direction.</p>
+<p>The right part of the figure shows how a typical FEF visual neuron responds, depending on whether the item in its receptive field (RF; circled areas on the left) is a target or a distractor. During phase 1, the neuron maintains a constant baseline firing rate. During phase 2, the neuron’s firing rate increases regardless of whether the item in its RF is a target or a distractor. Finally, during phase 3, the neurons fires more if the item is a target than if it is a distractor. Although individual neurons vary widely in their particulars, they all demonstrate this same qualitative pattern.</p>
+</section>
+<section id="scri-the-diagram" class="level3" data-number="14.1.2">
+<h3 data-number="14.1.2" class="anchored" data-anchor-id="scri-the-diagram"><span class="header-section-number">14.1.2</span> SCRI: The diagram</h3>
+<div class="cell" data-layout-align="center">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"img/fef_brain.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="img/fef_brain.png" class="img-fluid quarto-figure quarto-figure-center figure-img" style="width:50.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"img/fef_model_v2.png"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="img/fef_model_v2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The figure above illustrates the different elements of SCRI and how they are arranged, as well as their putative correspondence with neurons in different brain areas. For now, we will just describe them narratively, but don’t worry we will implement the model formally below. SCRI consists of three sets of units (I use the term “units” here so as to be agnostic about whether they necessarily refer to single neurons or whether they could reflect populations of neurons):</p>
+<ul>
+<li><strong>Localization</strong> units (<span class="math inline">\(x_i\)</span>) signal when anything changes in their receptive field. Their signal is <em>transient</em> and does not depend on the features of any items in their receptive field. These units are excited by the sudden appearance of an item when the search array appears. These units correspond to the kind of transient change detectors present throughout the dorsal “where” pathway.</li>
+<li><strong>Identification</strong> units (<span class="math inline">\(z_i\)</span>) detect the presence of target-like features in their receptive field, thus helping to indicate which parts of the visual field are likely to contain a target item. These units correspond to feature detectors present throughout the ventral “what” pathway.</li>
+<li><strong>Salience</strong> units (<span class="math inline">\(v_i\)</span>) are where the magic happens. These units are assumed to correspond directly to FEF visual neurons. They receive excitation from both the localization and identification units. They can also receive inhibition either from one another (<em>lateral</em> inhibition, <span class="math inline">\(\beta_v\)</span>) or from localization or identification units centered on different receptive fields (<em>feedforward</em> inhibition, <span class="math inline">\(\alpha_x\)</span> and <span class="math inline">\(\alpha_v\)</span>). Finally, they also act as <em>recurrent gates</em> on the identification units that govern the <em>rate</em> at which they can detect target-like features. Basically, the more active a salience unit is, the faster you can find out <em>what</em> the item in its receptive field is. In that sense, these units implement a form of <em>selective attention</em>.</li>
+</ul>
+<p>The characteristic three-phase pattern of FEF visual neurons arises from the dynamic interactions between these three unit types. When the localization units detect the sudden appearance of the items in the search array, this excites the salience units in FEF. Now excited, these units “open the gate” for the identification units to figure out whether the features of the items in each location resemble those of the search target. If the identification units detect the presence of target-like features, they become active and send excitation back to FEF salience units. Otherwise, they don’t excite the FEF salience units. In the end, the only salience units—and therefore the only FEF visual neurons—that remain with high firing rates are those with receptive fields that contain target-like items. This evidence feeds forward into movement neurons (<span class="math inline">\(m_i\)</span>) that eventually initiate a saccade into one of those receptive fields.</p>
+<p>One way to think of how SCRI works is this: The localization units kick open the doors of attention and the identification units prop open the doors to regions likely to contain a target.</p>
+</section>
+</section>
+<section id="dynamical-systems" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="dynamical-systems"><span class="header-section-number">14.2</span> Dynamical systems</h2>
+<p>The example of SCRI gives us a chance to address an additional type of modeling that is done in the cognitive sciences. <em>Dynamical systems</em> are models that are defined in terms of a set of equations that describe how the system changes over time. Of particular interest are models in which a system’s own state steers its dynamics. Although all of the models we have dealt with in this course involve dynamics of some kind—the dynamics of accumulating evidence, the dynamics of learning, the dynamics of social interactions, etc.—those dynamics have involved some element of randomness. Such models thus broadly fall under the heading of “stochastic dynamical systems”. For a weighty introduction to stochastic dynamical systems in the context of evidence accumulation models, see <span class="citation" data-cites="Smith2000">Smith (<a href="references.html#ref-Smith2000" role="doc-biblioref">2000</a>)</span>.</p>
+<p>Often, stochastic dynamical systems can only be simulated—only in rare situations (like with the diffusion and random walk models we started with) can the predictions of such systems be computed and therefore “fit” to data. The dynamical system we will explore in this chapter is <em>deterministic</em>. A deterministic dynamical system will always produce the same behavior when put into the same set of initial conditions.</p>
+<p>It is reasonable to ask whether any <em>interesting</em> cognitive models can be constructed as deterministic dynamical systems. For one thing, there can still be “noise” in the model to account for stochastic events in data. For example, in a regression model we assume that the underlying linear system is deterministic but we have a “noise” term that accounts for deviations from that linear system. So these kinds of models can still be applied to systems with stochastic elements; it is just that the noise does not <em>drive</em> the dynamics. For another thing, when a system’s dynamics are driven, at least in part, by its <em>own</em> states, there can be many interesting interactions between different parts of the system. Even if the system is deterministic, those interactions can still yield a great variety of potential behavior.</p>
+<p>Finally, it is worth keeping in mind that a deterministic dynamical system, even if it cannot be solved analytically, can usually be solved <em>numerically</em>, as we will do here. Computers are really good at this, meaning that it is practical to <em>fit</em> dynamical systems models to data, since we can quickly compute their predictions and adjust their parameters to find those that fit best.</p>
+<p>As we know, all models are deliberate simplifications. Assuming that the underlying dynamics of a system are deterministic is one such simplification. But as we shall see below, this simplification can be worth the cost when it helps us understand a system better without sacrificing its ability to fit data.</p>
+<section id="time-may-change-me-state-as-a-function-of-time-only" class="level3" data-number="14.2.1">
+<h3 data-number="14.2.1" class="anchored" data-anchor-id="time-may-change-me-state-as-a-function-of-time-only"><span class="header-section-number">14.2.1</span> Time may change me: State as a function of time only</h3>
+<p>The simplest kind of dynamics are those that depend only on how much time has passed. In that case, we can describe such a system with an equation or rule that does not need to make any reference to other parts of the system.</p>
+<p>In SCRI, the localization units are described by this kind of dynamic. Specifically, the activation of a localization unit at time <span class="math inline">\(t\)</span> is the PDF of a Gamma distribution. In SCRI, the Gamma distribution is parameterized in terms of its mode or “peak”, <span class="math inline">\(\omega_p\)</span>, and its standard deviation or “spread”, <span class="math inline">\(\omega_s\)</span>. We can convert these to the rate <span class="math inline">\(r\)</span> and shape <span class="math inline">\(s\)</span> with the following formulae: <span class="math display">\[\begin{align*}
+r &amp; = \frac{\omega_p + \sqrt{\omega_p^2 + 4 \omega_s^2}}{2 \omega_s^2} \\
+s &amp; = 1 + \omega_p r
+\end{align*}\]</span> In the function for SCRI, the peak and spread are called <code>loc_peak</code> and <code>loc_spread</code> and the formulae above are written below:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>loc_rate <span class="ot">&lt;-</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>In math terms, we can write the activation of a localization unit centered on location <span class="math inline">\(i\)</span> as <span class="math display">\[
+x_i(t) = \chi_i \gamma \left(t \mid s, r \right)
+\]</span> where <span class="math inline">\(\chi_i\)</span> is a scaling parameter that represents the strength of the localization signal and <span class="math inline">\(\gamma \left(t \mid s, r \right)\)</span> is short for the PDF of the Gamma distribution with shape <span class="math inline">\(s\)</span> and rate <span class="math inline">\(r\)</span> evaluated at time <span class="math inline">\(t\)</span>. The graph below visualizes how these dynamics change with the peak and spread of the function, assuming <span class="math inline">\(\chi_i = 1\)</span>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">expand_grid</span>(<span class="at">t =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">300</span>), <span class="at">loc_peak =</span> <span class="fu">c</span>(<span class="dv">70</span>, <span class="dv">100</span>, <span class="dv">130</span>), <span class="at">loc_spread =</span> <span class="fu">c</span>(<span class="dv">20</span>, <span class="dv">40</span>, <span class="dv">60</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_rate =</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_shape =</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">act =</span> <span class="fu">dgamma</span>(t, <span class="at">shape =</span> loc_shape, <span class="at">rate =</span> loc_rate)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> act, <span class="at">color =</span> <span class="fu">factor</span>(loc_peak), <span class="at">linetype =</span> <span class="fu">factor</span>(loc_spread))) <span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>) <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time from array onset (ms)"</span>, <span class="at">y =</span> <span class="fu">expression</span>(<span class="st">"Activation "</span><span class="sc">*</span>x[i](t)), <span class="at">color =</span> <span class="fu">expression</span>(omega[p]), <span class="at">linetype =</span> <span class="fu">expression</span>(omega[s]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="never-leave-the-stream-shunting-dynamics" class="level3" data-number="14.2.2">
+<h3 data-number="14.2.2" class="anchored" data-anchor-id="never-leave-the-stream-shunting-dynamics"><span class="header-section-number">14.2.2</span> Never leave the stream: Shunting dynamics</h3>
+<p>The next type of dynamics in SCRI are <em>not</em> functions of time alone. Instead, they are a function of the <em>excitation</em> and <em>inhibition</em> that an element of the model receives from other elements. In that sense, they are very similar to the accumulator models that we examined before. In those models, an accumulator received excitation in the form of incoming samples of evidence but could also receive inhibition, either from the evidence sent to other accumulators—<em>feedforward</em> inhibition—or from the amount of evidence present in other accumulators—<em>lateral</em> inhibition. In addition, accumulators could exhibit <em>leakage</em>, where they would lose a certain proportion of their accumulated evidence from one moment to the next.</p>
+<p>One issue we confronted with accumulator models was whether or not we allowed them to have <em>negative</em> amounts of accumulated evidence. Since we are now trying to build a model of neural firing rates, it doesn’t make sense to allow those to be negative. Moreover, neurons cannot increase their firing rate indefinitely—at some point, they reach saturation.</p>
+<p><em>Shunting</em> dynamics <span class="citation" data-cites="Grossberg1980">(<a href="references.html#ref-Grossberg1980" role="doc-biblioref">Grossberg, 1980</a>)</span> are a natural way to model a system that receives both excitation and inhibition while keeping its activation bounded both above—at a saturation point—and below—at zero. Shunting dynamics are described by the following differential equation, which specifies the <em>time derivative</em> of a unit’s activity: <span class="math display">\[
+\frac{dy}{dt} = \left[S - y(t) \right] \times E(t) - y(t) I(t)
+\]</span> where <span class="math inline">\(y(t)\)</span> is the activation of a unit at time <span class="math inline">\(t\)</span>, <span class="math inline">\(S\)</span> is the unit’s saturation point, and <span class="math inline">\(E(t)\)</span> and <span class="math inline">\(I(t)\)</span> are the amount of excitation and inhibition the unit is receiving at time <span class="math inline">\(t\)</span>, respectively. Note that both <span class="math inline">\(E(t)\)</span> and <span class="math inline">\(I(t)\)</span> must be nonnegative. Intuitively, the equation above says that excitation will only result in an increase to the unit’s activation to the extent that the unit is far from its saturation point (note that <span class="math inline">\(S - y(t)\)</span> acts to scale the excitation <span class="math inline">\(E(t)\)</span>). At the same time, inhibition will only result in a decrease of the unit’s activation to the extent that the unit has any activity to lose (note that inhibition <span class="math inline">\(I(t)\)</span> is scaled by the unit’s current activation <span class="math inline">\(y(t)\)</span>).</p>
+<p>Before fleshing out the different kinds of excitation and inhibition present in SCRI, let’s just see what happens if we assume that <span class="math inline">\(E\)</span> and <span class="math inline">\(I\)</span> are constant and set <span class="math inline">\(S = 1\)</span>. The graph below shows the value of <span class="math inline">\(\frac{dy}{dt}\)</span> for different combinations of <span class="math inline">\(E\)</span> and <span class="math inline">\(I\)</span> and for different values of the current activation <span class="math inline">\(y(t)\)</span>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">expand_grid</span>(<span class="at">y =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="at">length.out =</span> <span class="dv">101</span>), <span class="at">E =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">4</span>), <span class="at">I =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">dy_dt =</span> (<span class="dv">1</span> <span class="sc">-</span> y) <span class="sc">*</span> E <span class="sc">-</span> y <span class="sc">*</span> I) <span class="sc">%&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> dy_dt, <span class="at">color =</span> E, <span class="at">group =</span> E)) <span class="sc">+</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"I"</span>, <span class="at">labeller =</span> label_both) <span class="sc">+</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="fu">expression</span>(<span class="fu">y</span>(t)), <span class="at">y =</span> <span class="fu">expression</span>(<span class="fu">frac</span>(dy, dt)), <span class="at">color =</span> <span class="st">"E"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>When there is no inhibition (left graph), the derivative goes to zero as <span class="math inline">\(y(t) \rightarrow 1\)</span>, which is the saturation point (recall that <span class="math inline">\(S = 1\)</span> above). When there is inhibition but no excitation (purple lines in the middle and right graphs), the derivative goes to zero as <span class="math inline">\(y(t) \rightarrow 0\)</span>. Otherwise, the derivative only equals zero when the current activation <span class="math inline">\(y(t)\)</span> corresponds to <span class="math inline">\(\frac{E}{E + I}\)</span>, i.e., the <em>relative proportion</em> of excitation in the input.</p>
+</section>
+<section id="but-you-can-trace-time-numerical-integration" class="level3" data-number="14.2.3">
+<h3 data-number="14.2.3" class="anchored" data-anchor-id="but-you-can-trace-time-numerical-integration"><span class="header-section-number">14.2.3</span> But you <em>can</em> trace time: Numerical integration</h3>
+<p>The differential equation above is a great description of how the state of a unit will change at any given moment in time. How can we go from this description to seeing the complete trajectory of how a unit’s activity evolves over time? The short answer is that we need to <em>integrate</em> the differential equation over a span of time: <span class="math display">\[
+y(t) = \int_{\tau = t_0}^t \frac{dy}{d \tau} d \tau
+\]</span> But the short answer doesn’t get us very far because, in general, the differential equations that describe a dynamical system can’t be integrated mathematically.</p>
+<p>So the long answer is that we will write a function in R and then have the computer do the integration for us—this is called <em>numerical integration</em>. We will use the R package <code>deSolve</code>, which has a function <code>ode</code> which allows us to compute the solution to the integration problem above. The <code>ode</code> function needs three arguments: <code>y</code>, the initial value(s) of the function; <code>times</code>, a vector of time points at which to evaluate the function; and <code>func</code>, a function that computes the derivative given the time <code>t</code>, current state <code>y</code>, and parameters <code>parms</code>.</p>
+<p>Let’s get to it. First, let’s write our function. This is actually pretty straightforward, since we can just directly translate the equation into R code, as shown below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>shunting_system <span class="ot">&lt;-</span> <span class="cf">function</span>(t, y, parms) {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># dy/dt = (S - y) * E - y * I</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    dy <span class="ot">&lt;-</span> (parms<span class="sc">$</span>saturation <span class="sc">-</span> y) <span class="sc">*</span> parms<span class="sc">$</span>excitation <span class="sc">-</span> y <span class="sc">*</span> parms<span class="sc">$</span>inhibition</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(dy))</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>There are a couple of things worth noting about how we have to write this function: * The function always needs three arguments, <code>t</code>, <code>y</code>, and <code>parms</code>, even if you don’t need them all! Notice that we never refer to <code>t</code> explicitly, above. * The <code>parms</code> argument is expected to be either a list or vector of parameters for the function. The <code>shunting_system</code> function above assumes that <code>parms</code> is a list, so it refers to specific parameters using the <code>$</code>. * As we will see below, <code>y</code> can be a vector. The function needs to compute a vector of derivatives that is the same length as <code>y</code>. But for whatever reason, the return <em>type</em> needs to be a list, hence why the function returns <code>list(dy)</code> rather than just <code>dy</code>.</p>
+<p>Let’s take our shunting system out for a spin! In the chunk of code below, I illustrate how we can use the <code>ode</code> function in the <code>deSolve</code> package to “solve” the shunting system we just defined.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initial value</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>y0 <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Times at which to calculate the function</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">101</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters of the function</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation =</span> <span class="dv">1</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">excitation =</span> <span class="dv">1</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">inhibition =</span> <span class="dv">1</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> shunting_system,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">head</span>(solved))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     time         1
+[1,] 0.00 0.1000000
+[2,] 0.03 0.1232951
+[3,] 0.06 0.1452315
+[4,] 0.09 0.1658913
+[5,] 0.12 0.1853482
+[6,] 0.15 0.2036719</code></pre>
+</div>
+</div>
+<p>As you can see, the result is stored in <code>solved</code> as a <em>matrix</em>. The first column is always called <code>"time"</code> and the remaining columns are the values of <code>y</code> at each point in time. Let’s make a graph to visualize the results.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">2</span>]) <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Cool! Now let’s try running the function with a bunch of different values of <code>excitation</code>, <code>inhibition</code>, and initial value <code>y0</code>, as shown below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>to_solve <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation =</span> <span class="dv">1</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">excitation =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">inhibition =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">y0 =</span> <span class="fu">seq</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="at">length.out =</span> <span class="dv">5</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">101</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>to_plot <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(to_solve)) {</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> to_solve<span class="sc">$</span>y0[i],</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> shunting_system,</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> <span class="fu">as.list</span>(to_solve[i,])</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>              )</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>    to_plot <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        to_plot,</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(to_solve[i,], <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">2</span>]))</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>to_plot <span class="sc">%&gt;%</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> y, <span class="at">color =</span> y0, <span class="at">group =</span> y0)) <span class="sc">+</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(excitation <span class="sc">~</span> inhibition, <span class="at">labeller =</span> label_both) <span class="sc">+</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_viridis_c</span>() <span class="sc">+</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"y"</span>, <span class="at">color =</span> <span class="st">"y(0)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Regardless of the initial activity level <span class="math inline">\(y(0)\)</span>, the activity will eventually converge on a value that is a <em>balance</em> between excitation and inhibition, i.e., <span class="math inline">\(\frac{E}{E + I}\)</span>. Unless, of course, there is no excitation or inhibition in which case the activity level remains unchanged from its initial value (the top left corner). Finally, see how even when there is only excitation (left column) or only inhibition (top row), the system’s activation stays within its bounds between 0 and 1 (the saturation point).</p>
+</section>
+<section id="a-glimpse-of-how-others-see-the-faker-sources-of-excitation-and-inhibition" class="level3" data-number="14.2.4">
+<h3 data-number="14.2.4" class="anchored" data-anchor-id="a-glimpse-of-how-others-see-the-faker-sources-of-excitation-and-inhibition"><span class="header-section-number">14.2.4</span> A glimpse of how others see the faker: Sources of excitation and inhibition</h3>
+<p>Now let’s start making things interesting. Now that we’ve seen how shunting dynamics work, let’s replace the constant “excitation” parameter in our model with the time-varying excitation we saw when we described the localization units. We will assume that there is a parameter for the <em>shape</em> and <em>rate</em> of the gamma function in our <code>parms</code> list, as shown below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>shunting_system <span class="ot">&lt;-</span> <span class="cf">function</span>(t, y, parms) {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Localization signal (x) depends only on the current time</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> parms<span class="sc">$</span>strength_loc <span class="sc">*</span> <span class="fu">dgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape, <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    dy <span class="ot">&lt;-</span> (parms<span class="sc">$</span>saturation <span class="sc">-</span> y) <span class="sc">*</span> loc <span class="sc">-</span> y <span class="sc">*</span> parms<span class="sc">$</span>inhibition</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(dy))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Initial value</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>y0 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Times at which to calculate the function</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">101</span>)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>loc_peak <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>loc_spread <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>loc_rate <span class="ot">&lt;-</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters of the function</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation =</span> <span class="dv">1</span>,</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="dv">1</span>,</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">inhibition =</span> <span class="fl">0.2</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> shunting_system,</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms)</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">2</span>]) <span class="sc">%&gt;%</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can now see two things happening: First, there is a sharp increase in activation as the transient excitation increases. But once it’s gone, activation decays gradually because we have set the <code>inhibition</code> parameter to something greater than zero. In fact, this gradual decay is a part of SCRI and is referred to as <em>leakage</em>. In our next amendment to the function, we will change its name accordingly.</p>
+<p>In addition to leakage and transient excitation, we can also have <em>tonic excitation</em>. This corresponds to “background” sources of excitation that might be present even in the absence of a stimulus, as shown below where we call this tonic excitation <code>baseline</code>.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>shunting_system <span class="ot">&lt;-</span> <span class="cf">function</span>(t, y, parms) {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Localization signal (x) depends only on the current time</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> parms<span class="sc">$</span>strength_loc <span class="sc">*</span> <span class="fu">dgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape, <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    dy <span class="ot">&lt;-</span> (parms<span class="sc">$</span>saturation <span class="sc">-</span> y) <span class="sc">*</span> (parms<span class="sc">$</span>baseline <span class="sc">+</span> loc) <span class="sc">-</span> y <span class="sc">*</span> parms<span class="sc">$</span>leakage</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(dy))</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Initial value</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>y0 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Times at which to calculate the function</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">101</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>loc_peak <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>loc_spread <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>loc_rate <span class="ot">&lt;-</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters of the function</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation =</span> <span class="dv">1</span>,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="dv">1</span>,</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline =</span> <span class="fl">0.1</span>,</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">leakage =</span> <span class="fl">0.2</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> shunting_system,</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms)</span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">2</span>]) <span class="sc">%&gt;%</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can see the effect of the <code>baseline</code> excitation in the slight early rise of activation prior to the sudden transient excitation.</p>
+<p>So far, we have only modeled the dynamics of a single unit. Now let’s imagine that we have several such units. Each one now has an activation value, so <code>y</code> will be a <em>vector</em> with one entry for each unit. That means that <code>dy</code> will also be a vector.</p>
+<p>Allowing for multiple units also allows us to incorporate two forms of inhibition: We can have <em>feedforward</em> inhibition resulting from the excitatory inputs to <em>other</em> units. And we can have <em>lateral</em> inhibition between the units themselves.</p>
+<p>Computing the amount of feedforward or lateral inhibition to each unit is made easier if we use a <em>matrix</em>, where each entry represents the <em>strength</em> of inhibition between each pair of units. This matrix will also make it possible to model situations in which the strength of inhibition varies between units, for example, as a function of the <em>distance</em> between their receptive fields. Below, I show how such a matrix is created and used to compute the total amount of inhibition flowing into each unit.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Activation of four units</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.9</span>, <span class="fl">0.5</span>, <span class="fl">0.1</span>, <span class="dv">0</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Amount of lateral inhibition between units</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>lat <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Matrix of strength of lateral inhibition between each pair of units</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>(lat_sum <span class="ot">&lt;-</span> lat <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4]
+[1,]  0.0  0.5  0.5  0.5
+[2,]  0.5  0.0  0.5  0.5
+[3,]  0.5  0.5  0.0  0.5
+[4,]  0.5  0.5  0.5  0.0</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Total amount of lateral inhibition for each unit</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>(lat_sum <span class="sc">%*%</span> y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1]
+[1,] 0.30
+[2,] 0.50
+[3,] 0.70
+[4,] 0.75</code></pre>
+</div>
+</div>
+<p>Below, we have amended our <code>shunting_system</code> function to allow for <code>lat</code> and <code>ff_loc</code> as parameters which contribute to the inhibition for each unit.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>shunting_system <span class="ot">&lt;-</span> <span class="cf">function</span>(t, y, parms) {</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> parms<span class="sc">$</span>strength_loc <span class="sc">*</span> <span class="fu">dgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape, <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    dy <span class="ot">&lt;-</span> (parms<span class="sc">$</span>saturation <span class="sc">-</span> y) <span class="sc">*</span> (parms<span class="sc">$</span>baseline <span class="sc">+</span> loc) <span class="sc">-</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        y <span class="sc">*</span> (parms<span class="sc">$</span>leakage <span class="sc">+</span> parms<span class="sc">$</span>ff_loc <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>ff_loc_sum <span class="sc">%*%</span> loc) <span class="sc">+</span> parms<span class="sc">$</span>lat <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>lat_sum <span class="sc">%*%</span> y))</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(dy))</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">8</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Initial value</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>y0 <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, N)</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Times at which to calculate the function</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">101</span>)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>loc_peak <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>loc_spread <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>loc_rate <span class="ot">&lt;-</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters of the function</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation =</span> <span class="dv">1</span>,</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="fu">seq</span>(<span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="at">length.out =</span> N),</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc =</span> <span class="dv">1</span>,</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat =</span> <span class="fl">0.5</span>,</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline =</span> <span class="fl">0.1</span>,</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">leakage =</span> <span class="fl">0.2</span></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> shunting_system,</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms)</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(<span class="at">x =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(solved)], <span class="at">type =</span> <span class="st">'l'</span>, <span class="at">xlab =</span> <span class="st">"Time"</span>, <span class="at">ylab =</span> <span class="st">"y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<!-- ### I turned myself to face me: Recurrent interactions -->
+<!-- Finally, there is  -->
+</section>
+</section>
+<section id="the-days-float-through-my-eyes-salience-by-competitive-and-recurrent-interactions" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="the-days-float-through-my-eyes-salience-by-competitive-and-recurrent-interactions"><span class="header-section-number">14.3</span> The days float through my eyes: Salience by Competitive and Recurrent Interactions</h2>
+<p>Finally, we have all the pieces in place to implement the SCRI model!</p>
+<section id="scri-equations-and-function" class="level3" data-number="14.3.1">
+<h3 data-number="14.3.1" class="anchored" data-anchor-id="scri-equations-and-function"><span class="header-section-number">14.3.1</span> SCRI equations and function</h3>
+<p>First, let’s write out the complete set of equations governing the dynamics of each of the three types of unit in SCRI.</p>
+<p><span class="math display">\[\begin{align}
+x_i(t) &amp; = \chi_i \gamma\left( t \mid s, r \right) &amp; \text{Localization} \\
+\frac{dv_i}{dt} &amp; = \left[ 1 - v_i(t) \right] \left[ b + x_i(t) + z_i(t) \right] &amp; \text{Visual salience} \\
+&amp; \qquad - v_i(t) \left[ \lambda_v + \overbrace{\alpha_x \sum_{j \neq i} x_j(t)}^{\mathclap{\begin{smallmatrix} \text{Localization} \\ \text{feedforward inhibition} \end{smallmatrix}}} + \underbrace{\alpha_z \sum_{j \neq i} z_j(t)}_{\mathclap{\begin{smallmatrix} \text{Identification} \\ \text{feedforward inhibition} \end{smallmatrix}}} + \overbrace{\beta_v \sum_{j \neq i} \sigma_{v,ij} v_j(t)}^{\mathclap{\begin{smallmatrix} \text{FEF lateral} \\ \text{inhibition} \end{smallmatrix}}} \right] &amp; \\
+\frac{dz_i}{dt} &amp; = \left[ \eta_i - z_i(t) \right] \overbrace{v_i^{\mathbb{R}}(t)}^{\mathclap{\begin{smallmatrix} \text{Recurrent} \\ \text{gating} \end{smallmatrix}}} \Gamma \left[ t \mid (1 + \underbracket{\kappa}_{\mathclap{\begin{smallmatrix} \text{Identification} \\ \text{delay} \end{smallmatrix}}} ) s, r \right] &amp; \text{Identification} \\
+&amp; \qquad - z_i(t) \left[ \lambda_z + \overbrace{\beta_z \sum_{j \neq i} \sigma_{z,ij} z_j(t)}^{\mathclap{\begin{smallmatrix} \text{Identification} \\ \text{lateral inhibition} \end{smallmatrix}}} \right] &amp;
+\end{align}\]</span></p>
+<p>Though there are a number of terms involved, the nice thing is that we can basically “translate” those formulae verbatim into the function we need to send to <code>ode</code>. Here it is:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>scri_system <span class="ot">&lt;-</span> <span class="cf">function</span>(t, y, parms) {</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># First half of "y" are the salience units, second half are the identification units</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    N <span class="ot">&lt;-</span> <span class="fu">length</span>(y) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    vis <span class="ot">&lt;-</span> y[<span class="dv">1</span><span class="sc">:</span>N]</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    id <span class="ot">&lt;-</span> y[<span class="dv">1</span><span class="sc">:</span>N <span class="sc">+</span> N]</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Localization signal (x) depends only on the current time</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> parms<span class="sc">$</span>strength_loc <span class="sc">*</span> <span class="fu">dgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape, <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the salience units (v)</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    d_vis <span class="ot">&lt;-</span> (parms<span class="sc">$</span>saturation_vis <span class="sc">-</span> vis) <span class="sc">*</span> (parms<span class="sc">$</span>baseline <span class="sc">+</span> loc <span class="sc">+</span> id) <span class="sc">-</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        vis <span class="sc">*</span> (parms<span class="sc">$</span>leak_vis <span class="sc">+</span> parms<span class="sc">$</span>ff_loc <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>ff_loc_sum <span class="sc">%*%</span> loc) <span class="sc">+</span> parms<span class="sc">$</span>ff_id <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>ff_id_sum <span class="sc">%*%</span> id) <span class="sc">+</span> parms<span class="sc">$</span>lat_vis <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>lat_vis_sum <span class="sc">%*%</span> vis))</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the identification units (z)</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    d_id <span class="ot">&lt;-</span> (parms<span class="sc">$</span>strength_id <span class="sc">-</span> id) <span class="sc">*</span> <span class="fu">pgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> parms<span class="sc">$</span>id_delay), <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate) <span class="sc">*</span> vis<span class="sc">^</span>parms<span class="sc">$</span>recurrent_gating <span class="sc">-</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>        id <span class="sc">*</span> (parms<span class="sc">$</span>leak_id <span class="sc">+</span> parms<span class="sc">$</span>lat_id <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>lat_id_sum <span class="sc">%*%</span> id))</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return a listified vector of both sets of derivatives</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="fu">c</span>(d_vis, d_id)))</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>We are almost there! There’s just one more detail we need to resolve before we can complete the model.</p>
+</section>
+<section id="initial-activation-levels" class="level3" data-number="14.3.2">
+<h3 data-number="14.3.2" class="anchored" data-anchor-id="initial-activation-levels"><span class="header-section-number">14.3.2</span> Initial activation levels</h3>
+<p>As we know, to solve a dynamical systems model like SCRI, we need not just the function for the derivatives but also a set of initial values. These initial values represent the activation levels for the different SCRI units prior to the appearance of a visual search array. Before anything appears, the localization and identification units have activations of zero. But since the salience units have some baseline input level and have leakage and lateral inhibition, we need to figure out what their initial values should be.</p>
+<p>We have two basic ways to do this: First, we could set all the initial activations to zero and then run the model for a certain span of time until it has “stabilized”, that is, until the change in activation levels gets very close to zero. The upside of this approach is that it will work, in principle, for any dynamical system model, even very complex ones. The downside is that we don’t necessarily know how long it will take for the system to stabilize—and this time will often depend on the particular parameter values used. The second approach is to use some math. This second approach won’t necessarily work for every model—sometimes the system is too complex. But when it <em>can</em> be used, it saves us the trouble of needing to simulate extra time and figure out how long we need to simulate.</p>
+<p>SCRI’s salience units are, fortunately, simple enough that we can use the mathematical approach. By definition, activation levels are stable when their derivative (change per unit time) equals zero. So we need to solve the following for <span class="math inline">\(v\)</span>, which will be the initial activation level for each salience unit. <span class="math display">\[\begin{align}
+\frac{d v_i}{dt} &amp; = \left[ 1 - v_i(t) \right] \left[ b + x_i(t) + z_i(t) \right] - v_i(t) \left[ \lambda_v + \alpha_x \sum_{i \neq j} x_j(t) + \alpha_z \sum_{i \neq j} z_j(t) + \beta_v \sum_{i \neq j} \sigma_{v,ij} v_j(t) \right] \\
+0 &amp; = \left( 1 - v \right) b - v \left( \lambda_v + \beta_v \sum_{i \neq j} \sigma_{v,ij} v \right) \\
+0 &amp; = b - b v - \lambda_v v - \left(\beta_v \sum_{i \neq j} \sigma_{v,ij} \right) v^2 \\
+0 &amp; = \underbrace{b}_{C} - \underbrace{\left(b + \lambda_v \right)}_{B} v - \underbrace{\left(\beta_v \sum_{i \neq j} \sigma_{v,ij} \right)}_{A} v^2
+\end{align}\]</span> We can see at the end that solving for <span class="math inline">\(v\)</span> can be accomplished using our old middle-school friend, the quadratic formula. In particular, since <span class="math inline">\(v\)</span> must be positive, we get <span class="math display">\[
+v = \frac{-B - \sqrt{B^2 - 4 A C}}{2 A}
+\]</span> where <span class="math inline">\(A\)</span>, <span class="math inline">\(B\)</span>, and <span class="math inline">\(C\)</span> are as defined above. In case the salience lateral inhibition parameter <span class="math inline">\(\beta_v = 0\)</span>, we have a simpler solution, since the term involving <span class="math inline">\(v^2\)</span> goes to zero: <span class="math display">\[\begin{align}
+0 &amp; = b - \left(b + \lambda_v \right) v \\
+v &amp; = \frac{b}{b + \lambda_v}
+\end{align}\]</span> which is exactly what we noticed above when we introduced shunting dynamics—the system stablizes when there is a balance between excitation (<span class="math inline">\(b\)</span>) and inhibition (<span class="math inline">\(\lambda_v\)</span>).</p>
+</section>
+<section id="the-final-function" class="level3" data-number="14.3.3">
+<h3 data-number="14.3.3" class="anchored" data-anchor-id="the-final-function"><span class="header-section-number">14.3.3</span> The final function</h3>
+<p>Finally, we can write a function called <code>scri</code> which will return a data frame containing the activation at each moment in time for each SCRI unit. The arguments to the function describe both the properties of the search array as well as the parameters of the model. Specifically, the <code>strength_loc</code> argument should be a vector that gives the values of <span class="math inline">\(\chi_i\)</span> for each of the <span class="math inline">\(N\)</span> possible locations in the array. Typically, we assume that each location that contains an item gets the same strength <span class="math inline">\(\chi\)</span> and any location that is empty gets <span class="math inline">\(\chi_i = 0\)</span>. In addition, the <code>strength_id</code> argument should be a vector that gives the values of <span class="math inline">\(\eta_i\)</span> for each of the <span class="math inline">\(N\)</span> possible locations in the array. As with the localization strengths, we assume that any location that is empty has <span class="math inline">\(\eta_i = 0\)</span>. Otherwise, the value of <span class="math inline">\(\eta_i\)</span> should reflect the similarity between the item in that location and the search target. Although prior applications of SCRI have treated these <span class="math inline">\(\eta\)</span> values as free parameters, they could also be derived from an explicit model of similarity like we’ve seen earlier in the course.</p>
+<p>It is worth noting that the function allows us to specify the exact algorithm used by the <code>ode</code> function to solve the system of differential equations using the argument <code>odeMethod</code>. The default <code>ode</code> algorithm works most of the time, but in practice I’ve found that it can sometimes give wonky results depending on parameter values. Therefore, I set the default algorithm to a slightly slower but more robust method called <code>"bdf"</code> for “backward differentiation formula”.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>scri <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">max_t =</span> <span class="dv">500</span>, <span class="at">dt =</span> <span class="dv">1</span>,</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">strength_loc =</span> <span class="fu">rep</span>(<span class="fl">0.539</span>, <span class="dv">8</span>),</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">strength_id =</span> <span class="fl">0.023</span> <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="fl">0.222</span>, <span class="dv">7</span>)),</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">loc_peak =</span> <span class="dv">130</span>, <span class="at">loc_spread =</span> <span class="dv">35</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">leak_vis =</span> <span class="fl">0.328</span>, <span class="at">leak_id =</span> <span class="fl">0.071</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">ff_loc =</span> <span class="fl">0.168</span>, <span class="at">ff_id =</span> <span class="fl">20.689</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">lat_vis =</span> <span class="fl">1.217</span>, <span class="at">lat_id =</span> <span class="fl">0.445</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">ff_loc_spread =</span> <span class="cn">Inf</span>, <span class="at">ff_id_spread =</span> <span class="cn">Inf</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">lat_vis_spread =</span> <span class="fl">1.107</span>, <span class="at">lat_id_spread =</span> <span class="fl">4.435</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>                 <span class="at">id_delay =</span> <span class="fl">0.108</span>, <span class="at">baseline =</span> <span class="fl">0.004</span>,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>                 <span class="at">recurrent_gating =</span> <span class="cn">TRUE</span>, <span class="at">saturation_vis =</span> <span class="dv">1</span>,</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>                 <span class="at">odeMethod =</span> <span class="st">"bdf"</span>, ...) {</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(strength_loc) <span class="sc">!=</span> <span class="fu">length</span>(strength_id)) {</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">stop</span>(<span class="fu">paste0</span>(<span class="st">"Length of localization strength vector ("</span>, <span class="fu">length</span>(strength_loc), <span class="st">") not equal to length of identification strength vector ("</span>, <span class="fu">length</span>(strength_id), <span class="st">")."</span>))</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    N <span class="ot">&lt;-</span> <span class="fu">length</span>(strength_loc)</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert peak and spread of localization signal to shape and rate parameters</span></span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    loc_rate <span class="ot">&lt;-</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute the distance between each receptive field location, assuming they are equidistant on a circle of radius 1 (so distances are relative to the radius of the search array)</span></span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    angle <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out=</span>N<span class="sc">+</span><span class="dv">1</span>)[<span class="dv">1</span><span class="sc">:</span>N]</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    distance <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sin</span>(<span class="fu">outer</span>(angle, angle, <span class="at">FUN=</span><span class="cf">function</span>(a, b) <span class="fu">abs</span>(a <span class="sc">-</span> b)) <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The following matrices represent the strength of feedforward (ff) and lateral (lat) inhibition between each unit as a function of their distance</span></span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    ff_loc_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> ff_loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>    ff_id_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> ff_id_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>    lat_vis_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> lat_vis_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>    lat_id_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> lat_id_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute initial values for each salience unit</span></span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (baseline <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (lat_vis <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>            A <span class="ot">&lt;-</span> <span class="sc">-</span>lat_vis <span class="sc">*</span> <span class="fu">rowSums</span>(lat_vis_sum)</span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>            B <span class="ot">&lt;-</span> <span class="sc">-</span>(baseline <span class="sc">+</span> leak_vis)</span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>            C <span class="ot">&lt;-</span> baseline</span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>            init_v <span class="ot">&lt;-</span> (<span class="sc">-</span>B <span class="sc">-</span> <span class="fu">sqrt</span>(B<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">4</span> <span class="sc">*</span> A <span class="sc">*</span> C)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> A)</span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>            init_v <span class="ot">&lt;-</span> <span class="fu">rep</span>(baseline <span class="sc">/</span> (baseline <span class="sc">+</span> leak_vis), N)</span>
+<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>        init_v <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, N)</span>
+<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Prepare arguments for "ode" function</span></span>
+<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>    y0 <span class="ot">&lt;-</span> <span class="fu">c</span>(init_v, <span class="fu">rep</span>(<span class="dv">0</span>, N))</span>
+<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>    times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, max_t, <span class="at">by =</span> dt)</span>
+<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>    parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_loc =</span> strength_loc,</span>
+<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_id =</span> strength_id,</span>
+<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb20-56"><a href="#cb20-56" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb20-57"><a href="#cb20-57" aria-hidden="true" tabindex="-1"></a>        <span class="at">leak_vis =</span> leak_vis,</span>
+<span id="cb20-58"><a href="#cb20-58" aria-hidden="true" tabindex="-1"></a>        <span class="at">leak_id =</span> leak_id,</span>
+<span id="cb20-59"><a href="#cb20-59" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_loc =</span> ff_loc,</span>
+<span id="cb20-60"><a href="#cb20-60" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_id =</span> ff_id,</span>
+<span id="cb20-61"><a href="#cb20-61" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_vis =</span> lat_vis,</span>
+<span id="cb20-62"><a href="#cb20-62" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_id =</span> lat_id,</span>
+<span id="cb20-63"><a href="#cb20-63" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_loc_sum =</span> ff_loc_sum,</span>
+<span id="cb20-64"><a href="#cb20-64" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_id_sum =</span> ff_id_sum,</span>
+<span id="cb20-65"><a href="#cb20-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_vis_sum =</span> lat_vis_sum,</span>
+<span id="cb20-66"><a href="#cb20-66" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_id_sum =</span> lat_id_sum,</span>
+<span id="cb20-67"><a href="#cb20-67" aria-hidden="true" tabindex="-1"></a>        <span class="at">id_delay =</span> id_delay,</span>
+<span id="cb20-68"><a href="#cb20-68" aria-hidden="true" tabindex="-1"></a>        <span class="at">baseline =</span> baseline,</span>
+<span id="cb20-69"><a href="#cb20-69" aria-hidden="true" tabindex="-1"></a>        <span class="at">recurrent_gating =</span> recurrent_gating,</span>
+<span id="cb20-70"><a href="#cb20-70" aria-hidden="true" tabindex="-1"></a>        <span class="at">saturation_vis =</span> saturation_vis</span>
+<span id="cb20-71"><a href="#cb20-71" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb20-72"><a href="#cb20-72" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-73"><a href="#cb20-73" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Call the `ode` function to compute activations at each time point</span></span>
+<span id="cb20-74"><a href="#cb20-74" aria-hidden="true" tabindex="-1"></a>    solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0, <span class="at">times =</span> times, <span class="at">parms =</span> parms, <span class="at">func =</span> scri_system, <span class="at">method =</span> odeMethod, ...)</span>
+<span id="cb20-75"><a href="#cb20-75" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-76"><a href="#cb20-76" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reorganize the activations into a data frame that will be easier to deal with later</span></span>
+<span id="cb20-77"><a href="#cb20-77" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> <span class="fu">t</span>(strength_loc <span class="sc">%o%</span> <span class="fu">dgamma</span>(solved[, <span class="st">"time"</span>], <span class="at">shape =</span> loc_shape, <span class="at">rate =</span> loc_rate))</span>
+<span id="cb20-78"><a href="#cb20-78" aria-hidden="true" tabindex="-1"></a>    vis <span class="ot">&lt;-</span> solved[,<span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span>N]</span>
+<span id="cb20-79"><a href="#cb20-79" aria-hidden="true" tabindex="-1"></a>    id <span class="ot">&lt;-</span> solved[,<span class="dv">1</span> <span class="sc">+</span> N <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span>N]</span>
+<span id="cb20-80"><a href="#cb20-80" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-81"><a href="#cb20-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dimnames</span>(loc) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(vis) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(id) <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb20-82"><a href="#cb20-82" aria-hidden="true" tabindex="-1"></a>        <span class="st">"t"</span> <span class="ot">=</span> solved[, <span class="st">"time"</span>],</span>
+<span id="cb20-83"><a href="#cb20-83" aria-hidden="true" tabindex="-1"></a>        <span class="st">"array_position"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>N</span>
+<span id="cb20-84"><a href="#cb20-84" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb20-85"><a href="#cb20-85" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-86"><a href="#cb20-86" aria-hidden="true" tabindex="-1"></a>    to_return <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb20-87"><a href="#cb20-87" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"localization"</span>, <span class="fu">array2DF</span>(loc, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
+<span id="cb20-88"><a href="#cb20-88" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"identification"</span>, <span class="fu">array2DF</span>(id, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
+<span id="cb20-89"><a href="#cb20-89" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"salience"</span>, <span class="fu">array2DF</span>(vis, <span class="at">responseName =</span> <span class="st">"act"</span>))</span>
+<span id="cb20-90"><a href="#cb20-90" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb20-91"><a href="#cb20-91" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
+<span id="cb20-92"><a href="#cb20-92" aria-hidden="true" tabindex="-1"></a>            <span class="at">t =</span> <span class="fu">as.numeric</span>(t),</span>
+<span id="cb20-93"><a href="#cb20-93" aria-hidden="true" tabindex="-1"></a>            <span class="at">array_position =</span> <span class="fu">factor</span>(array_position),</span>
+<span id="cb20-94"><a href="#cb20-94" aria-hidden="true" tabindex="-1"></a>            <span class="at">unit_type =</span> <span class="fu">factor</span>(unit_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"localization"</span>, <span class="st">"identification"</span>, <span class="st">"salience"</span>))</span>
+<span id="cb20-95"><a href="#cb20-95" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb20-96"><a href="#cb20-96" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-97"><a href="#cb20-97" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return the resulting data frame</span></span>
+<span id="cb20-98"><a href="#cb20-98" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(to_return)</span>
+<span id="cb20-99"><a href="#cb20-99" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now let’s run the model using its default parameter values. These are close to the median values estimated from fitting SCRI to real neurons, and so produce behavior that is generally representative of how FEF visual neurons respond in visual search tasks.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">scri</span>()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>sim <span class="sc">%&gt;%</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> act, <span class="at">color =</span> array_position)) <span class="sc">+</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_okabeito</span>() <span class="sc">+</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"unit_type"</span>, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time from array onset (ms)"</span>, <span class="at">y =</span> <span class="st">"Activation"</span>, <span class="at">color =</span> <span class="st">"Array</span><span class="sc">\n</span><span class="st">position"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-CoxEtAl2022" class="csl-entry" role="listitem">
+Cox, G. E., Palmeri, T. J., Logan, G. D., Smith, P. L., &amp; Schall, J. D. (2022). Salience by competitive and recurrent interactions: Bridging neural spiking and computation in visual attention. <em>Psychological Review</em>, <em>129</em>(5), 1144–1182. <a href="https://doi.org/10.1037/rev0000366">https://doi.org/10.1037/rev0000366</a>
+</div>
+<div id="ref-CoxEtAlMBCN2024" class="csl-entry" role="listitem">
+Cox, G. E., Palmeri, T. J., Logan, G. D., Smith, P. L., &amp; Schall, J. D. (2024). Spiking, salience, and saccades: Using cognitive models to bridge the gap between <span>“how”</span> and <span>“why.”</span> In B. U. Forstmann &amp; B. M. Turner (Eds.), <em>An introduction to model-based cognitive neuroscience</em> (pp. 119–152). Springer International Publishing. <a href="https://doi.org/10.1007/978-3-031-45271-0_6">https://doi.org/10.1007/978-3-031-45271-0_6</a>
+</div>
+<div id="ref-Grossberg1980" class="csl-entry" role="listitem">
+Grossberg, S. (1980). How does a brain build a cognitive code? <em>Psychological Review</em>, <em>87</em>(1), 1–51. <a href="https://doi.org/10.1037/0033-295X.87.1.1">https://doi.org/10.1037/0033-295X.87.1.1</a>
+</div>
+<div id="ref-HanesSchall1996" class="csl-entry" role="listitem">
+Hanes, D. P., &amp; Schall, J. D. (1996). Neural control of voluntary movement initiation. <em>Science</em>, <em>274</em>(5286), 427–430. <a href="https://doi.org/10.1126/science.274.5286.427">https://doi.org/10.1126/science.274.5286.427</a>
+</div>
+<div id="ref-PurcellEtAl2010" class="csl-entry" role="listitem">
+Purcell, B. A., Heitz, R. P., Cohen, J. Y., Schall, J. D., Logan, G. D., &amp; Palmeri, T. J. (2010). Neurally constrained modeling of perceptual decision making. <em>Psychological Review</em>, <em>117</em>(4), 1113–1143. <a href="https://doi.org/10.1037/a0020311">https://doi.org/10.1037/a0020311</a>
+</div>
+<div id="ref-PurcellEtAl2012" class="csl-entry" role="listitem">
+Purcell, B. A., Schall, J. D., Logan, G. D., &amp; Palmeri, T. J. (2012). From salience to saccades: Multiple-alternative gated stochastic accumulator model of visual search. <em>Journal of Neuroscience</em>, <em>32</em>(10), 3433–3446. <a href="https://doi.org/10.1523/JNEUROSCI.4622-11.2012">https://doi.org/10.1523/JNEUROSCI.4622-11.2012</a>
+</div>
+<div id="ref-Schall2004" class="csl-entry" role="listitem">
+Schall, J. D. (2004). On building a bridge between brain and behavior. <em>Annual Review of Psychology</em>, <em>55</em>(1), 23–50. <a href="https://doi.org/10.1146/annurev.psych.55.090902.141907">https://doi.org/10.1146/annurev.psych.55.090902.141907</a>
+</div>
+<div id="ref-Smith2000" class="csl-entry" role="listitem">
+Smith, P. L. (2000). Stochastic dynamic models of response time and accuracy: A foundational primer. <em>Journal of Mathematical Psychology</em>, <em>44</em>(3), 408–463.
+</div>
+<div id="ref-Teller1984" class="csl-entry" role="listitem">
+Teller, D. Y. (1984). Linking propositions. <em>Vision Research</em>, <em>24</em>(10), 1233–1246. <a href="https://doi.org/10.1016/0042-6989(84)90178-0">https://doi.org/10.1016/0042-6989(84)90178-0</a>
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./agent_based_models.html" class="pagination-link" aria-label="Agent-Based Models">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Agent-Based Models</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./references.html" class="pagination-link" aria-label="References">
+        <span class="nav-page-text">References</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

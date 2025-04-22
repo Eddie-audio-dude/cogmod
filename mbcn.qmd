@@ -1,0 +1,597 @@
+# Model-based cognitive neuroscience
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(patchwork)
+library(colorspace)
+library(khroma)
+library(deSolve)
+
+set.seed(12222)
+```
+
+These notes are a companion to [this chapter](https://drive.google.com/file/d/1N5h4XsUny5h09XNR6Og0dV_MW0LjHvk0/view?usp=sharing) in the 2nd edition of *An Introduction to Model-Based Cognitive Neuroscience* [@CoxEtAlMBCN2024].  That chapter---like the rest in that book---covers the burgeoning field of model-based cognitive neuroscience.  This field seeks to use cognitive models like those we've developed throughout this course to help understand how brains implement the representations and processes posited by models.  In this way, cognitive models act as a "bridge" between different levels of explanation, helping us understand not merely *how* the brain does something, but *why*.  In this chapter, we closely examine one model in this field, Salience by Competitive and Recurrent Interactions (SCRI, pronounced "scry" like the mystical art; @CoxEtAl2022).
+
+## Salience by Competitive and Recurrent Interactions
+
+SCRI was developed to explain how individual visually-responsive neurons in the Frontal Eye Fields (FEF) select the locations of potential target items in visual search.  According to SCRI, these neurons use their *firing rate* to signal when a location in the visual field contains an object that is likely to be a search target.  In other words, these neurons produce more *spikes* or *action potentials* when there is a target (or target-like) object in their receptive fields than when there is a distractor (or nothing) in their receptive fields.  In that sense, these neurons signal the relative *salience* of different parts of the visual field based on how likely they are to contain a target.
+
+Neurophysiological studies have suggested that the signals produced by FEF visual neurons act as *evidence* that is used to decide where to move the eyes [@HanesSchall1996].  Subsequently, @PurcellEtAl2010 and @PurcellEtAl2012 used recorded activity from these neurons as input to an accumulator model of decision making and showed that, in doing so, they could account for the timing and end-points of saccades (eye movements) that monkeys made in visual search tasks.  Thus, in explaining how these FEF visual neurons operate, SCRI is ultimately a theory of *evidence generation*---where an accumulator's samples of evidence come from.
+
+What sets SCRI apart from other neurophysiologically-informed cognitive models is that it explains the moment-by-moment spiking activity of individual neurons not in physiological terms (e.g., ion channels and membrane conductance) but in *cognitive* terms.  This is possible because SCRI assumes a very simple and transparent *linking proposition* [@Schall2004; @Teller1984]: that FEF visual neuron spike rates are *directly* related to the *relative salience* of that neuron's receptive field.
+
+### FEF visual neuron dynamics
+
+```{r}
+#| caption: "Example of FEF visual neuron dynamics."
+
+knitr::include_graphics("img/ex_vn+array.png")
+```
+
+The figure above shows (a) a typical example of a visual search task and (b) an example of how a typical FEF visual neuron responds in this kind of visual search task.
+
+In the visual search tasks to which SCRI has been applied, each trial presents an array of items.  The items are presented at equidistant points on an imaginary circle centered on a fixation square that the monkey must fixate before the trial can start.  Each array contains exactly one *target* item, which remains the same throughout a block of trials (so the monkey knows what they are looking for).  The other items in the array are *distractors*.  The monkey's job is to make a *saccade* from the central fixation square to wherever they think the target is in the display (they're really good at this, as you might imagine).
+
+Displays can vary in *set size*, the number of items in the array.  They can also vary in how *similar* the distractors are to the target.  Sometimes, the target item is defined by its *form*, as in the above example where the target is a "T" shape and the distractors are "L" shaped.  In other conditions, the target is defined by its *color* or by its prevailing *motion* direction.
+
+The right part of the figure shows how a typical FEF visual neuron responds, depending on whether the item in its receptive field (RF; circled areas on the left) is a target or a distractor.  During phase 1, the neuron maintains a constant baseline firing rate.  During phase 2, the neuron's firing rate increases regardless of whether the item in its RF is a target or a distractor.  Finally, during phase 3, the neurons fires more if the item is a target than if it is a distractor.  Although individual neurons vary widely in their particulars, they all demonstrate this same qualitative pattern.
+
+### SCRI: The diagram
+
+```{r}
+#| out-width: 50%
+#| fig-align: center
+knitr::include_graphics("img/fef_brain.png")
+```
+
+```{r}
+knitr::include_graphics("img/fef_model_v2.png")
+```
+
+The figure above illustrates the different elements of SCRI and how they are arranged, as well as their putative correspondence with neurons in different brain areas.  For now, we will just describe them narratively, but don't worry we will implement the model formally below.  SCRI consists of three sets of units (I use the term "units" here so as to be agnostic about whether they necessarily refer to single neurons or whether they could reflect populations of neurons):
+
+* **Localization** units ($x_i$) signal when anything changes in their receptive field.  Their signal is *transient* and does not depend on the features of any items in their receptive field.  These units are excited by the sudden appearance of an item when the search array appears.  These units correspond to the kind of transient change detectors present throughout the dorsal "where" pathway.
+* **Identification** units ($z_i$) detect the presence of target-like features in their receptive field, thus helping to indicate which parts of the visual field are likely to contain a target item.  These units correspond to feature detectors present throughout the ventral "what" pathway.
+* **Salience** units ($v_i$) are where the magic happens.  These units are assumed to correspond directly to FEF visual neurons.  They receive excitation from both the localization and identification units.  They can also receive inhibition either from one another (*lateral* inhibition, $\beta_v$) or from localization or identification units centered on different receptive fields (*feedforward* inhibition, $\alpha_x$ and $\alpha_v$).  Finally, they also act as *recurrent gates* on the identification units that govern the *rate* at which they can detect target-like features.  Basically, the more active a salience unit is, the faster you can find out *what* the item in its receptive field is.  In that sense, these units implement a form of *selective attention*.
+
+The characteristic three-phase pattern of FEF visual neurons arises from the dynamic interactions between these three unit types.  When the localization units detect the sudden appearance of the items in the search array, this excites the salience units in FEF.  Now excited, these units "open the gate" for the identification units to figure out whether the features of the items in each location resemble those of the search target.  If the identification units detect the presence of target-like features, they become active and send excitation back to FEF salience units.  Otherwise, they don't excite the FEF salience units.  In the end, the only salience units---and therefore the only FEF visual neurons---that remain with high firing rates are those with receptive fields that contain target-like items.  This evidence feeds forward into movement neurons ($m_i$) that eventually initiate a saccade into one of those receptive fields.
+
+One way to think of how SCRI works is this:  The localization units kick open the doors of attention and the identification units prop open the doors to regions likely to contain a target.
+
+## Dynamical systems
+
+The example of SCRI gives us a chance to address an additional type of modeling that is done in the cognitive sciences.  *Dynamical systems* are models that are defined in terms of a set of equations that describe how the system changes over time.  Of particular interest are models in which a system's own state steers its dynamics.  Although all of the models we have dealt with in this course involve dynamics of some kind---the dynamics of accumulating evidence, the dynamics of learning, the dynamics of social interactions, etc.---those dynamics have involved some element of randomness.  Such models thus broadly fall under the heading of "stochastic dynamical systems".  For a weighty introduction to stochastic dynamical systems in the context of evidence accumulation models, see @Smith2000.
+
+Often, stochastic dynamical systems can only be simulated---only in rare situations (like with the diffusion and random walk models we started with) can the predictions of such systems be computed and therefore "fit" to data.  The dynamical system we will explore in this chapter is *deterministic*.  A deterministic dynamical system will always produce the same behavior when put into the same set of initial conditions.
+
+It is reasonable to ask whether any *interesting* cognitive models can be constructed as deterministic dynamical systems.  For one thing, there can still be "noise" in the model to account for stochastic events in data.  For example, in a regression model we assume that the underlying linear system is deterministic but we have a "noise" term that accounts for deviations from that linear system.  So these kinds of models can still be applied to systems with stochastic elements; it is just that the noise does not *drive* the dynamics.  For another thing, when a system's dynamics are driven, at least in part, by its *own* states, there can be many interesting interactions between different parts of the system.  Even if the system is deterministic, those interactions can still yield a great variety of potential behavior.
+
+Finally, it is worth keeping in mind that a deterministic dynamical system, even if it cannot be solved analytically, can usually be solved *numerically*, as we will do here.  Computers are really good at this, meaning that it is practical to *fit* dynamical systems models to data, since we can quickly compute their predictions and adjust their parameters to find those that fit best.
+
+As we know, all models are deliberate simplifications.  Assuming that the underlying dynamics of a system are deterministic is one such simplification.  But as we shall see below, this simplification can be worth the cost when it helps us understand a system better without sacrificing its ability to fit data.
+
+### Time may change me: State as a function of time only
+
+The simplest kind of dynamics are those that depend only on how much time has passed.  In that case, we can describe such a system with an equation or rule that does not need to make any reference to other parts of the system.
+
+In SCRI, the localization units are described by this kind of dynamic.  Specifically, the activation of a localization unit at time $t$ is the PDF of a Gamma distribution.  In SCRI, the Gamma distribution is parameterized in terms of its mode or "peak", $\omega_p$, and its standard deviation or "spread", $\omega_s$.  We can convert these to the rate $r$ and shape $s$ with the following formulae:
+\begin{align*}
+r & = \frac{\omega_p + \sqrt{\omega_p^2 + 4 \omega_s^2}}{2 \omega_s^2} \\
+s & = 1 + \omega_p r
+\end{align*}
+In the function for SCRI, the peak and spread are called `loc_peak` and `loc_spread` and the formulae above are written below:
+```{r}
+#| code-fold: show
+#| eval: false
+
+loc_rate <- (loc_peak + sqrt(loc_peak^2 + 4 * loc_spread^2)) / (2 * loc_spread^2)
+loc_shape <- 1 + loc_peak * loc_rate
+```
+
+In math terms, we can write the activation of a localization unit centered on location $i$ as
+$$
+x_i(t) = \chi_i \gamma \left(t \mid s, r \right)
+$$
+where $\chi_i$ is a scaling parameter that represents the strength of the localization signal and $\gamma \left(t \mid s, r \right)$ is short for the PDF of the Gamma distribution with shape $s$ and rate $r$ evaluated at time $t$.  The graph below visualizes how these dynamics change with the peak and spread of the function, assuming $\chi_i = 1$.
+
+```{r}
+expand_grid(t = seq(0, 300), loc_peak = c(70, 100, 130), loc_spread = c(20, 40, 60)) %>%
+    mutate(
+        loc_rate = (loc_peak + sqrt(loc_peak^2 + 4 * loc_spread^2)) / (2 * loc_spread^2),
+        loc_shape = 1 + loc_peak * loc_rate,
+        act = dgamma(t, shape = loc_shape, rate = loc_rate)
+    ) %>%
+    ggplot(aes(x = t, y = act, color = factor(loc_peak), linetype = factor(loc_spread))) +
+    geom_line() +
+    scale_color_brewer(palette = "Dark2") +
+    labs(x = "Time from array onset (ms)", y = expression("Activation "*x[i](t)), color = expression(omega[p]), linetype = expression(omega[s]))
+```
+
+### Never leave the stream: Shunting dynamics
+
+The next type of dynamics in SCRI are *not* functions of time alone.  Instead, they are a function of the *excitation* and *inhibition* that an element of the model receives from other elements.  In that sense, they are very similar to the accumulator models that we examined before.  In those models, an accumulator received excitation in the form of incoming samples of evidence but could also receive inhibition, either from the evidence sent to other accumulators---*feedforward* inhibition---or from the amount of evidence present in other accumulators---*lateral* inhibition.  In addition, accumulators could exhibit *leakage*, where they would lose a certain proportion of their accumulated evidence from one moment to the next.
+
+One issue we confronted with accumulator models was whether or not we allowed them to have *negative* amounts of accumulated evidence.  Since we are now trying to build a model of neural firing rates, it doesn't make sense to allow those to be negative.  Moreover, neurons cannot increase their firing rate indefinitely---at some point, they reach saturation.
+
+*Shunting* dynamics [@Grossberg1980] are a natural way to model a system that receives both excitation and inhibition while keeping its activation bounded both above---at a saturation point---and below---at zero.  Shunting dynamics are described by the following differential equation, which specifies the *time derivative* of a unit's activity:
+$$
+\frac{dy}{dt} = \left[S - y(t) \right] \times E(t) - y(t) I(t)
+$$
+where $y(t)$ is the activation of a unit at time $t$, $S$ is the unit's saturation point, and $E(t)$ and $I(t)$ are the amount of excitation and inhibition the unit is receiving at time $t$, respectively.  Note that both $E(t)$ and $I(t)$ must be nonnegative.  Intuitively, the equation above says that excitation will only result in an increase to the unit's activation to the extent that the unit is far from its saturation point (note that $S - y(t)$ acts to scale the excitation $E(t)$).  At the same time, inhibition will only result in a decrease of the unit's activation to the extent that the unit has any activity to lose (note that inhibition $I(t)$ is scaled by the unit's current activation $y(t)$).
+
+Before fleshing out the different kinds of excitation and inhibition present in SCRI, let's just see what happens if we assume that $E$ and $I$ are constant and set $S = 1$.  The graph below shows the value of $\frac{dy}{dt}$ for different combinations of $E$ and $I$ and for different values of the current activation $y(t)$.
+
+```{r}
+expand_grid(y = seq(0, 1, length.out = 101), E = seq(0, 4), I = seq(0, 2)) %>%
+    mutate(dy_dt = (1 - y) * E - y * I) %>%
+    ggplot(aes(x = y, y = dy_dt, color = E, group = E)) +
+    geom_line() +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "black") +
+    scale_color_viridis_c() +
+    facet_wrap("I", labeller = label_both) +
+    labs(x = expression(y(t)), y = expression(frac(dy, dt)), color = "E")
+```
+
+When there is no inhibition (left graph), the derivative goes to zero as $y(t) \rightarrow 1$, which is the saturation point (recall that $S = 1$ above).  When there is inhibition but no excitation (purple lines in the middle and right graphs), the derivative goes to zero as $y(t) \rightarrow 0$.  Otherwise, the derivative only equals zero when the current activation $y(t)$ corresponds to $\frac{E}{E + I}$, i.e., the *relative proportion* of excitation in the input.
+
+### But you *can* trace time: Numerical integration
+
+The differential equation above is a great description of how the state of a unit will change at any given moment in time.  How can we go from this description to seeing the complete trajectory of how a unit's activity evolves over time?  The short answer is that we need to *integrate* the differential equation over a span of time:
+$$
+y(t) = \int_{\tau = t_0}^t \frac{dy}{d \tau} d \tau
+$$
+But the short answer doesn't get us very far because, in general, the differential equations that describe a dynamical system can't be integrated mathematically.
+
+So the long answer is that we will write a function in R and then have the computer do the integration for us---this is called *numerical integration*.  We will use the R package `deSolve`, which has a function `ode` which allows us to compute the solution to the integration problem above.  The `ode` function needs three arguments: `y`, the initial value(s) of the function; `times`, a vector of time points at which to evaluate the function; and `func`, a function that computes the derivative given the time `t`, current state `y`, and parameters `parms`.
+
+Let's get to it.  First, let's write our function.  This is actually pretty straightforward, since we can just directly translate the equation into R code, as shown below.
+```{r}
+#| code-fold: show
+
+shunting_system <- function(t, y, parms) {
+    # dy/dt = (S - y) * E - y * I
+    dy <- (parms$saturation - y) * parms$excitation - y * parms$inhibition
+    
+    return(list(dy))
+}
+```
+There are a couple of things worth noting about how we have to write this function:
+* The function always needs three arguments, `t`, `y`, and `parms`, even if you don't need them all!  Notice that we never refer to `t` explicitly, above.
+* The `parms` argument is expected to be either a list or vector of parameters for the function.  The `shunting_system` function above assumes that `parms` is a list, so it refers to specific parameters using the `$`.
+* As we will see below, `y` can be a vector.  The function needs to compute a vector of derivatives that is the same length as `y`.  But for whatever reason, the return *type* needs to be a list, hence why the function returns `list(dy)` rather than just `dy`.
+
+Let's take our shunting system out for a spin!  In the chunk of code below, I illustrate how we can use the `ode` function in the `deSolve` package to "solve" the shunting system we just defined.
+
+```{r}
+#| code-fold: show
+
+# Initial value
+y0 <- 0.1
+# Times at which to calculate the function
+times <- seq(0, 3, length.out = 101)
+# Parameters of the function
+parms <- list(
+    saturation = 1,
+    excitation = 1,
+    inhibition = 1
+)
+
+solved <- ode(y = y0,
+              times = times,
+              func = shunting_system,
+              parms = parms)
+
+print(head(solved))
+```
+
+As you can see, the result is stored in `solved` as a *matrix*.  The first column is always called `"time"` and the remaining columns are the values of `y` at each point in time.  Let's make a graph to visualize the results.
+
+```{r}
+tibble(t = solved[,"time"], y = solved[,2]) %>%
+    ggplot(aes(x = t, y = y)) +
+    geom_line() +
+    coord_cartesian(ylim = c(0, 1)) +
+    labs(x = "Time", y = "y")
+```
+
+Cool!  Now let's try running the function with a bunch of different values of `excitation`, `inhibition`, and initial value `y0`, as shown below.
+
+```{r}
+#| code-fold: show
+
+to_solve <- expand_grid(
+    saturation = 1,
+    excitation = seq(0, 3),
+    inhibition = seq(0, 3),
+    y0 = seq(0.1, 0.9, length.out = 5)
+)
+
+times <- seq(0, 3, length.out = 101)
+
+to_plot <- c()
+
+for (i in 1:nrow(to_solve)) {
+    solved <- ode(y = to_solve$y0[i],
+              times = times,
+              func = shunting_system,
+              parms = as.list(to_solve[i,])
+              )
+    
+    to_plot <- rbind(
+        to_plot,
+        cbind(to_solve[i,], tibble(t = solved[,"time"], y = solved[,2]))
+    )
+}
+
+to_plot %>%
+    ggplot(aes(x = t, y = y, color = y0, group = y0)) +
+    geom_line() +
+    facet_grid(excitation ~ inhibition, labeller = label_both) +
+    scale_color_viridis_c() +
+    labs(x = "Time", y = "y", color = "y(0)")
+```
+
+Regardless of the initial activity level $y(0)$, the activity will eventually converge on a value that is a *balance* between excitation and inhibition, i.e., $\frac{E}{E + I}$.  Unless, of course, there is no excitation or inhibition in which case the activity level remains unchanged from its initial value (the top left corner).  Finally, see how even when there is only excitation (left column) or only inhibition (top row), the system's activation stays within its bounds between 0 and 1 (the saturation point).
+
+### A glimpse of how others see the faker: Sources of excitation and inhibition
+
+Now let's start making things interesting.  Now that we've seen how shunting dynamics work, let's replace the constant "excitation" parameter in our model with the time-varying excitation we saw when we described the localization units.  We will assume that there is a parameter for the *shape* and *rate* of the gamma function in our `parms` list, as shown below.
+
+```{r}
+#| code-fold: show
+
+shunting_system <- function(t, y, parms) {
+    # Localization signal (x) depends only on the current time
+    loc <- parms$strength_loc * dgamma(t, shape = parms$loc_shape, rate = parms$loc_rate)
+    
+    dy <- (parms$saturation - y) * loc - y * parms$inhibition
+    
+    return(list(dy))
+}
+
+# Initial value
+y0 <- 0
+# Times at which to calculate the function
+times <- seq(0, 3, length.out = 101)
+
+loc_peak <- 0.5
+loc_spread <- 0.1
+loc_rate <- (loc_peak + sqrt(loc_peak^2 + 4 * loc_spread^2)) / (2 * loc_spread^2)
+loc_shape <- 1 + loc_peak * loc_rate
+
+# Parameters of the function
+parms <- list(
+    saturation = 1,
+    strength_loc = 1,
+    loc_shape = loc_shape,
+    loc_rate = loc_rate,
+    inhibition = 0.2
+)
+
+solved <- ode(y = y0,
+              times = times,
+              func = shunting_system,
+              parms = parms)
+
+tibble(t = solved[,"time"], y = solved[,2]) %>%
+    ggplot(aes(x = t, y = y)) +
+    geom_line() +
+    coord_cartesian(ylim = c(0, 1)) +
+    labs(x = "Time", y = "y")
+```
+
+We can now see two things happening:  First, there is a sharp increase in activation as the transient excitation increases.  But once it's gone, activation decays gradually because we have set the `inhibition` parameter to something greater than zero.  In fact, this gradual decay is a part of SCRI and is referred to as *leakage*.  In our next amendment to the function, we will change its name accordingly.
+
+In addition to leakage and transient excitation, we can also have *tonic excitation*.  This corresponds to "background" sources of excitation that might be present even in the absence of a stimulus, as shown below where we call this tonic excitation `baseline`.
+
+```{r}
+#| code-fold: show
+
+shunting_system <- function(t, y, parms) {
+    # Localization signal (x) depends only on the current time
+    loc <- parms$strength_loc * dgamma(t, shape = parms$loc_shape, rate = parms$loc_rate)
+    
+    dy <- (parms$saturation - y) * (parms$baseline + loc) - y * parms$leakage
+    
+    return(list(dy))
+}
+
+# Initial value
+y0 <- 0
+# Times at which to calculate the function
+times <- seq(0, 3, length.out = 101)
+
+loc_peak <- 0.5
+loc_spread <- 0.1
+loc_rate <- (loc_peak + sqrt(loc_peak^2 + 4 * loc_spread^2)) / (2 * loc_spread^2)
+loc_shape <- 1 + loc_peak * loc_rate
+
+# Parameters of the function
+parms <- list(
+    saturation = 1,
+    strength_loc = 1,
+    loc_shape = loc_shape,
+    loc_rate = loc_rate,
+    baseline = 0.1,
+    leakage = 0.2
+)
+
+solved <- ode(y = y0,
+              times = times,
+              func = shunting_system,
+              parms = parms)
+
+tibble(t = solved[,"time"], y = solved[,2]) %>%
+    ggplot(aes(x = t, y = y)) +
+    geom_line() +
+    coord_cartesian(ylim = c(0, 1)) +
+    labs(x = "Time", y = "y")
+```
+
+We can see the effect of the `baseline` excitation in the slight early rise of activation prior to the sudden transient excitation.
+
+So far, we have only modeled the dynamics of a single unit.  Now let's imagine that we have several such units.  Each one now has an activation value, so `y` will be a *vector* with one entry for each unit.  That means that `dy` will also be a vector.
+
+Allowing for multiple units also allows us to incorporate two forms of inhibition:  We can have *feedforward* inhibition resulting from the excitatory inputs to *other* units.  And we can have *lateral* inhibition between the units themselves.
+
+Computing the amount of feedforward or lateral inhibition to each unit is made easier if we use a *matrix*, where each entry represents the *strength* of inhibition between each pair of units.  This matrix will also make it possible to model situations in which the strength of inhibition varies between units, for example, as a function of the *distance* between their receptive fields.  Below, I show how such a matrix is created and used to compute the total amount of inhibition flowing into each unit.
+
+```{r}
+#| code-fold: show
+
+N <- 4
+# Activation of four units
+y <- c(0.9, 0.5, 0.1, 0)
+# Amount of lateral inhibition between units
+lat <- 0.5
+# Matrix of strength of lateral inhibition between each pair of units
+(lat_sum <- lat * (1 - diag(N)))
+# Total amount of lateral inhibition for each unit
+(lat_sum %*% y)
+```
+
+Below, we have amended our `shunting_system` function to allow for `lat` and `ff_loc` as parameters which contribute to the inhibition for each unit.
+
+```{r}
+#| code-fold: show
+
+shunting_system <- function(t, y, parms) {
+    loc <- parms$strength_loc * dgamma(t, shape = parms$loc_shape, rate = parms$loc_rate)
+    
+    dy <- (parms$saturation - y) * (parms$baseline + loc) -
+        y * (parms$leakage + parms$ff_loc * c(parms$ff_loc_sum %*% loc) + parms$lat * c(parms$lat_sum %*% y))
+    
+    return(list(dy))
+}
+
+N <- 8
+# Initial value
+y0 <- rep(0, N)
+# Times at which to calculate the function
+times <- seq(0, 3, length.out = 101)
+
+loc_peak <- 0.5
+loc_spread <- 0.1
+loc_rate <- (loc_peak + sqrt(loc_peak^2 + 4 * loc_spread^2)) / (2 * loc_spread^2)
+loc_shape <- 1 + loc_peak * loc_rate
+
+# Parameters of the function
+parms <- list(
+    saturation = 1,
+    strength_loc = seq(1.5, 0.5, length.out = N),
+    loc_shape = loc_shape,
+    loc_rate = loc_rate,
+    ff_loc = 1,
+    ff_loc_sum = 1 - diag(N),
+    lat = 0.5,
+    lat_sum = 1 - diag(N),
+    baseline = 0.1,
+    leakage = 0.2
+)
+
+solved <- ode(y = y0,
+              times = times,
+              func = shunting_system,
+              parms = parms)
+
+matplot(x = solved[,"time"], y = solved[,2:ncol(solved)], type = 'l', xlab = "Time", ylab = "y")
+```
+
+<!-- ### I turned myself to face me: Recurrent interactions -->
+
+<!-- Finally, there is  -->
+
+## The days float through my eyes: Salience by Competitive and Recurrent Interactions
+
+Finally, we have all the pieces in place to implement the SCRI model!
+
+### SCRI equations and function
+
+First, let's write out the complete set of equations governing the dynamics of each of the three types of unit in SCRI.
+
+\begin{align}
+x_i(t) & = \chi_i \gamma\left( t \mid s, r \right) & \text{Localization} \\
+\frac{dv_i}{dt} & = \left[ 1 - v_i(t) \right] \left[ b + x_i(t) + z_i(t) \right] & \text{Visual salience} \\
+& \qquad - v_i(t) \left[ \lambda_v + \overbrace{\alpha_x \sum_{j \neq i} x_j(t)}^{\mathclap{\begin{smallmatrix} \text{Localization} \\ \text{feedforward inhibition} \end{smallmatrix}}} + \underbrace{\alpha_z \sum_{j \neq i} z_j(t)}_{\mathclap{\begin{smallmatrix} \text{Identification} \\ \text{feedforward inhibition} \end{smallmatrix}}} + \overbrace{\beta_v \sum_{j \neq i} \sigma_{v,ij} v_j(t)}^{\mathclap{\begin{smallmatrix} \text{FEF lateral} \\ \text{inhibition} \end{smallmatrix}}} \right] & \\
+\frac{dz_i}{dt} & = \left[ \eta_i - z_i(t) \right] \overbrace{v_i^{\mathbb{R}}(t)}^{\mathclap{\begin{smallmatrix} \text{Recurrent} \\ \text{gating} \end{smallmatrix}}} \Gamma \left[ t \mid (1 + \underbracket{\kappa}_{\mathclap{\begin{smallmatrix} \text{Identification} \\ \text{delay} \end{smallmatrix}}} ) s, r \right] & \text{Identification} \\
+& \qquad - z_i(t) \left[ \lambda_z + \overbrace{\beta_z \sum_{j \neq i} \sigma_{z,ij} z_j(t)}^{\mathclap{\begin{smallmatrix} \text{Identification} \\ \text{lateral inhibition} \end{smallmatrix}}} \right] &
+\end{align}
+
+Though there are a number of terms involved, the nice thing is that we can basically "translate" those formulae verbatim into the function we need to send to `ode`.  Here it is:
+
+```{r}
+#| code-fold: show
+
+scri_system <- function(t, y, parms) {
+    # First half of "y" are the salience units, second half are the identification units
+    N <- length(y) / 2
+    vis <- y[1:N]
+    id <- y[1:N + N]
+    
+    # Localization signal (x) depends only on the current time
+    loc <- parms$strength_loc * dgamma(t, shape = parms$loc_shape, rate = parms$loc_rate)
+    
+    # Derivative of the salience units (v)
+    d_vis <- (parms$saturation_vis - vis) * (parms$baseline + loc + id) -
+        vis * (parms$leak_vis + parms$ff_loc * c(parms$ff_loc_sum %*% loc) + parms$ff_id * c(parms$ff_id_sum %*% id) + parms$lat_vis * c(parms$lat_vis_sum %*% vis))
+    
+    # Derivative of the identification units (z)
+    d_id <- (parms$strength_id - id) * pgamma(t, shape = parms$loc_shape * (1 + parms$id_delay), rate = parms$loc_rate) * vis^parms$recurrent_gating -
+        id * (parms$leak_id + parms$lat_id * c(parms$lat_id_sum %*% id))
+    
+    # Return a listified vector of both sets of derivatives
+    return(list(c(d_vis, d_id)))
+}
+```
+
+We are almost there!  There's just one more detail we need to resolve before we can complete the model.
+
+### Initial activation levels
+
+As we know, to solve a dynamical systems model like SCRI, we need not just the function for the derivatives but also a set of initial values.  These initial values represent the activation levels for the different SCRI units prior to the appearance of a visual search array.  Before anything appears, the localization and identification units have activations of zero.  But since the salience units have some baseline input level and have leakage and lateral inhibition, we need to figure out what their initial values should be.
+
+We have two basic ways to do this:  First, we could set all the initial activations to zero and then run the model for a certain span of time until it has "stabilized", that is, until the change in activation levels gets very close to zero.  The upside of this approach is that it will work, in principle, for any dynamical system model, even very complex ones.  The downside is that we don't necessarily know how long it will take for the system to stabilize---and this time will often depend on the particular parameter values used.  The second approach is to use some math.  This second approach won't necessarily work for every model---sometimes the system is too complex.  But when it *can* be used, it saves us the trouble of needing to simulate extra time and figure out how long we need to simulate.
+
+SCRI's salience units are, fortunately, simple enough that we can use the mathematical approach.  By definition, activation levels are stable when their derivative (change per unit time) equals zero.  So we need to solve the following for $v$, which will be the initial activation level for each salience unit.
+\begin{align}
+\frac{d v_i}{dt} & = \left[ 1 - v_i(t) \right] \left[ b + x_i(t) + z_i(t) \right] - v_i(t) \left[ \lambda_v + \alpha_x \sum_{i \neq j} x_j(t) + \alpha_z \sum_{i \neq j} z_j(t) + \beta_v \sum_{i \neq j} \sigma_{v,ij} v_j(t) \right] \\
+0 & = \left( 1 - v \right) b - v \left( \lambda_v + \beta_v \sum_{i \neq j} \sigma_{v,ij} v \right) \\
+0 & = b - b v - \lambda_v v - \left(\beta_v \sum_{i \neq j} \sigma_{v,ij} \right) v^2 \\
+0 & = \underbrace{b}_{C} - \underbrace{\left(b + \lambda_v \right)}_{B} v - \underbrace{\left(\beta_v \sum_{i \neq j} \sigma_{v,ij} \right)}_{A} v^2
+\end{align}
+We can see at the end that solving for $v$ can be accomplished using our old middle-school friend, the quadratic formula.  In particular, since $v$ must be positive, we get
+$$
+v = \frac{-B - \sqrt{B^2 - 4 A C}}{2 A}
+$$
+where $A$, $B$, and $C$ are as defined above.  In case the salience lateral inhibition parameter $\beta_v = 0$, we have a simpler solution, since the term involving $v^2$ goes to zero:
+\begin{align}
+0 & = b - \left(b + \lambda_v \right) v \\
+v & = \frac{b}{b + \lambda_v}
+\end{align}
+which is exactly what we noticed above when we introduced shunting dynamics---the system stablizes when there is a balance between excitation ($b$) and inhibition ($\lambda_v$).
+
+### The final function
+
+Finally, we can write a function called `scri` which will return a data frame containing the activation at each moment in time for each SCRI unit.  The arguments to the function describe both the properties of the search array as well as the parameters of the model.  Specifically, the `strength_loc` argument should be a vector that gives the values of $\chi_i$ for each of the $N$ possible locations in the array.  Typically, we assume that each location that contains an item gets the same strength $\chi$ and any location that is empty gets $\chi_i = 0$.  In addition, the `strength_id` argument should be a vector that gives the values of $\eta_i$ for each of the $N$ possible locations in the array.  As with the localization strengths, we assume that any location that is empty has $\eta_i = 0$.  Otherwise, the value of $\eta_i$ should reflect the similarity between the item in that location and the search target.  Although prior applications of SCRI have treated these $\eta$ values as free parameters, they could also be derived from an explicit model of similarity like we've seen earlier in the course.
+
+It is worth noting that the function allows us to specify the exact algorithm used by the `ode` function to solve the system of differential equations using the argument `odeMethod`.  The default `ode` algorithm works most of the time, but in practice I've found that it can sometimes give wonky results depending on parameter values.  Therefore, I set the default algorithm to a slightly slower but more robust method called `"bdf"` for "backward differentiation formula".
+
+```{r}
+#| code-fold: show
+
+scri <- function(max_t = 500, dt = 1,
+                 strength_loc = rep(0.539, 8),
+                 strength_id = 0.023 * c(1, rep(0.222, 7)),
+                 loc_peak = 130, loc_spread = 35,
+                 leak_vis = 0.328, leak_id = 0.071,
+                 ff_loc = 0.168, ff_id = 20.689,
+                 lat_vis = 1.217, lat_id = 0.445,
+                 ff_loc_spread = Inf, ff_id_spread = Inf,
+                 lat_vis_spread = 1.107, lat_id_spread = 4.435,
+                 id_delay = 0.108, baseline = 0.004,
+                 recurrent_gating = TRUE, saturation_vis = 1,
+                 odeMethod = "bdf", ...) {
+    if (length(strength_loc) != length(strength_id)) {
+        stop(paste0("Length of localization strength vector (", length(strength_loc), ") not equal to length of identification strength vector (", length(strength_id), ")."))
+    }
+    
+    N <- length(strength_loc)
+    
+    # Convert peak and spread of localization signal to shape and rate parameters
+    loc_rate <- (loc_peak + sqrt(loc_peak^2 + 4 * loc_spread^2)) / (2 * loc_spread^2)
+    loc_shape <- 1 + loc_peak * loc_rate
+    
+    # Compute the distance between each receptive field location, assuming they are equidistant on a circle of radius 1 (so distances are relative to the radius of the search array)
+    angle <- seq(0, 2 * pi, length.out=N+1)[1:N]
+    distance <- 2 * sin(outer(angle, angle, FUN=function(a, b) abs(a - b)) / 2)
+    
+    # The following matrices represent the strength of feedforward (ff) and lateral (lat) inhibition between each unit as a function of their distance
+    ff_loc_sum <- exp(-distance^2 / (2 * ff_loc_spread^2)) * (1 - diag(N))
+    ff_id_sum <- exp(-distance^2 / (2 * ff_id_spread^2)) * (1 - diag(N))
+    
+    lat_vis_sum <- exp(-distance^2 / (2 * lat_vis_spread^2)) * (1 - diag(N))
+    lat_id_sum <- exp(-distance^2 / (2 * lat_id_spread^2)) * (1 - diag(N))
+    
+    # Compute initial values for each salience unit
+    if (baseline > 0) {
+        if (lat_vis > 0) {
+            A <- -lat_vis * rowSums(lat_vis_sum)
+            B <- -(baseline + leak_vis)
+            C <- baseline
+            
+            init_v <- (-B - sqrt(B^2 - 4 * A * C)) / (2 * A)
+        } else {
+            init_v <- rep(baseline / (baseline + leak_vis), N)
+        }
+    } else {
+        init_v <- rep(0, N)
+    }
+    
+    # Prepare arguments for "ode" function
+    y0 <- c(init_v, rep(0, N))
+    times <- seq(0, max_t, by = dt)
+    parms <- list(
+        strength_loc = strength_loc,
+        strength_id = strength_id,
+        loc_shape = loc_shape,
+        loc_rate = loc_rate,
+        leak_vis = leak_vis,
+        leak_id = leak_id,
+        ff_loc = ff_loc,
+        ff_id = ff_id,
+        lat_vis = lat_vis,
+        lat_id = lat_id,
+        ff_loc_sum = ff_loc_sum,
+        ff_id_sum = ff_id_sum,
+        lat_vis_sum = lat_vis_sum,
+        lat_id_sum = lat_id_sum,
+        id_delay = id_delay,
+        baseline = baseline,
+        recurrent_gating = recurrent_gating,
+        saturation_vis = saturation_vis
+    )
+    
+    # Call the `ode` function to compute activations at each time point
+    solved <- ode(y = y0, times = times, parms = parms, func = scri_system, method = odeMethod, ...)
+    
+    # Reorganize the activations into a data frame that will be easier to deal with later
+    loc <- t(strength_loc %o% dgamma(solved[, "time"], shape = loc_shape, rate = loc_rate))
+    vis <- solved[,1 + 1:N]
+    id <- solved[,1 + N + 1:N]
+    
+    dimnames(loc) <- dimnames(vis) <- dimnames(id) <- list(
+        "t" = solved[, "time"],
+        "array_position" = 1:N
+    )
+    
+    to_return <- rbind(
+        cbind(unit_type = "localization", array2DF(loc, responseName = "act")),
+        cbind(unit_type = "identification", array2DF(id, responseName = "act")),
+        cbind(unit_type = "salience", array2DF(vis, responseName = "act"))
+    ) %>%
+        mutate(
+            t = as.numeric(t),
+            array_position = factor(array_position),
+            unit_type = factor(unit_type, levels = c("localization", "identification", "salience"))
+        )
+    
+    # Return the resulting data frame
+    return(to_return)
+}
+```
+
+Now let's run the model using its default parameter values.  These are close to the median values estimated from fitting SCRI to real neurons, and so produce behavior that is generally representative of how FEF visual neurons respond in visual search tasks.
+
+```{r}
+#| code-fold: show
+
+sim <- scri()
+
+sim %>%
+    ggplot(aes(x = t, y = act, color = array_position)) +
+    geom_line() +
+    expand_limits(y = 0) +
+    scale_color_okabeito() +
+    facet_wrap("unit_type", ncol = 1, scales = "free_y") +
+    labs(x = "Time from array onset (ms)", y = "Activation", color = "Array\nposition")
+```

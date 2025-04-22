@@ -29,6 +29,7 @@ book:
     - part: "Cognitive models at larger and smaller scales"
       chapters:
         - agent_based_models.qmd
+        - mbcn.qmd
     - references.qmd
 
 bibliography: references.bib
