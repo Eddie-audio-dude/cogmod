@@ -280,7 +280,7 @@ tibble(t = solved[,"time"], y = solved[,2]) %>%
     labs(x = "Time", y = "y")
 ```
 
-We can now see two things happening:  First, there is a sharp increase in activation as the transient excitation increases.  But once it's gone, activation decays gradually because we have set the `inhibition` parameter to something greater than zero.  In fact, this gradual decay is a part of SCRI and is referred to as *leakage*.  In our next amendment to the function, we will change its name accordingly.
+We can now see two things happening:  First, there is a sharp increase in activation as the transient excitation increases.  But once it's gone, activation decays gradually because we have set the `inhibition` parameter to something greater than zero.  In fact, this gradual decay is a part of SCRI and is referred to as *leakage*, since we can think of it as corresponding to how quickly activity "leaks" out over time.  In our next amendment to the function, we will change its name accordingly.
 
 In addition to leakage and transient excitation, we can also have *tonic excitation*.  This corresponds to "background" sources of excitation that might be present even in the absence of a stimulus, as shown below where we call this tonic excitation `baseline`.
 
@@ -374,32 +374,359 @@ loc_peak <- 0.5
 loc_spread <- 0.1
 loc_rate <- (loc_peak + sqrt(loc_peak^2 + 4 * loc_spread^2)) / (2 * loc_spread^2)
 loc_shape <- 1 + loc_peak * loc_rate
+```
 
-# Parameters of the function
-parms <- list(
+Now let's see what happens if we include *feedforward* inhibition from the transient localization signal.  For the following example, we will assume that this localization varies in strength between different locations in equal increments between 0.5 and 1.5 (these numbers were chosen arbitrarily, just for illustration).  We've turned off lateral inhibition (`lat = 0`) and tonic excitation (`baseline = 0`) too for simplicity.
+
+```{r}
+#| code-fold: show
+
+# With feedforward inhibition
+parms_wff <- list(
     saturation = 1,
     strength_loc = seq(1.5, 0.5, length.out = N),
     loc_shape = loc_shape,
     loc_rate = loc_rate,
     ff_loc = 1,
     ff_loc_sum = 1 - diag(N),
+    lat = 0,
+    lat_sum = 1 - diag(N),
+    baseline = 0,
+    leakage = 0.2
+)
+
+# No feedforward inhibition
+parms_noff <- list(
+    saturation = 1,
+    strength_loc = seq(1.5, 0.5, length.out = N),
+    loc_shape = loc_shape,
+    loc_rate = loc_rate,
+    ff_loc = 0,
+    ff_loc_sum = 1 - diag(N),
+    lat = 0,
+    lat_sum = 1 - diag(N),
+    baseline = 0,
+    leakage = 0.2
+)
+
+solved_wff <- ode(y = y0,
+              times = times,
+              func = shunting_system,
+              parms = parms_wff)
+
+solved_noff <- ode(y = y0,
+              times = times,
+              func = shunting_system,
+              parms = parms_noff)
+
+y_wff <- solved_wff[,2:ncol(solved_wff)]
+y_noff <- solved_noff[,2:ncol(solved_noff)]
+
+dimnames(y_wff) <- dimnames(y_noff) <- list(
+    "t" = times,
+    "location" = 1:N
+)
+
+rbind(
+    cbind(ff = "With feedforward inhibition", array2DF(y_wff, responseName = "act")),
+    cbind(ff = "No feedforward inhibition", array2DF(y_noff, responseName = "act"))
+) %>%
+    mutate(t = as.numeric(t)) %>%
+    ggplot(aes(x = t, y = act, color = location)) +
+    geom_line() +
+    scale_color_okabeito() +
+    facet_wrap("ff") +
+    labs(x = "Time", y = "Activation", color = "Location")
+```
+
+By counteracting the excitation each unit receives, feedforward inhibition acts to tamp down the activation of each unit in response to the transient localization signal.
+
+The following graph illustrates the effect of lateral inhibition between units.
+
+```{r}
+#| code-fold: show
+
+# With lateral inhibition
+parms_wlat <- list(
+    saturation = 1,
+    strength_loc = seq(1.5, 0.5, length.out = N),
+    loc_shape = loc_shape,
+    loc_rate = loc_rate,
+    ff_loc = 0,
+    ff_loc_sum = 1 - diag(N),
     lat = 0.5,
     lat_sum = 1 - diag(N),
-    baseline = 0.1,
+    baseline = 0,
+    leakage = 0.2
+)
+
+# No lateral inhibition
+parms_nolat <- list(
+    saturation = 1,
+    strength_loc = seq(1.5, 0.5, length.out = N),
+    loc_shape = loc_shape,
+    loc_rate = loc_rate,
+    ff_loc = 0,
+    ff_loc_sum = 1 - diag(N),
+    lat = 0,
+    lat_sum = 1 - diag(N),
+    baseline = 0,
+    leakage = 0.2
+)
+
+solved_wlat <- ode(y = y0,
+              times = times,
+              func = shunting_system,
+              parms = parms_wlat)
+
+solved_nolat <- ode(y = y0,
+              times = times,
+              func = shunting_system,
+              parms = parms_nolat)
+
+y_wlat <- solved_wlat[,2:ncol(solved_wlat)]
+y_nolat <- solved_nolat[,2:ncol(solved_nolat)]
+
+dimnames(y_wlat) <- dimnames(y_nolat) <- list(
+    "t" = times,
+    "location" = 1:N
+)
+
+rbind(
+    cbind(lat = "With lateral inhibition", array2DF(y_wlat, responseName = "act")),
+    cbind(lat = "No lateral inhibition", array2DF(y_nolat, responseName = "act"))
+) %>%
+    mutate(t = as.numeric(t)) %>%
+    ggplot(aes(x = t, y = act, color = location)) +
+    geom_line() +
+    scale_color_okabeito() +
+    facet_wrap("lat") +
+    labs(x = "Time", y = "Activation", color = "Location")
+```
+
+Lateral inhibition has a much more dramatic effect on activation dynamics, "sharpening" the effect of transient excitation.  This is because, by definition, lateral inhibition only has an effect when there is activity present.  The dynamics above result from (a) the initial transient excitation boosting the activation of the units which then leads to (b) increased lateral inhibition between the now-active units.
+
+### I turned myself to face me: Recurrent interactions
+
+Lateral inhibition is a form of "recurrent" interaction, in that lateral inhibition from one unit affects the activation of another unit which, in turn, sends lateral inhibition back to the first unit.  As we've seen, though, SCRI involves another kind of recurrent interaction:  The visual salience units (which represent individual FEF visual neurons) act as *gates* which govern how quickly identification units can detect the presence/absence of target-like features.
+
+To see how this works, we will set up a model with just two units: a salience unit (which we will call `vis`) and an identification unit (which we will call `id`).  There is still a transient localization signal `loc`.  The derivative for the `id` unit will be another shunting equation, but with the excitatory term multiplied by the current activity of the `vis` unit.  This how recurrent gating is implemented.
+
+```{r}
+#| code-fold: show
+
+recurrent_gating_system <- function(t, y, parms) {
+    vis <- y[1]
+    id <- y[2]
+    
+    # Localization signal (x) depends only on the current time
+    loc <- parms$strength_loc * dgamma(t, shape = parms$loc_shape, rate = parms$loc_rate)
+    
+    # Derivative of the salience unit
+    d_vis <- (parms$saturation_vis - vis) * (parms$baseline + loc) -
+        vis * (parms$leakage)
+    
+    # Derivative of the identification unit
+    d_id <- (parms$strength_id - id) * vis
+    
+    # Return a listified vector of both sets of derivatives
+    return(list(c(d_vis, d_id)))
+}
+
+# Initial values
+y0 <- c(0, 0)
+# Times at which to calculate the function
+times <- seq(0, 3, length.out = 101)
+
+loc_peak <- 0.5
+loc_spread <- 0.1
+loc_rate <- (loc_peak + sqrt(loc_peak^2 + 4 * loc_spread^2)) / (2 * loc_spread^2)
+loc_shape <- 1 + loc_peak * loc_rate
+
+# Parameters of the function
+parms <- list(
+    saturation_vis = 1,
+    strength_loc = 1,
+    strength_id = 1,
+    loc_shape = loc_shape,
+    loc_rate = loc_rate,
+    baseline = 0,
     leakage = 0.2
 )
 
 solved <- ode(y = y0,
               times = times,
-              func = shunting_system,
+              func = recurrent_gating_system,
               parms = parms)
 
-matplot(x = solved[,"time"], y = solved[,2:ncol(solved)], type = 'l', xlab = "Time", ylab = "y")
+rbind(
+    tibble(t = solved[,"time"], y = solved[,2], unit_type = "salience"),
+    tibble(t = solved[,"time"], y = solved[,3], unit_type = "identification")
+) %>%
+    ggplot(aes(x = t, y = y, color = unit_type, linetype = unit_type)) +
+    geom_line() +
+    coord_cartesian(ylim = c(0, 1)) +
+    labs(x = "Time", y = "y", color = "Unit type", linetype = "Unit type")
 ```
 
-<!-- ### I turned myself to face me: Recurrent interactions -->
+We can see that the activity of the identification unit only begins to grow once the salience unit receives its transient excitation.  But technically what we just implemented is not *recurrent* because although the salience unit gates the identification unit, the identification unit has no influence over the salience unit.  In SCRI, identification units send excitation back to the salience units that gate them.  This is implemented below.
 
-<!-- Finally, there is  -->
+```{r}
+#| code-fold: show
+
+recurrent_gating_system <- function(t, y, parms) {
+    vis <- y[1]
+    id <- y[2]
+    
+    # Localization signal (x) depends only on the current time
+    loc <- parms$strength_loc * dgamma(t, shape = parms$loc_shape, rate = parms$loc_rate)
+    
+    # Derivative of the salience unit
+    d_vis <- (parms$saturation_vis - vis) * (parms$baseline + loc + id) -
+        vis * (parms$leakage)
+    
+    # Derivative of the identification unit
+    d_id <- (parms$strength_id - id) * vis
+    
+    # Return a listified vector of both sets of derivatives
+    return(list(c(d_vis, d_id)))
+}
+
+# Initial values
+y0 <- c(0, 0)
+# Times at which to calculate the function
+times <- seq(0, 3, length.out = 101)
+
+loc_peak <- 0.5
+loc_spread <- 0.1
+loc_rate <- (loc_peak + sqrt(loc_peak^2 + 4 * loc_spread^2)) / (2 * loc_spread^2)
+loc_shape <- 1 + loc_peak * loc_rate
+
+# Parameters of the function
+parms <- list(
+    saturation_vis = 1,
+    strength_loc = 1,
+    strength_id = 1,
+    loc_shape = loc_shape,
+    loc_rate = loc_rate,
+    baseline = 0,
+    leakage = 0.2
+)
+
+solved <- ode(y = y0,
+              times = times,
+              func = recurrent_gating_system,
+              parms = parms)
+
+rbind(
+    tibble(t = solved[,"time"], y = dgamma(solved[,"time"], shape = loc_shape, rate = loc_rate), unit_type = "localization"),
+    tibble(t = solved[,"time"], y = solved[,2], unit_type = "salience"),
+    tibble(t = solved[,"time"], y = solved[,3], unit_type = "identification")
+) %>%
+    mutate(unit_type = factor(unit_type, levels = c("localization", "identification", "salience"))) %>%
+    ggplot(aes(x = t, y = y, color = unit_type, linetype = unit_type)) +
+    geom_line() +
+    scale_color_brewer(palette = "Dark2") +
+    coord_cartesian(ylim = c(0, 1)) +
+    labs(x = "Time", y = "y", color = "Unit type", linetype = "Unit type")
+```
+
+The graph above illustrates how recurrent gating results in the characteristic dynamics of SCRI:  The transient localization signal (green) excites the salience unit (purple) which opens the gate for the identification unit (orange), which in turn sends excitation back to the salience unit.
+
+That said, there is just one more wrinkle to iron out.  Recall that FEF visual neurons have some non-zero baseline activity, meaning that our SCRI salience units will also have some tonic excitation that maintains a certain activation level.  This is a problem if the *only* thing gating the identification unit is salience activation, as shown below.
+
+```{r}
+#| code-fold: show
+
+parms <- list(
+    saturation_vis = 1,
+    strength_loc = 1,
+    strength_id = 1,
+    loc_shape = loc_shape,
+    loc_rate = loc_rate,
+    baseline = 0.2,
+    leakage = 0.2
+)
+
+solved <- ode(y = y0,
+              times = times,
+              func = recurrent_gating_system,
+              parms = parms)
+
+rbind(
+    tibble(t = solved[,"time"], y = dgamma(solved[,"time"], shape = loc_shape, rate = loc_rate), unit_type = "localization"),
+    tibble(t = solved[,"time"], y = solved[,2], unit_type = "salience"),
+    tibble(t = solved[,"time"], y = solved[,3], unit_type = "identification")
+) %>%
+    mutate(unit_type = factor(unit_type, levels = c("localization", "identification", "salience"))) %>%
+    ggplot(aes(x = t, y = y, color = unit_type, linetype = unit_type)) +
+    geom_line() +
+    scale_color_brewer(palette = "Dark2") +
+    coord_cartesian(ylim = c(0, 1)) +
+    labs(x = "Time", y = "y", color = "Unit type", linetype = "Unit type")
+```
+
+Without any additional gating, the model would make the paradoxical prediction that you know what an object is (activate the identification unit) before you have even detected the presence of the object (the localization signal).  Recall, though, that the localization signal is described by the PDF of a Gamma distribution---that means we can use the CDF of this same distribution as a "gate" too!  The gate is thus the *product* of the salience unit activation and the CDF of the localization signal, representing the idea that identification is available when two conditions are met: something has been detected at a location (the localization signal) AND some attention is devoted to that location (the salience activation).  This is illustrated below.
+
+```{r}
+#| code-fold: show
+
+recurrent_gating_system <- function(t, y, parms) {
+    vis <- y[1]
+    id <- y[2]
+    
+    # Localization signal (x) depends only on the current time
+    loc <- parms$strength_loc * dgamma(t, shape = parms$loc_shape, rate = parms$loc_rate)
+    
+    # Derivative of the salience unit
+    d_vis <- (parms$saturation_vis - vis) * (parms$baseline + loc + id) -
+        vis * (parms$leakage)
+    
+    # Derivative of the identification unit
+    d_id <- (parms$strength_id - id) * vis * pgamma(t, shape = parms$loc_shape, rate = parms$loc_rate)
+    
+    # Return a listified vector of both sets of derivatives
+    return(list(c(d_vis, d_id)))
+}
+
+# Initial values
+y0 <- c(0, 0)
+# Times at which to calculate the function
+times <- seq(0, 3, length.out = 101)
+
+loc_peak <- 0.5
+loc_spread <- 0.1
+loc_rate <- (loc_peak + sqrt(loc_peak^2 + 4 * loc_spread^2)) / (2 * loc_spread^2)
+loc_shape <- 1 + loc_peak * loc_rate
+
+# Parameters of the function
+parms <- list(
+    saturation_vis = 1,
+    strength_loc = 1,
+    strength_id = 1,
+    loc_shape = loc_shape,
+    loc_rate = loc_rate,
+    baseline = 0.05,
+    leakage = 0.2
+)
+
+solved <- ode(y = y0,
+              times = times,
+              func = recurrent_gating_system,
+              parms = parms)
+
+rbind(
+    tibble(t = solved[,"time"], y = dgamma(solved[,"time"], shape = loc_shape, rate = loc_rate), unit_type = "localization"),
+    tibble(t = solved[,"time"], y = solved[,2], unit_type = "salience"),
+    tibble(t = solved[,"time"], y = solved[,3], unit_type = "identification")
+) %>%
+    mutate(unit_type = factor(unit_type, levels = c("localization", "identification", "salience"))) %>%
+    ggplot(aes(x = t, y = y, color = unit_type, linetype = unit_type)) +
+    geom_line() +
+    scale_color_brewer(palette = "Dark2") +
+    coord_cartesian(ylim = c(0, 1)) +
+    labs(x = "Time", y = "y", color = "Unit type", linetype = "Unit type")
+```
 
 ## The days float through my eyes: Salience by Competitive and Recurrent Interactions
 

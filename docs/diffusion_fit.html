@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.39">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -91,10 +91,10 @@ div.csl-indent {
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-03787a5611acd63027d79b3f02190e6e.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -313,6 +313,12 @@ window.Quarto = {
   <div class="sidebar-item-container"> 
   <a href="./agent_based_models.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Agent-Based Models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./mbcn.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Model-based cognitive neuroscience</span></span></a>
   </div>
 </li>
       </ul>
@@ -741,7 +747,10 @@ $invhessian.lt
 
 $info
  maxgradient     laststep      stepmax        neval 
-3.672338e-08 2.012289e-07 1.500625e-02 1.700000e+01 </code></pre>
+3.672341e-08 2.012289e-07 1.500625e-02 1.700000e+01 
+
+attr(,"class")
+[1] "ucminf"</code></pre>
 </div>
 </div>
 <p>The best <em>negative log-likelihood</em> that the algorithm was able to find is <code>fit$value</code>—as we can see it is slightly <em>lower</em> than the negative log-likelihood associated with the original simulating parameters, suggesting that the best-fitting parameters really do a slightly better job of “fitting” the data. Those parameter estimates reside in <code>fit$par</code>, where we can compare them against the values used to actually simulate the data.</p>
@@ -839,7 +848,10 @@ $invhessian.lt
 
 $info
 maxgradient    laststep     stepmax       neval 
-  0.3267429   0.0000000   1.0000000   1.0000000 </code></pre>
+  0.3267429   0.0000000   1.0000000   1.0000000 
+
+attr(,"class")
+[1] "ucminf"</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -943,7 +955,10 @@ $invhessian.lt
 
 $info
 maxgradient    laststep     stepmax       neval 
- 0.04339481  0.00000000  1.00000000  1.00000000 </code></pre>
+ 0.04339481  0.00000000  1.00000000  1.00000000 
+
+attr(,"class")
+[1] "ucminf"</code></pre>
 </div>
 </div>
 <p>As we can see, the estimated drift rates <code>v[1]</code> and <code>v[2]</code> go in the direction we would expect, given that <code>drift_index = 1</code> indicates a target (positive drift) and <code>drift_index = 2</code> indicates a foil (negative drift).</p>
@@ -1012,7 +1027,10 @@ $invhessian.lt
 
 $info
 maxgradient    laststep     stepmax       neval 
- 0.06124639  0.00000000  1.00000000  1.00000000 </code></pre>
+ 0.06124639  0.00000000  1.00000000  1.00000000 
+
+attr(,"class")
+[1] "ucminf"</code></pre>
 </div>
 </div>
 <p>To compare the fit of the two models, we have a number of techniques at our disposal, but one of the most common is to use an <strong>information criterion</strong>. These values essentially “score” a model, with higher scores being worse (like golf). The score takes into account how well the model fits the data as well as how complex the model is. Taking into account complexity is critical because, generally speaking, a more complex model will be able to fit data better, so it needs to be “handicapped” to account for this advantage (again, sort of like golf). The information criteria we will use here measure a model’s complexity in terms of the number of free parameters it has.</p>
@@ -1324,6 +1342,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   });
   clipboard.on('success', onCopySuccess);
   if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
     const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
       text: getTextToCopy,
       container: window.document.getElementById('quarto-embedded-source-code-modal')
@@ -1434,6 +1454,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       if (window.Quarto?.typesetMath) {
         window.Quarto.typesetMath(note);
       }
+      // TODO in 1.5, we should make sure this works without a callout special case
       if (note.classList.contains("callout")) {
         return note.outerHTML;
       } else {

@@ -350,6 +350,7 @@ window.Quarto = {
   <li><a href="#never-leave-the-stream-shunting-dynamics" id="toc-never-leave-the-stream-shunting-dynamics" class="nav-link" data-scroll-target="#never-leave-the-stream-shunting-dynamics"><span class="header-section-number">14.2.2</span> Never leave the stream: Shunting dynamics</a></li>
   <li><a href="#but-you-can-trace-time-numerical-integration" id="toc-but-you-can-trace-time-numerical-integration" class="nav-link" data-scroll-target="#but-you-can-trace-time-numerical-integration"><span class="header-section-number">14.2.3</span> But you <em>can</em> trace time: Numerical integration</a></li>
   <li><a href="#a-glimpse-of-how-others-see-the-faker-sources-of-excitation-and-inhibition" id="toc-a-glimpse-of-how-others-see-the-faker-sources-of-excitation-and-inhibition" class="nav-link" data-scroll-target="#a-glimpse-of-how-others-see-the-faker-sources-of-excitation-and-inhibition"><span class="header-section-number">14.2.4</span> A glimpse of how others see the faker: Sources of excitation and inhibition</a></li>
+  <li><a href="#i-turned-myself-to-face-me-recurrent-interactions" id="toc-i-turned-myself-to-face-me-recurrent-interactions" class="nav-link" data-scroll-target="#i-turned-myself-to-face-me-recurrent-interactions"><span class="header-section-number">14.2.5</span> I turned myself to face me: Recurrent interactions</a></li>
   </ul></li>
   <li><a href="#the-days-float-through-my-eyes-salience-by-competitive-and-recurrent-interactions" id="toc-the-days-float-through-my-eyes-salience-by-competitive-and-recurrent-interactions" class="nav-link" data-scroll-target="#the-days-float-through-my-eyes-salience-by-competitive-and-recurrent-interactions"><span class="header-section-number">14.3</span> The days float through my eyes: Salience by Competitive and Recurrent Interactions</a>
   <ul class="collapse">
@@ -690,7 +691,7 @@ y(t) = \int_{\tau = t_0}^t \frac{dy}{d \tau} d \tau
 </div>
 </div>
 </div>
-<p>We can now see two things happening: First, there is a sharp increase in activation as the transient excitation increases. But once it’s gone, activation decays gradually because we have set the <code>inhibition</code> parameter to something greater than zero. In fact, this gradual decay is a part of SCRI and is referred to as <em>leakage</em>. In our next amendment to the function, we will change its name accordingly.</p>
+<p>We can now see two things happening: First, there is a sharp increase in activation as the transient excitation increases. But once it’s gone, activation decays gradually because we have set the <code>inhibition</code> parameter to something greater than zero. In fact, this gradual decay is a part of SCRI and is referred to as <em>leakage</em>, since we can think of it as corresponding to how quickly activity “leaks” out over time. In our next amendment to the function, we will change its name accordingly.</p>
 <p>In addition to leakage and transient excitation, we can also have <em>tonic excitation</em>. This corresponds to “background” sources of excitation that might be present even in the absence of a stimulus, as shown below where we call this tonic excitation <code>baseline</code>.</p>
 <div class="cell">
 <details open="" class="code-fold">
@@ -800,39 +801,394 @@ y(t) = \int_{\tau = t_0}^t \frac{dy}{d \tau} d \tau
 <span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>loc_peak <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
 <span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>loc_spread <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
 <span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>loc_rate <span class="ot">&lt;-</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span>
-<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters of the function</span></span>
-<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation =</span> <span class="dv">1</span>,</span>
-<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="fu">seq</span>(<span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="at">length.out =</span> N),</span>
-<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
-<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
-<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc =</span> <span class="dv">1</span>,</span>
-<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
-<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat =</span> <span class="fl">0.5</span>,</span>
-<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
-<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline =</span> <span class="fl">0.1</span>,</span>
-<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">leakage =</span> <span class="fl">0.2</span></span>
-<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
-<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
-<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> shunting_system,</span>
-<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms)</span>
-<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(<span class="at">x =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(solved)], <span class="at">type =</span> <span class="st">'l'</span>, <span class="at">xlab =</span> <span class="st">"Time"</span>, <span class="at">ylab =</span> <span class="st">"y"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now let’s see what happens if we include <em>feedforward</em> inhibition from the transient localization signal. For the following example, we will assume that this localization varies in strength between different locations in equal increments between 0.5 and 1.5 (these numbers were chosen arbitrarily, just for illustration). We’ve turned off lateral inhibition (<code>lat = 0</code>) and tonic excitation (<code>baseline = 0</code>) too for simplicity.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># With feedforward inhibition</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>parms_wff <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation =</span> <span class="dv">1</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="fu">seq</span>(<span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="at">length.out =</span> N),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc =</span> <span class="dv">1</span>,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat =</span> <span class="dv">0</span>,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline =</span> <span class="dv">0</span>,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">leakage =</span> <span class="fl">0.2</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a><span class="co"># No feedforward inhibition</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>parms_noff <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation =</span> <span class="dv">1</span>,</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="fu">seq</span>(<span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="at">length.out =</span> N),</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc =</span> <span class="dv">0</span>,</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat =</span> <span class="dv">0</span>,</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline =</span> <span class="dv">0</span>,</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">leakage =</span> <span class="fl">0.2</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>solved_wff <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> shunting_system,</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms_wff)</span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>solved_noff <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> shunting_system,</span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms_noff)</span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>y_wff <span class="ot">&lt;-</span> solved_wff[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(solved_wff)]</span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>y_noff <span class="ot">&lt;-</span> solved_noff[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(solved_noff)]</span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a><span class="fu">dimnames</span>(y_wff) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(y_noff) <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t"</span> <span class="ot">=</span> times,</span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>    <span class="st">"location"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>N</span>
+<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cbind</span>(<span class="at">ff =</span> <span class="st">"With feedforward inhibition"</span>, <span class="fu">array2DF</span>(y_wff, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
+<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cbind</span>(<span class="at">ff =</span> <span class="st">"No feedforward inhibition"</span>, <span class="fu">array2DF</span>(y_noff, <span class="at">responseName =</span> <span class="st">"act"</span>))</span>
+<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">t =</span> <span class="fu">as.numeric</span>(t)) <span class="sc">%&gt;%</span></span>
+<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> act, <span class="at">color =</span> location)) <span class="sc">+</span></span>
+<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_okabeito</span>() <span class="sc">+</span></span>
+<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"ff"</span>) <span class="sc">+</span></span>
+<span id="cb19-56"><a href="#cb19-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Activation"</span>, <span class="at">color =</span> <span class="st">"Location"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="mbcn_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="mbcn_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<!-- ### I turned myself to face me: Recurrent interactions -->
-<!-- Finally, there is  -->
+<p>By counteracting the excitation each unit receives, feedforward inhibition acts to tamp down the activation of each unit in response to the transient localization signal.</p>
+<p>The following graph illustrates the effect of lateral inhibition between units.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># With lateral inhibition</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>parms_wlat <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation =</span> <span class="dv">1</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="fu">seq</span>(<span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="at">length.out =</span> N),</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc =</span> <span class="dv">0</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat =</span> <span class="fl">0.5</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline =</span> <span class="dv">0</span>,</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">leakage =</span> <span class="fl">0.2</span></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="co"># No lateral inhibition</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>parms_nolat <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation =</span> <span class="dv">1</span>,</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="fu">seq</span>(<span class="fl">1.5</span>, <span class="fl">0.5</span>, <span class="at">length.out =</span> N),</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc =</span> <span class="dv">0</span>,</span>
+<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">ff_loc_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
+<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat =</span> <span class="dv">0</span>,</span>
+<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">lat_sum =</span> <span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N),</span>
+<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline =</span> <span class="dv">0</span>,</span>
+<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">leakage =</span> <span class="fl">0.2</span></span>
+<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>solved_wlat <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> shunting_system,</span>
+<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms_wlat)</span>
+<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>solved_nolat <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> shunting_system,</span>
+<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms_nolat)</span>
+<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>y_wlat <span class="ot">&lt;-</span> solved_wlat[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(solved_wlat)]</span>
+<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>y_nolat <span class="ot">&lt;-</span> solved_nolat[,<span class="dv">2</span><span class="sc">:</span><span class="fu">ncol</span>(solved_nolat)]</span>
+<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a><span class="fu">dimnames</span>(y_wlat) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(y_nolat) <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>    <span class="st">"t"</span> <span class="ot">=</span> times,</span>
+<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a>    <span class="st">"location"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>N</span>
+<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cbind</span>(<span class="at">lat =</span> <span class="st">"With lateral inhibition"</span>, <span class="fu">array2DF</span>(y_wlat, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
+<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cbind</span>(<span class="at">lat =</span> <span class="st">"No lateral inhibition"</span>, <span class="fu">array2DF</span>(y_nolat, <span class="at">responseName =</span> <span class="st">"act"</span>))</span>
+<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">t =</span> <span class="fu">as.numeric</span>(t)) <span class="sc">%&gt;%</span></span>
+<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> act, <span class="at">color =</span> location)) <span class="sc">+</span></span>
+<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_okabeito</span>() <span class="sc">+</span></span>
+<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"lat"</span>) <span class="sc">+</span></span>
+<span id="cb20-56"><a href="#cb20-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"Activation"</span>, <span class="at">color =</span> <span class="st">"Location"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Lateral inhibition has a much more dramatic effect on activation dynamics, “sharpening” the effect of transient excitation. This is because, by definition, lateral inhibition only has an effect when there is activity present. The dynamics above result from (a) the initial transient excitation boosting the activation of the units which then leads to (b) increased lateral inhibition between the now-active units.</p>
+</section>
+<section id="i-turned-myself-to-face-me-recurrent-interactions" class="level3" data-number="14.2.5">
+<h3 data-number="14.2.5" class="anchored" data-anchor-id="i-turned-myself-to-face-me-recurrent-interactions"><span class="header-section-number">14.2.5</span> I turned myself to face me: Recurrent interactions</h3>
+<p>Lateral inhibition is a form of “recurrent” interaction, in that lateral inhibition from one unit affects the activation of another unit which, in turn, sends lateral inhibition back to the first unit. As we’ve seen, though, SCRI involves another kind of recurrent interaction: The visual salience units (which represent individual FEF visual neurons) act as <em>gates</em> which govern how quickly identification units can detect the presence/absence of target-like features.</p>
+<p>To see how this works, we will set up a model with just two units: a salience unit (which we will call <code>vis</code>) and an identification unit (which we will call <code>id</code>). There is still a transient localization signal <code>loc</code>. The derivative for the <code>id</code> unit will be another shunting equation, but with the excitatory term multiplied by the current activity of the <code>vis</code> unit. This how recurrent gating is implemented.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>recurrent_gating_system <span class="ot">&lt;-</span> <span class="cf">function</span>(t, y, parms) {</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    vis <span class="ot">&lt;-</span> y[<span class="dv">1</span>]</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    id <span class="ot">&lt;-</span> y[<span class="dv">2</span>]</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Localization signal (x) depends only on the current time</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> parms<span class="sc">$</span>strength_loc <span class="sc">*</span> <span class="fu">dgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape, <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the salience unit</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    d_vis <span class="ot">&lt;-</span> (parms<span class="sc">$</span>saturation_vis <span class="sc">-</span> vis) <span class="sc">*</span> (parms<span class="sc">$</span>baseline <span class="sc">+</span> loc) <span class="sc">-</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        vis <span class="sc">*</span> (parms<span class="sc">$</span>leakage)</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the identification unit</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    d_id <span class="ot">&lt;-</span> (parms<span class="sc">$</span>strength_id <span class="sc">-</span> id) <span class="sc">*</span> vis</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return a listified vector of both sets of derivatives</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="fu">c</span>(d_vis, d_id)))</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Initial values</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>y0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Times at which to calculate the function</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">101</span>)</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>loc_peak <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>loc_spread <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>loc_rate <span class="ot">&lt;-</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters of the function</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation_vis =</span> <span class="dv">1</span>,</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="dv">1</span>,</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_id =</span> <span class="dv">1</span>,</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline =</span> <span class="dv">0</span>,</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">leakage =</span> <span class="fl">0.2</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> recurrent_gating_system,</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms)</span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">2</span>], <span class="at">unit_type =</span> <span class="st">"salience"</span>),</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">3</span>], <span class="at">unit_type =</span> <span class="st">"identification"</span>)</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> y, <span class="at">color =</span> unit_type, <span class="at">linetype =</span> unit_type)) <span class="sc">+</span></span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"y"</span>, <span class="at">color =</span> <span class="st">"Unit type"</span>, <span class="at">linetype =</span> <span class="st">"Unit type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can see that the activity of the identification unit only begins to grow once the salience unit receives its transient excitation. But technically what we just implemented is not <em>recurrent</em> because although the salience unit gates the identification unit, the identification unit has no influence over the salience unit. In SCRI, identification units send excitation back to the salience units that gate them. This is implemented below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>recurrent_gating_system <span class="ot">&lt;-</span> <span class="cf">function</span>(t, y, parms) {</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    vis <span class="ot">&lt;-</span> y[<span class="dv">1</span>]</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    id <span class="ot">&lt;-</span> y[<span class="dv">2</span>]</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Localization signal (x) depends only on the current time</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> parms<span class="sc">$</span>strength_loc <span class="sc">*</span> <span class="fu">dgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape, <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the salience unit</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    d_vis <span class="ot">&lt;-</span> (parms<span class="sc">$</span>saturation_vis <span class="sc">-</span> vis) <span class="sc">*</span> (parms<span class="sc">$</span>baseline <span class="sc">+</span> loc <span class="sc">+</span> id) <span class="sc">-</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        vis <span class="sc">*</span> (parms<span class="sc">$</span>leakage)</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the identification unit</span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    d_id <span class="ot">&lt;-</span> (parms<span class="sc">$</span>strength_id <span class="sc">-</span> id) <span class="sc">*</span> vis</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return a listified vector of both sets of derivatives</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="fu">c</span>(d_vis, d_id)))</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Initial values</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>y0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Times at which to calculate the function</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">101</span>)</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>loc_peak <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>loc_spread <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>loc_rate <span class="ot">&lt;-</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters of the function</span></span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation_vis =</span> <span class="dv">1</span>,</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="dv">1</span>,</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_id =</span> <span class="dv">1</span>,</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline =</span> <span class="dv">0</span>,</span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">leakage =</span> <span class="fl">0.2</span></span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb22-42"><a href="#cb22-42" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> recurrent_gating_system,</span>
+<span id="cb22-43"><a href="#cb22-43" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms)</span>
+<span id="cb22-44"><a href="#cb22-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-45"><a href="#cb22-45" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb22-46"><a href="#cb22-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> <span class="fu">dgamma</span>(solved[,<span class="st">"time"</span>], <span class="at">shape =</span> loc_shape, <span class="at">rate =</span> loc_rate), <span class="at">unit_type =</span> <span class="st">"localization"</span>),</span>
+<span id="cb22-47"><a href="#cb22-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">2</span>], <span class="at">unit_type =</span> <span class="st">"salience"</span>),</span>
+<span id="cb22-48"><a href="#cb22-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">3</span>], <span class="at">unit_type =</span> <span class="st">"identification"</span>)</span>
+<span id="cb22-49"><a href="#cb22-49" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb22-50"><a href="#cb22-50" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">unit_type =</span> <span class="fu">factor</span>(unit_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"localization"</span>, <span class="st">"identification"</span>, <span class="st">"salience"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb22-51"><a href="#cb22-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> y, <span class="at">color =</span> unit_type, <span class="at">linetype =</span> unit_type)) <span class="sc">+</span></span>
+<span id="cb22-52"><a href="#cb22-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb22-53"><a href="#cb22-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>) <span class="sc">+</span></span>
+<span id="cb22-54"><a href="#cb22-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb22-55"><a href="#cb22-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"y"</span>, <span class="at">color =</span> <span class="st">"Unit type"</span>, <span class="at">linetype =</span> <span class="st">"Unit type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The graph above illustrates how recurrent gating results in the characteristic dynamics of SCRI: The transient localization signal (green) excites the salience unit (purple) which opens the gate for the identification unit (orange), which in turn sends excitation back to the salience unit.</p>
+<p>That said, there is just one more wrinkle to iron out. Recall that FEF visual neurons have some non-zero baseline activity, meaning that our SCRI salience units will also have some tonic excitation that maintains a certain activation level. This is a problem if the <em>only</em> thing gating the identification unit is salience activation, as shown below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation_vis =</span> <span class="dv">1</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="dv">1</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_id =</span> <span class="dv">1</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline =</span> <span class="fl">0.2</span>,</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">leakage =</span> <span class="fl">0.2</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> recurrent_gating_system,</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> <span class="fu">dgamma</span>(solved[,<span class="st">"time"</span>], <span class="at">shape =</span> loc_shape, <span class="at">rate =</span> loc_rate), <span class="at">unit_type =</span> <span class="st">"localization"</span>),</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">2</span>], <span class="at">unit_type =</span> <span class="st">"salience"</span>),</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">3</span>], <span class="at">unit_type =</span> <span class="st">"identification"</span>)</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">unit_type =</span> <span class="fu">factor</span>(unit_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"localization"</span>, <span class="st">"identification"</span>, <span class="st">"salience"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> y, <span class="at">color =</span> unit_type, <span class="at">linetype =</span> unit_type)) <span class="sc">+</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>) <span class="sc">+</span></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"y"</span>, <span class="at">color =</span> <span class="st">"Unit type"</span>, <span class="at">linetype =</span> <span class="st">"Unit type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Without any additional gating, the model would make the paradoxical prediction that you know what an object is (activate the identification unit) before you have even detected the presence of the object (the localization signal). Recall, though, that the localization signal is described by the PDF of a Gamma distribution—that means we can use the CDF of this same distribution as a “gate” too! The gate is thus the <em>product</em> of the salience unit activation and the CDF of the localization signal, representing the idea that identification is available when two conditions are met: something has been detected at a location (the localization signal) AND some attention is devoted to that location (the salience activation). This is illustrated below.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>recurrent_gating_system <span class="ot">&lt;-</span> <span class="cf">function</span>(t, y, parms) {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    vis <span class="ot">&lt;-</span> y[<span class="dv">1</span>]</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    id <span class="ot">&lt;-</span> y[<span class="dv">2</span>]</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Localization signal (x) depends only on the current time</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> parms<span class="sc">$</span>strength_loc <span class="sc">*</span> <span class="fu">dgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape, <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the salience unit</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    d_vis <span class="ot">&lt;-</span> (parms<span class="sc">$</span>saturation_vis <span class="sc">-</span> vis) <span class="sc">*</span> (parms<span class="sc">$</span>baseline <span class="sc">+</span> loc <span class="sc">+</span> id) <span class="sc">-</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        vis <span class="sc">*</span> (parms<span class="sc">$</span>leakage)</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the identification unit</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>    d_id <span class="ot">&lt;-</span> (parms<span class="sc">$</span>strength_id <span class="sc">-</span> id) <span class="sc">*</span> vis <span class="sc">*</span> <span class="fu">pgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape, <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return a listified vector of both sets of derivatives</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="fu">c</span>(d_vis, d_id)))</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Initial values</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>y0 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">0</span>)</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Times at which to calculate the function</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">3</span>, <span class="at">length.out =</span> <span class="dv">101</span>)</span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>loc_peak <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>loc_spread <span class="ot">&lt;-</span> <span class="fl">0.1</span></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>loc_rate <span class="ot">&lt;-</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Parameters of the function</span></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">saturation_vis =</span> <span class="dv">1</span>,</span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_loc =</span> <span class="dv">1</span>,</span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">strength_id =</span> <span class="dv">1</span>,</span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">baseline =</span> <span class="fl">0.05</span>,</span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">leakage =</span> <span class="fl">0.2</span></span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a>solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0,</span>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a>              <span class="at">times =</span> times,</span>
+<span id="cb24-42"><a href="#cb24-42" aria-hidden="true" tabindex="-1"></a>              <span class="at">func =</span> recurrent_gating_system,</span>
+<span id="cb24-43"><a href="#cb24-43" aria-hidden="true" tabindex="-1"></a>              <span class="at">parms =</span> parms)</span>
+<span id="cb24-44"><a href="#cb24-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-45"><a href="#cb24-45" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb24-46"><a href="#cb24-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> <span class="fu">dgamma</span>(solved[,<span class="st">"time"</span>], <span class="at">shape =</span> loc_shape, <span class="at">rate =</span> loc_rate), <span class="at">unit_type =</span> <span class="st">"localization"</span>),</span>
+<span id="cb24-47"><a href="#cb24-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">2</span>], <span class="at">unit_type =</span> <span class="st">"salience"</span>),</span>
+<span id="cb24-48"><a href="#cb24-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">t =</span> solved[,<span class="st">"time"</span>], <span class="at">y =</span> solved[,<span class="dv">3</span>], <span class="at">unit_type =</span> <span class="st">"identification"</span>)</span>
+<span id="cb24-49"><a href="#cb24-49" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb24-50"><a href="#cb24-50" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">unit_type =</span> <span class="fu">factor</span>(unit_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"localization"</span>, <span class="st">"identification"</span>, <span class="st">"salience"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb24-51"><a href="#cb24-51" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> y, <span class="at">color =</span> unit_type, <span class="at">linetype =</span> unit_type)) <span class="sc">+</span></span>
+<span id="cb24-52"><a href="#cb24-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb24-53"><a href="#cb24-53" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Dark2"</span>) <span class="sc">+</span></span>
+<span id="cb24-54"><a href="#cb24-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb24-55"><a href="#cb24-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"y"</span>, <span class="at">color =</span> <span class="st">"Unit type"</span>, <span class="at">linetype =</span> <span class="st">"Unit type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 </section>
 <section id="the-days-float-through-my-eyes-salience-by-competitive-and-recurrent-interactions" class="level2" data-number="14.3">
@@ -852,26 +1208,26 @@ x_i(t) &amp; = \chi_i \gamma\left( t \mid s, r \right) &amp; \text{Localization}
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>scri_system <span class="ot">&lt;-</span> <span class="cf">function</span>(t, y, parms) {</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># First half of "y" are the salience units, second half are the identification units</span></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    N <span class="ot">&lt;-</span> <span class="fu">length</span>(y) <span class="sc">/</span> <span class="dv">2</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    vis <span class="ot">&lt;-</span> y[<span class="dv">1</span><span class="sc">:</span>N]</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    id <span class="ot">&lt;-</span> y[<span class="dv">1</span><span class="sc">:</span>N <span class="sc">+</span> N]</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Localization signal (x) depends only on the current time</span></span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> parms<span class="sc">$</span>strength_loc <span class="sc">*</span> <span class="fu">dgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape, <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate)</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the salience units (v)</span></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    d_vis <span class="ot">&lt;-</span> (parms<span class="sc">$</span>saturation_vis <span class="sc">-</span> vis) <span class="sc">*</span> (parms<span class="sc">$</span>baseline <span class="sc">+</span> loc <span class="sc">+</span> id) <span class="sc">-</span></span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        vis <span class="sc">*</span> (parms<span class="sc">$</span>leak_vis <span class="sc">+</span> parms<span class="sc">$</span>ff_loc <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>ff_loc_sum <span class="sc">%*%</span> loc) <span class="sc">+</span> parms<span class="sc">$</span>ff_id <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>ff_id_sum <span class="sc">%*%</span> id) <span class="sc">+</span> parms<span class="sc">$</span>lat_vis <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>lat_vis_sum <span class="sc">%*%</span> vis))</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the identification units (z)</span></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    d_id <span class="ot">&lt;-</span> (parms<span class="sc">$</span>strength_id <span class="sc">-</span> id) <span class="sc">*</span> <span class="fu">pgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> parms<span class="sc">$</span>id_delay), <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate) <span class="sc">*</span> vis<span class="sc">^</span>parms<span class="sc">$</span>recurrent_gating <span class="sc">-</span></span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>        id <span class="sc">*</span> (parms<span class="sc">$</span>leak_id <span class="sc">+</span> parms<span class="sc">$</span>lat_id <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>lat_id_sum <span class="sc">%*%</span> id))</span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return a listified vector of both sets of derivatives</span></span>
-<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="fu">c</span>(d_vis, d_id)))</span>
-<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>scri_system <span class="ot">&lt;-</span> <span class="cf">function</span>(t, y, parms) {</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># First half of "y" are the salience units, second half are the identification units</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    N <span class="ot">&lt;-</span> <span class="fu">length</span>(y) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    vis <span class="ot">&lt;-</span> y[<span class="dv">1</span><span class="sc">:</span>N]</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    id <span class="ot">&lt;-</span> y[<span class="dv">1</span><span class="sc">:</span>N <span class="sc">+</span> N]</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Localization signal (x) depends only on the current time</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> parms<span class="sc">$</span>strength_loc <span class="sc">*</span> <span class="fu">dgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape, <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the salience units (v)</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    d_vis <span class="ot">&lt;-</span> (parms<span class="sc">$</span>saturation_vis <span class="sc">-</span> vis) <span class="sc">*</span> (parms<span class="sc">$</span>baseline <span class="sc">+</span> loc <span class="sc">+</span> id) <span class="sc">-</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>        vis <span class="sc">*</span> (parms<span class="sc">$</span>leak_vis <span class="sc">+</span> parms<span class="sc">$</span>ff_loc <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>ff_loc_sum <span class="sc">%*%</span> loc) <span class="sc">+</span> parms<span class="sc">$</span>ff_id <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>ff_id_sum <span class="sc">%*%</span> id) <span class="sc">+</span> parms<span class="sc">$</span>lat_vis <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>lat_vis_sum <span class="sc">%*%</span> vis))</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Derivative of the identification units (z)</span></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    d_id <span class="ot">&lt;-</span> (parms<span class="sc">$</span>strength_id <span class="sc">-</span> id) <span class="sc">*</span> <span class="fu">pgamma</span>(t, <span class="at">shape =</span> parms<span class="sc">$</span>loc_shape <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> parms<span class="sc">$</span>id_delay), <span class="at">rate =</span> parms<span class="sc">$</span>loc_rate) <span class="sc">*</span> vis<span class="sc">^</span>parms<span class="sc">$</span>recurrent_gating <span class="sc">-</span></span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>        id <span class="sc">*</span> (parms<span class="sc">$</span>leak_id <span class="sc">+</span> parms<span class="sc">$</span>lat_id <span class="sc">*</span> <span class="fu">c</span>(parms<span class="sc">$</span>lat_id_sum <span class="sc">%*%</span> id))</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return a listified vector of both sets of derivatives</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(<span class="fu">c</span>(d_vis, d_id)))</span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>We are almost there! There’s just one more detail we need to resolve before we can complete the model.</p>
@@ -899,125 +1255,125 @@ v &amp; = \frac{b}{b + \lambda_v}
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>scri <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">max_t =</span> <span class="dv">500</span>, <span class="at">dt =</span> <span class="dv">1</span>,</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">strength_loc =</span> <span class="fu">rep</span>(<span class="fl">0.539</span>, <span class="dv">8</span>),</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">strength_id =</span> <span class="fl">0.023</span> <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="fl">0.222</span>, <span class="dv">7</span>)),</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">loc_peak =</span> <span class="dv">130</span>, <span class="at">loc_spread =</span> <span class="dv">35</span>,</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">leak_vis =</span> <span class="fl">0.328</span>, <span class="at">leak_id =</span> <span class="fl">0.071</span>,</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">ff_loc =</span> <span class="fl">0.168</span>, <span class="at">ff_id =</span> <span class="fl">20.689</span>,</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">lat_vis =</span> <span class="fl">1.217</span>, <span class="at">lat_id =</span> <span class="fl">0.445</span>,</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">ff_loc_spread =</span> <span class="cn">Inf</span>, <span class="at">ff_id_spread =</span> <span class="cn">Inf</span>,</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">lat_vis_spread =</span> <span class="fl">1.107</span>, <span class="at">lat_id_spread =</span> <span class="fl">4.435</span>,</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>                 <span class="at">id_delay =</span> <span class="fl">0.108</span>, <span class="at">baseline =</span> <span class="fl">0.004</span>,</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>                 <span class="at">recurrent_gating =</span> <span class="cn">TRUE</span>, <span class="at">saturation_vis =</span> <span class="dv">1</span>,</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>                 <span class="at">odeMethod =</span> <span class="st">"bdf"</span>, ...) {</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(strength_loc) <span class="sc">!=</span> <span class="fu">length</span>(strength_id)) {</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">stop</span>(<span class="fu">paste0</span>(<span class="st">"Length of localization strength vector ("</span>, <span class="fu">length</span>(strength_loc), <span class="st">") not equal to length of identification strength vector ("</span>, <span class="fu">length</span>(strength_id), <span class="st">")."</span>))</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    N <span class="ot">&lt;-</span> <span class="fu">length</span>(strength_loc)</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert peak and spread of localization signal to shape and rate parameters</span></span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    loc_rate <span class="ot">&lt;-</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute the distance between each receptive field location, assuming they are equidistant on a circle of radius 1 (so distances are relative to the radius of the search array)</span></span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    angle <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out=</span>N<span class="sc">+</span><span class="dv">1</span>)[<span class="dv">1</span><span class="sc">:</span>N]</span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>    distance <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sin</span>(<span class="fu">outer</span>(angle, angle, <span class="at">FUN=</span><span class="cf">function</span>(a, b) <span class="fu">abs</span>(a <span class="sc">-</span> b)) <span class="sc">/</span> <span class="dv">2</span>)</span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The following matrices represent the strength of feedforward (ff) and lateral (lat) inhibition between each unit as a function of their distance</span></span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a>    ff_loc_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> ff_loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>    ff_id_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> ff_id_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>    lat_vis_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> lat_vis_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a>    lat_id_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> lat_id_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute initial values for each salience unit</span></span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (baseline <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (lat_vis <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>            A <span class="ot">&lt;-</span> <span class="sc">-</span>lat_vis <span class="sc">*</span> <span class="fu">rowSums</span>(lat_vis_sum)</span>
-<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>            B <span class="ot">&lt;-</span> <span class="sc">-</span>(baseline <span class="sc">+</span> leak_vis)</span>
-<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>            C <span class="ot">&lt;-</span> baseline</span>
-<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a>            </span>
-<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>            init_v <span class="ot">&lt;-</span> (<span class="sc">-</span>B <span class="sc">-</span> <span class="fu">sqrt</span>(B<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">4</span> <span class="sc">*</span> A <span class="sc">*</span> C)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> A)</span>
-<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
-<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>            init_v <span class="ot">&lt;-</span> <span class="fu">rep</span>(baseline <span class="sc">/</span> (baseline <span class="sc">+</span> leak_vis), N)</span>
-<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
-<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>        init_v <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, N)</span>
-<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Prepare arguments for "ode" function</span></span>
-<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>    y0 <span class="ot">&lt;-</span> <span class="fu">c</span>(init_v, <span class="fu">rep</span>(<span class="dv">0</span>, N))</span>
-<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>    times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, max_t, <span class="at">by =</span> dt)</span>
-<span id="cb20-52"><a href="#cb20-52" aria-hidden="true" tabindex="-1"></a>    parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb20-53"><a href="#cb20-53" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_loc =</span> strength_loc,</span>
-<span id="cb20-54"><a href="#cb20-54" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_id =</span> strength_id,</span>
-<span id="cb20-55"><a href="#cb20-55" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_shape =</span> loc_shape,</span>
-<span id="cb20-56"><a href="#cb20-56" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_rate =</span> loc_rate,</span>
-<span id="cb20-57"><a href="#cb20-57" aria-hidden="true" tabindex="-1"></a>        <span class="at">leak_vis =</span> leak_vis,</span>
-<span id="cb20-58"><a href="#cb20-58" aria-hidden="true" tabindex="-1"></a>        <span class="at">leak_id =</span> leak_id,</span>
-<span id="cb20-59"><a href="#cb20-59" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_loc =</span> ff_loc,</span>
-<span id="cb20-60"><a href="#cb20-60" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_id =</span> ff_id,</span>
-<span id="cb20-61"><a href="#cb20-61" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_vis =</span> lat_vis,</span>
-<span id="cb20-62"><a href="#cb20-62" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_id =</span> lat_id,</span>
-<span id="cb20-63"><a href="#cb20-63" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_loc_sum =</span> ff_loc_sum,</span>
-<span id="cb20-64"><a href="#cb20-64" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_id_sum =</span> ff_id_sum,</span>
-<span id="cb20-65"><a href="#cb20-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_vis_sum =</span> lat_vis_sum,</span>
-<span id="cb20-66"><a href="#cb20-66" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_id_sum =</span> lat_id_sum,</span>
-<span id="cb20-67"><a href="#cb20-67" aria-hidden="true" tabindex="-1"></a>        <span class="at">id_delay =</span> id_delay,</span>
-<span id="cb20-68"><a href="#cb20-68" aria-hidden="true" tabindex="-1"></a>        <span class="at">baseline =</span> baseline,</span>
-<span id="cb20-69"><a href="#cb20-69" aria-hidden="true" tabindex="-1"></a>        <span class="at">recurrent_gating =</span> recurrent_gating,</span>
-<span id="cb20-70"><a href="#cb20-70" aria-hidden="true" tabindex="-1"></a>        <span class="at">saturation_vis =</span> saturation_vis</span>
-<span id="cb20-71"><a href="#cb20-71" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb20-72"><a href="#cb20-72" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-73"><a href="#cb20-73" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Call the `ode` function to compute activations at each time point</span></span>
-<span id="cb20-74"><a href="#cb20-74" aria-hidden="true" tabindex="-1"></a>    solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0, <span class="at">times =</span> times, <span class="at">parms =</span> parms, <span class="at">func =</span> scri_system, <span class="at">method =</span> odeMethod, ...)</span>
-<span id="cb20-75"><a href="#cb20-75" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-76"><a href="#cb20-76" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reorganize the activations into a data frame that will be easier to deal with later</span></span>
-<span id="cb20-77"><a href="#cb20-77" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> <span class="fu">t</span>(strength_loc <span class="sc">%o%</span> <span class="fu">dgamma</span>(solved[, <span class="st">"time"</span>], <span class="at">shape =</span> loc_shape, <span class="at">rate =</span> loc_rate))</span>
-<span id="cb20-78"><a href="#cb20-78" aria-hidden="true" tabindex="-1"></a>    vis <span class="ot">&lt;-</span> solved[,<span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span>N]</span>
-<span id="cb20-79"><a href="#cb20-79" aria-hidden="true" tabindex="-1"></a>    id <span class="ot">&lt;-</span> solved[,<span class="dv">1</span> <span class="sc">+</span> N <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span>N]</span>
-<span id="cb20-80"><a href="#cb20-80" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-81"><a href="#cb20-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dimnames</span>(loc) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(vis) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(id) <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb20-82"><a href="#cb20-82" aria-hidden="true" tabindex="-1"></a>        <span class="st">"t"</span> <span class="ot">=</span> solved[, <span class="st">"time"</span>],</span>
-<span id="cb20-83"><a href="#cb20-83" aria-hidden="true" tabindex="-1"></a>        <span class="st">"array_position"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>N</span>
-<span id="cb20-84"><a href="#cb20-84" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb20-85"><a href="#cb20-85" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-86"><a href="#cb20-86" aria-hidden="true" tabindex="-1"></a>    to_return <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb20-87"><a href="#cb20-87" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"localization"</span>, <span class="fu">array2DF</span>(loc, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
-<span id="cb20-88"><a href="#cb20-88" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"identification"</span>, <span class="fu">array2DF</span>(id, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
-<span id="cb20-89"><a href="#cb20-89" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"salience"</span>, <span class="fu">array2DF</span>(vis, <span class="at">responseName =</span> <span class="st">"act"</span>))</span>
-<span id="cb20-90"><a href="#cb20-90" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
-<span id="cb20-91"><a href="#cb20-91" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
-<span id="cb20-92"><a href="#cb20-92" aria-hidden="true" tabindex="-1"></a>            <span class="at">t =</span> <span class="fu">as.numeric</span>(t),</span>
-<span id="cb20-93"><a href="#cb20-93" aria-hidden="true" tabindex="-1"></a>            <span class="at">array_position =</span> <span class="fu">factor</span>(array_position),</span>
-<span id="cb20-94"><a href="#cb20-94" aria-hidden="true" tabindex="-1"></a>            <span class="at">unit_type =</span> <span class="fu">factor</span>(unit_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"localization"</span>, <span class="st">"identification"</span>, <span class="st">"salience"</span>))</span>
-<span id="cb20-95"><a href="#cb20-95" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb20-96"><a href="#cb20-96" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb20-97"><a href="#cb20-97" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return the resulting data frame</span></span>
-<span id="cb20-98"><a href="#cb20-98" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(to_return)</span>
-<span id="cb20-99"><a href="#cb20-99" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>scri <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">max_t =</span> <span class="dv">500</span>, <span class="at">dt =</span> <span class="dv">1</span>,</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">strength_loc =</span> <span class="fu">rep</span>(<span class="fl">0.539</span>, <span class="dv">8</span>),</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">strength_id =</span> <span class="fl">0.023</span> <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="fl">0.222</span>, <span class="dv">7</span>)),</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">loc_peak =</span> <span class="dv">130</span>, <span class="at">loc_spread =</span> <span class="dv">35</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">leak_vis =</span> <span class="fl">0.328</span>, <span class="at">leak_id =</span> <span class="fl">0.071</span>,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">ff_loc =</span> <span class="fl">0.168</span>, <span class="at">ff_id =</span> <span class="fl">20.689</span>,</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">lat_vis =</span> <span class="fl">1.217</span>, <span class="at">lat_id =</span> <span class="fl">0.445</span>,</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">ff_loc_spread =</span> <span class="cn">Inf</span>, <span class="at">ff_id_spread =</span> <span class="cn">Inf</span>,</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">lat_vis_spread =</span> <span class="fl">1.107</span>, <span class="at">lat_id_spread =</span> <span class="fl">4.435</span>,</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>                 <span class="at">id_delay =</span> <span class="fl">0.108</span>, <span class="at">baseline =</span> <span class="fl">0.004</span>,</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>                 <span class="at">recurrent_gating =</span> <span class="cn">TRUE</span>, <span class="at">saturation_vis =</span> <span class="dv">1</span>,</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>                 <span class="at">odeMethod =</span> <span class="st">"bdf"</span>, ...) {</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(strength_loc) <span class="sc">!=</span> <span class="fu">length</span>(strength_id)) {</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">stop</span>(<span class="fu">paste0</span>(<span class="st">"Length of localization strength vector ("</span>, <span class="fu">length</span>(strength_loc), <span class="st">") not equal to length of identification strength vector ("</span>, <span class="fu">length</span>(strength_id), <span class="st">")."</span>))</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    N <span class="ot">&lt;-</span> <span class="fu">length</span>(strength_loc)</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert peak and spread of localization signal to shape and rate parameters</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>    loc_rate <span class="ot">&lt;-</span> (loc_peak <span class="sc">+</span> <span class="fu">sqrt</span>(loc_peak<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">4</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> loc_spread<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>    loc_shape <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> loc_peak <span class="sc">*</span> loc_rate</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute the distance between each receptive field location, assuming they are equidistant on a circle of radius 1 (so distances are relative to the radius of the search array)</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>    angle <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out=</span>N<span class="sc">+</span><span class="dv">1</span>)[<span class="dv">1</span><span class="sc">:</span>N]</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>    distance <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">sin</span>(<span class="fu">outer</span>(angle, angle, <span class="at">FUN=</span><span class="cf">function</span>(a, b) <span class="fu">abs</span>(a <span class="sc">-</span> b)) <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># The following matrices represent the strength of feedforward (ff) and lateral (lat) inhibition between each unit as a function of their distance</span></span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>    ff_loc_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> ff_loc_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>    ff_id_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> ff_id_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>    lat_vis_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> lat_vis_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>    lat_id_sum <span class="ot">&lt;-</span> <span class="fu">exp</span>(<span class="sc">-</span>distance<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> lat_id_spread<span class="sc">^</span><span class="dv">2</span>)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">diag</span>(N))</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Compute initial values for each salience unit</span></span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (baseline <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (lat_vis <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>            A <span class="ot">&lt;-</span> <span class="sc">-</span>lat_vis <span class="sc">*</span> <span class="fu">rowSums</span>(lat_vis_sum)</span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>            B <span class="ot">&lt;-</span> <span class="sc">-</span>(baseline <span class="sc">+</span> leak_vis)</span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a>            C <span class="ot">&lt;-</span> baseline</span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a>            init_v <span class="ot">&lt;-</span> (<span class="sc">-</span>B <span class="sc">-</span> <span class="fu">sqrt</span>(B<span class="sc">^</span><span class="dv">2</span> <span class="sc">-</span> <span class="dv">4</span> <span class="sc">*</span> A <span class="sc">*</span> C)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> A)</span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a>            init_v <span class="ot">&lt;-</span> <span class="fu">rep</span>(baseline <span class="sc">/</span> (baseline <span class="sc">+</span> leak_vis), N)</span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a>        init_v <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, N)</span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Prepare arguments for "ode" function</span></span>
+<span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a>    y0 <span class="ot">&lt;-</span> <span class="fu">c</span>(init_v, <span class="fu">rep</span>(<span class="dv">0</span>, N))</span>
+<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>    times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, max_t, <span class="at">by =</span> dt)</span>
+<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a>    parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_loc =</span> strength_loc,</span>
+<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_id =</span> strength_id,</span>
+<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a>        <span class="at">leak_vis =</span> leak_vis,</span>
+<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a>        <span class="at">leak_id =</span> leak_id,</span>
+<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_loc =</span> ff_loc,</span>
+<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_id =</span> ff_id,</span>
+<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_vis =</span> lat_vis,</span>
+<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_id =</span> lat_id,</span>
+<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_loc_sum =</span> ff_loc_sum,</span>
+<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_id_sum =</span> ff_id_sum,</span>
+<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_vis_sum =</span> lat_vis_sum,</span>
+<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_id_sum =</span> lat_id_sum,</span>
+<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a>        <span class="at">id_delay =</span> id_delay,</span>
+<span id="cb26-68"><a href="#cb26-68" aria-hidden="true" tabindex="-1"></a>        <span class="at">baseline =</span> baseline,</span>
+<span id="cb26-69"><a href="#cb26-69" aria-hidden="true" tabindex="-1"></a>        <span class="at">recurrent_gating =</span> recurrent_gating,</span>
+<span id="cb26-70"><a href="#cb26-70" aria-hidden="true" tabindex="-1"></a>        <span class="at">saturation_vis =</span> saturation_vis</span>
+<span id="cb26-71"><a href="#cb26-71" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-72"><a href="#cb26-72" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-73"><a href="#cb26-73" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Call the `ode` function to compute activations at each time point</span></span>
+<span id="cb26-74"><a href="#cb26-74" aria-hidden="true" tabindex="-1"></a>    solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0, <span class="at">times =</span> times, <span class="at">parms =</span> parms, <span class="at">func =</span> scri_system, <span class="at">method =</span> odeMethod, ...)</span>
+<span id="cb26-75"><a href="#cb26-75" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-76"><a href="#cb26-76" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reorganize the activations into a data frame that will be easier to deal with later</span></span>
+<span id="cb26-77"><a href="#cb26-77" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> <span class="fu">t</span>(strength_loc <span class="sc">%o%</span> <span class="fu">dgamma</span>(solved[, <span class="st">"time"</span>], <span class="at">shape =</span> loc_shape, <span class="at">rate =</span> loc_rate))</span>
+<span id="cb26-78"><a href="#cb26-78" aria-hidden="true" tabindex="-1"></a>    vis <span class="ot">&lt;-</span> solved[,<span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span>N]</span>
+<span id="cb26-79"><a href="#cb26-79" aria-hidden="true" tabindex="-1"></a>    id <span class="ot">&lt;-</span> solved[,<span class="dv">1</span> <span class="sc">+</span> N <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span>N]</span>
+<span id="cb26-80"><a href="#cb26-80" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-81"><a href="#cb26-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dimnames</span>(loc) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(vis) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(id) <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb26-82"><a href="#cb26-82" aria-hidden="true" tabindex="-1"></a>        <span class="st">"t"</span> <span class="ot">=</span> solved[, <span class="st">"time"</span>],</span>
+<span id="cb26-83"><a href="#cb26-83" aria-hidden="true" tabindex="-1"></a>        <span class="st">"array_position"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>N</span>
+<span id="cb26-84"><a href="#cb26-84" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-85"><a href="#cb26-85" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-86"><a href="#cb26-86" aria-hidden="true" tabindex="-1"></a>    to_return <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb26-87"><a href="#cb26-87" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"localization"</span>, <span class="fu">array2DF</span>(loc, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
+<span id="cb26-88"><a href="#cb26-88" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"identification"</span>, <span class="fu">array2DF</span>(id, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
+<span id="cb26-89"><a href="#cb26-89" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"salience"</span>, <span class="fu">array2DF</span>(vis, <span class="at">responseName =</span> <span class="st">"act"</span>))</span>
+<span id="cb26-90"><a href="#cb26-90" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb26-91"><a href="#cb26-91" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
+<span id="cb26-92"><a href="#cb26-92" aria-hidden="true" tabindex="-1"></a>            <span class="at">t =</span> <span class="fu">as.numeric</span>(t),</span>
+<span id="cb26-93"><a href="#cb26-93" aria-hidden="true" tabindex="-1"></a>            <span class="at">array_position =</span> <span class="fu">factor</span>(array_position),</span>
+<span id="cb26-94"><a href="#cb26-94" aria-hidden="true" tabindex="-1"></a>            <span class="at">unit_type =</span> <span class="fu">factor</span>(unit_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"localization"</span>, <span class="st">"identification"</span>, <span class="st">"salience"</span>))</span>
+<span id="cb26-95"><a href="#cb26-95" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb26-96"><a href="#cb26-96" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-97"><a href="#cb26-97" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return the resulting data frame</span></span>
+<span id="cb26-98"><a href="#cb26-98" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(to_return)</span>
+<span id="cb26-99"><a href="#cb26-99" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now let’s run the model using its default parameter values. These are close to the median values estimated from fitting SCRI to real neurons, and so produce behavior that is generally representative of how FEF visual neurons respond in visual search tasks.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">scri</span>()</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>sim <span class="sc">%&gt;%</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> act, <span class="at">color =</span> array_position)) <span class="sc">+</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_okabeito</span>() <span class="sc">+</span></span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"unit_type"</span>, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time from array onset (ms)"</span>, <span class="at">y =</span> <span class="st">"Activation"</span>, <span class="at">color =</span> <span class="st">"Array</span><span class="sc">\n</span><span class="st">position"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">scri</span>()</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>sim <span class="sc">%&gt;%</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> act, <span class="at">color =</span> array_position)) <span class="sc">+</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_okabeito</span>() <span class="sc">+</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"unit_type"</span>, <span class="at">ncol =</span> <span class="dv">1</span>, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time from array onset (ms)"</span>, <span class="at">y =</span> <span class="st">"Activation"</span>, <span class="at">color =</span> <span class="st">"Array</span><span class="sc">\n</span><span class="st">position"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="mbcn_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="mbcn_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
