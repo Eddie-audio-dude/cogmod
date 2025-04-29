@@ -357,7 +357,11 @@ window.Quarto = {
   <li><a href="#scri-equations-and-function" id="toc-scri-equations-and-function" class="nav-link" data-scroll-target="#scri-equations-and-function"><span class="header-section-number">14.3.1</span> SCRI equations and function</a></li>
   <li><a href="#initial-activation-levels" id="toc-initial-activation-levels" class="nav-link" data-scroll-target="#initial-activation-levels"><span class="header-section-number">14.3.2</span> Initial activation levels</a></li>
   <li><a href="#the-final-function" id="toc-the-final-function" class="nav-link" data-scroll-target="#the-final-function"><span class="header-section-number">14.3.3</span> The final function</a></li>
+  <li><a href="#set-size" id="toc-set-size" class="nav-link" data-scroll-target="#set-size"><span class="header-section-number">14.3.4</span> Set size</a></li>
+  <li><a href="#target-distractor-similarity" id="toc-target-distractor-similarity" class="nav-link" data-scroll-target="#target-distractor-similarity"><span class="header-section-number">14.3.5</span> Target-distractor similarity</a></li>
+  <li><a href="#shiny-app" id="toc-shiny-app" class="nav-link" data-scroll-target="#shiny-app"><span class="header-section-number">14.3.6</span> Shiny app</a></li>
   </ul></li>
+  <li><a href="#turn-and-face-the-strange-fitting-scri-to-neural-data" id="toc-turn-and-face-the-strange-fitting-scri-to-neural-data" class="nav-link" data-scroll-target="#turn-and-face-the-strange-fitting-scri-to-neural-data"><span class="header-section-number">14.4</span> Turn and face the strange: Fitting SCRI to neural data</a></li>
   </ul>
 </nav>
     </div>
@@ -1251,11 +1255,12 @@ v &amp; = \frac{b}{b + \lambda_v}
 <section id="the-final-function" class="level3" data-number="14.3.3">
 <h3 data-number="14.3.3" class="anchored" data-anchor-id="the-final-function"><span class="header-section-number">14.3.3</span> The final function</h3>
 <p>Finally, we can write a function called <code>scri</code> which will return a data frame containing the activation at each moment in time for each SCRI unit. The arguments to the function describe both the properties of the search array as well as the parameters of the model. Specifically, the <code>strength_loc</code> argument should be a vector that gives the values of <span class="math inline">\(\chi_i\)</span> for each of the <span class="math inline">\(N\)</span> possible locations in the array. Typically, we assume that each location that contains an item gets the same strength <span class="math inline">\(\chi\)</span> and any location that is empty gets <span class="math inline">\(\chi_i = 0\)</span>. In addition, the <code>strength_id</code> argument should be a vector that gives the values of <span class="math inline">\(\eta_i\)</span> for each of the <span class="math inline">\(N\)</span> possible locations in the array. As with the localization strengths, we assume that any location that is empty has <span class="math inline">\(\eta_i = 0\)</span>. Otherwise, the value of <span class="math inline">\(\eta_i\)</span> should reflect the similarity between the item in that location and the search target. Although prior applications of SCRI have treated these <span class="math inline">\(\eta\)</span> values as free parameters, they could also be derived from an explicit model of similarity like we’ve seen earlier in the course.</p>
+<p>In the function below, note that it is possible to allow the different forms of feedforward or lateral inhibition to have a <em>spatial distribution</em> defined by the parameters ending in <code>_spread</code>. These parameters represent how far inhibition spreads from each receptive field. Specifically, SCRI treats the spatial distribution of inhibition like a normal distribution centered on the receptive fields of each unit and the <code>_spread</code> parameters are the <em>standard deviation</em> of that distribution. As such, the default value of <code>Inf</code> corresponds to inhibition that applies equally regardless of distance. The distance parameters are normalized to the radius of the search array. Thus, a value of <code>1</code> corresponds to inhibition that falls off with a standard deviation equal to the radius of the search array.</p>
 <p>It is worth noting that the function allows us to specify the exact algorithm used by the <code>ode</code> function to solve the system of differential equations using the argument <code>odeMethod</code>. The default <code>ode</code> algorithm works most of the time, but in practice I’ve found that it can sometimes give wonky results depending on parameter values. Therefore, I set the default algorithm to a slightly slower but more robust method called <code>"bdf"</code> for “backward differentiation formula”.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>scri <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">max_t =</span> <span class="dv">500</span>, <span class="at">dt =</span> <span class="dv">1</span>,</span>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>scri <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">times =</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">500</span>, <span class="at">by =</span> <span class="dv">1</span>),</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">strength_loc =</span> <span class="fu">rep</span>(<span class="fl">0.539</span>, <span class="dv">8</span>),</span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">strength_id =</span> <span class="fl">0.023</span> <span class="sc">*</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="fl">0.222</span>, <span class="dv">7</span>)),</span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">loc_peak =</span> <span class="dv">130</span>, <span class="at">loc_spread =</span> <span class="dv">35</span>,</span>
@@ -1264,9 +1269,9 @@ v &amp; = \frac{b}{b + \lambda_v}
 <span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">lat_vis =</span> <span class="fl">1.217</span>, <span class="at">lat_id =</span> <span class="fl">0.445</span>,</span>
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">ff_loc_spread =</span> <span class="cn">Inf</span>, <span class="at">ff_id_spread =</span> <span class="cn">Inf</span>,</span>
 <span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">lat_vis_spread =</span> <span class="fl">1.107</span>, <span class="at">lat_id_spread =</span> <span class="fl">4.435</span>,</span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>                 <span class="at">id_delay =</span> <span class="fl">0.108</span>, <span class="at">baseline =</span> <span class="fl">0.004</span>,</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>                 <span class="at">id_delay =</span> <span class="dv">0</span>, <span class="at">baseline =</span> <span class="fl">0.004</span>,</span>
 <span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>                 <span class="at">recurrent_gating =</span> <span class="cn">TRUE</span>, <span class="at">saturation_vis =</span> <span class="dv">1</span>,</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>                 <span class="at">odeMethod =</span> <span class="st">"bdf"</span>, ...) {</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>                 <span class="at">odeMethod =</span> <span class="st">"bdf"</span>, <span class="at">return_type =</span> <span class="st">"all"</span>, ...) {</span>
 <span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">length</span>(strength_loc) <span class="sc">!=</span> <span class="fu">length</span>(strength_id)) {</span>
 <span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">stop</span>(<span class="fu">paste0</span>(<span class="st">"Length of localization strength vector ("</span>, <span class="fu">length</span>(strength_loc), <span class="st">") not equal to length of identification strength vector ("</span>, <span class="fu">length</span>(strength_id), <span class="st">")."</span>))</span>
 <span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>    }</span>
@@ -1305,55 +1310,60 @@ v &amp; = \frac{b}{b + \lambda_v}
 <span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb26-49"><a href="#cb26-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Prepare arguments for "ode" function</span></span>
 <span id="cb26-50"><a href="#cb26-50" aria-hidden="true" tabindex="-1"></a>    y0 <span class="ot">&lt;-</span> <span class="fu">c</span>(init_v, <span class="fu">rep</span>(<span class="dv">0</span>, N))</span>
-<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>    times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, max_t, <span class="at">by =</span> dt)</span>
-<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a>    parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_loc =</span> strength_loc,</span>
-<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_id =</span> strength_id,</span>
-<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_shape =</span> loc_shape,</span>
-<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_rate =</span> loc_rate,</span>
-<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a>        <span class="at">leak_vis =</span> leak_vis,</span>
-<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a>        <span class="at">leak_id =</span> leak_id,</span>
-<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_loc =</span> ff_loc,</span>
-<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_id =</span> ff_id,</span>
-<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_vis =</span> lat_vis,</span>
-<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_id =</span> lat_id,</span>
-<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_loc_sum =</span> ff_loc_sum,</span>
-<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_id_sum =</span> ff_id_sum,</span>
-<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_vis_sum =</span> lat_vis_sum,</span>
-<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_id_sum =</span> lat_id_sum,</span>
-<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a>        <span class="at">id_delay =</span> id_delay,</span>
-<span id="cb26-68"><a href="#cb26-68" aria-hidden="true" tabindex="-1"></a>        <span class="at">baseline =</span> baseline,</span>
-<span id="cb26-69"><a href="#cb26-69" aria-hidden="true" tabindex="-1"></a>        <span class="at">recurrent_gating =</span> recurrent_gating,</span>
-<span id="cb26-70"><a href="#cb26-70" aria-hidden="true" tabindex="-1"></a>        <span class="at">saturation_vis =</span> saturation_vis</span>
-<span id="cb26-71"><a href="#cb26-71" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb26-72"><a href="#cb26-72" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb26-73"><a href="#cb26-73" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Call the `ode` function to compute activations at each time point</span></span>
-<span id="cb26-74"><a href="#cb26-74" aria-hidden="true" tabindex="-1"></a>    solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0, <span class="at">times =</span> times, <span class="at">parms =</span> parms, <span class="at">func =</span> scri_system, <span class="at">method =</span> odeMethod, ...)</span>
-<span id="cb26-75"><a href="#cb26-75" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb26-76"><a href="#cb26-76" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reorganize the activations into a data frame that will be easier to deal with later</span></span>
-<span id="cb26-77"><a href="#cb26-77" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> <span class="fu">t</span>(strength_loc <span class="sc">%o%</span> <span class="fu">dgamma</span>(solved[, <span class="st">"time"</span>], <span class="at">shape =</span> loc_shape, <span class="at">rate =</span> loc_rate))</span>
-<span id="cb26-78"><a href="#cb26-78" aria-hidden="true" tabindex="-1"></a>    vis <span class="ot">&lt;-</span> solved[,<span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span>N]</span>
-<span id="cb26-79"><a href="#cb26-79" aria-hidden="true" tabindex="-1"></a>    id <span class="ot">&lt;-</span> solved[,<span class="dv">1</span> <span class="sc">+</span> N <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span>N]</span>
-<span id="cb26-80"><a href="#cb26-80" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb26-81"><a href="#cb26-81" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dimnames</span>(loc) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(vis) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(id) <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb26-82"><a href="#cb26-82" aria-hidden="true" tabindex="-1"></a>        <span class="st">"t"</span> <span class="ot">=</span> solved[, <span class="st">"time"</span>],</span>
-<span id="cb26-83"><a href="#cb26-83" aria-hidden="true" tabindex="-1"></a>        <span class="st">"array_position"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>N</span>
-<span id="cb26-84"><a href="#cb26-84" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb26-85"><a href="#cb26-85" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb26-86"><a href="#cb26-86" aria-hidden="true" tabindex="-1"></a>    to_return <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
-<span id="cb26-87"><a href="#cb26-87" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"localization"</span>, <span class="fu">array2DF</span>(loc, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
-<span id="cb26-88"><a href="#cb26-88" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"identification"</span>, <span class="fu">array2DF</span>(id, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
-<span id="cb26-89"><a href="#cb26-89" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"salience"</span>, <span class="fu">array2DF</span>(vis, <span class="at">responseName =</span> <span class="st">"act"</span>))</span>
-<span id="cb26-90"><a href="#cb26-90" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
-<span id="cb26-91"><a href="#cb26-91" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(</span>
-<span id="cb26-92"><a href="#cb26-92" aria-hidden="true" tabindex="-1"></a>            <span class="at">t =</span> <span class="fu">as.numeric</span>(t),</span>
-<span id="cb26-93"><a href="#cb26-93" aria-hidden="true" tabindex="-1"></a>            <span class="at">array_position =</span> <span class="fu">factor</span>(array_position),</span>
-<span id="cb26-94"><a href="#cb26-94" aria-hidden="true" tabindex="-1"></a>            <span class="at">unit_type =</span> <span class="fu">factor</span>(unit_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"localization"</span>, <span class="st">"identification"</span>, <span class="st">"salience"</span>))</span>
-<span id="cb26-95"><a href="#cb26-95" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb26-96"><a href="#cb26-96" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb26-97"><a href="#cb26-97" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return the resulting data frame</span></span>
-<span id="cb26-98"><a href="#cb26-98" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(to_return)</span>
-<span id="cb26-99"><a href="#cb26-99" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb26-51"><a href="#cb26-51" aria-hidden="true" tabindex="-1"></a>    parms <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb26-52"><a href="#cb26-52" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_loc =</span> strength_loc,</span>
+<span id="cb26-53"><a href="#cb26-53" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_id =</span> strength_id,</span>
+<span id="cb26-54"><a href="#cb26-54" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_shape =</span> loc_shape,</span>
+<span id="cb26-55"><a href="#cb26-55" aria-hidden="true" tabindex="-1"></a>        <span class="at">loc_rate =</span> loc_rate,</span>
+<span id="cb26-56"><a href="#cb26-56" aria-hidden="true" tabindex="-1"></a>        <span class="at">leak_vis =</span> leak_vis,</span>
+<span id="cb26-57"><a href="#cb26-57" aria-hidden="true" tabindex="-1"></a>        <span class="at">leak_id =</span> leak_id,</span>
+<span id="cb26-58"><a href="#cb26-58" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_loc =</span> ff_loc,</span>
+<span id="cb26-59"><a href="#cb26-59" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_id =</span> ff_id,</span>
+<span id="cb26-60"><a href="#cb26-60" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_vis =</span> lat_vis,</span>
+<span id="cb26-61"><a href="#cb26-61" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_id =</span> lat_id,</span>
+<span id="cb26-62"><a href="#cb26-62" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_loc_sum =</span> ff_loc_sum,</span>
+<span id="cb26-63"><a href="#cb26-63" aria-hidden="true" tabindex="-1"></a>        <span class="at">ff_id_sum =</span> ff_id_sum,</span>
+<span id="cb26-64"><a href="#cb26-64" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_vis_sum =</span> lat_vis_sum,</span>
+<span id="cb26-65"><a href="#cb26-65" aria-hidden="true" tabindex="-1"></a>        <span class="at">lat_id_sum =</span> lat_id_sum,</span>
+<span id="cb26-66"><a href="#cb26-66" aria-hidden="true" tabindex="-1"></a>        <span class="at">id_delay =</span> id_delay,</span>
+<span id="cb26-67"><a href="#cb26-67" aria-hidden="true" tabindex="-1"></a>        <span class="at">baseline =</span> baseline,</span>
+<span id="cb26-68"><a href="#cb26-68" aria-hidden="true" tabindex="-1"></a>        <span class="at">recurrent_gating =</span> recurrent_gating,</span>
+<span id="cb26-69"><a href="#cb26-69" aria-hidden="true" tabindex="-1"></a>        <span class="at">saturation_vis =</span> saturation_vis</span>
+<span id="cb26-70"><a href="#cb26-70" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-71"><a href="#cb26-71" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-72"><a href="#cb26-72" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Call the `ode` function to compute activations at each time point</span></span>
+<span id="cb26-73"><a href="#cb26-73" aria-hidden="true" tabindex="-1"></a>    solved <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> y0, <span class="at">times =</span> times, <span class="at">parms =</span> parms, <span class="at">func =</span> scri_system, <span class="at">method =</span> odeMethod, ...)</span>
+<span id="cb26-74"><a href="#cb26-74" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-75"><a href="#cb26-75" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reorganize the activations into a data frame that will be easier to deal with later</span></span>
+<span id="cb26-76"><a href="#cb26-76" aria-hidden="true" tabindex="-1"></a>    loc <span class="ot">&lt;-</span> <span class="fu">t</span>(strength_loc <span class="sc">%o%</span> <span class="fu">dgamma</span>(solved[, <span class="st">"time"</span>], <span class="at">shape =</span> loc_shape, <span class="at">rate =</span> loc_rate))</span>
+<span id="cb26-77"><a href="#cb26-77" aria-hidden="true" tabindex="-1"></a>    vis <span class="ot">&lt;-</span> solved[,<span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span>N]</span>
+<span id="cb26-78"><a href="#cb26-78" aria-hidden="true" tabindex="-1"></a>    id <span class="ot">&lt;-</span> solved[,<span class="dv">1</span> <span class="sc">+</span> N <span class="sc">+</span> <span class="dv">1</span><span class="sc">:</span>N]</span>
+<span id="cb26-79"><a href="#cb26-79" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-80"><a href="#cb26-80" aria-hidden="true" tabindex="-1"></a>    <span class="fu">dimnames</span>(loc) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(vis) <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(id) <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb26-81"><a href="#cb26-81" aria-hidden="true" tabindex="-1"></a>        <span class="st">"t"</span> <span class="ot">=</span> solved[, <span class="st">"time"</span>],</span>
+<span id="cb26-82"><a href="#cb26-82" aria-hidden="true" tabindex="-1"></a>        <span class="st">"array_position"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span>N</span>
+<span id="cb26-83"><a href="#cb26-83" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-84"><a href="#cb26-84" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-85"><a href="#cb26-85" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (return_type <span class="sc">==</span> <span class="st">"all"</span>) {</span>
+<span id="cb26-86"><a href="#cb26-86" aria-hidden="true" tabindex="-1"></a>        <span class="co"># By default, return a data frame with activation values for all unit types</span></span>
+<span id="cb26-87"><a href="#cb26-87" aria-hidden="true" tabindex="-1"></a>        to_return <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb26-88"><a href="#cb26-88" aria-hidden="true" tabindex="-1"></a>            <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"localization"</span>, <span class="fu">array2DF</span>(loc, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
+<span id="cb26-89"><a href="#cb26-89" aria-hidden="true" tabindex="-1"></a>            <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"identification"</span>, <span class="fu">array2DF</span>(id, <span class="at">responseName =</span> <span class="st">"act"</span>)),</span>
+<span id="cb26-90"><a href="#cb26-90" aria-hidden="true" tabindex="-1"></a>            <span class="fu">cbind</span>(<span class="at">unit_type =</span> <span class="st">"salience"</span>, <span class="fu">array2DF</span>(vis, <span class="at">responseName =</span> <span class="st">"act"</span>))</span>
+<span id="cb26-91"><a href="#cb26-91" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">%&gt;%</span></span>
+<span id="cb26-92"><a href="#cb26-92" aria-hidden="true" tabindex="-1"></a>            <span class="fu">mutate</span>(</span>
+<span id="cb26-93"><a href="#cb26-93" aria-hidden="true" tabindex="-1"></a>                <span class="at">t =</span> <span class="fu">as.numeric</span>(t),</span>
+<span id="cb26-94"><a href="#cb26-94" aria-hidden="true" tabindex="-1"></a>                <span class="at">array_position =</span> <span class="fu">factor</span>(array_position),</span>
+<span id="cb26-95"><a href="#cb26-95" aria-hidden="true" tabindex="-1"></a>                <span class="at">unit_type =</span> <span class="fu">factor</span>(unit_type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"localization"</span>, <span class="st">"identification"</span>, <span class="st">"salience"</span>))</span>
+<span id="cb26-96"><a href="#cb26-96" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb26-97"><a href="#cb26-97" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span> (return_type <span class="sc">==</span> <span class="st">"vis"</span>) {</span>
+<span id="cb26-98"><a href="#cb26-98" aria-hidden="true" tabindex="-1"></a>        <span class="co"># For fitting, we only need the "vis" matrix</span></span>
+<span id="cb26-99"><a href="#cb26-99" aria-hidden="true" tabindex="-1"></a>        to_return <span class="ot">&lt;-</span> vis</span>
+<span id="cb26-100"><a href="#cb26-100" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb26-101"><a href="#cb26-101" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-102"><a href="#cb26-102" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return the desired result</span></span>
+<span id="cb26-103"><a href="#cb26-103" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(to_return)</span>
+<span id="cb26-104"><a href="#cb26-104" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Now let’s run the model using its default parameter values. These are close to the median values estimated from fitting SCRI to real neurons, and so produce behavior that is generally representative of how FEF visual neurons respond in visual search tasks.</p>
@@ -1374,6 +1384,554 @@ v &amp; = \frac{b}{b + \lambda_v}
 <div>
 <figure class="figure">
 <p><img src="mbcn_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="set-size" class="level3" data-number="14.3.4">
+<h3 data-number="14.3.4" class="anchored" data-anchor-id="set-size"><span class="header-section-number">14.3.4</span> Set size</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="fu">sin</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">3</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">cos</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">3</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="fu">c</span>(<span class="st">"T"</span>, <span class="fu">rep</span>(<span class="st">"L"</span>, <span class="dv">1</span>)),</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">angle =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">sample</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">270</span>, <span class="at">by =</span> <span class="dv">90</span>), <span class="at">size =</span> <span class="dv">1</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">setsize =</span> <span class="dv">2</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="fu">sin</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">5</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]),</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">cos</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">5</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>]),</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="fu">c</span>(<span class="st">"T"</span>, <span class="fu">rep</span>(<span class="st">"L"</span>, <span class="dv">3</span>)),</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">angle =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">sample</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">270</span>, <span class="at">by =</span> <span class="dv">90</span>), <span class="at">size =</span> <span class="dv">3</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">setsize =</span> <span class="dv">4</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="fu">sin</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">9</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>]),</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">cos</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">9</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>]),</span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">label =</span> <span class="fu">c</span>(<span class="st">"T"</span>, <span class="fu">rep</span>(<span class="st">"L"</span>, <span class="dv">7</span>)),</span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">angle =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fu">sample</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">270</span>, <span class="at">by =</span> <span class="dv">90</span>), <span class="at">size =</span> <span class="dv">7</span>, <span class="at">replace =</span> <span class="cn">TRUE</span>)),</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>        <span class="at">setsize =</span> <span class="dv">8</span></span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">setsize =</span> <span class="fu">factor</span>(setsize, <span class="at">levels =</span> <span class="fu">sort</span>(<span class="fu">unique</span>(setsize)), <span class="at">labels =</span> <span class="fu">paste</span>(<span class="st">"Set size"</span>, <span class="fu">sort</span>(<span class="fu">unique</span>(setsize))))) <span class="sc">%&gt;%</span></span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">label =</span> label, <span class="at">angle =</span> angle)) <span class="sc">+</span></span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_text</span>(<span class="at">size =</span> <span class="dv">7</span>) <span class="sc">+</span></span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">annotate</span>(<span class="at">geom =</span> <span class="st">"point"</span>, <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">shape =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span>)) <span class="sc">+</span></span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"setsize"</span>, <span class="at">nrow =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">panel.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"#777777"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s first see how we can use SCRI to model effects of <em>set size</em>. As illustrated in the examples above, set size refers to the number of items in the array. Each array contains one target with the remaining items acting as distractors. In the examples above, the “T” shape is the target while the “L” shapes are distractors; the displays are arranged so that the target is always at the top, but in the actual experiment the target could appear equally often at any location.</p>
+<p>For now, we will use the default parameter values in the <code>scri</code> function, since these produce dynamics that are typical of many FEF visual neurons. We will model a SCRI system with eight sets of units, corresponding to the eight possible locations at which an item could appear in the array. We will model different set sizes by setting the localization and identification inputs to zero for any location that doesn’t contain an item. At first glance, it may seem strange to model neural responses of regions that don’t contain an item, but recall that excitation isn’t the <em>only</em> influence on SCRI’s units! Each salience unit gets baseline input too, and this means that they are still active even without any excitation from localization or inhibition units. As a result, these units can still participate in inhibitory interactions even without external excitation.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Each row of this matrix indicates which array locations contain an item</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="co"># for each setsize.  The target is, by convention, always in array position 1.</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>item_present <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">8</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"setsize"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>),</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"array_position"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>localization_strength <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>target_id_strength <span class="ot">&lt;-</span> <span class="fl">0.03</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>distractor_id_strength <span class="ot">&lt;-</span> <span class="fl">0.01</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(item_present)) {</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>    this_strength_loc <span class="ot">&lt;-</span> localization_strength <span class="sc">*</span> item_present[i,]</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>    this_strength_id <span class="ot">&lt;-</span> distractor_id_strength <span class="sc">*</span> item_present[i,]</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>    this_strength_id[<span class="dv">1</span>] <span class="ot">&lt;-</span> target_id_strength</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>    this_sim <span class="ot">&lt;-</span> <span class="fu">scri</span>(</span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_loc =</span> this_strength_loc,</span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_id =</span> this_strength_id</span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a>    sim <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a>        sim,</span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">setsize =</span> <span class="fu">paste</span>(<span class="st">"Set size"</span>, <span class="fu">rownames</span>(item_present)[i]), this_sim)</span>
+<span id="cb29-33"><a href="#cb29-33" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb29-34"><a href="#cb29-34" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb29-35"><a href="#cb29-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-36"><a href="#cb29-36" aria-hidden="true" tabindex="-1"></a>sim <span class="sc">%&gt;%</span></span>
+<span id="cb29-37"><a href="#cb29-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> act, <span class="at">color =</span> array_position)) <span class="sc">+</span></span>
+<span id="cb29-38"><a href="#cb29-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb29-39"><a href="#cb29-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb29-40"><a href="#cb29-40" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_okabeito</span>() <span class="sc">+</span></span>
+<span id="cb29-41"><a href="#cb29-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(unit_type <span class="sc">~</span> setsize, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb29-42"><a href="#cb29-42" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time from array onset (ms)"</span>, <span class="at">y =</span> <span class="st">"Activation"</span>, <span class="at">color =</span> <span class="st">"Array</span><span class="sc">\n</span><span class="st">position"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Let’s examine these simulation results. Looking at the first row, depicting the localization units, they look the same for all levels of set size. Recall that the localization signal does not differentiate between targets and distractors and its dynamics depend only on time. Thus, we wouldn’t expect the dynamics of this signal to be affected by set size—only which array positions receive the requisite excitation.</p>
+<p>Looking at the middle row, depicting the identificatin units, these change considerably between levels of set size. The greater the set size, the lower is the asymptotic signal for the target item in position 1 (the upper black line). The lower asymptote is due to increased lateral inhibition between identification units with distractors in their receptive fields as set size increases.</p>
+<p>Finally, the bottom row depicts the dynamics of the salience units, which model FEF visual neurons. Once again, these neurons display the characteristic three-phase pattern, with the inhibited target representation resulting in lower asymptotic activity when a target is in the receptive field (i.e., in array position 1). Note also the lower lines depicting the activity of neurons with no items in their receptive fields; these get inhibited by the activity of neurons excited by the presence of an item in their receptive fields.</p>
+</section>
+<section id="target-distractor-similarity" class="level3" data-number="14.3.5">
+<h3 data-number="14.3.5" class="anchored" data-anchor-id="target-distractor-similarity"><span class="header-section-number">14.3.5</span> Target-distractor similarity</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="fu">sin</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">9</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>]),</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">cos</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">9</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>]),</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">item =</span> <span class="fu">c</span>(<span class="st">"Target"</span>, <span class="fu">rep</span>(<span class="st">"Easy distractor"</span>, <span class="dv">7</span>)),</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">cond =</span> <span class="st">"Easy"</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">x =</span> <span class="fu">sin</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">9</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>]),</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="fu">cos</span>(<span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">2</span> <span class="sc">*</span> pi, <span class="at">length.out =</span> <span class="dv">9</span>)[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>]),</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">item =</span> <span class="fu">c</span>(<span class="st">"Target"</span>, <span class="fu">rep</span>(<span class="st">"Hard distractor"</span>, <span class="dv">7</span>)),</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">cond =</span> <span class="st">"Hard"</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">cond =</span> <span class="fu">factor</span>(cond, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Easy"</span>, <span class="st">"Hard"</span>))) <span class="sc">%&gt;%</span></span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y, <span class="at">color =</span> item)) <span class="sc">+</span></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">shape =</span> <span class="dv">16</span>, <span class="at">size =</span> <span class="dv">10</span>) <span class="sc">+</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">annotate</span>(<span class="at">geom =</span> <span class="st">"point"</span>, <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">shape =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_equal</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span>)) <span class="sc">+</span></span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Target"</span> <span class="ot">=</span> <span class="st">"#16a74c"</span>, <span class="st">"Easy distractor"</span> <span class="ot">=</span> <span class="st">"#ea242e"</span>, <span class="st">"Hard distractor"</span> <span class="ot">=</span> <span class="st">"#6dc43f"</span>), <span class="at">guide =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"cond"</span>, <span class="at">nrow =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">panel.background =</span> <span class="fu">element_rect</span>(<span class="at">fill =</span> <span class="st">"#777777"</span>, <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Another common manipulation in the visual search tasks to which SCRI has been applied involves manipulating the <em>similarity</em> between the distractors and the search target. This is illustrated in the example arrays above, where the target is a green circle and the distractors are either dissimilar in color (“Easy”) or similar in color (“Hard”).</p>
+<p>Modeling this manipulation in SCRI involves assuming that easy and hard distractor differ in the strength of their identification signal (i.e., the <span class="math inline">\(\eta\)</span> parameter). Although it is not explicitly modeled in SCRI, we can think of the identification signal as the outcome of a comparison process between a representation of an item and a representation of the search target—this is exactly the kind of comparison we addressed in previous chapters. Thus, distractors with features (like color) that are similar to those of the target would produce a stronger comparison signal.</p>
+<p>This is implemented in the code chunk below, where we run two SCRI simulations, using the <code>distractor_id_strength</code> vector to hold the two values of <span class="math inline">\(\eta\)</span> corresponding to the easy and hard search conditions.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>localization_strength <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>target_id_strength <span class="ot">&lt;-</span> <span class="fl">0.03</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>distractor_id_strength <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Easy"</span> <span class="ot">=</span> <span class="fl">0.01</span>, <span class="st">"Hard"</span> <span class="ot">=</span> <span class="fl">0.02</span>)</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>sim <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(distractor_id_strength)) {</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    this_strength_id <span class="ot">&lt;-</span> <span class="fu">c</span>(target_id_strength, <span class="fu">rep</span>(distractor_id_strength[i], <span class="dv">7</span>))</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    this_sim <span class="ot">&lt;-</span> <span class="fu">scri</span>(</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_loc =</span> <span class="fu">rep</span>(localization_strength, <span class="dv">8</span>),</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">strength_id =</span> this_strength_id</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>    sim <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>        sim,</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">cbind</span>(<span class="at">cond =</span> <span class="fu">names</span>(distractor_id_strength)[i], this_sim)</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-21"><a href="#cb31-21" aria-hidden="true" tabindex="-1"></a>sim <span class="sc">%&gt;%</span></span>
+<span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> act, <span class="at">color =</span> array_position)) <span class="sc">+</span></span>
+<span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb31-25"><a href="#cb31-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_okabeito</span>() <span class="sc">+</span></span>
+<span id="cb31-26"><a href="#cb31-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(unit_type <span class="sc">~</span> cond, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb31-27"><a href="#cb31-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time from array onset (ms)"</span>, <span class="at">y =</span> <span class="st">"Activation"</span>, <span class="at">color =</span> <span class="st">"Array</span><span class="sc">\n</span><span class="st">position"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-27-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Looking at the results, we again see that the localization signal (top row) is unaffected by target-distractor similarity since localization is insensitive to the features of an item. On the other hand, the identification signal (middle row) is strongly affected. In the hard condition, the greater identification strength for distractors causes their activation to be higher. At the same time, the lateral inhibition between distractors and the target also suppresses activation for the target. This is reflected in the salience units that model FEF visual neurons (bottom row): in the hard condition, the salience of the target is much lower than in the easy condition as a result of the increased competition from distractors.</p>
+</section>
+<section id="shiny-app" class="level3" data-number="14.3.6">
+<h3 data-number="14.3.6" class="anchored" data-anchor-id="shiny-app"><span class="header-section-number">14.3.6</span> Shiny app</h3>
+<p>In the examples above, we’ve used some “default” values for SCRI’s parameters to illustrate its qualitative predictions. One issue with dynamical systems models is that, even if they are deterministic like SCRI, the presence of interactions can make it hard to intuit how the model will behave given different parameter values. Therefore, I’ve put together a <a href="https://raw.githubusercontent.com/gregcox7/choice_rt_models/refs/heads/main/scri_shiny_app.r">Shiny app</a> that you can download and run in RStudio to explore how changing different parameters of SCRI results in different dynamics.</p>
+</section>
+</section>
+<section id="turn-and-face-the-strange-fitting-scri-to-neural-data" class="level2" data-number="14.4">
+<h2 data-number="14.4" class="anchored" data-anchor-id="turn-and-face-the-strange-fitting-scri-to-neural-data"><span class="header-section-number">14.4</span> Turn and face the strange: Fitting SCRI to neural data</h2>
+<p>A major advantage of a model like SCRI is that it doesn’t just simulate firing rate dynamics, it can be <em>fit</em> to neural data so we can estimate the values of its different parameters. To see how this can be done, let’s first load a set of neural recordings from a single FEF visual neuron as a monkey (named Quincy) did a visual search task. In this session, set size was varied randomly from trial to trial, with set sizes 2, 4, and 8.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/data_Q30.rdata"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(spikeDF)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  subject cell setsize    resp   stim  rt trial    t spike
+1       Q   30       2 correct target 201     1 -500     0
+2       Q   30       2 correct target 201     1 -499     0
+3       Q   30       2 correct target 201     1 -498     0
+4       Q   30       2 correct target 201     1 -497     0
+5       Q   30       2 correct target 201     1 -496     0
+6       Q   30       2 correct target 201     1 -495     0</code></pre>
+</div>
+</div>
+<p>As you can see above, each row represents a single <em>millisecond</em> of time, with the column <code>t</code> indicating the time relative to the onset of the search array. The column <code>spike</code> is either 0 or 1, depending on whether the neuron fired an action potential at that time. The <code>stim</code> column indicates whether the item in the neuron’s receptive field was a “target” or a “distractor”. If it was a distractor, it was always in the position <em>opposite</em> that of the target. Since there are eight possible locations, we can thus designate position “1” as that of the target and position “5” as that of the distractor.</p>
+<p>In addition, prior to fitting, we will need to do some filtering. First, we don’t care what the neuron is doing before the array appears, so we can ignore any rows with <code>t &lt;= 0</code>. Second, since we are modeling how these neurons provide evidence for where to make a saccade, we can also ignore any spikes produced <em>after</em> the response is made, i.e., when <code>t &gt;= rt</code>. Finally, for present purposes, we will focus only on correct trials, for which <code>resp == "correct"</code>.</p>
+<p>The chunk below performs the filtering described above and summarizes the data in terms of the number of spikes recorded at each millisecond of time.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>setsize_spike_data <span class="ot">&lt;-</span> spikeDF <span class="sc">%&gt;%</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Ensure that the times are recorded to the nearest millisecond</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">t =</span> <span class="fu">round</span>(t)) <span class="sc">%&gt;%</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># When a distractor is in the receptive field, it is always the one opposite</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># the target in the array (which is position 5).</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">array_position =</span> <span class="fu">if_else</span>(stim <span class="sc">==</span> <span class="st">"target"</span>, <span class="dv">1</span>, <span class="dv">5</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Only model spikes after array has appeared (t &gt; 0), before a saccade is</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># made (t &lt; rt), and on correct trials (resp == "correct")</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(t <span class="sc">&gt;</span> <span class="dv">0</span>, t <span class="sc">&lt;</span> rt, resp <span class="sc">==</span> <span class="st">"correct"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># For each condition and item (stim), count the number of spikes observed</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># at each point in time as well as the number of observations</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(setsize, stim, array_position, t) <span class="sc">%&gt;%</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">n_spikes =</span> <span class="fu">sum</span>(spike), <span class="at">n_obs =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`summarise()` has grouped output by 'setsize', 'stim', 'array_position'. You
+can override using the `.groups` argument.</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(setsize_spike_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 6
+# Groups:   setsize, stim, array_position [1]
+  setsize stim   array_position     t n_spikes n_obs
+    &lt;dbl&gt; &lt;fct&gt;           &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt; &lt;int&gt;
+1       2 target              1     1        3   127
+2       2 target              1     2        2   127
+3       2 target              1     3        0   127
+4       2 target              1     4        6   127
+5       2 target              1     5        2   127
+6       2 target              1     6        2   127</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>setsize_spike_data <span class="sc">%&gt;%</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">setsize =</span> <span class="fu">factor</span>(setsize, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>), <span class="at">labels =</span> <span class="fu">paste</span>(<span class="st">"Set size"</span>, <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>)))) <span class="sc">%&gt;%</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">p_spike =</span> n_spikes <span class="sc">/</span> n_obs) <span class="sc">%&gt;%</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> p_spike, <span class="at">color =</span> stim)) <span class="sc">+</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">alpha =</span> n_obs), <span class="at">size =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_smooth</span>(<span class="fu">aes</span>(<span class="at">weight =</span> n_obs, <span class="at">group =</span> stim), <span class="at">se =</span> F) <span class="sc">+</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_alpha_continuous</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="fl">0.0</span>, <span class="fl">0.1</span>)) <span class="sc">+</span></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"target"</span> <span class="ot">=</span> <span class="st">"#377eb8"</span>, <span class="st">"distractor"</span> <span class="ot">=</span> <span class="st">"#e41a1c"</span>)) <span class="sc">+</span></span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time from array onset (ms)"</span>, <span class="at">y =</span> <span class="st">"Spike probability"</span>, <span class="at">color =</span> <span class="st">"Item in RF"</span>, <span class="at">alpha =</span> <span class="st">"Number of</span><span class="sc">\n</span><span class="st">observations"</span>) <span class="sc">+</span></span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="st">"setsize"</span>, <span class="at">nrow =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = "cs")'</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>As we can see, the neuron did indeed fire more when a target was in its receptive field than when a distractor was! Moreover, by looking at the structure of the data, we already get a sense of how we are going to compute the <em>negative log-likelihood</em>: Since the data consist of a number of “successes” (<code>n_spikes</code>) out of a number of observations (<code>n_obs</code>) for each point in time in each condition, the likelihood can be computed using the <strong>binomial distribution</strong> which is built into R as the function <code>dbinom</code>. This distribution has a single parameter, which is the probability of success (the argument <code>prob</code> in the R function). This probability is equal to the activation of the corresponding SCRI salience unit at that time in that condition. By minimizing the total negative log-likelihood across all time points/conditions, we can estimate the parameters of SCRI that best account for this neuron’s spiking dynamics.</p>
+<p>To do that, the chunk of code below implements a <code>scri_nll</code> function. One important thing to note is that the <code>par</code> vector, which is a vector of named parameter values, is on a <em>logarithmic</em> scale. These are transformed using the <code>exp</code> function to get the final parameter value. The reason for this transformation is twofold: First, all of SCRI’s parameters are constrained to be positive, so this transformation ensures that, regardless of the value in the <code>par</code> vector, the actual parameter that gets used is always nonnegative. Second, very small differences in SCRI’s parameters can sometimes lead to very large changes in model predictions. If the parameter search routine were operating on raw parameter values, it would be easy for it to take a step “too far” by adjusting a SCRI parameter too much, causing a sudden change in the model’s predictions. By performing the parameter search on a logarithmic scale, these big leaps are “smoothed out”, making it easier for the parameter search routine to find the best values.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>scri_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(par, cond, array_position, t, n_spikes, n_obs, items, <span class="at">n_items =</span> <span class="fu">max</span>(items, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">return.pred =</span> <span class="cn">FALSE</span>, ...) {</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    n_locations <span class="ot">&lt;-</span> <span class="fu">ncol</span>(items)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    n_cond <span class="ot">&lt;-</span> <span class="fu">nrow</span>(items)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="fu">max</span>(t))</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    saturation_vis <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"loc"</span>])) {</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>        loc <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="fu">paste0</span>(<span class="st">"loc["</span>, <span class="dv">1</span><span class="sc">:</span>n_items, <span class="st">"]"</span>)])</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>        loc <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">exp</span>(par[<span class="st">"loc"</span>]), n_items)</span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"id"</span>])) {</span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>        id <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="fu">paste0</span>(<span class="st">"id["</span>, <span class="dv">1</span><span class="sc">:</span>n_items, <span class="st">"]"</span>)])</span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>        id <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">exp</span>(par[<span class="st">"id"</span>]), n_items)</span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>    leak_vis <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">"leak_vis"</span>])</span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>    leak_id <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">"leak_id"</span>])</span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"ff_loc"</span>])) {</span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a>        ff_loc <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-27"><a href="#cb40-27" aria-hidden="true" tabindex="-1"></a>        ff_loc <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">"ff_loc"</span>])</span>
+<span id="cb40-28"><a href="#cb40-28" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-29"><a href="#cb40-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-30"><a href="#cb40-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"ff_id"</span>])) {</span>
+<span id="cb40-31"><a href="#cb40-31" aria-hidden="true" tabindex="-1"></a>        ff_id <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb40-32"><a href="#cb40-32" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-33"><a href="#cb40-33" aria-hidden="true" tabindex="-1"></a>        ff_id <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">"ff_id"</span>])</span>
+<span id="cb40-34"><a href="#cb40-34" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-35"><a href="#cb40-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-36"><a href="#cb40-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"lat_vis"</span>])) {</span>
+<span id="cb40-37"><a href="#cb40-37" aria-hidden="true" tabindex="-1"></a>        lat_vis <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb40-38"><a href="#cb40-38" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-39"><a href="#cb40-39" aria-hidden="true" tabindex="-1"></a>        lat_vis <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">"lat_vis"</span>])</span>
+<span id="cb40-40"><a href="#cb40-40" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-41"><a href="#cb40-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-42"><a href="#cb40-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"lat_id"</span>])) {</span>
+<span id="cb40-43"><a href="#cb40-43" aria-hidden="true" tabindex="-1"></a>        lat_id <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb40-44"><a href="#cb40-44" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-45"><a href="#cb40-45" aria-hidden="true" tabindex="-1"></a>        lat_id <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">"lat_id"</span>])</span>
+<span id="cb40-46"><a href="#cb40-46" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-47"><a href="#cb40-47" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-48"><a href="#cb40-48" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"lat_vis_spread"</span>])) {</span>
+<span id="cb40-49"><a href="#cb40-49" aria-hidden="true" tabindex="-1"></a>        lat_vis_spread <span class="ot">&lt;-</span> <span class="cn">Inf</span></span>
+<span id="cb40-50"><a href="#cb40-50" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-51"><a href="#cb40-51" aria-hidden="true" tabindex="-1"></a>        lat_vis_spread <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">"lat_vis_spread"</span>])</span>
+<span id="cb40-52"><a href="#cb40-52" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-53"><a href="#cb40-53" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-54"><a href="#cb40-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"lat_id_spread"</span>])) {</span>
+<span id="cb40-55"><a href="#cb40-55" aria-hidden="true" tabindex="-1"></a>        lat_id_spread <span class="ot">&lt;-</span> <span class="cn">Inf</span></span>
+<span id="cb40-56"><a href="#cb40-56" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-57"><a href="#cb40-57" aria-hidden="true" tabindex="-1"></a>        lat_id_spread <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">"lat_id_spread"</span>])</span>
+<span id="cb40-58"><a href="#cb40-58" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-59"><a href="#cb40-59" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-60"><a href="#cb40-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"id_delay"</span>])) {</span>
+<span id="cb40-61"><a href="#cb40-61" aria-hidden="true" tabindex="-1"></a>        id_delay <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb40-62"><a href="#cb40-62" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-63"><a href="#cb40-63" aria-hidden="true" tabindex="-1"></a>        id_delay <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">"id_delay"</span>])</span>
+<span id="cb40-64"><a href="#cb40-64" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-65"><a href="#cb40-65" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-66"><a href="#cb40-66" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.na</span>(par[<span class="st">"baseline"</span>])) {</span>
+<span id="cb40-67"><a href="#cb40-67" aria-hidden="true" tabindex="-1"></a>        baseline <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb40-68"><a href="#cb40-68" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-69"><a href="#cb40-69" aria-hidden="true" tabindex="-1"></a>        baseline <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">"baseline"</span>])</span>
+<span id="cb40-70"><a href="#cb40-70" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-71"><a href="#cb40-71" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-72"><a href="#cb40-72" aria-hidden="true" tabindex="-1"></a>    loc_peak <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">'loc_peak'</span>])</span>
+<span id="cb40-73"><a href="#cb40-73" aria-hidden="true" tabindex="-1"></a>    loc_spread <span class="ot">&lt;-</span> <span class="fu">exp</span>(par[<span class="st">"loc_spread"</span>])</span>
+<span id="cb40-74"><a href="#cb40-74" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-75"><a href="#cb40-75" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ll &lt;- sum(dexp(c(loc, id, leak_vis, leak_id, ff_loc, ff_id, lat_vis, lat_id, baseline, id_delay), rate = 1, log = TRUE)) +</span></span>
+<span id="cb40-76"><a href="#cb40-76" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     sum(dexp(c(loc_peak, loc_spread), rate = 0.005, log = TRUE))</span></span>
+<span id="cb40-77"><a href="#cb40-77" aria-hidden="true" tabindex="-1"></a>    ll <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb40-78"><a href="#cb40-78" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-79"><a href="#cb40-79" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (return.pred) {</span>
+<span id="cb40-80"><a href="#cb40-80" aria-hidden="true" tabindex="-1"></a>        to_ret <span class="ot">&lt;-</span> <span class="fu">c</span>()</span>
+<span id="cb40-81"><a href="#cb40-81" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-82"><a href="#cb40-82" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-83"><a href="#cb40-83" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (cond_index <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_cond) {</span>
+<span id="cb40-84"><a href="#cb40-84" aria-hidden="true" tabindex="-1"></a>        in_cond <span class="ot">&lt;-</span> <span class="fu">which</span>(cond <span class="sc">==</span> cond_index)</span>
+<span id="cb40-85"><a href="#cb40-85" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb40-86"><a href="#cb40-86" aria-hidden="true" tabindex="-1"></a>        strength_loc <span class="ot">&lt;-</span> loc[items[cond_index,]]</span>
+<span id="cb40-87"><a href="#cb40-87" aria-hidden="true" tabindex="-1"></a>        strength_id <span class="ot">&lt;-</span> id[items[cond_index,]]</span>
+<span id="cb40-88"><a href="#cb40-88" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb40-89"><a href="#cb40-89" aria-hidden="true" tabindex="-1"></a>        strength_loc[<span class="fu">is.na</span>(strength_loc)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb40-90"><a href="#cb40-90" aria-hidden="true" tabindex="-1"></a>        strength_id[<span class="fu">is.na</span>(strength_id)] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb40-91"><a href="#cb40-91" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb40-92"><a href="#cb40-92" aria-hidden="true" tabindex="-1"></a>        sim <span class="ot">&lt;-</span> <span class="fu">try</span>(<span class="fu">scri</span>(<span class="at">times =</span> times,</span>
+<span id="cb40-93"><a href="#cb40-93" aria-hidden="true" tabindex="-1"></a>                    <span class="at">strength_loc =</span> strength_loc,</span>
+<span id="cb40-94"><a href="#cb40-94" aria-hidden="true" tabindex="-1"></a>                    <span class="at">strength_id =</span> strength_id,</span>
+<span id="cb40-95"><a href="#cb40-95" aria-hidden="true" tabindex="-1"></a>                    <span class="at">loc_peak =</span> loc_peak, <span class="at">loc_spread =</span> loc_spread,</span>
+<span id="cb40-96"><a href="#cb40-96" aria-hidden="true" tabindex="-1"></a>                    <span class="at">leak_vis =</span> leak_vis, <span class="at">leak_id =</span> leak_id,</span>
+<span id="cb40-97"><a href="#cb40-97" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ff_loc =</span> ff_loc, <span class="at">ff_id =</span> ff_id,</span>
+<span id="cb40-98"><a href="#cb40-98" aria-hidden="true" tabindex="-1"></a>                    <span class="at">lat_vis =</span> lat_vis, <span class="at">lat_id =</span> lat_id,</span>
+<span id="cb40-99"><a href="#cb40-99" aria-hidden="true" tabindex="-1"></a>                    <span class="at">ff_loc_spread =</span> <span class="cn">Inf</span>, <span class="at">ff_id_spread =</span> <span class="cn">Inf</span>,</span>
+<span id="cb40-100"><a href="#cb40-100" aria-hidden="true" tabindex="-1"></a>                    <span class="at">lat_vis_spread =</span> lat_vis_spread, <span class="at">lat_id_spread =</span> lat_id_spread,</span>
+<span id="cb40-101"><a href="#cb40-101" aria-hidden="true" tabindex="-1"></a>                    <span class="at">id_delay =</span> id_delay, <span class="at">baseline =</span> baseline,</span>
+<span id="cb40-102"><a href="#cb40-102" aria-hidden="true" tabindex="-1"></a>                    <span class="at">saturation_vis =</span> saturation_vis,</span>
+<span id="cb40-103"><a href="#cb40-103" aria-hidden="true" tabindex="-1"></a>                    <span class="at">return_type =</span> <span class="fu">ifelse</span>(return.pred, <span class="st">"all"</span>, <span class="st">"vis"</span>), ...))</span>
+<span id="cb40-104"><a href="#cb40-104" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb40-105"><a href="#cb40-105" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (return.pred) {</span>
+<span id="cb40-106"><a href="#cb40-106" aria-hidden="true" tabindex="-1"></a>            to_ret <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb40-107"><a href="#cb40-107" aria-hidden="true" tabindex="-1"></a>                to_ret,</span>
+<span id="cb40-108"><a href="#cb40-108" aria-hidden="true" tabindex="-1"></a>                <span class="fu">cbind</span>(<span class="at">cond =</span> cond_index, sim)</span>
+<span id="cb40-109"><a href="#cb40-109" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb40-110"><a href="#cb40-110" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb40-111"><a href="#cb40-111" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> (<span class="fu">any</span>(<span class="fu">class</span>(sim) <span class="sc">==</span> <span class="st">"try-error"</span>)) {</span>
+<span id="cb40-112"><a href="#cb40-112" aria-hidden="true" tabindex="-1"></a>                <span class="fu">return</span>(<span class="cn">Inf</span>)</span>
+<span id="cb40-113"><a href="#cb40-113" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb40-114"><a href="#cb40-114" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb40-115"><a href="#cb40-115" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> (<span class="fu">length</span>(sim) <span class="sc">&lt;=</span> <span class="dv">0</span>) {</span>
+<span id="cb40-116"><a href="#cb40-116" aria-hidden="true" tabindex="-1"></a>                <span class="fu">return</span>(<span class="cn">Inf</span>)</span>
+<span id="cb40-117"><a href="#cb40-117" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb40-118"><a href="#cb40-118" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="cb40-119"><a href="#cb40-119" aria-hidden="true" tabindex="-1"></a>            ll <span class="ot">&lt;-</span> ll <span class="sc">+</span> <span class="fu">sum</span>(<span class="fu">dbinom</span>(</span>
+<span id="cb40-120"><a href="#cb40-120" aria-hidden="true" tabindex="-1"></a>                <span class="at">x =</span> n_spikes[in_cond],</span>
+<span id="cb40-121"><a href="#cb40-121" aria-hidden="true" tabindex="-1"></a>                <span class="at">size =</span> n_obs[in_cond],</span>
+<span id="cb40-122"><a href="#cb40-122" aria-hidden="true" tabindex="-1"></a>                <span class="at">prob =</span> sim[<span class="fu">cbind</span>(t[in_cond], array_position[in_cond])],</span>
+<span id="cb40-123"><a href="#cb40-123" aria-hidden="true" tabindex="-1"></a>                <span class="at">log =</span> <span class="cn">TRUE</span></span>
+<span id="cb40-124"><a href="#cb40-124" aria-hidden="true" tabindex="-1"></a>            ))</span>
+<span id="cb40-125"><a href="#cb40-125" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb40-126"><a href="#cb40-126" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-127"><a href="#cb40-127" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb40-128"><a href="#cb40-128" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (return.pred) {</span>
+<span id="cb40-129"><a href="#cb40-129" aria-hidden="true" tabindex="-1"></a>        <span class="fu">return</span>(to_ret)</span>
+<span id="cb40-130"><a href="#cb40-130" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb40-131"><a href="#cb40-131" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (<span class="fu">is.na</span>(ll)) {</span>
+<span id="cb40-132"><a href="#cb40-132" aria-hidden="true" tabindex="-1"></a>            <span class="fu">return</span>(<span class="cn">Inf</span>)</span>
+<span id="cb40-133"><a href="#cb40-133" aria-hidden="true" tabindex="-1"></a>        } <span class="cf">else</span> {</span>
+<span id="cb40-134"><a href="#cb40-134" aria-hidden="true" tabindex="-1"></a>            <span class="fu">return</span>(<span class="sc">-</span><span class="fu">sum</span>(ll))</span>
+<span id="cb40-135"><a href="#cb40-135" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb40-136"><a href="#cb40-136" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb40-137"><a href="#cb40-137" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>To see how this function can be used, let’s fit SCRI to the neuron shown above. To do this, we need to define a matrix called <code>items</code> which indicates which type of item is present in which location in each of the three conditions (set sizes 2, 4, and 8). Although the exact indices are arbitrary, a value of <code>1</code> indicates a target item, a value of <code>2</code> indicates a distractor item, and a value of <code>NA</code> indicates no item present at that location.</p>
+<p>Parameter fitting is done in two stages. First, R’s built-in <code>optim</code> function is used to get from the initial vector of parameter values (<code>par</code>) to a more reasonable set of values. Second, the best values found by <code>optim</code> are used as the starting point for <em>another</em> parameter search routine called <code>ucminf</code> from the <code>ucminf</code> package. The <code>ucminf</code> function then conducts the rest of the parameter search until it converges.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ucminf)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>items <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="dv">2</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="cn">NA</span>,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>, <span class="cn">NA</span>,  <span class="dv">2</span>, <span class="cn">NA</span>, <span class="dv">2</span>, <span class="cn">NA</span>,  <span class="dv">2</span>, <span class="cn">NA</span>,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>,  <span class="dv">2</span>,  <span class="dv">2</span>,  <span class="dv">2</span>, <span class="dv">2</span>,  <span class="dv">2</span>,  <span class="dv">2</span>,  <span class="dv">2</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>), <span class="at">nrow =</span> <span class="dv">3</span>, <span class="at">ncol =</span> <span class="dv">8</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="at">dimnames =</span> <span class="fu">list</span>(</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"setsize"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>),</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"array_position"</span> <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span></span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>par <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">"loc"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="fl">0.2</span>),</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"id[1]"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="fl">0.02</span>),</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"id[2]"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="fl">0.01</span>),</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"leak_vis"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="fl">0.1</span>),</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"leak_id"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="fl">0.1</span>),</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"loc_peak"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="dv">100</span>),</span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"loc_spread"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="dv">50</span>),</span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ff_loc"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="dv">1</span>),</span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ff_id"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="dv">1</span>),</span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lat_vis"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="dv">1</span>),</span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lat_id"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="dv">1</span>),</span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"baseline"</span> <span class="ot">=</span> <span class="fu">log</span>(<span class="fl">0.001</span>)</span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>setsize_fit <span class="ot">&lt;-</span> <span class="fu">optim</span>(</span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">par =</span> par,</span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">fn =</span> scri_nll,</span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"Nelder-Mead"</span>,</span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># control = list(trace = 6),</span></span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">cond =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(setsize_spike_data<span class="sc">$</span>setsize)),</span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">array_position =</span> setsize_spike_data<span class="sc">$</span>array_position,</span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">t =</span> setsize_spike_data<span class="sc">$</span>t,</span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_spikes =</span> setsize_spike_data<span class="sc">$</span>n_spikes,</span>
+<span id="cb41-37"><a href="#cb41-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_obs =</span> setsize_spike_data<span class="sc">$</span>n_obs,</span>
+<span id="cb41-38"><a href="#cb41-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">items =</span> items</span>
+<span id="cb41-39"><a href="#cb41-39" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb41-40"><a href="#cb41-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-41"><a href="#cb41-41" aria-hidden="true" tabindex="-1"></a>setsize_fit <span class="ot">&lt;-</span> <span class="fu">ucminf</span>(</span>
+<span id="cb41-42"><a href="#cb41-42" aria-hidden="true" tabindex="-1"></a>    <span class="at">par =</span> setsize_fit<span class="sc">$</span>par,</span>
+<span id="cb41-43"><a href="#cb41-43" aria-hidden="true" tabindex="-1"></a>    <span class="at">fn =</span> scri_nll,</span>
+<span id="cb41-44"><a href="#cb41-44" aria-hidden="true" tabindex="-1"></a>    <span class="co"># control = list(trace = 1),</span></span>
+<span id="cb41-45"><a href="#cb41-45" aria-hidden="true" tabindex="-1"></a>    <span class="at">cond =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(setsize_spike_data<span class="sc">$</span>setsize)),</span>
+<span id="cb41-46"><a href="#cb41-46" aria-hidden="true" tabindex="-1"></a>    <span class="at">array_position =</span> setsize_spike_data<span class="sc">$</span>array_position,</span>
+<span id="cb41-47"><a href="#cb41-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">t =</span> setsize_spike_data<span class="sc">$</span>t,</span>
+<span id="cb41-48"><a href="#cb41-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_spikes =</span> setsize_spike_data<span class="sc">$</span>n_spikes,</span>
+<span id="cb41-49"><a href="#cb41-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_obs =</span> setsize_spike_data<span class="sc">$</span>n_obs,</span>
+<span id="cb41-50"><a href="#cb41-50" aria-hidden="true" tabindex="-1"></a>    <span class="at">items =</span> items</span>
+<span id="cb41-51"><a href="#cb41-51" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now let’s see the fitted parameter values:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>setsize_fit<span class="sc">$</span>par</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       loc      id[1]      id[2]   leak_vis    leak_id   loc_peak loc_spread 
+-1.2773778 -3.8777737 -5.1419277 -2.3534910 -1.4395975  4.7902058  3.4274820 
+    ff_loc      ff_id    lat_vis     lat_id   baseline 
+-0.9759190 -2.5665133 -3.5362464 -0.8046772 -6.4589929 </code></pre>
+</div>
+</div>
+<p>Weird, right? Remember, though, that these are actually the <em>log</em> parameter values! To see them on their proper scale, we need to <code>exp</code> them:</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">exp</span>(setsize_fit<span class="sc">$</span>par), <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       loc      id[1]      id[2]   leak_vis    leak_id   loc_peak loc_spread 
+     0.279      0.021      0.006      0.095      0.237    120.326     30.799 
+    ff_loc      ff_id    lat_vis     lat_id   baseline 
+     0.377      0.077      0.029      0.447      0.002 </code></pre>
+</div>
+</div>
+<p>Much better! We can see that the identification signal for targets (<code>id[1]</code>) is indeed stronger than that for distractors (<code>id[2]</code>). It also looks like the strongest forms of inhibition acting on this neuron are localization-based feedforward inhibition (<code>ff_loc</code>, or <span class="math inline">\(\alpha_x\)</span>) and lateral inhibition between identification units (<code>lat_id</code>, or <span class="math inline">\(\beta_z\)</span>).</p>
+<p>Let’s see how SCRI’s predictions compare to the neuron’s actual spiking dynamics. We can use the <code>return.pred = TRUE</code> argument in the <code>scri_nll</code> function to get it to return SCRI predictions instead of the negative log-likelihood. We’ll also need to add some columns to the observed data so that we can plot them in the same graph.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>setsize_pred <span class="ot">&lt;-</span> <span class="fu">scri_nll</span>(</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">par =</span> setsize_fit<span class="sc">$</span>par,</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">cond =</span> <span class="fu">as.numeric</span>(<span class="fu">factor</span>(setsize_spike_data<span class="sc">$</span>setsize)),</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">array_position =</span> setsize_spike_data<span class="sc">$</span>array_position,</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">t =</span> setsize_spike_data<span class="sc">$</span>t,</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_spikes =</span> setsize_spike_data<span class="sc">$</span>n_spikes,</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_obs =</span> setsize_spike_data<span class="sc">$</span>n_obs,</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">items =</span> items,</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">return.pred =</span> <span class="cn">TRUE</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span></span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">setsize =</span> <span class="fu">factor</span>(cond, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">labels =</span> <span class="fu">paste</span>(<span class="st">"Set size"</span>, <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>))))</span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>setsize_spike_data_for_plot <span class="ot">&lt;-</span> setsize_spike_data <span class="sc">%&gt;%</span></span>
+<span id="cb46-14"><a href="#cb46-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(n_obs <span class="sc">&gt;</span> <span class="dv">20</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb46-15"><a href="#cb46-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb46-16"><a href="#cb46-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">p_spike =</span> n_spikes <span class="sc">/</span> n_obs,</span>
+<span id="cb46-17"><a href="#cb46-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">setsize =</span> <span class="fu">factor</span>(setsize, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>), <span class="at">labels =</span> <span class="fu">paste</span>(<span class="st">"Set size"</span>, <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>))),</span>
+<span id="cb46-18"><a href="#cb46-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">unit_type =</span> <span class="fu">factor</span>(<span class="st">"salience"</span>, <span class="at">levels =</span> <span class="fu">levels</span>(setsize_pred<span class="sc">$</span>unit_type)),</span>
+<span id="cb46-19"><a href="#cb46-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">array_position =</span> <span class="fu">factor</span>(array_position, <span class="at">levels =</span> <span class="fu">levels</span>(setsize_pred<span class="sc">$</span>array_position))</span>
+<span id="cb46-20"><a href="#cb46-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb46-21"><a href="#cb46-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-22"><a href="#cb46-22" aria-hidden="true" tabindex="-1"></a>setsize_pred <span class="sc">%&gt;%</span></span>
+<span id="cb46-23"><a href="#cb46-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> t, <span class="at">y =</span> act, <span class="at">color =</span> array_position)) <span class="sc">+</span></span>
+<span id="cb46-24"><a href="#cb46-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="at">data =</span> setsize_spike_data_for_plot, <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> p_spike, <span class="at">alpha =</span> n_obs), <span class="at">size =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb46-25"><a href="#cb46-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb46-26"><a href="#cb46-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">expand_limits</span>(<span class="at">y =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb46-27"><a href="#cb46-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_color_okabeito</span>() <span class="sc">+</span></span>
+<span id="cb46-28"><a href="#cb46-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_alpha_continuous</span>(<span class="at">range =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.2</span>)) <span class="sc">+</span></span>
+<span id="cb46-29"><a href="#cb46-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_grid</span>(unit_type <span class="sc">~</span> setsize, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb46-30"><a href="#cb46-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time from array onset (ms)"</span>, <span class="at">y =</span> <span class="st">"Activation"</span>, <span class="at">color =</span> <span class="st">"Array</span><span class="sc">\n</span><span class="st">position"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="mbcn_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1409,7 +1967,6 @@ Smith, P. L. (2000). Stochastic dynamic models of response time and accuracy: A 
 Teller, D. Y. (1984). Linking propositions. <em>Vision Research</em>, <em>24</em>(10), 1233–1246. <a href="https://doi.org/10.1016/0042-6989(84)90178-0">https://doi.org/10.1016/0042-6989(84)90178-0</a>
 </div>
 </div>
-</section>
 </section>
 
 </main> <!-- /main -->

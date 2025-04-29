@@ -801,12 +801,14 @@ which is exactly what we noticed above when we introduced shunting dynamics---th
 
 Finally, we can write a function called `scri` which will return a data frame containing the activation at each moment in time for each SCRI unit.  The arguments to the function describe both the properties of the search array as well as the parameters of the model.  Specifically, the `strength_loc` argument should be a vector that gives the values of $\chi_i$ for each of the $N$ possible locations in the array.  Typically, we assume that each location that contains an item gets the same strength $\chi$ and any location that is empty gets $\chi_i = 0$.  In addition, the `strength_id` argument should be a vector that gives the values of $\eta_i$ for each of the $N$ possible locations in the array.  As with the localization strengths, we assume that any location that is empty has $\eta_i = 0$.  Otherwise, the value of $\eta_i$ should reflect the similarity between the item in that location and the search target.  Although prior applications of SCRI have treated these $\eta$ values as free parameters, they could also be derived from an explicit model of similarity like we've seen earlier in the course.
 
+In the function below, note that it is possible to allow the different forms of feedforward or lateral inhibition to have a *spatial distribution* defined by the parameters ending in `_spread`.  These parameters represent how far inhibition spreads from each receptive field.  Specifically, SCRI treats the spatial distribution of inhibition like a normal distribution centered on the receptive fields of each unit and the `_spread` parameters are the *standard deviation* of that distribution.  As such, the default value of `Inf` corresponds to inhibition that applies equally regardless of distance.  The distance parameters are normalized to the radius of the search array.  Thus, a value of `1` corresponds to inhibition that falls off with a standard deviation equal to the radius of the search array.
+
 It is worth noting that the function allows us to specify the exact algorithm used by the `ode` function to solve the system of differential equations using the argument `odeMethod`.  The default `ode` algorithm works most of the time, but in practice I've found that it can sometimes give wonky results depending on parameter values.  Therefore, I set the default algorithm to a slightly slower but more robust method called `"bdf"` for "backward differentiation formula".
 
 ```{r}
 #| code-fold: show
 
-scri <- function(max_t = 500, dt = 1,
+scri <- function(times = seq(0, 500, by = 1),
                  strength_loc = rep(0.539, 8),
                  strength_id = 0.023 * c(1, rep(0.222, 7)),
                  loc_peak = 130, loc_spread = 35,
@@ -815,9 +817,9 @@ scri <- function(max_t = 500, dt = 1,
                  lat_vis = 1.217, lat_id = 0.445,
                  ff_loc_spread = Inf, ff_id_spread = Inf,
                  lat_vis_spread = 1.107, lat_id_spread = 4.435,
-                 id_delay = 0.108, baseline = 0.004,
+                 id_delay = 0, baseline = 0.004,
                  recurrent_gating = TRUE, saturation_vis = 1,
-                 odeMethod = "bdf", ...) {
+                 odeMethod = "bdf", return_type = "all", ...) {
     if (length(strength_loc) != length(strength_id)) {
         stop(paste0("Length of localization strength vector (", length(strength_loc), ") not equal to length of identification strength vector (", length(strength_id), ")."))
     }
@@ -856,7 +858,6 @@ scri <- function(max_t = 500, dt = 1,
     
     # Prepare arguments for "ode" function
     y0 <- c(init_v, rep(0, N))
-    times <- seq(0, max_t, by = dt)
     parms <- list(
         strength_loc = strength_loc,
         strength_id = strength_id,
@@ -891,18 +892,24 @@ scri <- function(max_t = 500, dt = 1,
         "array_position" = 1:N
     )
     
-    to_return <- rbind(
-        cbind(unit_type = "localization", array2DF(loc, responseName = "act")),
-        cbind(unit_type = "identification", array2DF(id, responseName = "act")),
-        cbind(unit_type = "salience", array2DF(vis, responseName = "act"))
-    ) %>%
-        mutate(
-            t = as.numeric(t),
-            array_position = factor(array_position),
-            unit_type = factor(unit_type, levels = c("localization", "identification", "salience"))
-        )
+    if (return_type == "all") {
+        # By default, return a data frame with activation values for all unit types
+        to_return <- rbind(
+            cbind(unit_type = "localization", array2DF(loc, responseName = "act")),
+            cbind(unit_type = "identification", array2DF(id, responseName = "act")),
+            cbind(unit_type = "salience", array2DF(vis, responseName = "act"))
+        ) %>%
+            mutate(
+                t = as.numeric(t),
+                array_position = factor(array_position),
+                unit_type = factor(unit_type, levels = c("localization", "identification", "salience"))
+            )
+    } else if (return_type == "vis") {
+        # For fitting, we only need the "vis" matrix
+        to_return <- vis
+    }
     
-    # Return the resulting data frame
+    # Return the desired result
     return(to_return)
 }
 ```
@@ -920,5 +927,480 @@ sim %>%
     expand_limits(y = 0) +
     scale_color_okabeito() +
     facet_wrap("unit_type", ncol = 1, scales = "free_y") +
+    labs(x = "Time from array onset (ms)", y = "Activation", color = "Array\nposition")
+```
+
+### Set size
+
+```{r}
+rbind(
+    tibble(
+        x = sin(seq(0, 2 * pi, length.out = 3)[1:2]),
+        y = cos(seq(0, 2 * pi, length.out = 3)[1:2]),
+        label = c("T", rep("L", 1)),
+        angle = c(0, sample(seq(0, 270, by = 90), size = 1, replace = TRUE)),
+        setsize = 2
+    ),
+    tibble(
+        x = sin(seq(0, 2 * pi, length.out = 5)[1:4]),
+        y = cos(seq(0, 2 * pi, length.out = 5)[1:4]),
+        label = c("T", rep("L", 3)),
+        angle = c(0, sample(seq(0, 270, by = 90), size = 3, replace = TRUE)),
+        setsize = 4
+    ),
+    tibble(
+        x = sin(seq(0, 2 * pi, length.out = 9)[1:8]),
+        y = cos(seq(0, 2 * pi, length.out = 9)[1:8]),
+        label = c("T", rep("L", 7)),
+        angle = c(0, sample(seq(0, 270, by = 90), size = 7, replace = TRUE)),
+        setsize = 8
+    )
+) %>%
+    mutate(setsize = factor(setsize, levels = sort(unique(setsize)), labels = paste("Set size", sort(unique(setsize))))) %>%
+    ggplot(aes(x = x, y = y, label = label, angle = angle)) +
+    geom_text(size = 7) +
+    annotate(geom = "point", x = 0, y = 0, shape = 0) +
+    coord_equal(xlim = c(-1.5, 1.5), ylim = c(-1.5, 1.5)) +
+    facet_wrap("setsize", nrow = 1) +
+    theme_void() +
+    theme(panel.background = element_rect(fill = "#777777", color = "black", linewidth = 1))
+```
+
+Let's first see how we can use SCRI to model effects of *set size*.  As illustrated in the examples above, set size refers to the number of items in the array.  Each array contains one target with the remaining items acting as distractors.  In the examples above, the "T" shape is the target while the "L" shapes are distractors; the displays are arranged so that the target is always at the top, but in the actual experiment the target could appear equally often at any location.
+
+For now, we will use the default parameter values in the `scri` function, since these produce dynamics that are typical of many FEF visual neurons.  We will model a SCRI system with eight sets of units, corresponding to the eight possible locations at which an item could appear in the array.  We will model different set sizes by setting the localization and identification inputs to zero for any location that doesn't contain an item.  At first glance, it may seem strange to model neural responses of regions that don't contain an item, but recall that excitation isn't the *only* influence on SCRI's units!  Each salience unit gets baseline input too, and this means that they are still active even without any excitation from localization or inhibition units.  As a result, these units can still participate in inhibitory interactions even without external excitation.
+
+```{r}
+#| code-fold: show
+
+# Each row of this matrix indicates which array locations contain an item
+# for each setsize.  The target is, by convention, always in array position 1.
+item_present <- matrix(c(
+    1, 0, 0, 0, 1, 0, 0, 0,
+    1, 0, 1, 0, 1, 0, 1, 0,
+    1, 1, 1, 1, 1, 1, 1, 1
+), nrow = 3, ncol = 8, byrow = TRUE,
+dimnames = list(
+    "setsize" = c(2, 4, 8),
+    "array_position" = 1:8
+))
+
+localization_strength <- 0.5
+target_id_strength <- 0.03
+distractor_id_strength <- 0.01
+
+sim <- c()
+
+for (i in 1:nrow(item_present)) {
+    this_strength_loc <- localization_strength * item_present[i,]
+    
+    this_strength_id <- distractor_id_strength * item_present[i,]
+    this_strength_id[1] <- target_id_strength
+    
+    this_sim <- scri(
+        strength_loc = this_strength_loc,
+        strength_id = this_strength_id
+    )
+    
+    sim <- rbind(
+        sim,
+        cbind(setsize = paste("Set size", rownames(item_present)[i]), this_sim)
+    )
+}
+
+sim %>%
+    ggplot(aes(x = t, y = act, color = array_position)) +
+    geom_line() +
+    expand_limits(y = 0) +
+    scale_color_okabeito() +
+    facet_grid(unit_type ~ setsize, scales = "free_y") +
+    labs(x = "Time from array onset (ms)", y = "Activation", color = "Array\nposition")
+```
+
+Let's examine these simulation results.  Looking at the first row, depicting the localization units, they look the same for all levels of set size.  Recall that the localization signal does not differentiate between targets and distractors and its dynamics depend only on time.  Thus, we wouldn't expect the dynamics of this signal to be affected by set size---only which array positions receive the requisite excitation.
+
+Looking at the middle row, depicting the identificatin units, these change considerably between levels of set size.  The greater the set size, the lower is the asymptotic signal for the target item in position 1 (the upper black line).  The lower asymptote is due to increased lateral inhibition between identification units with distractors in their receptive fields as set size increases.
+
+Finally, the bottom row depicts the dynamics of the salience units, which model FEF visual neurons.  Once again, these neurons display the characteristic three-phase pattern, with the inhibited target representation resulting in lower asymptotic activity when a target is in the receptive field (i.e., in array position 1).  Note also the lower lines depicting the activity of neurons with no items in their receptive fields; these get inhibited by the activity of neurons excited by the presence of an item in their receptive fields.
+
+### Target-distractor similarity
+
+```{r}
+rbind(
+    tibble(
+        x = sin(seq(0, 2 * pi, length.out = 9)[1:8]),
+        y = cos(seq(0, 2 * pi, length.out = 9)[1:8]),
+        item = c("Target", rep("Easy distractor", 7)),
+        cond = "Easy"
+    ),
+    tibble(
+        x = sin(seq(0, 2 * pi, length.out = 9)[1:8]),
+        y = cos(seq(0, 2 * pi, length.out = 9)[1:8]),
+        item = c("Target", rep("Hard distractor", 7)),
+        cond = "Hard"
+    )
+) %>%
+    mutate(cond = factor(cond, levels = c("Easy", "Hard"))) %>%
+    ggplot(aes(x = x, y = y, color = item)) +
+    geom_point(shape = 16, size = 10) +
+    annotate(geom = "point", x = 0, y = 0, shape = 0) +
+    coord_equal(xlim = c(-1.5, 1.5), ylim = c(-1.5, 1.5)) +
+    scale_color_manual(values = c("Target" = "#16a74c", "Easy distractor" = "#ea242e", "Hard distractor" = "#6dc43f"), guide = "none") +
+    facet_wrap("cond", nrow = 1) +
+    theme_void() +
+    theme(panel.background = element_rect(fill = "#777777", color = "black", linewidth = 1))
+```
+
+Another common manipulation in the visual search tasks to which SCRI has been applied involves manipulating the *similarity* between the distractors and the search target.  This is illustrated in the example arrays above, where the target is a green circle and the distractors are either dissimilar in color ("Easy") or similar in color ("Hard").
+
+Modeling this manipulation in SCRI involves assuming that easy and hard distractor differ in the strength of their identification signal (i.e., the $\eta$ parameter).  Although it is not explicitly modeled in SCRI, we can think of the identification signal as the outcome of a comparison process between a representation of an item and a representation of the search target---this is exactly the kind of comparison we addressed in previous chapters.  Thus, distractors with features (like color) that are similar to those of the target would produce a stronger comparison signal.
+
+This is implemented in the code chunk below, where we run two SCRI simulations, using the `distractor_id_strength` vector to hold the two values of $\eta$ corresponding to the easy and hard search conditions.
+
+```{r}
+#| code-fold: show
+
+localization_strength <- 0.5
+target_id_strength <- 0.03
+distractor_id_strength <- c("Easy" = 0.01, "Hard" = 0.02)
+
+sim <- c()
+
+for (i in 1:length(distractor_id_strength)) {
+    this_strength_id <- c(target_id_strength, rep(distractor_id_strength[i], 7))
+    
+    this_sim <- scri(
+        strength_loc = rep(localization_strength, 8),
+        strength_id = this_strength_id
+    )
+    
+    sim <- rbind(
+        sim,
+        cbind(cond = names(distractor_id_strength)[i], this_sim)
+    )
+}
+
+sim %>%
+    ggplot(aes(x = t, y = act, color = array_position)) +
+    geom_line() +
+    expand_limits(y = 0) +
+    scale_color_okabeito() +
+    facet_grid(unit_type ~ cond, scales = "free_y") +
+    labs(x = "Time from array onset (ms)", y = "Activation", color = "Array\nposition")
+```
+
+Looking at the results, we again see that the localization signal (top row) is unaffected by target-distractor similarity since localization is insensitive to the features of an item.  On the other hand, the identification signal (middle row) is strongly affected.  In the hard condition, the greater identification strength for distractors causes their activation to be higher.  At the same time, the lateral inhibition between distractors and the target also suppresses activation for the target.  This is reflected in the salience units that model FEF visual neurons (bottom row): in the hard condition, the salience of the target is much lower than in the easy condition as a result of the increased competition from distractors.
+
+### Shiny app
+
+In the examples above, we've used some "default" values for SCRI's parameters to illustrate its qualitative predictions.  One issue with dynamical systems models is that, even if they are deterministic like SCRI, the presence of interactions can make it hard to intuit how the model will behave given different parameter values.  Therefore, I've put together a [Shiny app](https://raw.githubusercontent.com/gregcox7/choice_rt_models/refs/heads/main/scri_shiny_app.r) that you can download and run in RStudio to explore how changing different parameters of SCRI results in different dynamics.
+
+## Turn and face the strange: Fitting SCRI to neural data
+
+A major advantage of a model like SCRI is that it doesn't just simulate firing rate dynamics, it can be *fit* to neural data so we can estimate the values of its different parameters.  To see how this can be done, let's first load a set of neural recordings from a single FEF visual neuron as a monkey (named Quincy) did a visual search task.  In this session, set size was varied randomly from trial to trial, with set sizes 2, 4, and 8.
+
+```{r}
+#| code-fold: show
+
+load("data/data_Q30.rdata")
+
+head(spikeDF)
+```
+
+As you can see above, each row represents a single *millisecond* of time, with the column `t` indicating the time relative to the onset of the search array.  The column `spike` is either 0 or 1, depending on whether the neuron fired an action potential at that time.  The `stim` column indicates whether the item in the neuron's receptive field was a "target" or a "distractor".  If it was a distractor, it was always in the position *opposite* that of the target.  Since there are eight possible locations, we can thus designate position "1" as that of the target and position "5" as that of the distractor.
+
+In addition, prior to fitting, we will need to do some filtering.  First, we don't care what the neuron is doing before the array appears, so we can ignore any rows with `t <= 0`.  Second, since we are modeling how these neurons provide evidence for where to make a saccade, we can also ignore any spikes produced *after* the response is made, i.e., when `t >= rt`.  Finally, for present purposes, we will focus only on correct trials, for which `resp == "correct"`.
+
+The chunk below performs the filtering described above and summarizes the data in terms of the number of spikes recorded at each millisecond of time.
+
+```{r}
+#| code-fold: show
+
+setsize_spike_data <- spikeDF %>%
+    # Ensure that the times are recorded to the nearest millisecond
+    mutate(t = round(t)) %>%
+    # When a distractor is in the receptive field, it is always the one opposite
+    # the target in the array (which is position 5).
+    mutate(array_position = if_else(stim == "target", 1, 5)) %>%
+    # Only model spikes after array has appeared (t > 0), before a saccade is
+    # made (t < rt), and on correct trials (resp == "correct")
+    filter(t > 0, t < rt, resp == "correct") %>%
+    # For each condition and item (stim), count the number of spikes observed
+    # at each point in time as well as the number of observations
+    group_by(setsize, stim, array_position, t) %>%
+    summarize(n_spikes = sum(spike), n_obs = n())
+
+head(setsize_spike_data)
+
+setsize_spike_data %>%
+    mutate(setsize = factor(setsize, levels = c(2, 4, 8), labels = paste("Set size", c(2, 4, 8)))) %>%
+    mutate(p_spike = n_spikes / n_obs) %>%
+    ggplot(aes(x = t, y = p_spike, color = stim)) +
+    geom_point(aes(alpha = n_obs), size = 0.5) +
+    geom_smooth(aes(weight = n_obs, group = stim), se = F) +
+    scale_alpha_continuous(range = c(0.0, 0.1)) +
+    scale_color_manual(values = c("target" = "#377eb8", "distractor" = "#e41a1c")) +
+    labs(x = "Time from array onset (ms)", y = "Spike probability", color = "Item in RF", alpha = "Number of\nobservations") +
+    facet_wrap("setsize", nrow = 1)
+```
+
+As we can see, the neuron did indeed fire more when a target was in its receptive field than when a distractor was!  Moreover, by looking at the structure of the data, we already get a sense of how we are going to compute the *negative log-likelihood*:  Since the data consist of a number of "successes" (`n_spikes`) out of a number of observations (`n_obs`) for each point in time in each condition, the likelihood can be computed using the **binomial distribution** which is built into R as the function `dbinom`.  This distribution has a single parameter, which is the probability of success (the argument `prob` in the R function).  This probability is equal to the activation of the corresponding SCRI salience unit at that time in that condition.  By minimizing the total negative log-likelihood across all time points/conditions, we can estimate the parameters of SCRI that best account for this neuron's spiking dynamics.
+
+To do that, the chunk of code below implements a `scri_nll` function.  One important thing to note is that the `par` vector, which is a vector of named parameter values, is on a *logarithmic* scale.  These are transformed using the `exp` function to get the final parameter value.  The reason for this transformation is twofold:  First, all of SCRI's parameters are constrained to be positive, so this transformation ensures that, regardless of the value in the `par` vector, the actual parameter that gets used is always nonnegative.  Second, very small differences in SCRI's parameters can sometimes lead to very large changes in model predictions.  If the parameter search routine were operating on raw parameter values, it would be easy for it to take a step "too far" by adjusting a SCRI parameter too much, causing a sudden change in the model's predictions.  By performing the parameter search on a logarithmic scale, these big leaps are "smoothed out", making it easier for the parameter search routine to find the best values.
+
+```{r}
+#| code-fold: show
+
+scri_nll <- function(par, cond, array_position, t, n_spikes, n_obs, items, n_items = max(items, na.rm = TRUE), return.pred = FALSE, ...) {
+    n_locations <- ncol(items)
+    n_cond <- nrow(items)
+    
+    times <- seq(1, max(t))
+    
+    saturation_vis <- 1
+
+    if (is.na(par["loc"])) {
+        loc <- exp(par[paste0("loc[", 1:n_items, "]")])
+    } else {
+        loc <- rep(exp(par["loc"]), n_items)
+    }
+    
+    if (is.na(par["id"])) {
+        id <- exp(par[paste0("id[", 1:n_items, "]")])
+    } else {
+        id <- rep(exp(par["id"]), n_items)
+    }
+    
+    leak_vis <- exp(par["leak_vis"])
+    leak_id <- exp(par["leak_id"])
+    
+    if (is.na(par["ff_loc"])) {
+        ff_loc <- 0
+    } else {
+        ff_loc <- exp(par["ff_loc"])
+    }
+
+    if (is.na(par["ff_id"])) {
+        ff_id <- 0
+    } else {
+        ff_id <- exp(par["ff_id"])
+    }
+    
+    if (is.na(par["lat_vis"])) {
+        lat_vis <- 0
+    } else {
+        lat_vis <- exp(par["lat_vis"])
+    }
+    
+    if (is.na(par["lat_id"])) {
+        lat_id <- 0
+    } else {
+        lat_id <- exp(par["lat_id"])
+    }
+    
+    if (is.na(par["lat_vis_spread"])) {
+        lat_vis_spread <- Inf
+    } else {
+        lat_vis_spread <- exp(par["lat_vis_spread"])
+    }
+    
+    if (is.na(par["lat_id_spread"])) {
+        lat_id_spread <- Inf
+    } else {
+        lat_id_spread <- exp(par["lat_id_spread"])
+    }
+    
+    if (is.na(par["id_delay"])) {
+        id_delay <- 0
+    } else {
+        id_delay <- exp(par["id_delay"])
+    }
+    
+    if (is.na(par["baseline"])) {
+        baseline <- 0
+    } else {
+        baseline <- exp(par["baseline"])
+    }
+    
+    loc_peak <- exp(par['loc_peak'])
+    loc_spread <- exp(par["loc_spread"])
+    
+    # ll <- sum(dexp(c(loc, id, leak_vis, leak_id, ff_loc, ff_id, lat_vis, lat_id, baseline, id_delay), rate = 1, log = TRUE)) +
+    #     sum(dexp(c(loc_peak, loc_spread), rate = 0.005, log = TRUE))
+    ll <- 0
+    
+    if (return.pred) {
+        to_ret <- c()
+    }
+    
+    for (cond_index in 1:n_cond) {
+        in_cond <- which(cond == cond_index)
+        
+        strength_loc <- loc[items[cond_index,]]
+        strength_id <- id[items[cond_index,]]
+        
+        strength_loc[is.na(strength_loc)] <- 0
+        strength_id[is.na(strength_id)] <- 0
+        
+        sim <- try(scri(times = times,
+                    strength_loc = strength_loc,
+                    strength_id = strength_id,
+                    loc_peak = loc_peak, loc_spread = loc_spread,
+                    leak_vis = leak_vis, leak_id = leak_id,
+                    ff_loc = ff_loc, ff_id = ff_id,
+                    lat_vis = lat_vis, lat_id = lat_id,
+                    ff_loc_spread = Inf, ff_id_spread = Inf,
+                    lat_vis_spread = lat_vis_spread, lat_id_spread = lat_id_spread,
+                    id_delay = id_delay, baseline = baseline,
+                    saturation_vis = saturation_vis,
+                    return_type = ifelse(return.pred, "all", "vis"), ...))
+        
+        if (return.pred) {
+            to_ret <- rbind(
+                to_ret,
+                cbind(cond = cond_index, sim)
+            )
+        } else {
+            if (any(class(sim) == "try-error")) {
+                return(Inf)
+            }
+            
+            if (length(sim) <= 0) {
+                return(Inf)
+            }
+            
+            ll <- ll + sum(dbinom(
+                x = n_spikes[in_cond],
+                size = n_obs[in_cond],
+                prob = sim[cbind(t[in_cond], array_position[in_cond])],
+                log = TRUE
+            ))
+        }
+    }
+    
+    if (return.pred) {
+        return(to_ret)
+    } else {
+        if (is.na(ll)) {
+            return(Inf)
+        } else {
+            return(-sum(ll))
+        }
+    }
+}
+```
+
+To see how this function can be used, let's fit SCRI to the neuron shown above.  To do this, we need to define a matrix called `items` which indicates which type of item is present in which location in each of the three conditions (set sizes 2, 4, and 8).  Although the exact indices are arbitrary, a value of `1` indicates a target item, a value of `2` indicates a distractor item, and a value of `NA` indicates no item present at that location.
+
+Parameter fitting is done in two stages.  First, R's built-in `optim` function is used to get from the initial vector of parameter values (`par`) to a more reasonable set of values.  Second, the best values found by `optim` are used as the starting point for *another* parameter search routine called `ucminf` from the `ucminf` package.  The `ucminf` function then conducts the rest of the parameter search until it converges.
+
+```{r}
+#| code-fold: show
+
+library(ucminf)
+
+items <- matrix(c(
+    1, NA, NA, NA, 2, NA, NA, NA,
+    1, NA,  2, NA, 2, NA,  2, NA,
+    1,  2,  2,  2, 2,  2,  2,  2
+), nrow = 3, ncol = 8, byrow = TRUE,
+dimnames = list(
+    "setsize" = c(2, 4, 8),
+    "array_position" = 1:8
+))
+
+par <- c(
+    "loc" = log(0.2),
+    "id[1]" = log(0.02),
+    "id[2]" = log(0.01),
+    "leak_vis" = log(0.1),
+    "leak_id" = log(0.1),
+    "loc_peak" = log(100),
+    "loc_spread" = log(50),
+    "ff_loc" = log(1),
+    "ff_id" = log(1),
+    "lat_vis" = log(1),
+    "lat_id" = log(1),
+    "baseline" = log(0.001)
+)
+
+setsize_fit <- optim(
+    par = par,
+    fn = scri_nll,
+    method = "Nelder-Mead",
+    # control = list(trace = 6),
+    cond = as.numeric(factor(setsize_spike_data$setsize)),
+    array_position = setsize_spike_data$array_position,
+    t = setsize_spike_data$t,
+    n_spikes = setsize_spike_data$n_spikes,
+    n_obs = setsize_spike_data$n_obs,
+    items = items
+)
+
+setsize_fit <- ucminf(
+    par = setsize_fit$par,
+    fn = scri_nll,
+    # control = list(trace = 1),
+    cond = as.numeric(factor(setsize_spike_data$setsize)),
+    array_position = setsize_spike_data$array_position,
+    t = setsize_spike_data$t,
+    n_spikes = setsize_spike_data$n_spikes,
+    n_obs = setsize_spike_data$n_obs,
+    items = items
+)
+```
+
+Now let's see the fitted parameter values:
+
+```{r}
+#| code-fold: show
+
+setsize_fit$par
+```
+
+Weird, right?  Remember, though, that these are actually the *log* parameter values!  To see them on their proper scale, we need to `exp` them:
+
+```{r}
+#| code-fold: show
+
+round(exp(setsize_fit$par), 3)
+```
+
+Much better!  We can see that the identification signal for targets (`id[1]`) is indeed stronger than that for distractors (`id[2]`).  It also looks like the strongest forms of inhibition acting on this neuron are localization-based feedforward inhibition (`ff_loc`, or $\alpha_x$) and lateral inhibition between identification units (`lat_id`, or $\beta_z$).
+
+Let's see how SCRI's predictions compare to the neuron's actual spiking dynamics.  We can use the `return.pred = TRUE` argument in the `scri_nll` function to get it to return SCRI predictions instead of the negative log-likelihood.  We'll also need to add some columns to the observed data so that we can plot them in the same graph.
+
+```{r}
+#| code-fold: show
+
+setsize_pred <- scri_nll(
+    par = setsize_fit$par,
+    cond = as.numeric(factor(setsize_spike_data$setsize)),
+    array_position = setsize_spike_data$array_position,
+    t = setsize_spike_data$t,
+    n_spikes = setsize_spike_data$n_spikes,
+    n_obs = setsize_spike_data$n_obs,
+    items = items,
+    return.pred = TRUE
+) %>%
+    mutate(setsize = factor(cond, levels = 1:3, labels = paste("Set size", c(2, 4, 8))))
+
+setsize_spike_data_for_plot <- setsize_spike_data %>%
+    filter(n_obs > 20) %>%
+    mutate(
+        p_spike = n_spikes / n_obs,
+        setsize = factor(setsize, levels = c(2, 4, 8), labels = paste("Set size", c(2, 4, 8))),
+        unit_type = factor("salience", levels = levels(setsize_pred$unit_type)),
+        array_position = factor(array_position, levels = levels(setsize_pred$array_position))
+    )
+
+setsize_pred %>%
+    ggplot(aes(x = t, y = act, color = array_position)) +
+    geom_point(data = setsize_spike_data_for_plot, mapping = aes(y = p_spike, alpha = n_obs), size = 0.2) +
+    geom_line() +
+    expand_limits(y = 0) +
+    scale_color_okabeito() +
+    scale_alpha_continuous(range = c(0, 0.2)) +
+    facet_grid(unit_type ~ setsize, scales = "free_y") +
     labs(x = "Time from array onset (ms)", y = "Activation", color = "Array\nposition")
 ```
