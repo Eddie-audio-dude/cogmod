@@ -1093,7 +1093,7 @@ Looking at the results, we again see that the localization signal (top row) is u
 
 ### Shiny app
 
-In the examples above, we've used some "default" values for SCRI's parameters to illustrate its qualitative predictions.  One issue with dynamical systems models is that, even if they are deterministic like SCRI, the presence of interactions can make it hard to intuit how the model will behave given different parameter values.  Therefore, I've put together a [Shiny app](https://raw.githubusercontent.com/gregcox7/choice_rt_models/refs/heads/main/scri_shiny_app.r) that you can download and run in RStudio to explore how changing different parameters of SCRI results in different dynamics.
+In the examples above, we've used some "default" values for SCRI's parameters to illustrate its qualitative predictions.  One issue with dynamical systems models is that, even if they are deterministic like SCRI, the presence of interactions can make it hard to intuit how the model will behave given different parameter values.  Therefore, I've put together a [Shiny app](https://raw.githubusercontent.com/gregcox7/cogmod/refs/heads/main/scri_shiny_app.r) that you can download and run in RStudio to explore how changing different parameters of SCRI results in different dynamics.
 
 ## Turn and face the strange: Fitting SCRI to neural data
 
